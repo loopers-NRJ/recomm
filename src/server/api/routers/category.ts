@@ -7,7 +7,7 @@ import {
 import { functionalityOptions } from "@/utils/schema";
 
 export const categoryRouter = createTRPCRouter({
-  getAll: publicProcedure
+  getCategories: publicProcedure
     .input(functionalityOptions)
     .query(
       async ({ input: { search, page, limit, sortBy, sortOrder }, ctx }) => {
@@ -32,8 +32,8 @@ export const categoryRouter = createTRPCRouter({
         }
       }
     ),
-  getById: publicProcedure
-    .input(z.string())
+  getCategoryById: publicProcedure
+    .input(z.string().cuid())
     .query(async ({ input: id, ctx }) => {
       try {
         const category = await ctx.prisma.category.findUnique({
@@ -50,7 +50,7 @@ export const categoryRouter = createTRPCRouter({
         return new Error("Failed to fetch category");
       }
     }),
-  create: adminProcedure
+  createCategory: adminProcedure
     .input(
       z.object({
         name: z.string().min(3).max(255),
@@ -78,17 +78,17 @@ export const categoryRouter = createTRPCRouter({
         return new Error(`Cannot create the category with name: ${name}`);
       }
     }),
-  update: adminProcedure
+  updateCategoryById: adminProcedure
     .input(
       z.union([
         z.object({
-          id: z.string(),
-          name: z.string().min(3).max(255),
+          id: z.string().cuid(),
+          name: z.string().min(1).max(255),
           picture: z.string().url().optional(),
         }),
         z.object({
-          id: z.string(),
-          name: z.string().min(3).max(255).optional(),
+          id: z.string().cuid(),
+          name: z.string().min(1).max(255).optional(),
           picture: z.string().url(),
         }),
       ])
@@ -125,8 +125,8 @@ export const categoryRouter = createTRPCRouter({
         return new Error(`Cannot update the category with name: ${name}`);
       }
     }),
-  delete: adminProcedure
-    .input(z.string())
+  deleteCategoryById: adminProcedure
+    .input(z.string().cuid())
     .mutation(async ({ input: id, ctx }) => {
       try {
         const existingCategory = await ctx.prisma.category.findUnique({
@@ -148,10 +148,10 @@ export const categoryRouter = createTRPCRouter({
       }
     }),
   getBrandsByCategoryId: publicProcedure
-    .input(functionalityOptions.extend({ id: z.string() }))
+    .input(functionalityOptions.extend({ categoryId: z.string().cuid() }))
     .query(
       async ({
-        input: { id, search, sortBy, page, limit, sortOrder },
+        input: { categoryId: id, search, sortBy, page, limit, sortOrder },
         ctx,
       }) => {
         try {
@@ -185,10 +185,10 @@ export const categoryRouter = createTRPCRouter({
       }
     ),
   getModelsByCategoryId: publicProcedure
-    .input(functionalityOptions.extend({ id: z.string() }))
+    .input(functionalityOptions.extend({ categoryId: z.string().cuid() }))
     .query(
       async ({
-        input: { id, limit, page, search, sortBy, sortOrder },
+        input: { categoryId: id, limit, page, search, sortBy, sortOrder },
         ctx,
       }) => {
         try {
@@ -218,10 +218,10 @@ export const categoryRouter = createTRPCRouter({
       }
     ),
   getProductsByCategoryId: publicProcedure
-    .input(functionalityOptions.extend({ id: z.string() }))
+    .input(functionalityOptions.extend({ categoryId: z.string().cuid() }))
     .query(
       async ({
-        input: { id, limit, page, search, sortBy, sortOrder },
+        input: { categoryId: id, limit, page, search, sortBy, sortOrder },
         ctx,
       }) => {
         try {

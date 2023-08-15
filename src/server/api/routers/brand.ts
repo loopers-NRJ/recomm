@@ -1,15 +1,10 @@
 import { z } from "zod";
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  adminProcedure,
-  publicProcedure,
-} from "../trpc";
+import { createTRPCRouter, adminProcedure, publicProcedure } from "../trpc";
 
 import { functionalityOptions } from "@/utils/schema";
 
 export const brandRouter = createTRPCRouter({
-  getAll: publicProcedure
+  getBrands: publicProcedure
     .input(functionalityOptions)
     .query(
       async ({ input: { limit, page, search, sortBy, sortOrder }, ctx }) => {
@@ -27,13 +22,14 @@ export const brandRouter = createTRPCRouter({
               [sortBy]: sortOrder,
             },
           });
+          return brands;
         } catch (error) {
           return new Error("Error fetching brands");
         }
       }
     ),
-  getById: publicProcedure
-    .input(z.string())
+  getBrandById: publicProcedure
+    .input(z.string().cuid())
     .query(async ({ input: id, ctx }) => {
       try {
         const brand = await ctx.prisma.brand.findUnique({
@@ -49,7 +45,7 @@ export const brandRouter = createTRPCRouter({
         return new Error("Error fetching brand");
       }
     }),
-  create: adminProcedure
+  createBrand: adminProcedure
     .input(
       z.object({
         name: z.string(),
@@ -77,17 +73,17 @@ export const brandRouter = createTRPCRouter({
         return new Error("Error creating brand");
       }
     }),
-  update: adminProcedure
+  updateBrandById: adminProcedure
     .input(
       z.union([
         z.object({
-          id: z.string(),
-          name: z.string(),
+          id: z.string().cuid(),
+          name: z.string().min(1).max(255),
           picture: z.string().url().optional(),
         }),
         z.object({
-          id: z.string(),
-          name: z.string().optional(),
+          id: z.string().cuid(),
+          name: z.string().min(1).max(255).optional(),
           picture: z.string().url(),
         }),
       ])
@@ -124,8 +120,8 @@ export const brandRouter = createTRPCRouter({
         return new Error("Error updating brand");
       }
     }),
-  delete: adminProcedure
-    .input(z.string())
+  deleteBrandById: adminProcedure
+    .input(z.string().cuid())
     .mutation(async ({ input: id, ctx }) => {
       try {
         const existingBrand = await ctx.prisma.brand.findUnique({
@@ -149,12 +145,12 @@ export const brandRouter = createTRPCRouter({
   getModelsByBrandId: publicProcedure
     .input(
       functionalityOptions.extend({
-        id: z.string(),
+        brandId: z.string().cuid(),
       })
     )
     .query(
       async ({
-        input: { limit, page, search, sortBy, sortOrder, id },
+        input: { limit, page, search, sortBy, sortOrder, brandId: id },
         ctx,
       }) => {
         try {
@@ -172,6 +168,7 @@ export const brandRouter = createTRPCRouter({
               [sortBy]: sortOrder,
             },
           });
+          return models;
         } catch (error) {
           return new Error("Error fetching models");
         }
@@ -180,12 +177,12 @@ export const brandRouter = createTRPCRouter({
   getProductsByBrandId: publicProcedure
     .input(
       functionalityOptions.extend({
-        id: z.string(),
+        brandId: z.string().cuid(),
       })
     )
     .query(
       async ({
-        input: { limit, page, search, sortBy, sortOrder, id },
+        input: { limit, page, search, sortBy, sortOrder, brandId: id },
         ctx,
       }) => {
         try {
