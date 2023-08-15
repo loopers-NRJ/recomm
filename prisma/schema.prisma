@@ -1,0 +1,154 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model Account {
+    id                String  @id @default(cuid())
+    userId            String
+    type              String
+    provider          String
+    providerAccountId String
+    refresh_token     String?
+    access_token      String?
+    expires_at        Int?
+    token_type        String?
+    scope             String?
+    id_token          String?
+    session_state     String?
+    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([provider, providerAccountId])
+}
+
+model Session {
+    id           String   @id @default(cuid())
+    sessionToken String   @unique
+    userId       String
+    expires      DateTime
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+    identifier String
+    token      String   @unique
+    expires    DateTime
+
+    @@unique([identifier, token])
+}
+
+model User {
+    id                String    @id @default(cuid())
+    name              String?
+    email             String?   @unique
+    emailVerified     DateTime?
+    image             String?
+    accounts          Account[]
+    sessions          Session[]
+    listedProducts    Product[] @relation("listedProducts")
+    purchasedProducts Product[] @relation("purchasedProducts")
+    favoriteProducts  Product[] @relation("favoriteProducts")
+    wishes            Wish[]
+    bids              Bid[]
+    createdAt         DateTime  @default(now())
+    updatedAt         DateTime  @updatedAt
+    admin             Admin?
+}
+
+model Admin {
+    id        String   @id @default(cuid())
+    user      User     @relation(fields: [userId], references: [id])
+    userId    String   @unique
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model Category {
+    id        String   @id @default(cuid())
+    name      String   @unique
+    // subCategories Category[] @relation("SubCategory")
+    // parentCategory      Category?  @relation("SubCategory", fields: [parentCategoryId], references: [id])
+    // parentCategoryId    String?
+    models    Model[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model Brand {
+    id        String   @id @default(cuid())
+    name      String   @unique
+    picture   String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    models    Model[]
+}
+
+model Model {
+    id         String     @id @default(cuid())
+    name       String     @unique
+    brand      Brand      @relation(fields: [brandId], references: [id])
+    brandId    String
+    categories Category[]
+    products   Product[]
+    createdAt  DateTime   @default(now())
+    updatedAt  DateTime   @updatedAt
+    wishes     Wish[]
+}
+
+model Product {
+    id             String   @id @default(cuid())
+    price          Float
+    description    String
+    pictures       String[]
+    model          Model    @relation(fields: [modelId], references: [id])
+    modelId        String
+    seller         User     @relation("listedProducts", fields: [sellerId], references: [id])
+    sellerId       String
+    buyer          User?    @relation("purchasedProducts", fields: [buyerId], references: [id])
+    buyerId        String?
+    favoritedUsers User[]   @relation("favoriteProducts")
+    createdAt      DateTime @default(now())
+    updatedAt      DateTime @updatedAt
+    room           Room     @relation(fields: [roomId], references: [id])
+    roomId         String   @unique
+}
+
+model Room {
+    id           String   @id @default(cuid())
+    bids         Bid[]
+    product      Product?
+    highestBid   Bid?     @relation("highestBid")
+    highestBidId String?
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+}
+
+model Bid {
+    id                 String   @id @default(cuid())
+    price              Float
+    user               User     @relation(fields: [userId], references: [id])
+    userId             String
+    room               Room?    @relation(fields: [roomId], references: [id])
+    roomId             String?
+    highestBidedRoom   Room     @relation("highestBid", fields: [highestBidedRoomId], references: [id])
+    highestBidedRoomId String   @unique
+    createdAt          DateTime @default(now())
+}
+
+enum WishStatus {
+    pending
+    available
+}
+
+model Wish {
+    id      String     @id @default(cuid())
+    model   Model      @relation(fields: [modelId], references: [id])
+    modelId String
+    status  WishStatus @default(pending)
+    user    User?      @relation(fields: [userId], references: [id])
+    userId  String?
+}
