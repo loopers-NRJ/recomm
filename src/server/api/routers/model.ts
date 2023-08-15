@@ -1,4 +1,4 @@
-import { functionalityOptions } from "@/utils/schema";
+import { functionalityOptions } from "@/utils/validation";
 import { adminProcedure, createTRPCRouter, publicProcedure } from "../trpc";
 import { z } from "zod";
 
@@ -28,8 +28,8 @@ export const modelRouter = createTRPCRouter({
       }
     ),
   getModelById: publicProcedure
-    .input(z.string().cuid())
-    .query(async ({ input: id, ctx }) => {
+    .input(z.object({ modelId: z.string().cuid() }))
+    .query(async ({ input: { modelId: id }, ctx }) => {
       try {
         const model = await ctx.prisma.model.findUnique({
           where: {
@@ -140,8 +140,8 @@ export const modelRouter = createTRPCRouter({
       }
     }),
   deleteModelById: adminProcedure
-    .input(z.string().cuid())
-    .mutation(async ({ input: id, ctx }) => {
+    .input(z.object({ modelId: z.string().cuid() }))
+    .mutation(async ({ input: { modelId: id }, ctx }) => {
       try {
         const existingModel = await ctx.prisma.model.findUnique({
           where: {

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, adminProcedure, publicProcedure } from "../trpc";
 
-import { functionalityOptions } from "@/utils/schema";
+import { functionalityOptions } from "@/utils/validation";
 
 export const brandRouter = createTRPCRouter({
   getBrands: publicProcedure
@@ -29,8 +29,8 @@ export const brandRouter = createTRPCRouter({
       }
     ),
   getBrandById: publicProcedure
-    .input(z.string().cuid())
-    .query(async ({ input: id, ctx }) => {
+    .input(z.object({ brandId: z.string().cuid() }))
+    .query(async ({ input: { brandId: id }, ctx }) => {
       try {
         const brand = await ctx.prisma.brand.findUnique({
           where: {
@@ -121,8 +121,8 @@ export const brandRouter = createTRPCRouter({
       }
     }),
   deleteBrandById: adminProcedure
-    .input(z.string().cuid())
-    .mutation(async ({ input: id, ctx }) => {
+    .input(z.object({ brandId: z.string().cuid() }))
+    .mutation(async ({ input: { brandId: id }, ctx }) => {
       try {
         const existingBrand = await ctx.prisma.brand.findUnique({
           where: {

@@ -4,7 +4,7 @@ import {
   createTRPCRouter,
   publicProcedure,
 } from "@/server/api/trpc";
-import { functionalityOptions } from "@/utils/schema";
+import { functionalityOptions } from "@/utils/validation";
 
 export const categoryRouter = createTRPCRouter({
   getCategories: publicProcedure
@@ -33,8 +33,8 @@ export const categoryRouter = createTRPCRouter({
       }
     ),
   getCategoryById: publicProcedure
-    .input(z.string().cuid())
-    .query(async ({ input: id, ctx }) => {
+    .input(z.object({ categoryId: z.string().cuid() }))
+    .query(async ({ input: { categoryId: id }, ctx }) => {
       try {
         const category = await ctx.prisma.category.findUnique({
           where: {
@@ -126,8 +126,8 @@ export const categoryRouter = createTRPCRouter({
       }
     }),
   deleteCategoryById: adminProcedure
-    .input(z.string().cuid())
-    .mutation(async ({ input: id, ctx }) => {
+    .input(z.object({ categoryId: z.string().cuid() }))
+    .mutation(async ({ input: { categoryId: id }, ctx }) => {
       try {
         const existingCategory = await ctx.prisma.category.findUnique({
           where: {

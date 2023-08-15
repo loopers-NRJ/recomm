@@ -129,7 +129,12 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
  */
 export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
 
-// create a new adminProtectedProcedure that extend the protected procedure and check if the user is an admin
+/**
+ * Protected (admin authenticated) procedure
+ *
+ * If you want a query or mutation to ONLY be accessible to admins.
+ *
+ */
 export const adminProcedure = protectedProcedure.use(async ({ ctx, next }) => {
   // check if the user is an admin
   // let isAdmin = false;
