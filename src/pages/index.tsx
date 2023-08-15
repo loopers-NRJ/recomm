@@ -1,3 +1,5 @@
+import { api } from "@/utils/api";
+
 export default function Home() {
-  return <main>hello world</main>;
+  return <main>Hello world</main>;
 }

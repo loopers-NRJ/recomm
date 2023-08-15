@@ -70,6 +70,7 @@ model Admin {
 model Category {
     id        String   @id @default(cuid())
     name      String   @unique
+    picture   String
     // subCategories Category[] @relation("SubCategory")
     // parentCategory      Category?  @relation("SubCategory", fields: [parentCategoryId], references: [id])
     // parentCategoryId    String?

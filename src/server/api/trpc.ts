@@ -128,3 +128,29 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
  * @see https://trpc.io/docs/procedures
  */
 export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
+
+// create a new adminProtectedProcedure that extend the protected procedure and check if the user is an admin
+export const adminProcedure = protectedProcedure.use(async ({ ctx, next }) => {
+  // check if the user is an admin
+  // let isAdmin = false;
+  // try {
+  //   const admin = await prisma.admin.findFirst({
+  //     where: {
+  //       id: ctx.session.user.id,
+  //     },
+  //   });
+  //   isAdmin = admin !== null;
+  // } catch (error) {
+  //   console.log("cannot validate the user in admin route: ", error);
+  //   isAdmin = false;
+  // }
+  // if (!isAdmin) {
+  //   throw new TRPCError({ code: "UNAUTHORIZED" });
+  // }
+  return next({
+    ctx: {
+      // infers the `session` as non-nullable
+      session: { ...ctx.session, user: ctx.session.user, isAdmin: true },
+    },
+  });
+});
