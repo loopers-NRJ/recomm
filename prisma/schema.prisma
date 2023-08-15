@@ -54,9 +54,9 @@ model User {
     favoriteProducts  Product[] @relation("favoriteProducts")
     wishes            Wish[]
     bids              Bid[]
+    admin             Admin?
     createdAt         DateTime  @default(now())
     updatedAt         DateTime  @updatedAt
-    admin             Admin?
 }
 
 model Admin {
@@ -83,9 +83,9 @@ model Brand {
     id        String   @id @default(cuid())
     name      String   @unique
     picture   String
+    models    Model[]
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
-    models    Model[]
 }
 
 model Model {
@@ -95,9 +95,9 @@ model Model {
     brandId    String
     categories Category[]
     products   Product[]
+    wishes     Wish[]
     createdAt  DateTime   @default(now())
     updatedAt  DateTime   @updatedAt
-    wishes     Wish[]
 }
 
 model Product {
@@ -112,10 +112,10 @@ model Product {
     buyer          User?    @relation("purchasedProducts", fields: [buyerId], references: [id])
     buyerId        String?
     favoritedUsers User[]   @relation("favoriteProducts")
-    createdAt      DateTime @default(now())
-    updatedAt      DateTime @updatedAt
     room           Room     @relation(fields: [roomId], references: [id])
     roomId         String   @unique
+    createdAt      DateTime @default(now())
+    updatedAt      DateTime @updatedAt
 }
 
 model Room {
@@ -147,10 +147,12 @@ enum WishStatus {
 }
 
 model Wish {
-    id      String     @id @default(cuid())
-    model   Model      @relation(fields: [modelId], references: [id])
-    modelId String
-    status  WishStatus @default(pending)
-    user    User?      @relation(fields: [userId], references: [id])
-    userId  String?
+    id        String     @id @default(cuid())
+    model     Model      @relation(fields: [modelId], references: [id])
+    modelId   String
+    status    WishStatus @default(pending)
+    user      User?      @relation(fields: [userId], references: [id])
+    userId    String?
+    createdAt DateTime   @default(now())
+    updatedAt DateTime   @updatedAt
 }
