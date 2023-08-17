@@ -136,8 +136,8 @@ model Bid {
     userId             String
     room               Room?    @relation(fields: [roomId], references: [id])
     roomId             String?
-    highestBidedRoom   Room     @relation("highestBid", fields: [highestBidedRoomId], references: [id])
-    highestBidedRoomId String   @unique
+    highestBidedRoom   Room?    @relation("highestBid", fields: [highestBidedRoomId], references: [id])
+    highestBidedRoomId String?  @unique
     createdAt          DateTime @default(now())
 }
 
