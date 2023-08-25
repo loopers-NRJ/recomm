@@ -33,12 +33,16 @@ export const productRouter = createTRPCRouter({
             },
             skip: limit * (page - 1),
             take: limit,
-            orderBy: {
-              model: {
-                name: sortBy === "name" ? sortOrder : undefined,
+            orderBy: [
+              {
+                model: {
+                  name: sortBy === "name" ? sortOrder : undefined,
+                },
               },
-              createdAt: sortBy === "createdAt" ? sortOrder : undefined,
-            },
+              {
+                createdAt: sortBy === "createdAt" ? sortOrder : undefined,
+              },
+            ],
             include: {
               buyer: true,
               seller: true,
