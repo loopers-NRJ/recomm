@@ -1,3 +1,4 @@
+import { WishStatus } from "@prisma/client";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { z } from "zod";
 
@@ -15,6 +16,20 @@ export const wishRouter = createTRPCRouter({
         if (model === null) {
           return new Error("Product not found");
         }
+        const result = await ctx.prisma.product.aggregate({
+          where: {
+            modelId: id,
+            buyerId: null,
+          },
+          _count: {
+            _all: true,
+          },
+        });
+        let status: WishStatus = WishStatus.pending;
+        if (result._count._all !== 0) {
+          status = WishStatus.available;
+        }
+
         const wish = await ctx.prisma.wish.create({
           data: {
             user: {
@@ -27,8 +42,10 @@ export const wishRouter = createTRPCRouter({
                 id,
               },
             },
+            status,
           },
         });
+
         return wish;
       } catch (error) {
         return new Error("Error creating wish");
