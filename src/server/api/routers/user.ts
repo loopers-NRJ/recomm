@@ -44,6 +44,61 @@ export const userRouter = createTRPCRouter({
         return new Error("Error fetching user");
       }
     }),
+  getMyBids: protectedProcedure
+    .input(functionalityOptions)
+    .query(
+      async ({ input: { limit, page, search, sortBy, sortOrder }, ctx }) => {
+        try {
+          const user = ctx.session.user;
+          const bids = await ctx.prisma.bid.findMany({
+            where: {
+              userId: user.id,
+              room: {
+                product: {
+                  model: {
+                    OR: [
+                      {
+                        name: {
+                          contains: search,
+                          mode: "insensitive",
+                        },
+                      },
+                      {
+                        brand: {
+                          name: {
+                            contains: search,
+                            mode: "insensitive",
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+            take: limit,
+            skip: (page - 1) * limit,
+            orderBy: [
+              {
+                room: {
+                  product: {
+                    model: {
+                      name: sortBy === "name" ? sortOrder : undefined,
+                    },
+                  },
+                },
+              },
+              {
+                createdAt: sortBy === "createdAt" ? sortOrder : undefined,
+              },
+            ],
+          });
+          return bids;
+        } catch (error) {
+          return new Error("Error fetching user bids");
+        }
+      }
+    ),
   getMyFavoritesById: protectedProcedure
     .input(functionalityOptions.extend({ userId: z.string().cuid() }))
     .query(
