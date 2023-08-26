@@ -18,9 +18,11 @@ export const brandRouter = createTRPCRouter({
             },
             skip: limit * (page - 1),
             take: limit,
-            orderBy: {
-              [sortBy]: sortOrder,
-            },
+            orderBy: [
+              {
+                [sortBy]: sortOrder,
+              },
+            ],
           });
           return brands;
         } catch (error) {
@@ -164,9 +166,11 @@ export const brandRouter = createTRPCRouter({
             },
             skip: limit * (page - 1),
             take: limit,
-            orderBy: {
-              [sortBy]: sortOrder,
-            },
+            orderBy: [
+              {
+                [sortBy]: sortOrder,
+              },
+            ],
           });
           return models;
         } catch (error) {
@@ -210,12 +214,14 @@ export const brandRouter = createTRPCRouter({
             },
             skip: limit * (page - 1),
             take: limit,
-            orderBy: {
-              model: {
-                name: sortBy === "name" ? sortOrder : undefined,
+            orderBy: [
+              {
+                model: {
+                  name: sortBy === "name" ? sortOrder : undefined,
+                },
               },
-              createdAt: sortBy === "createdAt" ? sortOrder : undefined,
-            },
+              { createdAt: sortBy === "createdAt" ? sortOrder : undefined },
+            ],
           });
           return products;
         } catch (error) {

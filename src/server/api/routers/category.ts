@@ -21,9 +21,11 @@ export const categoryRouter = createTRPCRouter({
             },
             skip: (page - 1) * limit,
             take: limit,
-            orderBy: {
-              [sortBy]: sortOrder,
-            },
+            orderBy: [
+              {
+                [sortBy]: sortOrder,
+              },
+            ],
           });
           return categories;
         } catch (error) {
@@ -173,9 +175,11 @@ export const categoryRouter = createTRPCRouter({
             },
             skip: (page - 1) * limit,
             take: limit,
-            orderBy: {
-              [sortBy]: sortOrder,
-            },
+            orderBy: [
+              {
+                [sortBy]: sortOrder,
+              },
+            ],
           });
           return brands;
         } catch (error) {
@@ -206,9 +210,11 @@ export const categoryRouter = createTRPCRouter({
             },
             skip: (page - 1) * limit,
             take: limit,
-            orderBy: {
-              [sortBy]: sortOrder,
-            },
+            orderBy: [
+              {
+                [sortBy]: sortOrder,
+              },
+            ],
           });
           return models;
         } catch (error) {
@@ -253,12 +259,16 @@ export const categoryRouter = createTRPCRouter({
             },
             skip: (page - 1) * limit,
             take: limit,
-            orderBy: {
-              model: {
-                name: sortBy === "name" ? sortOrder : undefined,
+            orderBy: [
+              {
+                model: {
+                  name: sortBy === "name" ? sortOrder : undefined,
+                },
               },
-              createdAt: sortBy === "createdAt" ? sortOrder : undefined,
-            },
+              {
+                createdAt: sortBy === "createdAt" ? sortOrder : undefined,
+              },
+            ],
           });
           return products;
         } catch (error) {

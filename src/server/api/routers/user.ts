@@ -17,9 +17,11 @@ export const userRouter = createTRPCRouter({
                 mode: "insensitive",
               },
             },
-            orderBy: {
-              [sortBy]: sortOrder,
-            },
+            orderBy: [
+              {
+                [sortBy]: sortOrder,
+              },
+            ],
           });
           return users;
         } catch (error) {
@@ -84,12 +86,16 @@ export const userRouter = createTRPCRouter({
             },
             take: limit,
             skip: (page - 1) * limit,
-            orderBy: {
-              model: {
-                name: sortBy === "name" ? sortOrder : undefined,
+            orderBy: [
+              {
+                model: {
+                  name: sortBy === "name" ? sortOrder : undefined,
+                },
               },
-              createdAt: sortBy === "createdAt" ? sortOrder : undefined,
-            },
+              {
+                createdAt: sortBy === "createdAt" ? sortOrder : undefined,
+              },
+            ],
           });
           return favoritedProducts;
         } catch (error) {
@@ -129,12 +135,16 @@ export const userRouter = createTRPCRouter({
             },
             take: limit,
             skip: (page - 1) * limit,
-            orderBy: {
-              model: {
-                name: sortBy === "name" ? sortOrder : undefined,
+            orderBy: [
+              {
+                model: {
+                  name: sortBy === "name" ? sortOrder : undefined,
+                },
               },
-              createdAt: sortBy === "createdAt" ? sortOrder : undefined,
-            },
+              {
+                createdAt: sortBy === "createdAt" ? sortOrder : undefined,
+              },
+            ],
           });
           return listings;
         } catch (error) {
@@ -178,12 +188,16 @@ export const userRouter = createTRPCRouter({
             },
             take: limit,
             skip: (page - 1) * limit,
-            orderBy: {
-              model: {
-                name: sortBy === "name" ? sortOrder : undefined,
+            orderBy: [
+              {
+                model: {
+                  name: sortBy === "name" ? sortOrder : undefined,
+                },
               },
-              createdAt: sortBy === "createdAt" ? sortOrder : undefined,
-            },
+              {
+                createdAt: sortBy === "createdAt" ? sortOrder : undefined,
+              },
+            ],
           });
           return purchases;
         } catch (error) {
@@ -227,12 +241,16 @@ export const userRouter = createTRPCRouter({
             },
             take: limit,
             skip: (page - 1) * limit,
-            orderBy: {
-              model: {
-                name: sortBy === "name" ? sortOrder : undefined,
+            orderBy: [
+              {
+                model: {
+                  name: sortBy === "name" ? sortOrder : undefined,
+                },
               },
-              createdAt: sortBy === "createdAt" ? sortOrder : undefined,
-            },
+              {
+                createdAt: sortBy === "createdAt" ? sortOrder : undefined,
+              },
+            ],
           });
           return wishes;
         } catch (error) {

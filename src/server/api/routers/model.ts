@@ -17,9 +17,11 @@ export const modelRouter = createTRPCRouter({
             },
             take: limit,
             skip: (page - 1) * limit,
-            orderBy: {
-              [sortBy]: sortOrder,
-            },
+            orderBy: [
+              {
+                [sortBy]: sortOrder,
+              },
+            ],
           });
           return models;
         } catch (error) {
@@ -185,12 +187,16 @@ export const modelRouter = createTRPCRouter({
             },
             take: limit,
             skip: (page - 1) * limit,
-            orderBy: {
-              model: {
-                name: sortBy === "name" ? sortOrder : undefined,
+            orderBy: [
+              {
+                model: {
+                  name: sortBy === "name" ? sortOrder : undefined,
+                },
               },
-              createdAt: sortBy === "createdAt" ? sortOrder : undefined,
-            },
+              {
+                createdAt: sortBy === "createdAt" ? sortOrder : undefined,
+              },
+            ],
           });
           return products;
         } catch (error) {
