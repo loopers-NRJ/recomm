@@ -112,7 +112,7 @@ model Product {
     buyer          User?    @relation("purchasedProducts", fields: [buyerId], references: [id])
     buyerId        String?
     favoritedUsers User[]   @relation("favoriteProducts")
-    room           Room     @relation(fields: [roomId], references: [id])
+    room           Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
     roomId         String   @unique
     createdAt      DateTime @default(now())
     updatedAt      DateTime @updatedAt

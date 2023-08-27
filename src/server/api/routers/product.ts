@@ -1,6 +1,7 @@
 import { functionalityOptions } from "@/utils/validation";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { z } from "zod";
+import { WishStatus } from "@prisma/client";
 
 export const productRouter = createTRPCRouter({
   getProducts: publicProcedure
@@ -135,6 +136,18 @@ export const productRouter = createTRPCRouter({
               seller: true,
               model: true,
               room: true,
+            },
+          });
+          /**
+           * Updating all the wishes with the modeiId to available
+           */
+          await ctx.prisma.wish.updateMany({
+            where: {
+              modelId,
+              status: WishStatus.pending,
+            },
+            data: {
+              status: WishStatus.available,
             },
           });
           return product;

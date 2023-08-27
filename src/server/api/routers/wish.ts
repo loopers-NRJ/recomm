@@ -25,10 +25,8 @@ export const wishRouter = createTRPCRouter({
             _all: true,
           },
         });
-        let status: WishStatus = WishStatus.pending;
-        if (result._count._all !== 0) {
-          status = WishStatus.available;
-        }
+        const status: WishStatus =
+          result._count._all !== 0 ? WishStatus.available : WishStatus.pending;
 
         const wish = await ctx.prisma.wish.create({
           data: {
