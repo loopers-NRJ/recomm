@@ -3,25 +3,23 @@
 
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 
-import { User } from "next-auth";
 import { useCallback, useState } from "react";
 import useLoginModal from "@/hooks/useLoginModal";
 import { Toggle } from "@/components/ui/toggle";
-import { api } from "@/utils/api";
+import { useSession } from "next-auth/react";
+// import { api } from "@/utils/api";
 
 interface HeartButtonProps {
   enabled?: boolean;
   productId: string;
-  currentUser?: User | null;
+
+  listingId: string;
 }
 
-const HeartButton: React.FC<HeartButtonProps> = ({
-  enabled,
-  productId,
-  currentUser,
-}) => {
-  const [hasFavorited, setHasFavourited] = useState(enabled);
+const HeartButton: React.FC<HeartButtonProps> = ({ listingId }) => {
+  const [hasFavorited, setHasFavourited] = useState(false);
   const loginModal = useLoginModal();
+  const session = useSession();
 
   const addToFavourite = api.product.addProductToFavorites.useMutation();
   const removeFromFavourite =
@@ -31,13 +29,13 @@ const HeartButton: React.FC<HeartButtonProps> = ({
     (e: React.MouseEvent) => {
       e.stopPropagation();
 
-      if (currentUser) {
+      if (session?.data?.user) {
         if (!hasFavorited) {
           // add to favourites
-          addToFavourite.mutate({ productId });
+          addToFavourite.mutate({ listingId });
         } else {
           // remove from favourites
-          removeFromFavourite.mutate({ productId });
+          removeFromFavourite.mutate({ listingId });
         }
         // toggle favourite
         setHasFavourited(!hasFavorited);
@@ -46,7 +44,7 @@ const HeartButton: React.FC<HeartButtonProps> = ({
         loginModal.onOpen();
       }
     },
-    [hasFavorited, currentUser]
+    [hasFavorited, session]
   );
 
   return (

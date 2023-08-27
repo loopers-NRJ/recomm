@@ -1,7 +1,6 @@
 "use client";
 
 import Product from "@/types/product";
-import { type User } from "next-auth";
 // import Button from "./Button";
 import HeartButton from "./HeartButton";
 import { useRouter } from "next/router";
@@ -10,14 +9,9 @@ import Image from "next/image";
 interface ListingCardProps {
   isFavourite?: boolean;
   product: Product;
-  currentUser: User | null;
 }
 
-const ListingCard: React.FC<ListingCardProps> = ({
-  isFavourite,
-  product,
-  currentUser,
-}) => {
+const ListingCard: React.FC<ListingCardProps> = ({ product, isFavourite }) => {
   const router = useRouter();
 
   return (
@@ -59,9 +53,8 @@ const ListingCard: React.FC<ListingCardProps> = ({
             "
           >
             <HeartButton
+              listingId={product.id}
               enabled={isFavourite ?? false}
-              productId={product.id}
-              currentUser={currentUser}
             />
           </div>
         </div>

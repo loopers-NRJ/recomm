@@ -4,20 +4,16 @@ import { NextPage } from "next";
 import { api } from "@/utils/api";
 import Product from "@/types/product";
 import ListingCard from "@/components/ListingCard";
-import { useRouter } from "next/router";
 import Container from "@/components/Container";
 import { useSession } from "next-auth/react";
 import { User } from "next-auth";
 
 const Favourites: NextPage = () => {
-  // user the params to get User ID
-  const userId = useRouter().query.userid as string;
-  const { data: session } = useSession();
-
-  // use the user ID to get the favourites
-  const { data: products, isLoading } = api.user.getMyFavoritesById.useQuery({
-    userId,
-  });
+  const {
+    data: products,
+    isLoading,
+    isError,
+  } = api.user.getMyFavorites.useQuery({});
 
   if (isLoading) return <div>Loading...</div>;
   if (products instanceof Error) return <div>Something went wrong</div>;
@@ -41,7 +37,6 @@ const Favourites: NextPage = () => {
         >
           {products.map((product) => (
             <ListingCard
-              currentUser={session?.user as User}
               key={product.id}
               product={product as unknown as Product}
             />

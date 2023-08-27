@@ -2,16 +2,10 @@ import { api } from "@/utils/api";
 import ListingCard from "@/components/ListingCard";
 import Container from "@/components/Container";
 import Product from "@/types/product";
-import { useSession } from "next-auth/react";
 import { NextPage } from "next";
 import { useSearchParams } from "next/navigation";
-import { User } from "next-auth";
 
 export const Home: NextPage = () => {
-  // get the current user
-  const { data: session } = useSession();
-  const user = session?.user;
-
   // get products according to the search params
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
@@ -58,7 +52,6 @@ export const Home: NextPage = () => {
         >
           {products.map((product) => (
             <ListingCard
-              currentUser={user as User}
               key={product.id}
               product={product as unknown as Product}
             />

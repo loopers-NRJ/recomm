@@ -53,8 +53,11 @@ export const productRouter = createTRPCRouter({
                   categories: true,
                 },
               },
-              favoritedUsers: true,
-              room: true,
+              room: {
+                include: {
+                  highestBid: true,
+                },
+              },
             },
           });
           return products;
@@ -259,35 +262,6 @@ export const productRouter = createTRPCRouter({
         return product;
       } catch (error) {
         return new Error("Error deleting product");
-      }
-    }),
-  getRoomByProductId: publicProcedure
-    .input(functionalityOptions.extend({ productId: z.string().cuid() }))
-    .query(async ({ input: { productId: id }, ctx }) => {
-      try {
-        const room = await ctx.prisma.room.findUnique({
-          where: {
-            product: {
-              some: {
-                id,
-              },
-            },
-          },
-          include: {
-            highestBid: true,
-            bids: {
-              include: {
-                user: true,
-              },
-            },
-          },
-        });
-        if (room === null) {
-          return new Error("Product does not exist");
-        }
-        return room;
-      } catch (error) {
-        return new Error("Error fetching room");
       }
     }),
   addProductToFavorites: protectedProcedure
