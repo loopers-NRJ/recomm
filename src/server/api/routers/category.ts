@@ -269,6 +269,12 @@ export const categoryRouter = createTRPCRouter({
                 createdAt: sortBy === "createdAt" ? sortOrder : undefined,
               },
             ],
+            include: {
+              buyer: true,
+              seller: true,
+              model: true,
+              room: true,
+            },
           });
           return products;
         } catch (error) {

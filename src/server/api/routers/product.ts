@@ -46,7 +46,12 @@ export const productRouter = createTRPCRouter({
             include: {
               buyer: true,
               seller: true,
-              model: true,
+              model: {
+                include: {
+                  brand: true,
+                  categories: true,
+                },
+              },
               room: true,
             },
           });
