@@ -101,17 +101,12 @@ export const userRouter = createTRPCRouter({
         }
       }
     ),
-  getMyFavoritesById: protectedProcedure
-    .input(functionalityOptions.extend({ userId: z.string().cuid() }))
+  getMyFavorites: protectedProcedure
+    .input(functionalityOptions)
     .query(
-      async ({
-        input: { userId: id, limit, page, search, sortBy, sortOrder },
-        ctx,
-      }) => {
-        const user = ctx.session.user;
-        if (id !== user.id) {
-          return new Error("Unauthorized");
-        }
+      async ({ input: { limit, page, search, sortBy, sortOrder }, ctx }) => {
+        const id = ctx.session.user.id;
+
         try {
           const favoritedProducts = await ctx.prisma.product.findMany({
             where: {
@@ -213,17 +208,11 @@ export const userRouter = createTRPCRouter({
         }
       }
     ),
-  getMyPurchasesById: protectedProcedure
-    .input(functionalityOptions.extend({ userId: z.string().cuid() }))
+  getMyPurchases: protectedProcedure
+    .input(functionalityOptions)
     .query(
-      async ({
-        input: { userId: id, limit, page, search, sortBy, sortOrder },
-        ctx,
-      }) => {
-        const user = ctx.session.user;
-        if (id !== user.id) {
-          return new Error("Unauthorized");
-        }
+      async ({ input: { limit, page, search, sortBy, sortOrder }, ctx }) => {
+        const id = ctx.session.user.id;
         try {
           const purchases = await ctx.prisma.product.findMany({
             where: {

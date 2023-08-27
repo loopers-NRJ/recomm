@@ -1,5 +1,4 @@
 import Product from "@/types/product";
-import { type User } from "next-auth";
 // import Button from "./Button";
 import HeartButton from "./HeartButton";
 import { useRouter } from "next/router";
@@ -7,10 +6,9 @@ import Image from "next/image";
 
 interface ListingCardProps {
   product: Product;
-  currentUser: User | null;
 }
 
-const ListingCard: React.FC<ListingCardProps> = ({ product, currentUser }) => {
+const ListingCard: React.FC<ListingCardProps> = ({ product }) => {
   const router = useRouter();
 
   return (
@@ -51,7 +49,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ product, currentUser }) => {
               top-3
             "
           >
-            <HeartButton listingId={product.id} currentUser={currentUser} />
+            <HeartButton listingId={product.id} />
           </div>
         </div>
         <div className="text-lg font-semibold">{product.model.name}</div>
