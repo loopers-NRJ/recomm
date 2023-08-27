@@ -267,4 +267,90 @@ export const productRouter = createTRPCRouter({
         return new Error("Error fetching room");
       }
     }),
+  addProductToFavorites: protectedProcedure
+    .input(z.object({ productId: z.string().cuid() }))
+    .mutation(async ({ input: { productId: id }, ctx }) => {
+      try {
+        const user = ctx.session.user;
+        const existingProduct = await ctx.prisma.product.findUnique({
+          where: {
+            id,
+          },
+        });
+        if (existingProduct === null) {
+          return new Error("Product does not exist");
+        }
+        const productInFavorites = await ctx.prisma.product.findUnique({
+          where: {
+            id,
+            favoritedUsers: {
+              some: {
+                id: user.id,
+              },
+            },
+          },
+        });
+        if (productInFavorites !== null) {
+          return new Error("Product is already in favorites");
+        }
+        await ctx.prisma.user.update({
+          where: {
+            id: user.id,
+          },
+          data: {
+            favoriteProducts: {
+              connect: {
+                id,
+              },
+            },
+          },
+        });
+        return true;
+      } catch (error) {
+        return new Error("Error adding product to favorites");
+      }
+    }),
+  removeProductFromFavorites: protectedProcedure
+    .input(z.object({ productId: z.string().cuid() }))
+    .mutation(async ({ input: { productId: id }, ctx }) => {
+      try {
+        const user = ctx.session.user;
+        const existingProduct = await ctx.prisma.product.findUnique({
+          where: {
+            id,
+          },
+        });
+        if (existingProduct === null) {
+          return new Error("Product does not exist");
+        }
+        const productInFavorites = await ctx.prisma.product.findUnique({
+          where: {
+            id,
+            favoritedUsers: {
+              some: {
+                id: user.id,
+              },
+            },
+          },
+        });
+        if (productInFavorites === null) {
+          return new Error("Product is not in favorites");
+        }
+        await ctx.prisma.user.update({
+          where: {
+            id: user.id,
+          },
+          data: {
+            favoriteProducts: {
+              disconnect: {
+                id,
+              },
+            },
+          },
+        });
+        return true;
+      } catch (error) {
+        return new Error("Error removing product from favorites");
+      }
+    }),
 });
