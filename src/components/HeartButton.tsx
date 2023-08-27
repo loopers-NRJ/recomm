@@ -3,15 +3,14 @@
 
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 
-import { User } from "next-auth";
 import { useCallback, useState } from "react";
 import useLoginModal from "@/hooks/useLoginModal";
 import { Toggle } from "@/components/ui/toggle";
+import { useSession } from "next-auth/react";
 // import { api } from "@/utils/api";
 
 interface HeartButtonProps {
   listingId: string;
-  currentUser?: User | null;
 }
 
 // const setFavourite = async (listingId: string, userId: string) => {
@@ -20,17 +19,14 @@ interface HeartButtonProps {
 
 // }
 
-const HeartButton: React.FC<HeartButtonProps> = ({
-  listingId,
-  currentUser,
-}) => {
+const HeartButton: React.FC<HeartButtonProps> = ({ listingId }) => {
   const [hasFavorited, setHasFavourited] = useState(false);
   const loginModal = useLoginModal();
-
+  const session = useSession();
   const toggleFavourite = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      if (currentUser) {
+      if (session?.data?.user) {
         // toggle favourite
         console.log(listingId);
 
@@ -40,7 +36,7 @@ const HeartButton: React.FC<HeartButtonProps> = ({
         loginModal.onOpen();
       }
     },
-    [hasFavorited, currentUser]
+    [hasFavorited, session]
   );
 
   return (
