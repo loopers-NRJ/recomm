@@ -53,6 +53,7 @@ export const productRouter = createTRPCRouter({
                   categories: true,
                 },
               },
+              favoritedUsers: true,
               room: true,
             },
           });
@@ -74,7 +75,11 @@ export const productRouter = createTRPCRouter({
             buyer: true,
             seller: true,
             model: true,
-            room: true,
+            room: {
+              include: {
+                highestBid: true,
+              },
+            },
           },
         });
         return product;
@@ -262,10 +267,19 @@ export const productRouter = createTRPCRouter({
       try {
         const room = await ctx.prisma.room.findUnique({
           where: {
-            id,
+            product: {
+              some: {
+                id,
+              },
+            },
           },
           include: {
             highestBid: true,
+            bids: {
+              include: {
+                user: true,
+              },
+            },
           },
         });
         if (room === null) {

@@ -7,33 +7,39 @@ import { User } from "next-auth";
 import { useCallback, useState } from "react";
 import useLoginModal from "@/hooks/useLoginModal";
 import { Toggle } from "@/components/ui/toggle";
-// import { api } from "@/utils/api";
+import { api } from "@/utils/api";
 
 interface HeartButtonProps {
-  listingId: string;
+  enabled?: boolean;
+  productId: string;
   currentUser?: User | null;
 }
 
-// const setFavourite = async (listingId: string, userId: string) => {
-
-//     api.user.
-
-// }
-
 const HeartButton: React.FC<HeartButtonProps> = ({
-  listingId,
+  enabled,
+  productId,
   currentUser,
 }) => {
-  const [hasFavorited, setHasFavourited] = useState(false);
+  const [hasFavorited, setHasFavourited] = useState(enabled);
   const loginModal = useLoginModal();
+
+  const addToFavourite = api.product.addProductToFavorites.useMutation();
+  const removeFromFavourite =
+    api.product.removeProductFromFavorites.useMutation();
 
   const toggleFavourite = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      if (currentUser) {
-        // toggle favourite
-        console.log(listingId);
 
+      if (currentUser) {
+        if (!hasFavorited) {
+          // add to favourites
+          addToFavourite.mutate({ productId });
+        } else {
+          // remove from favourites
+          removeFromFavourite.mutate({ productId });
+        }
+        // toggle favourite
         setHasFavourited(!hasFavorited);
       } else {
         // show sign in modal
@@ -58,14 +64,14 @@ const HeartButton: React.FC<HeartButtonProps> = ({
         hover:opacity-80
       "
     >
-      <AiOutlineHeart className="fill-white" size={28}>
-        {hasFavorited && (
-          <AiFillHeart
-            size={24}
-            className="text-red-500 shadow-sm outline-2 outline-white"
-          />
-        )}
-      </AiOutlineHeart>
+      {hasFavorited ? (
+        <AiFillHeart
+          size={28}
+          className="text-red-500 shadow-sm outline-2 outline-white"
+        />
+      ) : (
+        <AiOutlineHeart className="fill-white" size={28} />
+      )}
     </Toggle>
   );
 };

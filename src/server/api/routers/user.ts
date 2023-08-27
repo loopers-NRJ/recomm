@@ -151,6 +151,14 @@ export const userRouter = createTRPCRouter({
                 createdAt: sortBy === "createdAt" ? sortOrder : undefined,
               },
             ],
+            include: {
+              model: true,
+              room: {
+                include: {
+                  bids: true,
+                },
+              },
+            },
           });
           return favoritedProducts;
         } catch (error) {

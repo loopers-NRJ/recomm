@@ -8,6 +8,10 @@ import { useSearchParams } from "next/navigation";
 import { User } from "next-auth";
 
 export const Home: NextPage = () => {
+  // get the current user
+  const { data: session } = useSession();
+  const user = session?.user;
+
   // get products according to the search params
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
@@ -27,7 +31,6 @@ export const Home: NextPage = () => {
       sortOrder: "desc",
     })!;
   }
-  const session = useSession();
 
   const { data: products, isLoading, isError } = response;
 
@@ -55,7 +58,7 @@ export const Home: NextPage = () => {
         >
           {products.map((product) => (
             <ListingCard
-              currentUser={session?.data?.user as User}
+              currentUser={user as User}
               key={product.id}
               product={product as unknown as Product}
             />
