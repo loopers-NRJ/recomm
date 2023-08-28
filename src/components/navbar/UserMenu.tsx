@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 
 import useLoginModal from "@/hooks/useLoginModal";
 import useRegisterModal from "@/hooks/useRegisterModal";
+import usePostingModal from "@/hooks/usePostingModal";
 
 import Avatar from "./Avatar";
 import { User } from "next-auth";
@@ -32,14 +33,15 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
 
   const loginModal = useLoginModal();
   const registerModal = useRegisterModal();
+  const postingModal = usePostingModal();
 
   const onPost = useCallback(() => {
     if (!currentUser) {
       return loginModal.onOpen();
     } else {
-      return router.push(`/${currentUser.id}/listings/new`);
+      return postingModal.onOpen();
     }
-  }, [currentUser, loginModal, router]);
+  }, [currentUser, loginModal, postingModal]);
 
   return (
     <div className="relative">
@@ -66,12 +68,12 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
                   {"Hi, " + currentUser.name ?? "My Account"}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-slate-600/20" />
-                <DropdownMenuItem
+                {/* <DropdownMenuItem
                   onClick={() => router.push(`/${currentUser.id}/profile`)}
                   className="w-full px-4 py-3 font-semibold transition hover:bg-neutral-100"
                 >
                   Profile
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
                 <DropdownMenuItem
                   onClick={() => router.push(`/${currentUser.id}/favourites`)}
                   className="px-4 py-3 font-semibold transition hover:bg-neutral-100"
