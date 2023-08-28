@@ -30,6 +30,9 @@ export const roomRounter = createTRPCRouter({
               price: sortOrder,
             },
           ],
+          include: {
+            user: true,
+          },
         });
         return bids;
       } catch (error) {

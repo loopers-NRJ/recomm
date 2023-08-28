@@ -25,7 +25,7 @@ const ProductPage: NextPage = () => {
   if (isLoading) {
     return <div>Loading...</div>;
   }
-  if (!product || product === undefined || product instanceof Error) {
+  if (product == null || product instanceof Error) {
     return <div>Product not found</div>;
   }
 
@@ -85,7 +85,7 @@ const ProductPage: NextPage = () => {
                   <div>{product.room.highestBid?.price}</div>
                 </div>
                 <hr />
-                <BiddingList product={product}></BiddingList>
+                <BiddingList room={product.room}></BiddingList>
                 <hr />
                 <div className="p-4">
                   <Button
