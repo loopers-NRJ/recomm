@@ -12,9 +12,14 @@ import { api } from "@/utils/api";
 interface HeartButtonProps {
   enabled?: boolean;
   productId: string;
+  onChange?: () => void;
 }
 
-const HeartButton: React.FC<HeartButtonProps> = ({ productId, enabled }) => {
+const HeartButton: React.FC<HeartButtonProps> = ({
+  productId,
+  enabled,
+  onChange,
+}) => {
   const [hasFavorited, setHasFavourited] = useState(enabled ?? false);
   const loginModal = useLoginModal();
   const session = useSession();
@@ -24,19 +29,22 @@ const HeartButton: React.FC<HeartButtonProps> = ({ productId, enabled }) => {
     api.product.removeProductFromFavorites.useMutation();
 
   const toggleFavourite = useCallback(
-    (e: React.MouseEvent) => {
+    async (e: React.MouseEvent) => {
       e.stopPropagation();
 
       if (session?.data?.user) {
-        if (!hasFavorited) {
-          // add to favourites
-          addToFavourite.mutate({ productId });
-        } else {
-          // remove from favourites
-          removeFromFavourite.mutate({ productId });
-        }
         // toggle favourite
         setHasFavourited(!hasFavorited);
+        if (!hasFavorited) {
+          // add to favourites
+          await addToFavourite.mutateAsync({ productId });
+        } else {
+          // remove from favourites
+          await removeFromFavourite.mutateAsync({ productId });
+        }
+        if (onChange) {
+          onChange();
+        }
       } else {
         // show sign in modal
         loginModal.onOpen();
@@ -48,7 +56,7 @@ const HeartButton: React.FC<HeartButtonProps> = ({ productId, enabled }) => {
   return (
     <div
       onClick={(e) => {
-        toggleFavourite(e);
+        void toggleFavourite(e);
       }}
       defaultChecked
       className="
