@@ -19,6 +19,8 @@ const ListingCard: React.FC<ListingCardProps> = ({
 }) => {
   const router = useRouter();
 
+  const pathname = router.pathname;
+
   return (
     <div
       onClick={() => {
@@ -57,11 +59,13 @@ const ListingCard: React.FC<ListingCardProps> = ({
               top-3
             "
           >
-            <HeartButton
-              productId={product.id}
-              enabled={isFavourite ?? false}
-              onChange={onFavoriteStateChange}
-            />
+            {pathname !== "/" && (
+              <HeartButton
+                productId={product.id}
+                enabled={isFavourite ?? false}
+                onChange={onFavoriteStateChange}
+              />
+            )}
           </div>
         </div>
         <div className="text-lg font-semibold">{product.model.name}</div>

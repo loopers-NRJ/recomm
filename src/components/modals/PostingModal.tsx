@@ -43,9 +43,13 @@ const PostingModal = () => {
           <form>
             Category
             <Input></Input>
-            Category
+            Brand
             <Input></Input>
-            Category
+            Model
+            <Input></Input>
+            Description
+            <Input></Input>
+            Price
             <Input></Input>
             <Button variant={"default"}>Post</Button>
           </form>

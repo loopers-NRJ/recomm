@@ -10,6 +10,7 @@ import PostingModal from "@/components/modals/PostingModal";
 // import SearchModal from "@/components/modals/SearchModal";
 
 import "@/styles/globals.css";
+import BiddingModal from "@/components/modals/BiddingModal";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -20,6 +21,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
       <LoginModal />
       <RegisterModal />
       <PostingModal />
+      <BiddingModal />
       {/* <SearchModal /> */}
       <Navbar />
       <div className="pb-20 pt-28">

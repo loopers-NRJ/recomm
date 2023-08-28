@@ -14,13 +14,11 @@ const Listings: NextPage = () => {
     data: products,
     isLoading,
     isError,
-  } = api.user.getUserListingsById.useQuery({
-    userId,
-  });
+  } = api.user.getUserListingsById.useQuery({ userId });
 
   if (isError || products instanceof Error)
     return <div>Something went wrong</div>;
-  if (!products) return <div>No data to Show</div>;
+  if (!products || products.length === 0) return <div>No data to Show</div>;
   if (isLoading) return <div>Loading...</div>;
 
   return (
