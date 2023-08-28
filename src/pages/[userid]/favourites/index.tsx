@@ -5,12 +5,26 @@ import { api } from "@/utils/api";
 import Product from "@/types/product";
 import ListingCard from "@/components/ListingCard";
 import Container from "@/components/Container";
+import { useSession } from "next-auth/react";
+import { useEffect } from "react";
 
 const Favourites: NextPage = () => {
-  const { data: products, isLoading } = api.user.getMyFavorites.useQuery({});
+  const {
+    data: products,
+    isLoading,
+    // isError,
+    // error,
+    refetch,
+  } = api.user.getMyFavorites.useQuery({});
+  const session = useSession();
+
+  useEffect(() => {
+    void refetch();
+  }, [session.status, refetch]);
 
   if (isLoading) return <div>Loading...</div>;
 
+  // if (isError) return <div>{error.message}</div>;
   if (products instanceof Error) return <div>Something went wrong</div>;
   else if (products === undefined || products.length === 0)
     return <div>No Products in the List</div>;
@@ -33,7 +47,8 @@ const Favourites: NextPage = () => {
           <ListingCard
             key={product.id}
             product={product as unknown as Product}
-            isFavourite={true}
+            isFavourite
+            onFavoriteStateChange={() => void refetch()}
           />
         ))}
       </div>

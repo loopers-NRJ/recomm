@@ -9,9 +9,14 @@ import Image from "next/image";
 interface ListingCardProps {
   isFavourite?: boolean;
   product: Product;
+  onFavoriteStateChange?: () => void;
 }
 
-const ListingCard: React.FC<ListingCardProps> = ({ product, isFavourite }) => {
+const ListingCard: React.FC<ListingCardProps> = ({
+  product,
+  isFavourite,
+  onFavoriteStateChange,
+}) => {
   const router = useRouter();
 
   return (
@@ -55,6 +60,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ product, isFavourite }) => {
             <HeartButton
               productId={product.id}
               enabled={isFavourite ?? false}
+              onChange={onFavoriteStateChange}
             />
           </div>
         </div>

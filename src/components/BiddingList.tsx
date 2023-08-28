@@ -1,16 +1,28 @@
 "use client";
 
-import Avatar from "./navbar/Avatar";
+import { api } from "@/utils/api";
+import { Room } from "@prisma/client";
 import { FC } from "react";
-import Product from "@/types/product";
-
+import Avatar from "./navbar/Avatar";
 interface BiddingProps {
-  product: Product;
+  room: Room;
 }
 
-const BiddingList: FC<BiddingProps> = ({ product }) => {
-  const { bids } = product.room!;
-
+const BiddingList: FC<BiddingProps> = ({ room }) => {
+  const {
+    data: bids,
+    isLoading,
+    isError,
+  } = api.room.getBidsByRoomId.useQuery({ roomId: room.id });
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+  if (!bids || isError) {
+    return <div>Error</div>;
+  }
+  if (bids instanceof Error) {
+    return <div>{bids.message}</div>;
+  }
   return (
     <div className="flex h-full min-h-[20rem] w-full flex-col rounded-lg bg-red-200">
       {bids.map((bid) => (
