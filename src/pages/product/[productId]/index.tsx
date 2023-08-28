@@ -7,11 +7,11 @@ import Image from "next/image";
 import HeartButton from "@/components/HeartButton";
 import Avatar from "@/components/navbar/Avatar";
 import Button from "@/components/Button";
-import ListingCategory from "@/components/listings/ListingCategory";
 import { GiSofa } from "react-icons/gi";
 import BiddingList from "@/components/BiddingList";
 import { api } from "@/utils/api";
 import { NextPage } from "next";
+import ListingCategory from "@/components/ListingCategory";
 
 const ProductPage: NextPage = () => {
   const router = useRouter();
@@ -43,7 +43,7 @@ const ProductPage: NextPage = () => {
               alt="Image"
             />
             <div className="absolute right-5 top-5">
-              <HeartButton productId={product.id} currentUser={session?.user} />
+              <HeartButton productId={product.id} />
             </div>
           </div>
 
@@ -85,7 +85,7 @@ const ProductPage: NextPage = () => {
                   <div>{product.room.highestBid?.price}</div>
                 </div>
                 <hr />
-                <BiddingList productId={productId}></BiddingList>
+                <BiddingList product={product}></BiddingList>
                 <hr />
                 <div className="p-4">
                   <Button

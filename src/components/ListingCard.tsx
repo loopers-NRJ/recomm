@@ -53,7 +53,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ product, isFavourite }) => {
             "
           >
             <HeartButton
-              listingId={product.id}
+              productId={product.id}
               enabled={isFavourite ?? false}
             />
           </div>

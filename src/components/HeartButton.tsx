@@ -5,19 +5,17 @@ import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 
 import { useCallback, useState } from "react";
 import useLoginModal from "@/hooks/useLoginModal";
-import { Toggle } from "@/components/ui/toggle";
+// import { Toggle } from "@/components/ui/toggle";
 import { useSession } from "next-auth/react";
-// import { api } from "@/utils/api";
+import { api } from "@/utils/api";
 
 interface HeartButtonProps {
   enabled?: boolean;
   productId: string;
-
-  listingId: string;
 }
 
-const HeartButton: React.FC<HeartButtonProps> = ({ listingId }) => {
-  const [hasFavorited, setHasFavourited] = useState(false);
+const HeartButton: React.FC<HeartButtonProps> = ({ productId, enabled }) => {
+  const [hasFavorited, setHasFavourited] = useState(enabled ?? false);
   const loginModal = useLoginModal();
   const session = useSession();
 
@@ -32,10 +30,10 @@ const HeartButton: React.FC<HeartButtonProps> = ({ listingId }) => {
       if (session?.data?.user) {
         if (!hasFavorited) {
           // add to favourites
-          addToFavourite.mutate({ listingId });
+          addToFavourite.mutate({ productId });
         } else {
           // remove from favourites
-          removeFromFavourite.mutate({ listingId });
+          removeFromFavourite.mutate({ productId });
         }
         // toggle favourite
         setHasFavourited(!hasFavorited);
@@ -48,11 +46,11 @@ const HeartButton: React.FC<HeartButtonProps> = ({ listingId }) => {
   );
 
   return (
-    <Toggle
+    <div
       onClick={(e) => {
         toggleFavourite(e);
       }}
-      size="lg"
+      defaultChecked
       className="
         absolute
         right-[2px]
@@ -70,7 +68,7 @@ const HeartButton: React.FC<HeartButtonProps> = ({ listingId }) => {
       ) : (
         <AiOutlineHeart className="fill-white" size={28} />
       )}
-    </Toggle>
+    </div>
   );
 };
 

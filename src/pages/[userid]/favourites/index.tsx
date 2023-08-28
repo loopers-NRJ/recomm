@@ -5,26 +5,20 @@ import { api } from "@/utils/api";
 import Product from "@/types/product";
 import ListingCard from "@/components/ListingCard";
 import Container from "@/components/Container";
-import { useSession } from "next-auth/react";
-import { User } from "next-auth";
 
 const Favourites: NextPage = () => {
-  const {
-    data: products,
-    isLoading,
-    isError,
-  } = api.user.getMyFavorites.useQuery({});
+  const { data: products, isLoading } = api.user.getMyFavorites.useQuery({});
 
   if (isLoading) return <div>Loading...</div>;
+
   if (products instanceof Error) return <div>Something went wrong</div>;
-  if (products === undefined || products.length === 0)
+  else if (products === undefined || products.length === 0)
     return <div>No Products in the List</div>;
 
   return (
-    <main>
-      <Container>
-        <div
-          className="
+    <Container>
+      <div
+        className="
             grid
             grid-cols-1 
             gap-8 
@@ -34,16 +28,16 @@ const Favourites: NextPage = () => {
             xl:grid-cols-5
             2xl:grid-cols-6
           "
-        >
-          {products.map((product) => (
-            <ListingCard
-              key={product.id}
-              product={product as unknown as Product}
-            />
-          ))}
-        </div>
-      </Container>
-    </main>
+      >
+        {products.map((product) => (
+          <ListingCard
+            key={product.id}
+            product={product as unknown as Product}
+            isFavourite={true}
+          />
+        ))}
+      </div>
+    </Container>
   );
 };
 
