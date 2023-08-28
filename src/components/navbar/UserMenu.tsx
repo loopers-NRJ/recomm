@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 
 import useLoginModal from "@/hooks/useLoginModal";
 import useRegisterModal from "@/hooks/useRegisterModal";
+import usePostingModal from "@/hooks/usePostingModal";
 
 import Avatar from "./Avatar";
 import { User } from "next-auth";
@@ -32,14 +33,15 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
 
   const loginModal = useLoginModal();
   const registerModal = useRegisterModal();
+  const postingModal = usePostingModal();
 
   const onPost = useCallback(() => {
     if (!currentUser) {
       return loginModal.onOpen();
     } else {
-      return router.push(`/${currentUser.id}/listings/new`);
+      return postingModal.onOpen();
     }
-  }, [currentUser, loginModal, router]);
+  }, [currentUser, loginModal, postingModal]);
 
   return (
     <div className="relative">
