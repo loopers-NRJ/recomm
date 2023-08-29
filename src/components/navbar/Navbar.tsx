@@ -1,7 +1,6 @@
 import Categories from "./Categories";
 import Container from "@/components/Container";
 import Logo from "./Logo";
-import Search from "./Search";
 import UserMenu from "./UserMenu";
 import { useSession } from "next-auth/react";
 import { type User } from "next-auth";

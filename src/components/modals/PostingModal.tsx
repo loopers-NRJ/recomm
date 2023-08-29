@@ -1,17 +1,19 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-"use client";
-
 import * as Dialog from "@radix-ui/react-dialog";
 import usePostingModal from "@/hooks/usePostingModal";
 import { Cross1Icon } from "@radix-ui/react-icons";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useEffect, useState } from "react";
+import ComboBox from "../ui/ComboBox";
+import { api } from "@/utils/api";
+import { Category } from "@prisma/client";
 
 const PostingModal = () => {
   const postingModal = usePostingModal();
 
   const [showModal, setShowModal] = useState(postingModal.isOpen);
+  const [categoryInput, setCategoryInput] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<Category>();
 
   useEffect(() => {
     setShowModal(postingModal.isOpen);
@@ -42,7 +44,15 @@ const PostingModal = () => {
           {/* Form */}
           <form>
             Category
-            <Input></Input>
+            <ComboBox
+              searchQuery={categoryInput}
+              onSearch={setCategoryInput}
+              selected={selectedCategory}
+              onSelect={(category) => setSelectedCategory(category as Category)}
+              placeholder="Category"
+              useItems={api.category.getCategories.useQuery}
+            />
+            <br />
             Brand
             <Input></Input>
             Model
