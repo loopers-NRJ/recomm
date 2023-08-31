@@ -3,7 +3,7 @@
 import { PiEyeClosedBold, PiDressBold } from "react-icons/pi";
 import { LuStethoscope, LuDog } from "react-icons/lu";
 import { TbHorseToy, TbTool } from "react-icons/tb";
-import { BiHomeHeart } from "react-icons/bi";
+import { BiHome, BiHomeHeart } from "react-icons/bi";
 import {
   MdDevices,
   MdOutlineChair,
@@ -96,12 +96,18 @@ const Categories = () => {
           pt-4
         "
       >
+        <CategoryBox label="Home" icon={BiHome} selected={category === null} />
         {categories.map((item, i) => (
           <CategoryBox
             key={item.label}
             label={item.label}
             icon={item.icon}
-            id={data instanceof Error || data === undefined ? "" : data[i]!.id}
+            selected={category === item.label}
+            id={
+              data instanceof Error || data === undefined
+                ? undefined
+                : data[i]!.id
+            }
           />
         ))}
       </div>

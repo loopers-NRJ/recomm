@@ -9,7 +9,8 @@ import { IconType } from "react-icons";
 interface CategoryBoxProps {
   icon: IconType;
   label: string;
-  id: string;
+  selected?: boolean;
+  id?: string;
 }
 
 const CategoryBox: React.FC<CategoryBoxProps> = ({ icon: Icon, label, id }) => {
@@ -33,7 +34,9 @@ const CategoryBox: React.FC<CategoryBoxProps> = ({ icon: Icon, label, id }) => {
     <div
       onClick={() => {
         router
-          .push(`${pathname}?${createQueryString("category", id)}`)
+          .push(
+            id ? `${pathname}?${createQueryString("category", id)}` : pathname
+          )
           .catch((err) => console.log(err));
       }}
       className={`

@@ -1,7 +1,6 @@
 import Container from "@/components/Container";
 import { useRouter } from "next/router";
 import Heading from "@/components/Heading";
-import Image from "next/image";
 import HeartButton from "@/components/HeartButton";
 import Avatar from "@/components/navbar/Avatar";
 import Button from "@/components/Button";
@@ -12,6 +11,7 @@ import { NextPage } from "next";
 import ListingCategory from "@/components/ListingCategory";
 import useBiddingModal from "@/hooks/useBiddingModal";
 import { useSession } from "next-auth/react";
+import Carousel from "@/components/common/Carousel";
 
 const ProductPage: NextPage = () => {
   const router = useRouter();
@@ -38,13 +38,8 @@ const ProductPage: NextPage = () => {
         <div className="flex flex-col gap-6">
           <Heading title={product.model.name} />
 
-          <div className="relative h-[60vh] w-full overflow-hidden rounded-xl">
-            <Image
-              src="/shoe.jpg"
-              fill
-              className="w-full object-cover"
-              alt="Image"
-            />
+          <div className="relative h-72 w-full overflow-hidden rounded-xl">
+            <Carousel images={["/shoe.jpg"]} />
             <div className="absolute right-5 top-5">
               <HeartButton productId={product.id} />
             </div>
@@ -63,7 +58,7 @@ const ProductPage: NextPage = () => {
                 </div>
               </div>
               <hr />
-              <ListingCategory icon={GiSofa} label={"Furniture"} />
+              <ListingCategory icon={GiSofa} label="Furniture" />
               <hr />
               <div className="text-lg font-light text-neutral-500">
                 Created on {product.createdAt.toDateString()}.
