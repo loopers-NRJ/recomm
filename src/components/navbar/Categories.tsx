@@ -1,6 +1,5 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import { PiEyeClosedBold, PiDressBold } from "react-icons/pi";
 import { LuStethoscope, LuDog } from "react-icons/lu";
 import { TbHorseToy, TbTool } from "react-icons/tb";
@@ -77,28 +76,13 @@ export const categories = [
     icon: TbTool,
     description: "This property is in arctic environment!",
   },
-  // {
-  //   label: "Desert",
-  //   icon: GiCactus,
-  //   description: "This property is in the desert!",
-  // },
-  // {
-  //   label: "Barns",
-  //   icon: GiBarn,
-  //   description: "This property is in a barn!",
-  // },
-  // {
-  //   label: "Lux",
-  //   icon: IoDiamond,
-  //   description: "This property is brand new and luxurious!",
-  // },
 ];
 
 const Categories = () => {
-  const params = useSearchParams();
-  const category = params?.get("category");
-
   const { data } = api.category.getCategories.useQuery({});
+
+  if (data instanceof Error) return <div>Error</div>;
+  if (data === undefined) return <div>Loading...</div>;
 
   return (
     <Container>
@@ -117,7 +101,6 @@ const Categories = () => {
             key={item.label}
             label={item.label}
             icon={item.icon}
-            selected={category === item.label}
             id={data instanceof Error || data === undefined ? "" : data[i]!.id}
           />
         ))}

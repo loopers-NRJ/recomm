@@ -9,16 +9,10 @@ import { IconType } from "react-icons";
 interface CategoryBoxProps {
   icon: IconType;
   label: string;
-  selected?: boolean;
   id: string;
 }
 
-const CategoryBox: React.FC<CategoryBoxProps> = ({
-  icon: Icon,
-  label,
-  selected,
-  id,
-}) => {
+const CategoryBox: React.FC<CategoryBoxProps> = ({ icon: Icon, label, id }) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -32,6 +26,8 @@ const CategoryBox: React.FC<CategoryBoxProps> = ({
     },
     [searchParams]
   );
+
+  const selected = searchParams.get("category") === id;
 
   return (
     <div
