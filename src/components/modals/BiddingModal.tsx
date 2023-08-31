@@ -30,22 +30,24 @@ const BiddingModal: FC = () => {
         {/* Overlay */}
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
         {/* Content */}
-        <Dialog.DialogContent
-          className={`translate fixed inset-0 z-50 mx-auto h-full w-full rounded-lg bg-white p-8 text-foreground shadow-sm duration-300 md:my-40 md:h-fit md:w-4/6 lg:h-fit lg:w-3/6 xl:w-2/5
-            ${showModal ? "translate-y-0" : "translate-y-full"}
-            ${showModal ? "opacity-100" : "opacity-0"}`}
-        >
-          {/* Close */}
-          <Dialog.Close className="absolute right-0 top-0 m-3">
-            <Cross1Icon onClick={onClose} />
-          </Dialog.Close>
+        <div className="fixed right-0 top-0 z-50 flex h-full w-full items-end justify-center md:items-center">
+          <Dialog.DialogContent
+            className={`translate relative z-50 h-[40%] w-full rounded-xl bg-white p-8 text-foreground shadow-sm duration-300 md:h-auto md:w-4/6 lg:h-auto lg:w-3/6 xl:w-2/5
+              ${showModal ? "translate-y-0" : "translate-y-full"}
+              ${showModal ? "opacity-100" : "opacity-0"}`}
+          >
+            {/* Close */}
+            <Dialog.Close className="absolute right-0 top-0 m-3">
+              <Cross1Icon onClick={onClose} />
+            </Dialog.Close>
 
-          <DialogHeader>
-            <h1 className="text-2xl font-semibold">Place your Bid</h1>
-          </DialogHeader>
-          {/* Form */}
-          <BidForm />
-        </Dialog.DialogContent>
+            <DialogHeader>
+              <h1 className="text-2xl font-semibold">Place your Bid</h1>
+            </DialogHeader>
+            {/* Form */}
+            <BidForm roomId={biddingModal.roomId} onClose={onClose} />
+          </Dialog.DialogContent>
+        </div>
       </Dialog.Portal>
     </Dialog.Root>
   );

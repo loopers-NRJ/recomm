@@ -76,7 +76,7 @@ const ProductPage: NextPage = () => {
 
             {/* Bidding List */}
             <div className="order-first mb-10 md:order-last md:col-span-3">
-              <div className="border-[1px]border-neutral-200 overflow-hidden rounded-xl bg-white">
+              <div className="overflow-hidden rounded-xl border-[1px] border-neutral-200 bg-white">
                 <div className="flex flex-row items-end justify-between p-4">
                   <div className="text-lg font-semibold">Product Price: </div>
                   <div className="text-2xl font-semibold">
@@ -90,7 +90,7 @@ const ProductPage: NextPage = () => {
                     disabled={!user || user?.id === product.seller.id}
                     label="Place Bid"
                     onClick={() => {
-                      biddingModal.onOpen();
+                      biddingModal.onOpen(product.roomId);
                     }}
                   />
                 </div>

@@ -1,16 +1,28 @@
 import { z } from "zod";
-import React, { useState } from "react";
+import React, { FC, useState } from "react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
+import { api } from "@/utils/api";
+import { useToast } from "./ui/use-toast";
 
 const BidFormSchema = z.object({
-  price: z.number().positive("Price must be a positive number"),
+  price: z
+    .number()
+    .int("Price cannot have decimal values")
+    .positive("Price must not be negative"),
 });
 
 type BidFormData = z.infer<typeof BidFormSchema>;
 
-function BidForm() {
+interface BidFormProps {
+  roomId: string;
+  onClose: () => void;
+}
+
+const BidForm: FC<BidFormProps> = ({ roomId, onClose }) => {
   const [formData, setFormData] = useState<BidFormData>({ price: 0 });
+  const placeBid = api.room.postABid.useMutation();
+  const { toast } = useToast();
 
   const handlePriceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newPrice = parseFloat(event.target.value);
@@ -20,10 +32,20 @@ function BidForm() {
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     if (BidFormSchema.safeParse(formData).success) {
-      // Perform bid placement logic here using formData.price
+      const data = {
+        price: formData.price,
+        roomId,
+      };
+      placeBid.mutate(data);
+      onClose();
       console.log("Bid placed:", formData.price);
     } else {
-      console.error("Form data validation failed");
+      toast({
+        title: "Invaid Bid",
+        description: "Bid Cannot have decimal price values",
+        variant: "destructive",
+      });
+      console.log("Invalid Bid");
     }
   };
 
@@ -44,6 +66,6 @@ function BidForm() {
       </Button>
     </form>
   );
-}
+};
 
 export default BidForm;

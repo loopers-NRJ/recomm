@@ -3,6 +3,7 @@ import { SessionProvider } from "next-auth/react";
 import { type AppType } from "next/app";
 import { api } from "@/utils/api";
 
+import { Toaster } from "@/components/ui/toaster";
 import Navbar from "@/components/navbar/Navbar";
 import LoginModal from "@/components/modals/LoginModal";
 import RegisterModal from "@/components/modals/RegisterModal";
@@ -27,6 +28,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
       <div className="pb-20 pt-28">
         <Component {...pageProps} session={session} />
       </div>
+      <Toaster />
     </SessionProvider>
   );
 };
