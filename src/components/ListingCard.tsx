@@ -4,7 +4,8 @@ import Product from "@/types/product";
 // import Button from "./Button";
 import HeartButton from "./HeartButton";
 import { useRouter } from "next/router";
-import Image from "next/image";
+// import Image from "next/image";
+import Carousel from "./common/Carousel";
 
 interface ListingCardProps {
   isFavourite?: boolean;
@@ -34,13 +35,12 @@ const ListingCard: React.FC<ListingCardProps> = ({
         <div
           className="
               relative 
-              aspect-square 
               w-full 
               overflow-hidden 
               rounded-xl
             "
         >
-          <Image
+          {/* <Image
             fill
             className="
                 h-full 
@@ -51,7 +51,8 @@ const ListingCard: React.FC<ListingCardProps> = ({
               "
             src={"/shoe.jpg"}
             alt="Listing"
-          />
+          /> */}
+          <Carousel images={["/shoe.jpg", "/shoe.jpg", "/shoe.jpg"]} />
           <div
             className="
               absolute
