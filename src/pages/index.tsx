@@ -14,16 +14,9 @@ export const Home: NextPage = () => {
   if (params.has("category")) {
     const categoryId = params.get("category")!;
     console.log(categoryId);
-    response = api.category.getProductsByCategoryId.useQuery({
-      categoryId,
-      sortBy: "createdAt",
-      sortOrder: "desc",
-    })!;
+    response = api.category.getProductsByCategoryId.useQuery({ categoryId })!;
   } else {
-    response = api.product.getProducts.useQuery({
-      sortBy: "createdAt",
-      sortOrder: "desc",
-    })!;
+    response = api.product.getProducts.useQuery({})!;
   }
 
   const { data: products, isLoading, isError } = response;
