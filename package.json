@@ -31,6 +31,7 @@
     "@upstash/ratelimit": "^0.4.3",
     "@upstash/redis": "^1.22.0",
     "class-variance-authority": "^0.7.0",
+    "cloudinary": "^1.40.0",
     "clsx": "^2.0.0",
     "cmdk": "^0.2.0",
     "date-fns": "^2.30.0",
@@ -56,6 +57,7 @@
   "devDependencies": {
     "@next/eslint-plugin-next": "^13.4.16",
     "@types/eslint": "^8.37.0",
+    "@types/multer": "^1.4.7",
     "@types/node": "^18.16.0",
     "@types/nodemailer": "^6.4.9",
     "@types/prettier": "^2.7.2",

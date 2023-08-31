@@ -152,7 +152,7 @@ async function seed() {
     {
       price: 999.99,
       description: "The latest iPhone with advanced features.",
-      pictures: ["iphone12.jpg"],
+      images: ["iphone12.jpg"],
       modelId: createdModels.find((model) => model.name === "iPhone 12")!.id,
       sellerId: user!.id,
       roomId: fetchedRooms[0]!.id,
@@ -160,7 +160,7 @@ async function seed() {
     {
       price: 149.99,
       description: "Classic sneakers known for comfort and style.",
-      pictures: ["air_max_90.jpg"],
+      images: ["air_max_90.jpg"],
       modelId: createdModels.find((model) => model.name === "Air Max 90")!.id,
       sellerId: user!.id,
       roomId: fetchedRooms[1]!.id,
@@ -168,7 +168,7 @@ async function seed() {
     {
       price: 1099.99,
       description: "The latest iPhone with advanced features.",
-      pictures: ["iphone13.jpg"],
+      images: ["iphone13.jpg"],
       modelId: createdModels.find((model) => model.name === "iPhone 13")!.id,
       sellerId: user!.id,
       roomId: fetchedRooms[2]!.id,
@@ -176,7 +176,7 @@ async function seed() {
     {
       price: 169.99,
       description: "Iconic sneakers known for style and comfort.",
-      pictures: ["air_max_95.jpg"],
+      images: ["air_max_95.jpg"],
       modelId: createdModels.find((model) => model.name === "Air Max 95")!.id,
       sellerId: user!.id,
       roomId: fetchedRooms[3]!.id,
@@ -184,7 +184,7 @@ async function seed() {
     {
       price: 249.99,
       description: "Next-gen gaming console for immersive gameplay.",
-      pictures: ["ps5.jpg"],
+      images: ["ps5.jpg"],
       modelId: createdModels.find((model) => model.name === "PlayStation 5")!
         .id,
       sellerId: user!.id,
@@ -193,7 +193,7 @@ async function seed() {
     {
       price: 49.99,
       description: "Classic toy for creative building and play.",
-      pictures: ["lego_technic.jpg"],
+      images: ["lego_technic.jpg"],
       modelId: createdModels.find((model) => model.name === "LEGO Technic")!.id,
       sellerId: user!.id,
       roomId: fetchedRooms[5]!.id,
@@ -201,7 +201,7 @@ async function seed() {
     {
       price: 299.99,
       description: "Powerful laptop for work and entertainment.",
-      pictures: ["laptop.jpg"],
+      images: ["laptop.jpg"],
       modelId: createdModels.find((model) => model.name === "M1 MacBook Air")!
         .id,
       sellerId: user!.id,
@@ -210,7 +210,7 @@ async function seed() {
     {
       price: 89.99,
       description: "Versatile kitchen appliance for healthier cooking.",
-      pictures: ["air_fryer.jpg"],
+      images: ["air_fryer.jpg"],
       modelId: createdModels.find((model) => model.name === "Air Fryer")!.id,
       sellerId: user!.id,
       roomId: fetchedRooms[7]!.id,
@@ -218,7 +218,7 @@ async function seed() {
     {
       price: 79.99,
       description: "Bestselling running shoes for comfort and performance.",
-      pictures: ["running_shoes.jpg"],
+      images: ["running_shoes.jpg"],
       modelId: createdModels.find((model) => model.name === "Jorden 1")!.id,
       sellerId: user!.id,
       roomId: fetchedRooms[8]!.id,
@@ -226,7 +226,7 @@ async function seed() {
     {
       price: 199.99,
       description: "Premium beauty product for a radiant look.",
-      pictures: ["loreal_paris.jpg"],
+      images: ["loreal_paris.jpg"],
       modelId: createdModels.find((model) => model.name === "L'Oreal Paris")!
         .id,
       sellerId: user!.id,
@@ -235,7 +235,7 @@ async function seed() {
     {
       price: 399.99,
       description: "Advanced gaming console with high-performance features.",
-      pictures: ["xbox_series_x.jpg"],
+      images: ["xbox_series_x.jpg"],
       modelId: createdModels.find((model) => model.name === "Xbox Series X")!
         .id,
       sellerId: user!.id,
@@ -244,7 +244,7 @@ async function seed() {
     {
       price: 299.99,
       description: "Innovative kitchen appliance for baking enthusiasts.",
-      pictures: ["kitchen_mixer.jpg"],
+      images: ["kitchen_mixer.jpg"],
       modelId: createdModels.find((model) => model.name === "Kitchen Mixer")!
         .id,
       sellerId: user!.id,
@@ -255,7 +255,7 @@ async function seed() {
   interface product {
     price: number;
     description: string;
-    pictures: string[];
+    images: string[];
     modelId: string;
     sellerId: string;
     roomId: string;

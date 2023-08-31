@@ -38,6 +38,7 @@ const PostingModal = () => {
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const uploadProduct = api.product.createProduct.useMutation();
 
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     setShowModal(postingModal.isOpen);
   }, [postingModal.isOpen]);
@@ -72,21 +73,56 @@ const PostingModal = () => {
       return alert("Model must be selected");
     }
 
-    const uploadImages = ["https://picsum.photos/200/300"];
+    const formData = new FormData();
+    images.forEach((picture) => {
+      formData.append("images", picture);
+    });
+    const uploadedPictureUrls = [];
+    setLoading(true);
+    try {
+      const result = await fetch("/api/images/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!result.ok) {
+        setLoading(false);
+        console.log(result);
+        return alert("cannot upload the images.");
+      }
+      const data = await result.json();
+      // ckech weather the data.files is an array of string
+      if (
+        Array.isArray(data) &&
+        data.every((item): item is string => typeof item === "string")
+      ) {
+        uploadedPictureUrls.push(...data);
+      } else {
+        setLoading(false);
+        console.log(data);
+        return alert("cannot upload the images.");
+      }
+    } catch (error) {
+      setLoading(false);
+      console.log(error);
+      return alert("cannot upload the images.");
+    }
 
     const product = await uploadProduct.mutateAsync({
       price,
       description,
       modelId: selectedModel,
       closedAt: endDate ?? new Date(Date.now() + 60 * 60 * 24 * 7),
-      pictures: uploadImages,
+      images: uploadedPictureUrls,
     });
     if (product instanceof Error) {
+      setLoading(false);
       return alert(product.message);
     }
 
     console.log("product", product);
     //  navigate to listing page
+    setLoading(false);
   };
 
   if (
@@ -123,6 +159,7 @@ const PostingModal = () => {
             <Cross1Icon onClick={onClose} />
           </Dialog.Close>
           {/* Form */}
+          {loading && "loading"}
           <form
             onSubmit={(e) => void handleSubmit(e)}
             className="flex h-full flex-col justify-between"
@@ -159,12 +196,12 @@ const PostingModal = () => {
               <Input ref={descriptionRef} required />
               Price
               <Input ref={priceRef} type="number" defaultValue={0} required />
-              Pictures
+              Images
               <ImagePicker images={images} setImages={setImages} />
               Bidding End Date
               <DatePicker date={endDate} setDate={setEndDate} />
             </div>
-            <Button variant="default" type="submit">
+            <Button variant="default" type="submit" disabled={loading}>
               Post
             </Button>
           </form>

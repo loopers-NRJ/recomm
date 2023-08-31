@@ -95,14 +95,14 @@ export const productRouter = createTRPCRouter({
       z.object({
         price: z.number().int().gt(0),
         description: z.string(),
-        pictures: z.array(z.string().url()),
+        images: z.array(z.string().url()),
         closedAt: z.date(),
         modelId: z.string().cuid(),
       })
     )
     .mutation(
       async ({
-        input: { price, description, pictures, modelId, closedAt },
+        input: { price, description, images, modelId, closedAt },
         ctx,
       }) => {
         if (closedAt < new Date()) {
@@ -122,7 +122,7 @@ export const productRouter = createTRPCRouter({
             data: {
               price,
               description,
-              pictures,
+              images,
               seller: {
                 connect: {
                   id: user.id,
@@ -172,19 +172,19 @@ export const productRouter = createTRPCRouter({
           productId: z.string().cuid(),
           price: z.number().int().gt(0),
           description: z.string().optional(),
-          pictures: z.array(z.string().url()).optional(),
+          images: z.array(z.string().url()).optional(),
         }),
         z.object({
           productId: z.string().cuid(),
           price: z.number().int().gt(0).optional(),
           description: z.string(),
-          pictures: z.array(z.string().url()).optional(),
+          images: z.array(z.string().url()).optional(),
         }),
         z.object({
           productId: z.string().cuid(),
           price: z.number().int().gt(0).optional(),
           description: z.string().optional(),
-          pictures: z.array(z.string().url()),
+          images: z.array(z.string().url()),
         }),
       ])
     )
