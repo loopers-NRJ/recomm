@@ -96,13 +96,12 @@ const Categories = () => {
           pt-4
         "
       >
-        <CategoryBox label="Home" icon={BiHome} selected={category === null} />
+        <CategoryBox label="Home" icon={BiHome} />
         {categories.map((item, i) => (
           <CategoryBox
             key={item.label}
             label={item.label}
             icon={item.icon}
-            selected={category === item.label}
             id={
               data instanceof Error || data === undefined
                 ? undefined

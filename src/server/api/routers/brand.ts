@@ -92,14 +92,14 @@ export const brandRouter = createTRPCRouter({
     )
     .mutation(async ({ input: { id, name, picture }, ctx }) => {
       try {
-        const existingBrand = await ctx.prisma.brand.findUnique({
-          where: {
-            id,
-          },
-        });
-        if (existingBrand === null) {
-          return new Error("Brand not found");
-        }
+        // const existingBrand = await ctx.prisma.brand.findUnique({
+        //   where: {
+        //     id,
+        //   },
+        // });
+        // if (existingBrand === null) {
+        //   return new Error("Brand not found");
+        // }
         const existingBrandName = await ctx.prisma.brand.findUnique({
           where: {
             name,
@@ -119,21 +119,21 @@ export const brandRouter = createTRPCRouter({
         });
         return brand;
       } catch (error) {
-        return new Error("Error updating brand");
+        return new Error(`Error updating brand with id ${id}`);
       }
     }),
   deleteBrandById: adminProcedure
     .input(z.object({ brandId: z.string().cuid() }))
     .mutation(async ({ input: { brandId: id }, ctx }) => {
       try {
-        const existingBrand = await ctx.prisma.brand.findUnique({
-          where: {
-            id,
-          },
-        });
-        if (existingBrand === null) {
-          return new Error("Brand not found");
-        }
+        // const existingBrand = await ctx.prisma.brand.findUnique({
+        //   where: {
+        //     id,
+        //   },
+        // });
+        // if (existingBrand === null) {
+        //   return new Error("Brand not found");
+        // }
         const brand = await ctx.prisma.brand.delete({
           where: {
             id,
@@ -141,7 +141,7 @@ export const brandRouter = createTRPCRouter({
         });
         return brand;
       } catch (error) {
-        return new Error("Error deleting brand");
+        return new Error(`cannot delete brand with id: ${id}`);
       }
     }),
   getModelsByBrandId: publicProcedure

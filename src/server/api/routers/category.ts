@@ -97,21 +97,21 @@ export const categoryRouter = createTRPCRouter({
     )
     .mutation(async ({ input: { id, name, picture }, ctx }) => {
       try {
-        const existingCategory = await ctx.prisma.category.findUnique({
-          where: {
-            id,
-          },
-        });
-        if (existingCategory === null) {
-          return new Error("Category does not exist");
-        }
+        // const existingCategory = await ctx.prisma.category.findUnique({
+        //   where: {
+        //     id,
+        //   },
+        // });
+        // if (existingCategory === null) {
+        //   return new Error("Category does not exist");
+        // }
         const existingCategoryName = await ctx.prisma.category.findUnique({
           where: {
             name,
           },
         });
         if (existingCategoryName !== null) {
-          return new Error(`Category with name: ${name} already exists`);
+          return new Error(`Category ${name} already exists`);
         }
         const category = await ctx.prisma.category.update({
           where: {
@@ -124,21 +124,21 @@ export const categoryRouter = createTRPCRouter({
         });
         return category;
       } catch (error) {
-        return new Error(`Cannot update the category with name: ${name}`);
+        return new Error(`Cannot update the category with id: ${id}`);
       }
     }),
   deleteCategoryById: adminProcedure
     .input(z.object({ categoryId: z.string().cuid() }))
     .mutation(async ({ input: { categoryId: id }, ctx }) => {
       try {
-        const existingCategory = await ctx.prisma.category.findUnique({
-          where: {
-            id,
-          },
-        });
-        if (existingCategory === null) {
-          return new Error("Category does not exist");
-        }
+        // const existingCategory = await ctx.prisma.category.findUnique({
+        //   where: {
+        //     id,
+        //   },
+        // });
+        // if (existingCategory === null) {
+        //   return new Error("Category does not exist");
+        // }
         const category = await ctx.prisma.category.delete({
           where: {
             id,
@@ -146,7 +146,7 @@ export const categoryRouter = createTRPCRouter({
         });
         return category;
       } catch (error) {
-        return new Error("Cannot delete the category");
+        return new Error(`Cannot delete category with id: ${id}`);
       }
     }),
   getBrandsByCategoryId: publicProcedure
