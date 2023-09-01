@@ -63,23 +63,21 @@ const Carousel: FC<CarouselProps> = ({ images }) => {
 
   return (
     <div className="relative flex flex-col gap-4">
-      <div className="absolute flex h-full w-full items-center justify-between">
-        <button
-          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full p-2 disabled:opacity-0"
-          onClick={(e) => swipeTo(current - 1, e)}
-          disabled={current === 0}
-        >
-          <BiLeftArrow />
-        </button>
+      <button
+        className="absolute top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full p-2 disabled:opacity-0"
+        onClick={(e) => swipeTo(current - 1, e)}
+        disabled={current === 0}
+      >
+        <BiLeftArrow />
+      </button>
 
-        <button
-          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full p-2 disabled:opacity-0"
-          onClick={(e) => swipeTo(current + 1, e)}
-          disabled={current === images.length - 1}
-        >
-          <BiRightArrow />
-        </button>
-      </div>
+      <button
+        className="absolute right-0 top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full p-2 disabled:opacity-0"
+        onClick={(e) => swipeTo(current + 1, e)}
+        disabled={current === images.length - 1}
+      >
+        <BiRightArrow />
+      </button>
       <div
         className="flex snap-x snap-mandatory gap-4 overflow-auto"
         ref={scrollContainerRef}
@@ -92,7 +90,7 @@ const Carousel: FC<CarouselProps> = ({ images }) => {
             alt="image"
             width={150}
             height={150}
-            className="h-72 w-full flex-shrink-0 snap-center rounded-xl object-cover"
+            className="h-72 w-full flex-shrink-0 snap-center snap-always rounded-xl object-cover"
           />
         ))}
       </div>
