@@ -95,14 +95,14 @@ export const modelRouter = createTRPCRouter({
     )
     .mutation(async ({ input: { id, name, categoryIds }, ctx }) => {
       try {
-        const existingModel = await ctx.prisma.model.findUnique({
-          where: {
-            id,
-          },
-        });
-        if (existingModel === null) {
-          return new Error("Model not found");
-        }
+        // const existingModel = await ctx.prisma.model.findUnique({
+        //   where: {
+        //     id,
+        //   },
+        // });
+        // if (existingModel === null) {
+        //   return new Error("Model not found");
+        // }
         if (name !== undefined) {
           const existingModel = await ctx.prisma.model.findFirst({
             where: {
@@ -145,14 +145,14 @@ export const modelRouter = createTRPCRouter({
     .input(z.object({ modelId: z.string().cuid() }))
     .mutation(async ({ input: { modelId: id }, ctx }) => {
       try {
-        const existingModel = await ctx.prisma.model.findUnique({
-          where: {
-            id,
-          },
-        });
-        if (existingModel === null) {
-          return new Error("Model not found");
-        }
+        // const existingModel = await ctx.prisma.model.findUnique({
+        //   where: {
+        //     id,
+        //   },
+        // });
+        // if (existingModel === null) {
+        //   return new Error("Model not found");
+        // }
         const model = await ctx.prisma.model.delete({
           where: {
             id,
