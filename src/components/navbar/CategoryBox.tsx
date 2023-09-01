@@ -9,7 +9,6 @@ import { IconType } from "react-icons";
 interface CategoryBoxProps {
   icon: IconType;
   label: string;
-  selected?: boolean;
   id?: string;
 }
 
@@ -28,7 +27,10 @@ const CategoryBox: React.FC<CategoryBoxProps> = ({ icon: Icon, label, id }) => {
     [searchParams]
   );
 
-  const selected = searchParams.get("category") === id;
+  const selected =
+    label === "Home" && pathname === "/"
+      ? true
+      : searchParams.get("category") === id;
 
   return (
     <div
@@ -39,17 +41,7 @@ const CategoryBox: React.FC<CategoryBoxProps> = ({ icon: Icon, label, id }) => {
           )
           .catch((err) => console.log(err));
       }}
-      className={`
-        flex 
-        cursor-pointer 
-        flex-col 
-        items-center 
-        justify-center
-        gap-2
-        border-b-2
-        p-3
-        transition
-        hover:text-neutral-800
+      className={`flex cursor-pointer flex-col items-center justify-center gap-2 border-b-2 p-3 transition hover:text-neutral-800
         ${selected ? "border-b-neutral-800" : "border-transparent"}
         ${selected ? "text-neutral-800" : "text-neutral-500"}
       `}
