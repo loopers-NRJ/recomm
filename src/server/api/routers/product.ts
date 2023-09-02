@@ -146,9 +146,8 @@ export const productRouter = createTRPCRouter({
               room: true,
             },
           });
-          /**
-           * Updating all the wishes with the modeiId to available
-           */
+
+          // Updating all the wishes with the modeiId to available
           await ctx.prisma.wish.updateMany({
             where: {
               modelId,
@@ -269,14 +268,14 @@ export const productRouter = createTRPCRouter({
     .mutation(async ({ input: { productId: id }, ctx }) => {
       try {
         const user = ctx.session.user;
-        const existingProduct = await ctx.prisma.product.findUnique({
-          where: {
-            id,
-          },
-        });
-        if (existingProduct === null) {
-          return new Error("Product does not exist");
-        }
+        // const existingProduct = await ctx.prisma.product.findUnique({
+        //   where: {
+        //     id,
+        //   },
+        // });
+        // if (existingProduct === null) {
+        //   return new Error("Product does not exist");
+        // }
         const productInFavorites = await ctx.prisma.product.findUnique({
           where: {
             id,
@@ -302,7 +301,6 @@ export const productRouter = createTRPCRouter({
             },
           },
         });
-        return true;
       } catch (error) {
         return new Error("Error adding product to favorites");
       }
@@ -312,14 +310,14 @@ export const productRouter = createTRPCRouter({
     .mutation(async ({ input: { productId: id }, ctx }) => {
       try {
         const user = ctx.session.user;
-        const existingProduct = await ctx.prisma.product.findUnique({
-          where: {
-            id,
-          },
-        });
-        if (existingProduct === null) {
-          return new Error("Product does not exist");
-        }
+        // const existingProduct = await ctx.prisma.product.findUnique({
+        //   where: {
+        //     id,
+        //   },
+        // });
+        // if (existingProduct === null) {
+        //   return new Error("Product does not exist");
+        // }
         const productInFavorites = await ctx.prisma.product.findUnique({
           where: {
             id,
@@ -345,7 +343,6 @@ export const productRouter = createTRPCRouter({
             },
           },
         });
-        return true;
       } catch (error) {
         return new Error("Error removing product from favorites");
       }

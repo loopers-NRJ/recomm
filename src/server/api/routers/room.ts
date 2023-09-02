@@ -11,14 +11,14 @@ export const roomRounter = createTRPCRouter({
     )
     .query(async ({ input: { roomId: id, limit, page, sortOrder }, ctx }) => {
       try {
-        const room = await ctx.prisma.room.findUnique({
-          where: {
-            id,
-          },
-        });
-        if (room === null) {
-          return new Error("Room not found");
-        }
+        // const room = await ctx.prisma.room.findUnique({
+        //   where: {
+        //     id,
+        //   },
+        // });
+        // if (room === null) {
+        //   return new Error("Room not found");
+        // }
         const bids = await ctx.prisma.bid.findMany({
           where: {
             roomId: id,
@@ -74,11 +74,13 @@ export const roomRounter = createTRPCRouter({
             if (room.product.buyerId != null) {
               return new Error("Product already sold");
             }
+            // this condition decides whether to allow user to bid lesser than or equal to the highest bid
             // if (room.highestBid !== null && room.highestBid.price >= price) {
             //   return new Error("Bid is too low");
             // }
             if (room.highestBid !== null) {
-              await prisma.bid.update({
+              // not awaiting for the highestBid to update. this is to send response asap
+              void prisma.bid.update({
                 where: {
                   id: room.highestBid.id,
                 },
