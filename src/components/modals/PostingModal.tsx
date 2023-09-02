@@ -8,9 +8,15 @@ import ComboBox from "../common/ComboBox";
 import { api } from "@/utils/api";
 import ImagePicker from "../common/ImagePicker";
 import DatePicker from "../common/DatePicker";
+import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 
 const PostingModal = () => {
   const postingModal = usePostingModal();
+  const router = useRouter();
+
+  const session = useSession();
+  const userId = session.data?.user.id;
 
   const [showModal, setShowModal] = useState(postingModal.isOpen);
 
@@ -88,7 +94,7 @@ const PostingModal = () => {
       if (!result.ok) {
         setLoading(false);
         console.log(result);
-        return alert("cannot upload the images.");
+        return alert("cannot upload the images. this is the place");
       }
       const data = await result.json();
       // ckech weather the data.files is an array of string
@@ -121,8 +127,10 @@ const PostingModal = () => {
     }
 
     console.log("product", product);
-    //  navigate to listing page
     setLoading(false);
+    onClose();
+    //  navigate to listing page
+    void router.push(`/${userId}/listings`);
   };
 
   if (
