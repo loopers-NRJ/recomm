@@ -10,11 +10,66 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { FC, useState } from "react";
 import { AiFillPlusCircle } from "react-icons/ai";
+import ComboBox from "./common/ComboBox";
+import { api } from "@/utils/api";
+import { useToast } from "./ui/use-toast";
 
-export default function AddWish(): JSX.Element {
+const AddWish: FC = () => {
+  const { data: categories = [] } = api.category.getCategories.useQuery({});
+  const [selectedCategory, setSelectedCategory] = useState("");
+
+  // TODO: hardcoded default category id `cllrwmem20005ua9k3cxywefx`
+  // this id is for Electronics Category.
+  const { data: brands = [] } = api.category.getBrandsByCategoryId.useQuery({
+    categoryId:
+      selectedCategory === "" ? "cllrwmem20005ua9k3cxywefx" : selectedCategory,
+  });
+  const [selectedBrand, setSelectedBrand] = useState("");
+
+  // TODO: hardcoded default brand id `cllrwmf4n0014ua9kz1iwr1by`
+  // this id is for Apple Brand.
+  const { data: models = [] } = api.brand.getModelsByBrandId.useQuery({
+    brandId: selectedBrand === "" ? "cllrwmf4n0014ua9kz1iwr1by" : selectedBrand,
+  });
+  const [selectedModel, setSelectedModel] = useState("");
+  const { mutateAsync: createWish } = api.wish.createWish.useMutation();
+  const { toast } = useToast();
+  if (
+    categories instanceof Error ||
+    brands instanceof Error ||
+    models instanceof Error
+  ) {
+    // TODO: display the error message
+    const error =
+      categories instanceof Error
+        ? categories
+        : brands instanceof Error
+        ? brands
+        : models instanceof Error
+        ? models
+        : null;
+    return <h1>{error?.message}</h1>;
+  }
+
+  const handleClick = async () => {
+    try {
+      const result = await createWish({ modelId: selectedModel });
+      if (result instanceof Error) {
+        alert(result.message);
+      }
+      console.log(result);
+      // TODO: close the model
+    } catch (error) {
+      console.log(error);
+      return toast({
+        title: "Error",
+        description: "Something went wrong",
+        variant: "destructive",
+      });
+    }
+  };
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -29,29 +84,42 @@ export default function AddWish(): JSX.Element {
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="category" className="text-right">
-              Category
-            </Label>
-            <Input id="category" value="Mobile" className="col-span-3" />
+          <div className="flex justify-between">
+            Category
+            <ComboBox
+              label="Category"
+              items={categories}
+              selected={selectedCategory}
+              onSelect={setSelectedCategory}
+            />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="brand" className="text-right">
-              Brand
-            </Label>
-            <Input id="brand" value="Nothing" className="col-span-3" />
+          <div className="flex justify-between">
+            Brand
+            <ComboBox
+              label="Brand"
+              items={brands}
+              selected={selectedBrand}
+              onSelect={setSelectedBrand}
+            />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="model" className="text-right">
-              Model
-            </Label>
-            <Input id="model" value="Phone 1" className="col-span-3" />
+          <div className="flex justify-between">
+            Model
+            <ComboBox
+              label="Model"
+              items={models}
+              selected={selectedModel}
+              onSelect={setSelectedModel}
+            />
           </div>
         </div>
         <DialogFooter>
-          <Button type="submit">Add to List</Button>
+          <Button type="submit" onClick={() => void handleClick()}>
+            Add to List
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-}
+};
+
+export default AddWish;

@@ -263,17 +263,11 @@ export const userRouter = createTRPCRouter({
         }
       }
     ),
-  getMywishesById: protectedProcedure
-    .input(functionalityOptions.extend({ userId: z.string().cuid() }))
+  getMywishes: protectedProcedure
+    .input(functionalityOptions)
     .query(
-      async ({
-        input: { userId: id, limit, page, search, sortBy, sortOrder },
-        ctx,
-      }) => {
-        const user = ctx.session.user;
-        if (id !== user.id) {
-          return new Error("Unauthorized");
-        }
+      async ({ input: { limit, page, search, sortBy, sortOrder }, ctx }) => {
+        const id = ctx.session.user.id;
         try {
           const wishes = await ctx.prisma.wish.findMany({
             where: {

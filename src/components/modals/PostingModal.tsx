@@ -8,6 +8,53 @@ import ComboBox from "../common/ComboBox";
 import { api } from "@/utils/api";
 import ImagePicker from "../common/ImagePicker";
 import DatePicker from "../common/DatePicker";
+import { z } from "zod";
+import { useToast } from "../ui/use-toast";
+
+const productSchema = z.object({
+  price: z
+    .number()
+    .int("Price cannot have decimal values")
+    .positive("Price must not be negative"),
+  description: z.string().min(1),
+  modelId: z.string().min(1),
+  brandId: z.string().min(1),
+  categoryId: z.string().min(1),
+});
+
+const uploadImages = async (images: File[]) => {
+  const formData = new FormData();
+  images.forEach((image) => {
+    formData.append("images", image);
+  });
+  const uploadedPictureUrls = [];
+  try {
+    const result = await fetch("/api/images/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!result.ok) {
+      console.log(result);
+      return new Error("cannot upload the images.");
+    }
+    const data = await result.json();
+    // check weather the data.files is an array of string
+    if (
+      Array.isArray(data) &&
+      data.every((item): item is string => typeof item === "string")
+    ) {
+      uploadedPictureUrls.push(...data);
+      return uploadedPictureUrls;
+    } else {
+      console.log(data);
+      return new Error("cannot upload the images.");
+    }
+  } catch (error) {
+    console.log(error);
+    return new Error("cannot upload the images.");
+  }
+};
 
 const PostingModal = () => {
   const postingModal = usePostingModal();
@@ -39,6 +86,7 @@ const PostingModal = () => {
   const uploadProduct = api.product.createProduct.useMutation();
 
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
   useEffect(() => {
     setShowModal(postingModal.isOpen);
   }, [postingModal.isOpen]);
@@ -57,55 +105,31 @@ const PostingModal = () => {
     }
     const description = descriptionRef.current.value;
     const price = +priceRef.current.value;
-    if (description === "") {
-      return alert("Description cannot be empty");
-    }
-    if (Number.isNaN(price)) {
-      return alert("Price must be a number");
-    }
-    if (selectedCategory === "") {
-      return alert("Category must be selected");
-    }
-    if (selectedBrand === "") {
-      return alert("Brand must be selected");
-    }
-    if (selectedModel === "") {
-      return alert("Model must be selected");
-    }
-
-    const formData = new FormData();
-    images.forEach((picture) => {
-      formData.append("images", picture);
+    const result = productSchema.safeParse({
+      price,
+      description,
+      modelId: selectedModel,
+      brandId: selectedBrand,
+      categoryId: selectedCategory,
     });
-    const uploadedPictureUrls = [];
-    setLoading(true);
-    try {
-      const result = await fetch("/api/images/upload", {
-        method: "POST",
-        body: formData,
-      });
 
-      if (!result.ok) {
-        setLoading(false);
-        console.log(result);
-        return alert("cannot upload the images.");
-      }
-      const data = await result.json();
-      // ckech weather the data.files is an array of string
-      if (
-        Array.isArray(data) &&
-        data.every((item): item is string => typeof item === "string")
-      ) {
-        uploadedPictureUrls.push(...data);
-      } else {
-        setLoading(false);
-        console.log(data);
-        return alert("cannot upload the images.");
-      }
-    } catch (error) {
+    if (!result.success) {
+      return toast({
+        title: "Error",
+        description: result.error.message,
+        variant: "destructive",
+      });
+    }
+    setLoading(true);
+    const imagesUrls = await uploadImages(images);
+    if (imagesUrls instanceof Error) {
       setLoading(false);
-      console.log(error);
-      return alert("cannot upload the images.");
+      // TODO: display the error message
+      return toast({
+        title: "Error",
+        description: imagesUrls.message,
+        variant: "destructive",
+      });
     }
 
     const product = await uploadProduct.mutateAsync({
@@ -113,15 +137,16 @@ const PostingModal = () => {
       description,
       modelId: selectedModel,
       closedAt: endDate ?? new Date(Date.now() + 60 * 60 * 24 * 7),
-      images: uploadedPictureUrls,
+      images: imagesUrls,
     });
     if (product instanceof Error) {
       setLoading(false);
-      return alert(product.message);
+      return toast({
+        title: "Error",
+        description: product.message,
+        variant: "destructive",
+      });
     }
-
-    console.log("product", product);
-    //  navigate to listing page
     setLoading(false);
   };
 
@@ -130,17 +155,16 @@ const PostingModal = () => {
     brands instanceof Error ||
     models instanceof Error
   ) {
-    // const error =
-    //   categories instanceof Error
-    //     ? categories
-    //     : brands instanceof Error
-    //     ? brands
-    //     : models instanceof Error
-    //     ? models
-    //     : null;
-    // give a descriptive error message
-    // return <h1>{error?.message}</h1>;
-    return;
+    // TODO: display the error message
+    const error =
+      categories instanceof Error
+        ? categories
+        : brands instanceof Error
+        ? brands
+        : models instanceof Error
+        ? models
+        : null;
+    return <h1>{error?.message}</h1>;
   }
 
   return (

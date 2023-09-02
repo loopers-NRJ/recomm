@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { FC } from "react";
-import { Brand, Model, Wish } from "@prisma/client";
+import { Brand, Model, Wish, WishStatus } from "@prisma/client";
 
 type WishProp = Wish & {
   model: Model & {
@@ -37,14 +37,16 @@ const WishCard: FC<WishCardProps> = ({ wish }) => {
           <CardDescription>{"Electronics"}</CardDescription>
           <Badge
             className="leading-0 w-fit select-none px-2 text-[10px]"
-            variant={"pending"}
+            variant={status}
           >
             {status}
           </Badge>
         </CardHeader>
       </div>
       <CardFooter className="flex-col items-end gap-2 p-6">
-        <Button disabled={status !== "available"}>View Products</Button>
+        <Button disabled={status !== WishStatus.available}>
+          View Products
+        </Button>
       </CardFooter>
     </Card>
   );
