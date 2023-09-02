@@ -19,9 +19,7 @@ const POST = (request: MulterRequest, response: NextApiResponse) => {
     return middleware(request as never, response as never, async (error) => {
       if (error) {
         // cannot upload images to local storage
-        return response
-          .status(500)
-          .json({ message: "cannot upload the images.", error });
+        return response.status(500).json({ message: "First Error", error });
       }
 
       const pictureUrls = [];
@@ -31,9 +29,7 @@ const POST = (request: MulterRequest, response: NextApiResponse) => {
           const picture = await uploadImages(file.path);
           pictureUrls.push(picture);
         } catch (error) {
-          return response
-            .status(500)
-            .json({ error: "cannot upload the images." });
+          return response.status(500).json({ message: "second error", error });
         }
       }
 
@@ -45,9 +41,7 @@ const POST = (request: MulterRequest, response: NextApiResponse) => {
       return response.status(200).json(pictureUrls);
     });
   } catch (error) {
-    return response
-      .status(500)
-      .json({ message: "cannot upload the images.", error });
+    return response.status(500).json({ message: "third error", error });
   }
 };
 

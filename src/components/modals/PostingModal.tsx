@@ -8,6 +8,8 @@ import ComboBox from "../common/ComboBox";
 import { api } from "@/utils/api";
 import ImagePicker from "../common/ImagePicker";
 import DatePicker from "../common/DatePicker";
+import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 import { z } from "zod";
 import { useToast } from "../ui/use-toast";
 
@@ -58,6 +60,10 @@ const uploadImages = async (images: File[]) => {
 
 const PostingModal = () => {
   const postingModal = usePostingModal();
+  const router = useRouter();
+
+  const session = useSession();
+  const userId = session.data?.user.id;
 
   const [showModal, setShowModal] = useState(postingModal.isOpen);
 
@@ -148,6 +154,9 @@ const PostingModal = () => {
       });
     }
     setLoading(false);
+    onClose();
+    //  navigate to listing page
+    void router.push(`/${userId}/listings`);
   };
 
   if (

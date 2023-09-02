@@ -18,11 +18,11 @@ export interface MulterRequest extends NextApiRequest {
 }
 
 export const uploads = multer({
-  dest: "uploads/",
+  // dest: "uploads/",
   storage: multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, "uploads/");
-    },
+    // destination: function (req, file, cb) {
+    //   cb(null, "uploads/");
+    // },
     filename: function (req, file, cb) {
       const fileName = `${Date.now()}-${file.originalname}`;
       if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
