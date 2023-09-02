@@ -309,6 +309,13 @@ export const userRouter = createTRPCRouter({
                 createdAt: sortBy === "createdAt" ? sortOrder : undefined,
               },
             ],
+            include: {
+              model: {
+                include: {
+                  brand: true,
+                },
+              },
+            },
           });
           return wishes;
         } catch (error) {

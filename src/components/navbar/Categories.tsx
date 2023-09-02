@@ -96,7 +96,7 @@ const Categories = () => {
           pt-4
         "
       >
-        <CategoryBox label="Home" icon={BiHome} />
+        <CategoryBox label="All" icon={BiHome} />
         {categories.map((item, i) => (
           <CategoryBox
             key={item.label}

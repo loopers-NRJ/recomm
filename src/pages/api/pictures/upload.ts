@@ -21,7 +21,7 @@ const POST = (request: MulterRequest, response: NextApiResponse) => {
         // cannot upload images to local storage
         return response
           .status(500)
-          .json({ error: "cannot upload the images." });
+          .json({ message: "cannot upload the images.", error });
       }
 
       const pictureUrls = [];
@@ -45,7 +45,9 @@ const POST = (request: MulterRequest, response: NextApiResponse) => {
       return response.status(200).json(pictureUrls);
     });
   } catch (error) {
-    return response.status(500).json({ error: "cannot upload the images." });
+    return response
+      .status(500)
+      .json({ message: "cannot upload the images.", error });
   }
 };
 
