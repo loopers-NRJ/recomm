@@ -14,7 +14,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 
 interface Item {
   id: string;
@@ -29,13 +29,16 @@ interface ComboBoxProps {
 }
 
 const ComboBox: FC<ComboBoxProps> = ({
-  items,
+  items: originalItems,
   selected,
   onSelect,
   label = "item",
 }) => {
   const [open, setOpen] = useState(false);
-
+  const [items, setItems] = useState(originalItems);
+  useEffect(() => {
+    setItems([...originalItems]);
+  }, [originalItems]);
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -53,7 +56,16 @@ const ComboBox: FC<ComboBoxProps> = ({
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command>
-          <CommandInput placeholder={`Search ${label}...`} />
+          <CommandInput
+            placeholder={`Search ${label}...`}
+            onValueChange={(e) =>
+              setItems(
+                originalItems.filter((item) =>
+                  new RegExp(e, "i").test(item.name)
+                )
+              )
+            }
+          />
           <CommandEmpty>No {label} found.</CommandEmpty>
           <CommandGroup>
             {items.map((item) => (
