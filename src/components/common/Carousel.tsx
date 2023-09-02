@@ -1,41 +1,24 @@
 import Image from "next/image";
-import {
-  type RefObject,
-  useRef,
-  useEffect,
-  useState,
-  useMemo,
-  FC,
-} from "react";
+import { useRef, useEffect, useState, FC } from "react";
 import { BiLeftArrow, BiRightArrow } from "react-icons/bi";
 
 interface CarouselProps {
   images: string[];
 }
 
-/**
- * @brief A simple carousel component
- * @warning This component is not for production use
- */
 const Carousel: FC<CarouselProps> = ({ images }) => {
   const [current, setCurrent] = useState(0);
-  const refs: RefObject<HTMLImageElement>[] = useMemo(() => [], []);
+  const refs = useRef<(HTMLImageElement | null)[]>([]);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  for (const image of images) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    refs.push(useRef<HTMLImageElement>(null));
-  }
 
   const swipeTo = (index: number, e: React.MouseEvent) => {
     e.stopPropagation();
     if (scrollContainerRef.current != null) {
       scrollContainerRef.current.scrollTo({
         behavior: "smooth",
-        left: refs[index]?.current?.offsetLeft ?? 0,
+        left: refs.current[index]?.offsetLeft ?? 0,
       });
     }
-    setCurrent(index);
   };
 
   useEffect(() => {
@@ -44,16 +27,16 @@ const Carousel: FC<CarouselProps> = ({ images }) => {
         entries.forEach(({ target, intersectionRatio }) => {
           // find the visible image and set it as current
           if (intersectionRatio > 0.25) {
-            const index = refs.findIndex((ref) => ref.current === target);
+            const index = refs.current.findIndex((ref) => ref === target);
             setCurrent(index % images.length);
           }
         });
       },
       { threshold: 0.25 }
     );
-    refs.forEach((ref) => {
-      if (ref.current != null) {
-        observer.observe(ref.current);
+    refs.current.forEach((ref) => {
+      if (ref != null) {
+        observer.observe(ref);
       }
     });
     return () => {
@@ -86,11 +69,12 @@ const Carousel: FC<CarouselProps> = ({ images }) => {
           <Image
             key={image + index}
             src={image}
-            ref={refs[index]}
+            ref={(element) => refs.current.push(element)}
             alt="image"
             width={150}
             height={150}
             className="h-72 w-full flex-shrink-0 snap-center snap-always rounded-xl object-cover"
+            loading="lazy"
           />
         ))}
       </div>
