@@ -1,5 +1,8 @@
 "use client";
 
+import { FC, useState } from "react";
+import { AiFillPlusCircle } from "react-icons/ai";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,54 +13,103 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { FC, useState } from "react";
-import { AiFillPlusCircle } from "react-icons/ai";
-import ComboBox from "./common/ComboBox";
 import { api } from "@/utils/api";
+import { Brand, Category, Model } from "@prisma/client";
+
+import ComboBox from "./common/ComboBox";
 import { useToast } from "./ui/use-toast";
 
 const AddWish: FC = () => {
-  const { data: categories = [] } = api.category.getCategories.useQuery({});
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [searchCategory, setSearchCategory] = useState("");
+  const categoryApi = api.category.getCategories.useQuery({
+    search: searchCategory,
+  });
+  const [selectedCategory, setSelectedCategory] = useState<
+    Category | undefined
+  >();
 
   // TODO: hardcoded default category id `cllrwmem20005ua9k3cxywefx`
   // this id is for Electronics Category.
-  const { data: brands = [] } = api.category.getBrandsByCategoryId.useQuery({
+  const [searchBrand, setSearchBrand] = useState("");
+  const brandApi = api.category.getBrandsByCategoryId.useQuery({
     categoryId:
-      selectedCategory === "" ? "cllrwmem20005ua9k3cxywefx" : selectedCategory,
+      selectedCategory === undefined
+        ? "cllrwmem20005ua9k3cxywefx"
+        : selectedCategory.id,
+    search: searchBrand,
   });
-  const [selectedBrand, setSelectedBrand] = useState("");
+  const [selectedBrand, setSelectedBrand] = useState<Brand | undefined>();
 
   // TODO: hardcoded default brand id `cllrwmf4n0014ua9kz1iwr1by`
   // this id is for Apple Brand.
-  const { data: models = [] } = api.brand.getModelsByBrandId.useQuery({
-    brandId: selectedBrand === "" ? "cllrwmf4n0014ua9kz1iwr1by" : selectedBrand,
+  const [searchModel, setSearchModel] = useState("");
+  const modelApi = api.brand.getModelsByBrandId.useQuery({
+    brandId:
+      selectedBrand === undefined
+        ? "cllrwmf4n0014ua9kz1iwr1by"
+        : selectedBrand.id,
+    search: searchModel,
   });
-  const [selectedModel, setSelectedModel] = useState("");
+  const [selectedModel, setSelectedModel] = useState<Model | undefined>();
+
   const { mutateAsync: createWish } = api.wish.createWish.useMutation();
   const { toast } = useToast();
+
   if (
-    categories instanceof Error ||
-    brands instanceof Error ||
-    models instanceof Error
+    categoryApi.data instanceof Error ||
+    brandApi.data instanceof Error ||
+    modelApi.data instanceof Error
   ) {
     // TODO: display the error message
     const error =
-      categories instanceof Error
-        ? categories
-        : brands instanceof Error
-        ? brands
-        : models instanceof Error
-        ? models
+      categoryApi.data instanceof Error
+        ? categoryApi.data
+        : brandApi.data instanceof Error
+        ? brandApi.data
+        : modelApi.data instanceof Error
+        ? modelApi.data
         : null;
-    return <h1>{error?.message}</h1>;
+    toast({
+      title: "Error",
+      description: error?.message,
+      variant: "destructive",
+    });
+    return;
   }
 
   const handleClick = async () => {
     try {
-      const result = await createWish({ modelId: selectedModel });
+      if (selectedCategory === undefined) {
+        return toast({
+          title: "Error",
+          description: "Select the Category",
+          variant: "destructive",
+        });
+      }
+
+      if (selectedBrand === undefined) {
+        return toast({
+          title: "Error",
+          description: "Select the Brand",
+          variant: "destructive",
+        });
+      }
+
+      if (selectedModel === undefined) {
+        return toast({
+          title: "Error",
+          description: "Select the Model",
+          variant: "destructive",
+        });
+      }
+
+      const result = await createWish({ modelId: selectedModel.id });
       if (result instanceof Error) {
-        alert(result.message);
+        return toast({
+          title: "Error",
+          description: result.message,
+          variant: "destructive",
+        });
       }
       console.log(result);
       // TODO: close the model
@@ -88,27 +140,33 @@ const AddWish: FC = () => {
             Category
             <ComboBox
               label="Category"
-              items={categories}
+              items={categoryApi.data}
               selected={selectedCategory}
-              onSelect={setSelectedCategory}
+              onSelect={(category) => setSelectedCategory(category as Category)}
+              refetch={setSearchCategory}
+              loading={categoryApi.isLoading}
             />
           </div>
           <div className="flex justify-between">
             Brand
             <ComboBox
               label="Brand"
-              items={brands}
+              items={brandApi.data}
               selected={selectedBrand}
-              onSelect={setSelectedBrand}
+              onSelect={(brand) => setSelectedBrand(brand as Brand)}
+              refetch={setSearchBrand}
+              loading={brandApi.isLoading}
             />
           </div>
           <div className="flex justify-between">
             Model
             <ComboBox
               label="Model"
-              items={models}
+              items={modelApi.data}
               selected={selectedModel}
-              onSelect={setSelectedModel}
+              onSelect={(model) => setSelectedModel(model as Model)}
+              refetch={setSearchModel}
+              loading={modelApi.isLoading}
             />
           </div>
         </div>
