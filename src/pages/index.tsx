@@ -1,9 +1,10 @@
-import { api } from "@/utils/api";
-import ListingCard from "@/components/ListingCard";
-import Container from "@/components/Container";
-import Product from "@/types/product";
 import { NextPage } from "next";
 import { useSearchParams } from "next/navigation";
+
+import Container from "@/components/Container";
+import ListingCard from "@/components/ListingCard";
+import Product from "@/types/product";
+import { api } from "@/utils/api";
 
 export const Home: NextPage = () => {
   // get products according to the search params
@@ -13,10 +14,9 @@ export const Home: NextPage = () => {
   let response;
   if (params.has("category")) {
     const categoryId = params.get("category")!;
-    console.log(categoryId);
-    response = api.category.getProductsByCategoryId.useQuery({ categoryId })!;
+    response = api.category.getProductsByCategoryId.useQuery({ categoryId });
   } else {
-    response = api.product.getProducts.useQuery({})!;
+    response = api.product.getProducts.useQuery({});
   }
 
   const { data: products, isLoading, isError } = response;

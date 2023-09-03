@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { useRef, useEffect, useState, FC } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { BiLeftArrow, BiRightArrow } from "react-icons/bi";
 
 interface CarouselProps {
@@ -85,7 +85,7 @@ const Carousel: FC<CarouselProps> = ({ images }) => {
               key={index}
               className={`${
                 current === index ? "h-3 w-3" : "h-2 w-2"
-              } cursor-pointer rounded-full bg-neutral-200 hover:bg-neutral-300`}
+              } cursor-pointer rounded-full bg-black`}
               onClick={(e) => swipeTo(index, e)}
             />
           ))}

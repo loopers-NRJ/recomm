@@ -3,7 +3,6 @@
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import { useCallback } from "react";
-// import { useCallback } from "react";
 import { IconType } from "react-icons";
 
 interface CategoryBoxProps {
@@ -26,8 +25,6 @@ const CategoryBox: React.FC<CategoryBoxProps> = ({ icon: Icon, label, id }) => {
     },
     [searchParams]
   );
-
-  console.log(pathname);
 
   const selected =
     searchParams.get("category") === null && id === undefined

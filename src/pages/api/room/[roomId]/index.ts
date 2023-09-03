@@ -1,9 +1,10 @@
-import { authOptions } from "@/server/auth";
-import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
-import { prisma } from "@/server/db";
 import { z } from "zod";
 
+import { authOptions } from "@/server/auth";
+import { prisma } from "@/server/db";
+
+import type { NextApiRequest, NextApiResponse } from "next";
 const requestDispatcher = async (
   request: NextApiRequest,
   response: NextApiResponse
@@ -53,7 +54,6 @@ export const POST = async (
   response: NextApiResponse
 ): Promise<void> => {
   const session = await getServerSession(request, response, authOptions);
-  console.log(session?.user.id);
   if (session === null) {
     return response.status(401).json("Unauthorized");
   }
