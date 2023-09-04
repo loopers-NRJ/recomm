@@ -19,7 +19,6 @@ const BiddingList: FC<BiddingListProps> = ({ room }) => {
 
   useEffect(() => {
     void refetch();
-    console.log("Bidding Refetched");
   }, [refetch]);
 
   if (isLoading) {

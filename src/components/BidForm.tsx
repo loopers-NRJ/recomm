@@ -45,7 +45,6 @@ const BidForm: FC<BidFormProps> = ({ roomId, onClose }) => {
         description: "Bid Cannot have decimal price values",
         variant: "destructive",
       });
-      console.log("Invalid Bid");
     }
   };
 

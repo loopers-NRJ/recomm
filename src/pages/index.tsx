@@ -13,7 +13,6 @@ export const Home: NextPage = () => {
   let response;
   if (params.has("category")) {
     const categoryId = params.get("category")!;
-    console.log(categoryId);
     response = api.category.getProductsByCategoryId.useQuery({ categoryId })!;
   } else {
     response = api.product.getProducts.useQuery({})!;
@@ -32,14 +31,14 @@ export const Home: NextPage = () => {
       <Container>
         <div
           className="
-        grid
-        grid-cols-1 
+            grid 
+            grid-cols-1 
             gap-8 
             pt-24 
             sm:grid-cols-2 
             md:grid-cols-3
             lg:grid-cols-4
-            xl:grid-cols-5
+            xl:grid-cols-4
             2xl:grid-cols-6
           "
         >
