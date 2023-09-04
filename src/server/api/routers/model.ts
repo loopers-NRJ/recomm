@@ -197,6 +197,14 @@ export const modelRouter = createTRPCRouter({
                 createdAt: sortBy === "createdAt" ? sortOrder : undefined,
               },
             ],
+            include: {
+              model: {
+                include: {
+                  brand: true,
+                  categories: true,
+                },
+              },
+            },
           });
           return products;
         } catch (error) {
