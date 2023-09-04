@@ -32,7 +32,7 @@ const LoginModal = () => {
       mt-4 text-center font-light text-neutral-500"
       >
         <p>
-          First time using Airbnb?
+          First time using Recomm?
           <span
             onClick={onToggle}
             className="

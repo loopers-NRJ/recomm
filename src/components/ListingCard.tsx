@@ -25,7 +25,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
   return (
     <div
       onClick={() => {
-        router.push(`/product/${product.id}/`).catch((err) => {
+        router.push(`/products/${product.id}/`).catch((err) => {
           console.log(err);
         });
       }}
@@ -42,24 +42,12 @@ const ListingCard: React.FC<ListingCardProps> = ({
         >
           {/* <Image
             fill
-            className="
-                h-full 
-                w-full 
-                object-cover 
-                transition 
-                group-hover:scale-110
-              "
+            className="h-full w-full object-cover transition group-hover:scale-110"
             src={"/shoe.jpg"}
             alt="Listing"
           /> */}
-          <Carousel images={["/shoe.jpg", "/shoe.jpg", "/shoe.jpg"]} />
-          <div
-            className="
-              absolute
-              right-3
-              top-3
-            "
-          >
+          <Carousel images={["/shoe.jpg"]} />
+          <div className="absolute right-3 top-3">
             {pathname !== "/" && (
               <HeartButton
                 productId={product.id}
@@ -70,7 +58,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
           </div>
         </div>
         <div className="text-lg font-semibold">{product.model.name}</div>
-        <div className="font-light text-neutral-500">{product.description}</div>
+        {/* <div className="font-light text-neutral-500">{product.description}</div> */}
         <div className="flex flex-row items-center gap-1">
           <div className="font-semibold">$ {product.price}</div>
         </div>

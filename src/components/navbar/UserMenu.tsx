@@ -81,10 +81,10 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
                   My Favourites
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onClick={() => router.push(`/${currentUser.id}/bids`)}
+                  onClick={() => router.push(`/${currentUser.id}/wishlist`)}
                   className="px-4 py-3 font-semibold transition hover:bg-neutral-100"
                 >
-                  My Bids
+                  Wish List
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => router.push(`/${currentUser.id}/listings`)}
