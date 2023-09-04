@@ -1,16 +1,19 @@
-import * as Dialog from "@radix-ui/react-dialog";
-import usePostingModal from "@/hooks/usePostingModal";
-import { Cross1Icon } from "@radix-ui/react-icons";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
-import { FormEvent, useEffect, useRef, useState } from "react";
-import ComboBox from "../common/ComboBox";
-import { api } from "@/utils/api";
-import ImagePicker from "../common/ImagePicker";
-import DatePicker from "../common/DatePicker";
-import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { z } from "zod";
+
+import usePostingModal from "@/hooks/usePostingModal";
+import { api } from "@/utils/api";
+import { Brand, Category, Model } from "@prisma/client";
+import * as Dialog from "@radix-ui/react-dialog";
+import { Cross1Icon } from "@radix-ui/react-icons";
+
+import ComboBox from "../common/ComboBox";
+import DatePicker from "../common/DatePicker";
+import ImagePicker from "../common/ImagePicker";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 import { useToast } from "../ui/use-toast";
 
 const productSchema = z.object({
@@ -61,41 +64,67 @@ const uploadImages = async (images: File[]) => {
 const PostingModal = () => {
   const postingModal = usePostingModal();
   const router = useRouter();
-
   const session = useSession();
+
   const userId = session.data?.user.id;
 
   const [showModal, setShowModal] = useState(postingModal.isOpen);
 
-  const { data: categories = [] } = api.category.getCategories.useQuery({});
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [searchCategory, setSearchCategory] = useState("");
+  const categoryApi = api.category.getCategories.useQuery({
+    search: searchCategory,
+  });
+  const [selectedCategory, setSelectedCategory] = useState<
+    Category | undefined
+  >();
 
   // TODO: hardcoded default category id `cllrwmem20005ua9k3cxywefx`
   // this id is for Electronics Category.
-  const { data: brands = [] } = api.category.getBrandsByCategoryId.useQuery({
+  const [searchBrand, setSearchBrand] = useState("");
+  const brandApi = api.category.getBrandsByCategoryId.useQuery({
     categoryId:
-      selectedCategory === "" ? "cllrwmem20005ua9k3cxywefx" : selectedCategory,
+      selectedCategory === undefined
+        ? "cllrwmem20005ua9k3cxywefx"
+        : selectedCategory.id,
+    search: searchBrand,
   });
-  const [selectedBrand, setSelectedBrand] = useState("");
+  const [selectedBrand, setSelectedBrand] = useState<Brand | undefined>();
 
   // TODO: hardcoded default brand id `cllrwmf4n0014ua9kz1iwr1by`
   // this id is for Apple Brand.
-  const { data: models = [] } = api.brand.getModelsByBrandId.useQuery({
-    brandId: selectedBrand === "" ? "cllrwmf4n0014ua9kz1iwr1by" : selectedBrand,
+  const [searchModel, setSearchModel] = useState("");
+  const modelApi = api.brand.getModelsByBrandId.useQuery({
+    brandId:
+      selectedBrand === undefined
+        ? "cllrwmf4n0014ua9kz1iwr1by"
+        : selectedBrand.id,
+    search: searchModel,
   });
-  const [selectedModel, setSelectedModel] = useState("");
+  const [selectedModel, setSelectedModel] = useState<Model | undefined>();
 
   const descriptionRef = useRef<HTMLInputElement>(null);
   const priceRef = useRef<HTMLInputElement>(null);
   const [images, setImages] = useState<File[]>([]);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
-  const uploadProduct = api.product.createProduct.useMutation();
 
+  const uploadProduct = api.product.createProduct.useMutation();
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+
   useEffect(() => {
     setShowModal(postingModal.isOpen);
   }, [postingModal.isOpen]);
+
+  // reset the selected brand and model when the category is changed
+  useEffect(() => {
+    setSelectedBrand(undefined);
+    setSelectedModel(undefined);
+  }, [selectedCategory]);
+
+  // reset the selected model when the brand is changed
+  useEffect(() => {
+    setSelectedModel(undefined);
+  }, [selectedBrand]);
 
   const onClose = () => {
     setShowModal(false);
@@ -114,9 +143,9 @@ const PostingModal = () => {
     const result = productSchema.safeParse({
       price,
       description,
-      modelId: selectedModel,
-      brandId: selectedBrand,
-      categoryId: selectedCategory,
+      modelId: selectedModel?.id,
+      brandId: selectedBrand?.id,
+      categoryId: selectedCategory?.id,
     });
 
     if (!result.success) {
@@ -126,6 +155,8 @@ const PostingModal = () => {
         variant: "destructive",
       });
     }
+    const { modelId } = result.data;
+
     setLoading(true);
     const imagesUrls = await uploadImages(images);
     if (imagesUrls instanceof Error) {
@@ -141,7 +172,7 @@ const PostingModal = () => {
     const product = await uploadProduct.mutateAsync({
       price,
       description,
-      modelId: selectedModel,
+      modelId,
       closedAt: endDate ?? new Date(Date.now() + 60 * 60 * 24 * 7),
       images: imagesUrls,
     });
@@ -160,20 +191,25 @@ const PostingModal = () => {
   };
 
   if (
-    categories instanceof Error ||
-    brands instanceof Error ||
-    models instanceof Error
+    categoryApi.data instanceof Error ||
+    brandApi.data instanceof Error ||
+    modelApi.data instanceof Error
   ) {
     // TODO: display the error message
     const error =
-      categories instanceof Error
-        ? categories
-        : brands instanceof Error
-        ? brands
-        : models instanceof Error
-        ? models
+      categoryApi.data instanceof Error
+        ? categoryApi.data
+        : brandApi.data instanceof Error
+        ? brandApi.data
+        : modelApi.data instanceof Error
+        ? modelApi.data
         : null;
-    return <h1>{error?.message}</h1>;
+    toast({
+      title: "Error",
+      description: error?.message,
+      variant: "destructive",
+    });
+    return;
   }
 
   return (
@@ -202,27 +238,35 @@ const PostingModal = () => {
                 Category
                 <ComboBox
                   label="Category"
-                  items={categories}
+                  items={categoryApi.data}
                   selected={selectedCategory}
-                  onSelect={setSelectedCategory}
+                  onSelect={(category) =>
+                    setSelectedCategory(category as Category)
+                  }
+                  refetch={setSearchCategory}
+                  loading={categoryApi.isLoading}
                 />
               </div>
               <div className="flex justify-between">
                 Brand
                 <ComboBox
                   label="Brand"
-                  items={brands}
+                  items={brandApi.data}
                   selected={selectedBrand}
-                  onSelect={setSelectedBrand}
+                  onSelect={(brand) => setSelectedBrand(brand as Brand)}
+                  refetch={setSearchBrand}
+                  loading={brandApi.isLoading}
                 />
               </div>
               <div className="flex justify-between">
                 Model
                 <ComboBox
                   label="Model"
-                  items={models}
+                  items={modelApi.data}
                   selected={selectedModel}
-                  onSelect={setSelectedModel}
+                  onSelect={(model) => setSelectedModel(model as Model)}
+                  refetch={setSearchModel}
+                  loading={modelApi.isLoading}
                 />
               </div>
               Description

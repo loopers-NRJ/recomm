@@ -1,11 +1,15 @@
 "use client";
 
+import { useSession } from "next-auth/react";
+import { FC, useEffect } from "react";
+
 import { api } from "@/utils/api";
 import { Room } from "@prisma/client";
-import { FC, useEffect } from "react";
-import { Card, CardContent } from "./ui/card";
 import { Avatar, AvatarImage } from "@radix-ui/react-avatar";
+
 import { AvatarFallback } from "./ui/avatar";
+import { Card, CardContent } from "./ui/card";
+
 interface BiddingListProps {
   room: Room;
 }
@@ -17,6 +21,7 @@ const BiddingList: FC<BiddingListProps> = ({ room }) => {
     refetch,
   } = api.room.getBidsByRoomId.useQuery({ roomId: room.id });
 
+  const session = useSession();
   useEffect(() => {
     void refetch();
   }, [refetch]);

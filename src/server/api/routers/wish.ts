@@ -1,6 +1,8 @@
-import { WishStatus } from "@prisma/client";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { z } from "zod";
+
+import { WishStatus } from "@prisma/client";
+
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const wishRouter = createTRPCRouter({
   createWish: protectedProcedure
@@ -8,13 +10,15 @@ export const wishRouter = createTRPCRouter({
     .mutation(async ({ input: { modelId: id }, ctx }) => {
       const user = ctx.session.user;
       try {
-        const model = await ctx.prisma.model.findUnique({
+        const existingWish = await ctx.prisma.wish.findFirst({
           where: {
-            id,
+            userId: user.id,
+            modelId: id,
           },
         });
-        if (model === null) {
-          return new Error("Product not found");
+
+        if (existingWish !== null) {
+          return new Error("wish already exists");
         }
         const result = await ctx.prisma.product.aggregate({
           where: {

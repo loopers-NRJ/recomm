@@ -3,7 +3,6 @@
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import { useCallback } from "react";
-// import { useCallback } from "react";
 import { IconType } from "react-icons";
 
 interface CategoryBoxProps {

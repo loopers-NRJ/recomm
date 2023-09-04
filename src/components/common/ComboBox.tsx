@@ -1,6 +1,6 @@
 import { Check, ChevronsUpDown } from "lucide-react";
+import { FC, useEffect, useRef, useState } from "react";
 
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -14,7 +14,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { FC, useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
+import { debounce } from "@/utils/debounce";
 
 interface Item {
   id: string;
@@ -22,10 +23,12 @@ interface Item {
 }
 
 interface ComboBoxProps {
-  items: Item[];
-  selected: string;
-  onSelect: (selected: string) => void;
+  items?: Item[];
+  selected?: Item;
+  onSelect: (selected?: Item) => void;
   label?: string;
+  refetch?: (partialName: string) => void;
+  loading?: boolean;
 }
 
 const ComboBox: FC<ComboBoxProps> = ({
@@ -33,12 +36,23 @@ const ComboBox: FC<ComboBoxProps> = ({
   selected,
   onSelect,
   label = "item",
+  refetch,
+  loading,
 }) => {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState(originalItems);
+  const previousItemsRef = useRef<Item[]>([]);
+
   useEffect(() => {
-    setItems([...originalItems]);
+    setItems(originalItems);
   }, [originalItems]);
+
+  useEffect(() => {
+    if (items) {
+      previousItemsRef.current = items;
+    }
+  }, [items]);
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -49,7 +63,9 @@ const ComboBox: FC<ComboBoxProps> = ({
           className="w-[200px] justify-between text-black"
         >
           {selected
-            ? items.find((item) => item.id === selected)?.name
+            ? (items ?? previousItemsRef.current).find(
+                (item) => item.id === selected.id
+              )?.name
             : `Select ${label}...`}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -58,34 +74,40 @@ const ComboBox: FC<ComboBoxProps> = ({
         <Command>
           <CommandInput
             placeholder={`Search ${label}...`}
-            onValueChange={(e) =>
-              setItems(
-                originalItems.filter((item) =>
-                  new RegExp(e, "i").test(item.name)
-                )
-              )
-            }
+            // value={search}
+            onValueChange={(e) => {
+              debounce(() => refetch?.(e))();
+            }}
           />
           <CommandEmpty>No {label} found.</CommandEmpty>
           <CommandGroup>
-            {items.map((item) => (
+            {(items ?? previousItemsRef.current).map((item) => (
               <CommandItem
                 key={item.id}
                 onSelect={(currentValue) => {
-                  onSelect(currentValue === selected ? "" : currentValue);
+                  onSelect(
+                    currentValue === selected?.name
+                      ? undefined
+                      : (items ?? previousItemsRef.current).find(
+                          (item) =>
+                            item.name.toLowerCase() ===
+                            currentValue.toLowerCase()
+                        )
+                  );
                   setOpen(false);
                 }}
-                value={item.id}
+                value={item.name}
               >
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
-                    selected === item.id ? "opacity-100" : "opacity-0"
+                    selected?.name === item.name ? "opacity-100" : "opacity-0"
                   )}
                 />
                 {item.name}
               </CommandItem>
             ))}
+            {loading && <h1 className="text-center">...</h1>}
           </CommandGroup>
         </Command>
       </PopoverContent>
