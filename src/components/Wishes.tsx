@@ -6,8 +6,6 @@ import { api } from "@/utils/api";
 import { useEffect } from "react";
 
 function Wishes() {
-  // const router = useRouter();
-  // const userId = router.query.userid as string;
   const {
     data: wishes,
     isLoading,

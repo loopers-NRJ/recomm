@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { FC } from "react";
 import { Brand, Model, Wish, WishStatus } from "@prisma/client";
+import { useRouter } from "next/navigation";
 
 type WishProp = Wish & {
   model: Model & {
@@ -26,6 +27,8 @@ const WishCard: FC<WishCardProps> = ({ wish }) => {
   const model = wish.model.name;
   const brand = wish.model.brand.name;
   const status = wish.status;
+
+  const router = useRouter();
 
   return (
     <Card className="flex w-[350px] items-center justify-between md:w-[500px]">
@@ -44,7 +47,10 @@ const WishCard: FC<WishCardProps> = ({ wish }) => {
         </CardHeader>
       </div>
       <CardFooter className="flex-col items-end gap-2 p-6">
-        <Button disabled={status !== WishStatus.available}>
+        <Button
+          onClick={() => router.push(`/products?category=${wish.model.name}`)}
+          disabled={status !== WishStatus.available}
+        >
           View Products
         </Button>
       </CardFooter>
