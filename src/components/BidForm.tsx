@@ -1,8 +1,10 @@
-import { z } from "zod";
 import React, { FC, useState } from "react";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
+import { z } from "zod";
+
 import { api } from "@/utils/api";
+
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 import { useToast } from "./ui/use-toast";
 
 const BidFormSchema = z.object({
@@ -38,7 +40,6 @@ const BidForm: FC<BidFormProps> = ({ roomId, onClose }) => {
       };
       placeBid.mutate(data);
       onClose();
-      console.log("Bid placed:", formData.price);
     } else {
       toast({
         title: "Invaid Bid",

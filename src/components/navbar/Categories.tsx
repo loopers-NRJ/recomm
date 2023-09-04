@@ -1,19 +1,21 @@
 "use client";
 
-import { PiEyeClosedBold, PiDressBold } from "react-icons/pi";
-import { LuStethoscope, LuDog } from "react-icons/lu";
-import { TbHorseToy, TbTool } from "react-icons/tb";
 import { BiHome, BiHomeHeart } from "react-icons/bi";
+import { LuDog, LuStethoscope } from "react-icons/lu";
 import {
   MdDevices,
   MdOutlineChair,
-  MdSportsSoccer,
-  MdOutlineLocalGroceryStore,
   MdOutlineDiamond,
+  MdOutlineLocalGroceryStore,
+  MdSportsSoccer,
 } from "react-icons/md";
-import CategoryBox from "./CategoryBox";
-import Container from "../Container";
+import { PiDressBold, PiEyeClosedBold } from "react-icons/pi";
+import { TbHorseToy, TbTool } from "react-icons/tb";
+
 import { api } from "@/utils/api";
+
+import Container from "../Container";
+import CategoryBox from "./CategoryBox";
 
 export const categories = [
   {
@@ -105,7 +107,7 @@ const Categories = () => {
             id={
               data instanceof Error || data === undefined
                 ? undefined
-                : data[i]!.id
+                : data[i]?.id
             }
           />
         ))}
