@@ -1,6 +1,8 @@
-import { functionalityOptions } from "@/utils/validation";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { z } from "zod";
+
+import { functionalityOptions } from "@/utils/validation";
+
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const roomRounter = createTRPCRouter({
   getBidsByRoomId: publicProcedure
@@ -73,6 +75,10 @@ export const roomRounter = createTRPCRouter({
             }
             if (room.product.buyerId != null) {
               return new Error("Product already sold");
+            }
+            // this condition block user from bidding twice
+            if (room.highestBid !== null && room.highestBid.userId === userId) {
+              return new Error("You are already the highest bidder");
             }
             // this condition decides whether to allow user to bid lesser than or equal to the highest bid
             // if (room.highestBid !== null && room.highestBid.price >= price) {
