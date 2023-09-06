@@ -12,6 +12,7 @@ import PostingModal from "@/components/modals/PostingModal";
 
 import "@/styles/globals.css";
 import BiddingModal from "@/components/modals/BiddingModal";
+import BottomBar from "@/components/navbar/BottomBar";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -28,6 +29,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
       <div className="pb-20 pt-28">
         <Component {...pageProps} session={session} />
       </div>
+      <BottomBar />
       <Toaster />
     </SessionProvider>
   );
