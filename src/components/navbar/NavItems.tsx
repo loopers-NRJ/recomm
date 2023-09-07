@@ -1,6 +1,5 @@
-import { RiCopperCoinLine } from "react-icons/ri";
+import { RiCopperCoinLine, RiHeartLine } from "react-icons/ri";
 import { Button } from "../ui/button";
-import { BiHeart } from "react-icons/bi";
 import Avatar from "./Avatar";
 import usePostingModal from "@/hooks/usePostingModal";
 import useLoginModal from "@/hooks/useLoginModal";
@@ -44,10 +43,10 @@ const NavItems: FC<NavItemsProps> = ({ currentUser }) => {
   }, [currentUser, loginModal, router]);
 
   return (
-    <div className="flex w-fit flex-row items-center gap-3 rounded-full bg-white px-3 py-2">
+    <div className="flex w-fit flex-row items-center gap-0 rounded-full bg-white md:gap-3">
       <Button
         variant={"ghost"}
-        className="min-w-max rounded-full"
+        className="min-w-max rounded-full px-4 py-6 md:px-4 md:py-2"
         onClick={onPost}
       >
         <span className="text-xl md:hidden">
@@ -58,19 +57,19 @@ const NavItems: FC<NavItemsProps> = ({ currentUser }) => {
 
       <Button
         variant={"ghost"}
+        className="min-w-max rounded-full px-4 py-6 md:px-4 md:py-2"
         onClick={handleWishListClick}
-        className="min-w-max rounded-full"
       >
         <span className="text-xl md:hidden">
-          <BiHeart />
+          <RiHeartLine />
         </span>
         <span className="hidden md:block">Wish It</span>
       </Button>
 
       <Button
-        className="min-w-max gap-2 rounded-full"
-        onClick={handleProfileClick}
+        className="min-w-max rounded-full px-4 py-6 md:gap-2 md:px-4 md:py-2"
         variant={"ghost"}
+        onClick={handleProfileClick}
       >
         <div>
           <Avatar src={currentUser?.image} />
