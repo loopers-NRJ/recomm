@@ -1,7 +1,9 @@
-import { type MulterRequest, uploads } from "@/lib/multer";
-import { type NextApiResponse } from "next";
-import { uploadImages } from "@/lib/cloudinary";
 import fs from "fs";
+import { NextApiResponse } from "next";
+
+import { uploadImage } from "@/lib/cloudinary";
+import { MulterRequest, uploads } from "@/lib/multer";
+
 const MAX_IMAGE_COUNT = 10;
 
 const handler = (request: MulterRequest, response: NextApiResponse) => {
@@ -19,17 +21,20 @@ const POST = (request: MulterRequest, response: NextApiResponse) => {
     return middleware(request as never, response as never, async (error) => {
       if (error) {
         // cannot upload images to local storage
-        return response.status(500).json({ message: "First Error", error });
+        return response.status(500).json({ error: "cannot upload images" });
       }
 
       const pictureUrls = [];
       // uploading images to cloudinary
       for (const file of request.files) {
         try {
-          const picture = await uploadImages(file.path);
+          const picture = await uploadImage(file.path);
+          if (picture instanceof Error) {
+            return response.status(500).json({ error: "cannot upload images" });
+          }
           pictureUrls.push(picture);
         } catch (error) {
-          return response.status(500).json({ message: "second error", error });
+          return response.status(500).json({ error: "cannot upload images" });
         }
       }
 

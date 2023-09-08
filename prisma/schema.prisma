@@ -61,38 +61,43 @@ model User {
 
 model Admin {
     id        String   @id @default(cuid())
-    user      User     @relation(fields: [userId], references: [id])
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
     userId    String   @unique
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 }
 
 model Category {
-    id        String   @id @default(cuid())
-    name      String   @unique
-    picture   String
+    id        String        @id @default(cuid())
+    name      String        @unique
+    image     CategoryImage @relation(fields: [imageId], references: [id], onDelete: Cascade)
+    imageId   String        @unique
+    // properties for subCategories. uncomment if needed
     // subCategories Category[] @relation("SubCategory")
-    // parentCategory      Category?  @relation("SubCategory", fields: [parentCategoryId], references: [id])
+    // parentCategory      Category?  @relation("SubCategory", fields: [parentCategoryId], references: [id], onDelete: Cascade)
     // parentCategoryId    String?
     models    Model[]
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    createdAt DateTime      @default(now())
+    updatedAt DateTime      @updatedAt
 }
 
 model Brand {
-    id        String   @id @default(cuid())
-    name      String   @unique
-    picture   String
+    id        String     @id @default(cuid())
+    name      String     @unique
+    image     BrandImage @relation(fields: [imageId], references: [id], onDelete: Cascade)
+    imageId   String     @unique
     models    Model[]
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    createdAt DateTime   @default(now())
+    updatedAt DateTime   @updatedAt
 }
 
 model Model {
     id         String     @id @default(cuid())
     name       String     @unique
-    brand      Brand      @relation(fields: [brandId], references: [id])
+    brand      Brand      @relation(fields: [brandId], references: [id], onDelete: Cascade)
     brandId    String
+    image      ModelImage @relation(fields: [imageId], references: [id], onDelete: Cascade)
+    imageId    String     @unique
     categories Category[]
     products   Product[]
     wishes     Wish[]
@@ -104,12 +109,12 @@ model Product {
     id             String   @id @default(cuid())
     price          Float
     description    String
-    images         String[] @map("pictures")
-    model          Model    @relation(fields: [modelId], references: [id])
+    images         Image[]
+    model          Model    @relation(fields: [modelId], references: [id], onDelete: Cascade)
     modelId        String
-    seller         User     @relation("listedProducts", fields: [sellerId], references: [id])
+    seller         User     @relation("listedProducts", fields: [sellerId], references: [id], onDelete: Cascade)
     sellerId       String
-    buyer          User?    @relation("purchasedProducts", fields: [buyerId], references: [id])
+    buyer          User?    @relation("purchasedProducts", fields: [buyerId], references: [id], onDelete: SetNull)
     buyerId        String?
     favoritedUsers User[]   @relation("favoriteProducts")
     room           Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
@@ -132,11 +137,11 @@ model Room {
 model Bid {
     id                 String   @id @default(cuid())
     price              Float
-    user               User     @relation(fields: [userId], references: [id])
+    user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
     userId             String
-    room               Room?    @relation(fields: [roomId], references: [id])
+    room               Room?    @relation(fields: [roomId], references: [id], onDelete: Cascade)
     roomId             String?
-    highestBidedRoom   Room?    @relation("highestBid", fields: [highestBidedRoomId], references: [id])
+    highestBidedRoom   Room?    @relation("highestBid", fields: [highestBidedRoomId], references: [id], onDelete: Cascade)
     highestBidedRoomId String?  @unique
     createdAt          DateTime @default(now())
 }
@@ -148,11 +153,60 @@ enum WishStatus {
 
 model Wish {
     id        String     @id @default(cuid())
-    model     Model      @relation(fields: [modelId], references: [id])
+    model     Model      @relation(fields: [modelId], references: [id], onDelete: Cascade)
     modelId   String
     status    WishStatus @default(pending)
-    user      User?      @relation(fields: [userId], references: [id])
-    userId    String?
+    user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId    String
     createdAt DateTime   @default(now())
     updatedAt DateTime   @updatedAt
+}
+
+model Image {
+    id        String   @id @default(cuid())
+    publicId  String
+    url       String
+    fileType  String
+    width     Int
+    height    Int
+    products  Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+    productId String?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model CategoryImage {
+    id        String    @id @default(cuid())
+    publicId  String
+    url       String
+    fileType  String
+    width     Int
+    height    Int
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    category  Category?
+}
+
+model BrandImage {
+    id        String   @id @default(cuid())
+    publicId  String
+    url       String
+    fileType  String
+    width     Int
+    height    Int
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    brand     Brand?
+}
+
+model ModelImage {
+    id        String   @id @default(cuid())
+    publicId  String
+    url       String
+    fileType  String
+    width     Int
+    height    Int
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    model     Model?
 }

@@ -1,5 +1,6 @@
-import { env } from "@/env.mjs";
 import { v2 as cloudinary } from "cloudinary";
+
+import { env } from "@/env.mjs";
 
 cloudinary.config({
   cloud_name: env.CLOUDINARY_CLOUD_NAME,
@@ -8,17 +9,33 @@ cloudinary.config({
   secure: true,
 });
 
-export const uploadImages: (file: string) => Promise<string | Error> = async (
-  file: string
+export const uploadImage = async (localPath: string) => {
+  try {
+    const response = await cloudinary.uploader.upload(localPath);
+    // imageInputs.parse(response)
+    const image = {
+      publicId: response.public_id,
+      url: response.secure_url,
+      width: response.width,
+      height: response.height,
+      fileType: response.format,
+    };
+    return image;
+  } catch (error) {
+    console.log(error);
+    return new Error("cannot upload the image");
+  }
+};
+
+export const deleteImage: (publicId: string) => Promise<void | Error> = async (
+  publicId: string
 ) => {
-  return new Promise((resolve, reject) => {
-    void cloudinary.uploader.upload(file, (err, res) => {
-      if (err !== undefined || res === undefined) {
-        return reject(new Error("Upload failed"));
-      }
-      resolve(res.secure_url);
-    });
-  });
+  try {
+    await cloudinary.uploader.destroy(publicId);
+  } catch (error) {
+    console.log(error);
+    return new Error("cannot delete the image");
+  }
 };
 
 export default cloudinary;
