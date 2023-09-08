@@ -1,6 +1,5 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import { FC, useEffect } from "react";
 
 import { api } from "@/utils/api";
@@ -21,7 +20,6 @@ const BiddingList: FC<BiddingListProps> = ({ room }) => {
     refetch,
   } = api.room.getBidsByRoomId.useQuery({ roomId: room.id });
 
-  const session = useSession();
   useEffect(() => {
     void refetch();
   }, [refetch]);
