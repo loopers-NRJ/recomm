@@ -27,7 +27,7 @@ const CategoryBox: React.FC<CategoryBoxProps> = ({ icon: Icon, label, id }) => {
   );
 
   const selected =
-    searchParams.get("category") === null && id === undefined
+    searchParams.get("category") === null && label === "All"
       ? true
       : searchParams.get("category") === id;
 
