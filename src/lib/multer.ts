@@ -18,14 +18,10 @@ export interface MulterRequest extends NextApiRequest {
 }
 
 export const uploads = multer({
-  // dest: "uploads/",
   storage: multer.diskStorage({
-    // destination: function (req, file, cb) {
-    //   cb(null, "uploads/");
-    // },
     filename: function (req, file, cb) {
       const fileName = `${Date.now()}-${file.originalname}`;
-      if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+      if (!file.originalname.match(/\.(jpg|jpeg|webp|svg)$/)) {
         return cb(new Error("Only image files are allowed!"), fileName);
       }
       cb(null, fileName);

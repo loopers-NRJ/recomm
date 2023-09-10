@@ -15,3 +15,5 @@ export const imageInputs = z.object({
   width: z.number().int(),
   height: z.number().int(),
 });
+
+export type Image = z.infer<typeof imageInputs>;

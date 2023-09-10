@@ -4,10 +4,13 @@ import { imageInputs } from "./validation";
 
 export const uploadImagesToBackend = async (images: File[]) => {
   const formData = new FormData();
+
   images.forEach((image) => {
     formData.append("images", image);
   });
+
   const uploadedPictureUrls = [];
+
   try {
     const result = await fetch("/api/images/upload", {
       method: "POST",

@@ -21,6 +21,7 @@ const POST = (request: MulterRequest, response: NextApiResponse) => {
     return middleware(request as never, response as never, async (error) => {
       if (error) {
         // cannot upload images to local storage
+        console.error("cannot upload images to local storage", error);
         return response.status(500).json({ error: "cannot upload images" });
       }
 
@@ -30,10 +31,12 @@ const POST = (request: MulterRequest, response: NextApiResponse) => {
         try {
           const picture = await uploadImage(file.path);
           if (picture instanceof Error) {
+            console.error("cannot upload images to cloudinary", picture);
             return response.status(500).json({ error: "cannot upload images" });
           }
           pictureUrls.push(picture);
         } catch (error) {
+          console.error("cannot upload images to cloudinary", error);
           return response.status(500).json({ error: "cannot upload images" });
         }
       }

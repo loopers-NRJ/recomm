@@ -5,7 +5,7 @@ import { z } from "zod";
 
 import usePostingModal from "@/hooks/usePostingModal";
 import { api } from "@/utils/api";
-import { uploadImagesToBackend } from "@/utils/image";
+import { uploadImagesToBackend } from "@/utils/imageUpload";
 import { Brand, Category, Model } from "@prisma/client";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross1Icon } from "@radix-ui/react-icons";
@@ -15,7 +15,7 @@ import DatePicker from "../common/DatePicker";
 import ImagePicker from "../common/ImagePicker";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { useToast } from "../ui/use-toast";
+import { toast } from "../ui/use-toast";
 
 const productSchema = z.object({
   price: z
@@ -76,7 +76,6 @@ const PostingModal = () => {
 
   const uploadProduct = api.product.createProduct.useMutation();
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
 
   useEffect(() => {
     setShowModal(postingModal.isOpen);
@@ -128,7 +127,6 @@ const PostingModal = () => {
     const imagesUrls = await uploadImagesToBackend(images);
     if (imagesUrls instanceof Error) {
       setLoading(false);
-      // TODO: display the error message
       return toast({
         title: "Error",
         description: imagesUrls.message,
@@ -162,7 +160,6 @@ const PostingModal = () => {
     brandApi.data instanceof Error ||
     modelApi.data instanceof Error
   ) {
-    // TODO: display the error message
     const error =
       categoryApi.data instanceof Error
         ? categoryApi.data
@@ -241,7 +238,7 @@ const PostingModal = () => {
               Price
               <Input ref={priceRef} type="number" defaultValue={0} required />
               Images
-              <ImagePicker images={images} setImages={setImages} />
+              <ImagePicker setImages={setImages} />
               Bidding End Date
               <DatePicker date={endDate} setDate={setEndDate} />
             </div>

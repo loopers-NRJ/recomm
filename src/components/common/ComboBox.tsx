@@ -15,7 +15,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { debounce } from "@/utils/debounce";
+import { debounce } from "@/utils/helper";
 
 interface Item {
   id: string;
