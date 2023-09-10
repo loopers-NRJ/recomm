@@ -103,7 +103,24 @@ export const productRouter = createTRPCRouter({
             images: true,
           },
         });
-        return product;
+        type ProductWithIsFavorite = typeof product & { isFavorite?: true };
+        if (ctx.session !== null) {
+          const favorited = await ctx.prisma.product.findUnique({
+            where: {
+              id,
+              favoritedUsers: {
+                some: {
+                  id: ctx.session.user.id,
+                },
+              },
+            },
+          });
+
+          if (favorited !== null) {
+            (product as ProductWithIsFavorite).isFavorite = true;
+          }
+        }
+        return product as ProductWithIsFavorite;
       } catch (error) {
         console.error({
           procedure: "getProductById",
