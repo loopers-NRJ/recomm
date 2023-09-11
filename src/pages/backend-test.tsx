@@ -3,7 +3,8 @@ import { useState } from "react";
 import ImagePicker from "@/components/common/ImagePicker";
 import { api } from "@/utils/api";
 import { uploadImagesToBackend } from "@/utils/imageUpload";
-import { Brand, Category, Model, Product } from "@prisma/client";
+
+import type { Bid, Brand, Category, Model, Product } from "@prisma/client";
 
 import type { Image } from "@/utils/validation";
 const Home = () => {
@@ -26,6 +27,10 @@ const Home = () => {
   const createProductApi = api.product.createProduct.useMutation();
   const deleteProductApi = api.product.deleteProductById.useMutation();
   const [product, setProduct] = useState<Product | null>(null);
+
+  const createBidApi = api.room.createBid.useMutation();
+  const deleteBidApi = api.room.deleteBid.useMutation();
+  const [bid, setBid] = useState<Bid | null>(null);
 
   const [error, setError] = useState<string | null>(null);
 
@@ -186,6 +191,36 @@ const Home = () => {
     setModel(null);
   };
 
+  const createBid = async () => {
+    if (product === null) {
+      return setError("create a product to create a bid");
+    }
+    const result = await createBidApi.mutateAsync({
+      price: 669,
+      roomId: product.roomId,
+    });
+
+    console.log(result);
+    if (result instanceof Error) {
+      return setError(result.message);
+    }
+    setBid(result);
+  };
+
+  const deleteBid = async () => {
+    if (bid === null) {
+      return setError("create a bid to delete");
+    }
+    const result = await deleteBidApi.mutateAsync({
+      bidId: bid.id,
+    });
+    console.log(result);
+    if (result instanceof Error) {
+      return setError(result.message);
+    }
+    setBid(null);
+  };
+
   return (
     <main className="flex flex-col gap-4">
       <h1 className="text-center text-2xl font-bold">Api test</h1>
@@ -291,7 +326,23 @@ const Home = () => {
         </div>
       </section>
 
-      <br />
+      <section className="flex flex-col">
+        <h2 className="text-center text-lg">Bid - {bid?.id ?? "null"}</h2>
+        <div className="flex justify-between px-4">
+          <button
+            onClick={() => void createBid()}
+            className="rounded-lg bg-primary px-4 py-2 text-primary-foreground"
+          >
+            Create Bid
+          </button>
+          <button
+            onClick={() => void deleteBid()}
+            className="rounded-lg bg-primary px-4 py-2 text-primary-foreground"
+          >
+            Delete Bid
+          </button>
+        </div>
+      </section>
     </main>
   );
 };

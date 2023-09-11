@@ -7,12 +7,28 @@ import { adminProcedure, createTRPCRouter, publicProcedure } from "../trpc";
 
 export const modelRouter = createTRPCRouter({
   getModels: publicProcedure
-    .input(functionalityOptions)
+    .input(
+      functionalityOptions.extend({
+        categoryId: z.string().cuid().optional(),
+        brandId: z.string().cuid().optional(),
+      })
+    )
     .query(
-      async ({ input: { limit, page, search, sortBy, sortOrder }, ctx }) => {
+      async ({
+        input: { limit, page, search, sortBy, sortOrder, brandId, categoryId },
+        ctx,
+      }) => {
         try {
           const models = await ctx.prisma.model.findMany({
             where: {
+              brandId,
+              categories: categoryId
+                ? {
+                    some: {
+                      id: categoryId,
+                    },
+                  }
+                : undefined,
               name: {
                 contains: search,
                 mode: "insensitive",

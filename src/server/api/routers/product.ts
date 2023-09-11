@@ -8,12 +8,26 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const productRouter = createTRPCRouter({
   getProducts: publicProcedure
-    .input(functionalityOptions)
+    .input(
+      functionalityOptions.extend({
+        brandId: z.string().cuid().optional(),
+        modelId: z.string().cuid().optional(),
+      })
+    )
     .query(
-      async ({ input: { limit, page, search, sortBy, sortOrder }, ctx }) => {
+      async ({
+        input: { limit, page, search, sortBy, sortOrder, brandId, modelId },
+        ctx,
+      }) => {
         try {
           const products = await ctx.prisma.product.findMany({
             where: {
+              modelId,
+              model: brandId
+                ? {
+                    brandId,
+                  }
+                : undefined,
               OR: [
                 {
                   model: {
@@ -56,11 +70,7 @@ export const productRouter = createTRPCRouter({
                   categories: true,
                 },
               },
-              room: {
-                include: {
-                  highestBid: true,
-                },
-              },
+              room: true,
             },
           });
           return products;
@@ -95,11 +105,7 @@ export const productRouter = createTRPCRouter({
                 },
               },
             },
-            room: {
-              include: {
-                highestBid: true,
-              },
-            },
+            room: true,
             images: true,
           },
         });

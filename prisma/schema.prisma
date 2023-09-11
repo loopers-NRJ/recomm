@@ -124,26 +124,22 @@ model Product {
 }
 
 model Room {
-    id           String   @id @default(cuid())
-    bids         Bid[]
-    product      Product?
-    highestBid   Bid?     @relation("highestBid")
-    highestBidId String?
-    createdAt    DateTime @default(now())
-    updatedAt    DateTime @updatedAt
-    closedAt     DateTime
+    id        String   @id @default(cuid())
+    bids      Bid[]
+    product   Product?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    closedAt  DateTime
 }
 
 model Bid {
-    id                 String   @id @default(cuid())
-    price              Float
-    user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-    userId             String
-    room               Room?    @relation(fields: [roomId], references: [id], onDelete: Cascade)
-    roomId             String?
-    highestBidedRoom   Room?    @relation("highestBid", fields: [highestBidedRoomId], references: [id], onDelete: Cascade)
-    highestBidedRoomId String?  @unique
-    createdAt          DateTime @default(now())
+    id        String   @id @default(cuid())
+    price     Float
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId    String
+    room      Room?    @relation(fields: [roomId], references: [id], onDelete: Cascade)
+    roomId    String?
+    createdAt DateTime @default(now())
 }
 
 enum WishStatus {
