@@ -1,12 +1,10 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
+import { useSession } from "next-auth/react";
+import { useCallback, useEffect, useState } from "react";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 
-import { useCallback, useState } from "react";
 import useLoginModal from "@/hooks/useLoginModal";
-// import { Toggle } from "@/components/ui/toggle";
-import { useSession } from "next-auth/react";
 import { api } from "@/utils/api";
 
 interface HeartButtonProps {
@@ -23,6 +21,10 @@ const HeartButton: React.FC<HeartButtonProps> = ({
   const [hasFavorited, setHasFavourited] = useState(enabled ?? false);
   const loginModal = useLoginModal();
   const session = useSession();
+
+  useEffect(() => {
+    setHasFavourited(enabled ?? false);
+  }, [enabled]);
 
   const addToFavourite = api.product.addProductToFavorites.useMutation();
   const removeFromFavourite =
@@ -50,7 +52,15 @@ const HeartButton: React.FC<HeartButtonProps> = ({
         loginModal.onOpen();
       }
     },
-    [hasFavorited, session]
+    [
+      addToFavourite,
+      hasFavorited,
+      loginModal,
+      onChange,
+      productId,
+      removeFromFavourite,
+      session?.data?.user,
+    ]
   );
 
   return (

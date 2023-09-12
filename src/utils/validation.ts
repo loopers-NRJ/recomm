@@ -7,3 +7,13 @@ export const functionalityOptions = z.object({
   sortOrder: z.enum(["asc", "desc"]).default("desc"),
   sortBy: z.enum(["name", "createdAt"]).default("createdAt"),
 });
+
+export const imageInputs = z.object({
+  publicId: z.string(),
+  url: z.string().url(),
+  fileType: z.string(),
+  width: z.number().int(),
+  height: z.number().int(),
+});
+
+export type Image = z.infer<typeof imageInputs>;

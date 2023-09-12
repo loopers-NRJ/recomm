@@ -1,17 +1,19 @@
-import Container from "@/components/Container";
+import { NextPage } from "next";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { GiSofa } from "react-icons/gi";
+
+import BiddingList from "@/components/BiddingList";
+import Button from "@/components/Button";
+import Carousel from "@/components/common/Carousel";
+import Container from "@/components/Container";
 import Heading from "@/components/Heading";
 import HeartButton from "@/components/HeartButton";
-import Avatar from "@/components/navbar/Avatar";
-import Button from "@/components/Button";
-import { GiSofa } from "react-icons/gi";
-import BiddingList from "@/components/BiddingList";
-import { api } from "@/utils/api";
-import { NextPage } from "next";
 import ListingCategory from "@/components/ListingCategory";
+import Avatar from "@/components/navbar/Avatar";
 import useBiddingModal from "@/hooks/useBiddingModal";
-import { useSession } from "next-auth/react";
-import Carousel from "@/components/common/Carousel";
+import { api } from "@/utils/api";
 
 const ProductPage: NextPage = () => {
   const router = useRouter();
@@ -23,7 +25,15 @@ const ProductPage: NextPage = () => {
 
   const { data: product, isLoading } = api.product.getProductById.useQuery({
     productId,
-  })!;
+  });
+
+  const [isFavorited, setIsFavorited] = useState<true | undefined>();
+  useEffect(() => {
+    if (product == null) return;
+    if (product instanceof Error) return;
+
+    setIsFavorited(product.isFavorite);
+  }, [product, session.status]);
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -41,7 +51,7 @@ const ProductPage: NextPage = () => {
           <div className="relative h-72 w-full overflow-hidden rounded-xl">
             <Carousel images={["/shoe.jpg", "/shoe.jpg", "/shoe.jpg"]} />
             <div className="absolute right-5 top-5">
-              <HeartButton productId={product.id} />
+              <HeartButton productId={product.id} enabled={isFavorited} />
             </div>
           </div>
 

@@ -23,7 +23,7 @@ interface BidFormProps {
 
 const BidForm: FC<BidFormProps> = ({ roomId, onClose }) => {
   const [formData, setFormData] = useState<BidFormData>({ price: 0 });
-  const placeBid = api.room.postABid.useMutation();
+  const placeBid = api.room.createBid.useMutation();
   const { toast } = useToast();
 
   const handlePriceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
