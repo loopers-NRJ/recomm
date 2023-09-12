@@ -1,21 +1,17 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { currentModal, CurrentModal } from "./current-modal";
-import { Suspense, useEffect, useState } from "react";
+import React, { Suspense } from "react";
 
 export const ModalRenderer = () => {
-  const [modal, updateCurrentModal] = useState<CurrentModal<any> | null>(null);
+  const LoginModal = React.lazy(() => import("../LoginModal"));
+  const RegisterModal = React.lazy(() => import("../RegisterModal"));
+  const BiddingModal = React.lazy(() => import("../BiddingModal"));
+  const PostingModal = React.lazy(() => import("../PostingModal"));
 
-  useEffect(() => currentModal.subscribe(updateCurrentModal), []);
-
-  if (modal) {
-    const Modal = currentModal.get(modal.name);
-
-    return (
-      <Suspense>
-        <Modal {...modal?.props} />
-      </Suspense>
-    );
-  }
-
-  return null;
+  return (
+    <Suspense fallback={<p>Loading...</p>}>
+      <LoginModal />
+      <RegisterModal />
+      <BiddingModal />
+      <PostingModal />
+    </Suspense>
+  );
 };
