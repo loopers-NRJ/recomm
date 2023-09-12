@@ -4,9 +4,7 @@ import { FC, useEffect } from "react";
 
 import { api } from "@/utils/api";
 import { Room } from "@prisma/client";
-import { Avatar, AvatarImage } from "@radix-ui/react-avatar";
-
-import { AvatarFallback } from "./ui/avatar";
+import Avatar from "@/components/navbar/Avatar";
 import { Card, CardContent } from "./ui/card";
 
 interface BiddingListProps {
@@ -45,20 +43,7 @@ const BiddingList: FC<BiddingListProps> = ({ room }) => {
             <CardContent className="p-5">
               <div className="flex w-full items-center justify-between space-x-4">
                 <div className="flex items-center space-x-4">
-                  <Avatar>
-                    <AvatarImage
-                      width={40}
-                      className="rounded-full shadow-sm"
-                      src={bid.user.image!}
-                    />
-                    <AvatarFallback>
-                      <AvatarImage
-                        width={40}
-                        className="rounded-full shadow-sm"
-                        src="/placeholder.jpg"
-                      />
-                    </AvatarFallback>
-                  </Avatar>
+                  <Avatar src={bid.user.image ?? "/placeholder.jpg"} />
                   <div>
                     <p className="text-sm font-medium leading-none">
                       {bid.user.name}
