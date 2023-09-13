@@ -43,3 +43,6 @@ yarn-error.log*
 
 # npm
 package-lock.json
+
+# bun pkg
+bun.lockb

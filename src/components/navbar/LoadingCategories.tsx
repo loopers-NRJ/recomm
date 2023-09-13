@@ -8,11 +8,11 @@ const LoadingCategories = () => {
 
   return (
     <Container>
-      <div className="flex flex-row items-center justify-between overflow-x-auto pt-4">
+      <div className="inline w-full overflow-x-scroll whitespace-nowrap md:flex md:flex-row md:justify-between">
         {dummy.map((_, i) => (
           <Skeleton
             key={i}
-            className="h-16 w-16 bg-slate-400/20 p-3"
+            className="mx-3 mt-4 inline-block h-16 w-16 bg-slate-400/20 p-6 md:h-20 md:w-24"
           ></Skeleton>
         ))}
       </div>
