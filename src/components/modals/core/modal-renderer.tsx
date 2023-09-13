@@ -1,17 +1,17 @@
-import React, { Suspense } from "react";
+import BiddingModal from "../BiddingModal";
+import LoginModal from "../LoginModal";
+import PostingModal from "../PostingModal";
+import RegisterModal from "../RegisterModal";
 
-export const ModalRenderer = () => {
-  const LoginModal = React.lazy(() => import("../LoginModal"));
-  const RegisterModal = React.lazy(() => import("../RegisterModal"));
-  const BiddingModal = React.lazy(() => import("../BiddingModal"));
-  const PostingModal = React.lazy(() => import("../PostingModal"));
-
+const ModalRenderer = () => {
   return (
-    <Suspense fallback={<p>Loading...</p>}>
+    <>
       <LoginModal />
       <RegisterModal />
       <BiddingModal />
       <PostingModal />
-    </Suspense>
+    </>
   );
 };
+
+export default ModalRenderer;

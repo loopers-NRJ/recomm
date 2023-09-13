@@ -5,10 +5,18 @@ import { api } from "@/utils/api";
 
 import { Toaster } from "@/components/ui/toaster";
 import Navbar from "@/components/navbar/Navbar";
-import { ModalRenderer } from "@/components/modals/core/modal-renderer";
 
 import "@/styles/globals.css";
 import BottomBar from "@/components/navbar/BottomBar";
+import dynamic from "next/dynamic";
+
+const ModalRenderer = dynamic(
+  () => import("../components/modals/core/modal-renderer"),
+  {
+    loading: () => <p>Loading...</p>,
+    ssr: false,
+  }
+);
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,

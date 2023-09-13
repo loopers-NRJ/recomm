@@ -126,7 +126,7 @@ const AddWish: FC = () => {
     <Dialog>
       <DialogTrigger asChild>
         {/* Plus icon */}
-        <AiFillPlusCircle className="fixed bottom-5 right-5 text-5xl" />
+        <AiFillPlusCircle className="text-5xl" />
       </DialogTrigger>
       <DialogContent className="w-[350px] md:w-full">
         <DialogHeader>
