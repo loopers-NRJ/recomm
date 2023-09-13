@@ -7,6 +7,7 @@ import ListingCard from "@/components/ListingCard";
 import Container from "@/components/Container";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
+import LoadingProducts from "@/components/loading/LoadingProducts";
 
 const Favourites: NextPage = () => {
   const {
@@ -22,7 +23,7 @@ const Favourites: NextPage = () => {
     void refetch();
   }, [session.status, refetch]);
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <LoadingProducts />;
 
   // if (isError) return <div>{error.message}</div>;
   if (products instanceof Error) return <div>Something went wrong</div>;
@@ -33,13 +34,13 @@ const Favourites: NextPage = () => {
     <Container>
       <div
         className="
-            grid
+            grid 
             grid-cols-1 
             gap-8 
             sm:grid-cols-2 
             md:grid-cols-3
             lg:grid-cols-4
-            xl:grid-cols-5
+            xl:grid-cols-4
             2xl:grid-cols-6
           "
       >

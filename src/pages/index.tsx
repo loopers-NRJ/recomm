@@ -5,6 +5,7 @@ import Container from "@/components/Container";
 import ListingCard from "@/components/ListingCard";
 import Product from "@/types/product";
 import { api } from "@/utils/api";
+import LoadingProducts from "@/components/loading/LoadingProducts";
 
 export const Home: NextPage = () => {
   // get products according to the search params
@@ -21,7 +22,7 @@ export const Home: NextPage = () => {
 
   const { data: products, isLoading, isError } = response;
 
-  if (isLoading) return <div className="pt-24">Loading...</div>;
+  if (isLoading) return <LoadingProducts />;
   else if (isError) return <div>Something went wrong</div>;
   else if (products instanceof Error) return <div>{products.message}</div>;
   else if (!products || products.length === 0)

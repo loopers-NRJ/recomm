@@ -28,6 +28,12 @@ const WishCard: FC<WishCardProps> = ({ wish }) => {
   const brand = wish.model.brand.name;
   const status = wish.status;
 
+  // TODO: delete wish
+  // const deleteWish = async (id: string) => {
+  //   // await api.wish.deleteWish.useMutation(id);
+  //   // await refetch();
+  // };
+
   const router = useRouter();
 
   return (
@@ -47,6 +53,12 @@ const WishCard: FC<WishCardProps> = ({ wish }) => {
         </CardHeader>
       </div>
       <CardFooter className="flex-col items-end gap-2 p-6">
+        <Button
+          // onClick={() => deleteWish(wish.id)}
+          variant={"destructive"}
+        >
+          Delete
+        </Button>
         <Button
           onClick={() => router.push(`/products?category=${wish.model.name}`)}
           disabled={status !== WishStatus.available}

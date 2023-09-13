@@ -4,6 +4,7 @@ import Product from "@/types/product";
 import ListingCard from "@/components/ListingCard";
 import { useRouter } from "next/router";
 import Container from "@/components/Container";
+import LoadingProducts from "@/components/loading/LoadingProducts";
 
 const Listings: NextPage = () => {
   // user the params to get User ID
@@ -19,20 +20,20 @@ const Listings: NextPage = () => {
   if (isError || products instanceof Error)
     return <div>Something went wrong</div>;
   if (!products || products.length === 0) return <div>No data to Show</div>;
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <LoadingProducts />;
 
   return (
     <main>
       <Container>
         <div
           className="
-            grid
+            grid 
             grid-cols-1 
             gap-8 
             sm:grid-cols-2 
             md:grid-cols-3
             lg:grid-cols-4
-            xl:grid-cols-5
+            xl:grid-cols-4
             2xl:grid-cols-6
           "
         >

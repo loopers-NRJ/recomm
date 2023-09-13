@@ -16,6 +16,7 @@ import { api } from "@/utils/api";
 
 import Container from "../Container";
 import CategoryBox from "./CategoryBox";
+import LoadingCategories from "./LoadingCategories";
 
 export const categories = [
   {
@@ -84,20 +85,11 @@ const Categories = () => {
   const { data } = api.category.getCategories.useQuery({});
 
   if (data instanceof Error) return <div>Error</div>;
-  if (data === undefined) return <div>Loading...</div>;
+  if (data === undefined) return <LoadingCategories />;
 
   return (
     <Container>
-      <div
-        className="
-          flex
-          flex-row 
-          items-center 
-          justify-between 
-          overflow-x-auto
-          pt-4
-        "
-      >
+      <div className="flex flex-row items-center justify-between overflow-x-auto pt-4">
         <CategoryBox label="All" icon={BiHome} />
         {categories.map((item, i) => (
           <CategoryBox
