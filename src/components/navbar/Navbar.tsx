@@ -1,15 +1,16 @@
-import Categories from "./Categories";
+import { Search } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+
 import Container from "@/components/Container";
+
+import Categories from "./Categories";
 import Logo from "./Logo";
 import NavItems from "./NavItems";
-import { useSession } from "next-auth/react";
-import { type User } from "next-auth";
-import { useRouter } from "next/router";
-import Search from "@/components/search/Search";
 
 const Navbar: React.FC = () => {
   const { data: session } = useSession();
-  const currentUser = session?.user as User;
+  const currentUser = session?.user;
   const isMainPage = useRouter().pathname === "/";
 
   return (
@@ -19,7 +20,6 @@ const Navbar: React.FC = () => {
           <div className="flex items-center justify-between pt-3">
             <div className="flex w-full items-center justify-between md:justify-start md:gap-5">
               <Logo />
-              {/* <Search /> */}
               <Search />
             </div>
             <div className="hidden md:block">

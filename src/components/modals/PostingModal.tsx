@@ -48,10 +48,7 @@ const PostingModal = () => {
   // this id is for Electronics Category.
   const [searchBrand, setSearchBrand] = useState("");
   const brandApi = api.search.brands.useQuery({
-    categoryId:
-      selectedCategory === undefined
-        ? "cllrwmem20005ua9k3cxywefx"
-        : selectedCategory.id,
+    categoryId: selectedCategory?.id,
     search: searchBrand,
   });
   const [selectedBrand, setSelectedBrand] = useState<OptionalItem>();
@@ -60,10 +57,7 @@ const PostingModal = () => {
   // this id is for Apple Brand.
   const [searchModel, setSearchModel] = useState("");
   const modelApi = api.search.models.useQuery({
-    brandId:
-      selectedBrand === undefined
-        ? "cllrwmf4n0014ua9kz1iwr1by"
-        : selectedBrand.id,
+    brandId: selectedBrand?.id,
     search: searchModel,
   });
   const [selectedModel, setSelectedModel] = useState<OptionalItem>();

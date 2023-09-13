@@ -1,15 +1,20 @@
+import { useRouter } from "next/navigation";
+import { FC, useCallback } from "react";
 import { RiCopperCoinLine, RiHeartLine } from "react-icons/ri";
+
+import useLoginModal from "@/hooks/useLoginModal";
+import usePostingModal from "@/hooks/usePostingModal";
+
 import { Button } from "../ui/button";
 import Avatar from "./Avatar";
-import usePostingModal from "@/hooks/usePostingModal";
-import useLoginModal from "@/hooks/useLoginModal";
-import { FC, useCallback } from "react";
-
-import { User } from "next-auth";
-import { useRouter } from "next/navigation";
 
 interface NavItemsProps {
-  currentUser: User | null;
+  currentUser?: {
+    id: string;
+    name?: string | null;
+    image?: string | null;
+    email?: string | null;
+  };
 }
 
 const NavItems: FC<NavItemsProps> = ({ currentUser }) => {
