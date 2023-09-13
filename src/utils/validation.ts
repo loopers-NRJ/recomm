@@ -12,7 +12,7 @@ export type SortBy = "name" | "createdAt";
 export const functionalityOptions = z.object({
   search: z.string().default(""),
   limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
-  page: z.number().int().positive().default(DefaultLimit),
+  page: z.number().int().positive().default(DefaultPage),
   sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
   sortBy: z.enum(["name", "createdAt"]).default(DefaultSortBy),
 });
