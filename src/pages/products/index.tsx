@@ -1,5 +1,6 @@
 import { NextPage } from "next";
 import { useSearchParams } from "next/navigation";
+import LoadingProducts from "@/components/loading/LoadingProducts";
 
 import Container from "@/components/Container";
 import ListingCard from "@/components/ListingCard";
@@ -40,7 +41,7 @@ export const ProductsPages: NextPage = () => {
 
   if (isError || products instanceof Error)
     return <div>Something went wrong</div>;
-  if (isLoading) return <div className="pt-24">Loading...</div>;
+  if (isLoading) return <LoadingProducts />;
   if (!products || products.length === 0)
     return <div className="pt-24">No data to Show</div>;
 

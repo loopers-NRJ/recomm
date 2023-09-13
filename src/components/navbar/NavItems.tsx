@@ -1,3 +1,4 @@
+import { Home } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FC, useCallback } from "react";
 import { RiCopperCoinLine, RiHeartLine } from "react-icons/ri";
@@ -49,6 +50,17 @@ const NavItems: FC<NavItemsProps> = ({ currentUser }) => {
 
   return (
     <div className="flex w-fit flex-row items-center gap-0 rounded-full bg-white md:gap-3">
+      <Button
+        variant={"ghost"}
+        className="min-w-max rounded-full px-4 py-6 md:px-4 md:py-2"
+        onClick={() => router.push("/")}
+      >
+        <span className="text-xl md:hidden">
+          <Home height={20} />
+        </span>
+        <span className="hidden md:block">Home</span>
+      </Button>
+
       <Button
         variant={"ghost"}
         className="min-w-max rounded-full px-4 py-6 md:px-4 md:py-2"

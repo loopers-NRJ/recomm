@@ -32,20 +32,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
       className="group col-span-1 cursor-pointer"
     >
       <div className="flex w-full flex-col gap-2">
-        <div
-          className="
-              relative 
-              w-full 
-              overflow-hidden 
-              rounded-xl
-            "
-        >
-          {/* <Image
-            fill
-            className="h-full w-full object-cover transition group-hover:scale-110"
-            src={"/shoe.jpg"}
-            alt="Listing"
-          /> */}
+        <div className="relative w-full overflow-hidden rounded-xl">
           <Carousel images={["/shoe.jpg"]} />
           <div className="absolute right-3 top-3">
             {pathname !== "/" && (
@@ -58,18 +45,9 @@ const ListingCard: React.FC<ListingCardProps> = ({
           </div>
         </div>
         <div className="text-lg font-semibold">{product.model.name}</div>
-        {/* <div className="font-light text-neutral-500">{product.description}</div> */}
         <div className="flex flex-row items-center gap-1">
           <div className="font-semibold">$ {product.price}</div>
         </div>
-        {/* {onAction && actionLabel && (
-          <Button
-            disabled={disabled}
-            small
-            label={actionLabel}
-            onClick={handleCancel}
-          />
-        )} */}
       </div>
     </div>
   );

@@ -3,6 +3,7 @@ import { useSearchParams } from "next/navigation";
 
 import Container from "@/components/Container";
 import ListingCard from "@/components/ListingCard";
+import LoadingProducts from "@/components/loading/LoadingProducts";
 import Product from "@/types/product";
 import { api } from "@/utils/api";
 import {
@@ -39,7 +40,7 @@ export const Home: NextPage = () => {
     categoryId,
   });
 
-  if (isLoading) return <div className="pt-24">Loading...</div>;
+  if (isLoading) return <LoadingProducts />;
   else if (isError) return <div>Something went wrong</div>;
   else if (products instanceof Error) return <div>{products.message}</div>;
   else if (!products || products.length === 0)
