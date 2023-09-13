@@ -25,8 +25,10 @@ const WishList: NextPage = () => {
 
   return (
     <Container>
-      <Heading title="Your WishList"></Heading>
-      <AddWish />
+      <div className="flex justify-between">
+        <Heading title="Your WishList"></Heading>
+        <AddWish />
+      </div>
       <Wishes />
     </Container>
   );
