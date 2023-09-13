@@ -13,44 +13,42 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { OptionalItem } from "@/types/item";
 import { api } from "@/utils/api";
-import { Brand, Category, Model } from "@prisma/client";
 
 import ComboBox from "./common/ComboBox";
 import { useToast } from "./ui/use-toast";
 
 const AddWish: FC = () => {
   const [searchCategory, setSearchCategory] = useState("");
-  const categoryApi = api.category.getCategories.useQuery({
+  const categoryApi = api.search.category.useQuery({
     search: searchCategory,
   });
-  const [selectedCategory, setSelectedCategory] = useState<
-    Category | undefined
-  >();
+  const [selectedCategory, setSelectedCategory] = useState<OptionalItem>();
 
   // TODO: hardcoded default category id `cllrwmem20005ua9k3cxywefx`
   // this id is for Electronics Category.
   const [searchBrand, setSearchBrand] = useState("");
-  const brandApi = api.category.getBrandsByCategoryId.useQuery({
+  const brandApi = api.search.brands.useQuery({
     categoryId:
       selectedCategory === undefined
         ? "cllrwmem20005ua9k3cxywefx"
         : selectedCategory.id,
     search: searchBrand,
   });
-  const [selectedBrand, setSelectedBrand] = useState<Brand | undefined>();
+  const [selectedBrand, setSelectedBrand] = useState<OptionalItem>();
 
   // TODO: hardcoded default brand id `cllrwmf4n0014ua9kz1iwr1by`
   // this id is for Apple Brand.
   const [searchModel, setSearchModel] = useState("");
-  const modelApi = api.brand.getModelsByBrandId.useQuery({
+  const modelApi = api.search.models.useQuery({
     brandId:
       selectedBrand === undefined
         ? "cllrwmf4n0014ua9kz1iwr1by"
         : selectedBrand.id,
     search: searchModel,
   });
-  const [selectedModel, setSelectedModel] = useState<Model | undefined>();
+  const [selectedModel, setSelectedModel] = useState<OptionalItem>();
 
   const { mutateAsync: createWish } = api.wish.createWish.useMutation();
   const { toast } = useToast();
@@ -142,7 +140,7 @@ const AddWish: FC = () => {
               label="Category"
               items={categoryApi.data}
               selected={selectedCategory}
-              onSelect={(category) => setSelectedCategory(category as Category)}
+              onSelect={(category) => setSelectedCategory(category)}
               refetch={setSearchCategory}
               loading={categoryApi.isLoading}
             />
@@ -153,7 +151,7 @@ const AddWish: FC = () => {
               label="Brand"
               items={brandApi.data}
               selected={selectedBrand}
-              onSelect={(brand) => setSelectedBrand(brand as Brand)}
+              onSelect={(brand) => setSelectedBrand(brand)}
               refetch={setSearchBrand}
               loading={brandApi.isLoading}
             />
@@ -164,7 +162,7 @@ const AddWish: FC = () => {
               label="Model"
               items={modelApi.data}
               selected={selectedModel}
-              onSelect={(model) => setSelectedModel(model as Model)}
+              onSelect={(model) => setSelectedModel(model)}
               refetch={setSearchModel}
               loading={modelApi.isLoading}
             />

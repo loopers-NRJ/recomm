@@ -1,32 +1,42 @@
-import { api } from "@/utils/api";
-import ListingCard from "@/components/ListingCard";
-import Container from "@/components/Container";
-import Product from "@/types/product";
 import { NextPage } from "next";
 import { useSearchParams } from "next/navigation";
 
+import Container from "@/components/Container";
+import ListingCard from "@/components/ListingCard";
+import Product from "@/types/product";
+import { api } from "@/utils/api";
+import {
+  DefaultPage,
+  DefaultSearch,
+  DefaultSortBy,
+  DefaultSortOrder,
+  SortBy,
+  SortOrder,
+} from "@/utils/validation";
+
 export const ProductsPages: NextPage = () => {
-  // get products according to the search params
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
 
-  let response;
+  const page = +(params.get("page") ?? DefaultPage);
+  const search = params.get("search") ?? DefaultSearch;
+  const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
+  const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
+  const modelId = params.get("model") ?? undefined;
+  const categoryId = params.get("category") ?? undefined;
 
-  if (params.has("category")) {
-    const categoryId = params.get("category")!;
-    response = api.category.getProductsByCategoryId.useQuery({ categoryId })!;
-  } else {
-    response = api.product.getProducts.useQuery({})!;
-  }
-
-  if (params.has("model")) {
-    const modelId = params.get("model")!;
-    response = api.model.getProductsByModelId.useQuery({ modelId })!;
-  } else {
-    response = api.product.getProducts.useQuery({})!;
-  }
-
-  const { data: products, isLoading, isError } = response;
+  const {
+    data: products,
+    isLoading,
+    isError,
+  } = api.product.getProducts.useQuery({
+    page,
+    search,
+    sortBy,
+    sortOrder,
+    modelId,
+    categoryId,
+  });
 
   if (isError || products instanceof Error)
     return <div>Something went wrong</div>;

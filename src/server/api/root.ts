@@ -6,6 +6,7 @@ import { imageRouter } from "./routers/image";
 import { modelRouter } from "./routers/model";
 import { productRouter } from "./routers/product";
 import { roomRounter } from "./routers/room";
+import { searchRouter } from "./routers/search";
 import { userRouter } from "./routers/user";
 import { wishRouter } from "./routers/wish";
 
@@ -23,6 +24,7 @@ export const appRouter = createTRPCRouter({
   user: userRouter,
   room: roomRounter,
   wish: wishRouter,
+  search: searchRouter,
 });
 
 // export type definition of API

@@ -7,9 +7,16 @@ import { adminProcedure, createTRPCRouter, publicProcedure } from "../trpc";
 
 export const brandRouter = createTRPCRouter({
   getBrands: publicProcedure
-    .input(functionalityOptions)
+    .input(
+      functionalityOptions.extend({
+        categoryId: z.string().cuid().optional(),
+      })
+    )
     .query(
-      async ({ input: { limit, page, search, sortBy, sortOrder }, ctx }) => {
+      async ({
+        input: { limit, page, search, sortBy, sortOrder, categoryId },
+        ctx,
+      }) => {
         try {
           const brands = await ctx.prisma.brand.findMany({
             where: {
@@ -17,6 +24,17 @@ export const brandRouter = createTRPCRouter({
                 contains: search,
                 mode: "insensitive",
               },
+              models: categoryId
+                ? {
+                    some: {
+                      categories: {
+                        some: {
+                          id: categoryId,
+                        },
+                      },
+                    },
+                  }
+                : undefined,
             },
             skip: limit * (page - 1),
             take: limit,
@@ -232,122 +250,4 @@ export const brandRouter = createTRPCRouter({
         return new Error(`cannot delete brand with id: ${id}`);
       }
     }),
-  getModelsByBrandId: publicProcedure
-    .input(
-      functionalityOptions.extend({
-        brandId: z.string().cuid(),
-      })
-    )
-    .query(
-      async ({
-        input: { limit, page, search, sortBy, sortOrder, brandId: id },
-        ctx,
-      }) => {
-        try {
-          const models = await ctx.prisma.model.findMany({
-            where: {
-              brandId: id,
-              name: {
-                contains: search,
-                mode: "insensitive",
-              },
-            },
-            skip: limit * (page - 1),
-            take: limit,
-            orderBy: [
-              {
-                [sortBy]: sortOrder,
-              },
-            ],
-            include: {
-              categories: {
-                include: {
-                  image: true,
-                },
-              },
-              brand: {
-                include: {
-                  image: true,
-                },
-              },
-              image: true,
-            },
-          });
-          return models;
-        } catch (error) {
-          console.error({ procedure: "getModelsByBrandId", error });
-          return new Error("Error fetching models");
-        }
-      }
-    ),
-  getProductsByBrandId: publicProcedure
-    .input(
-      functionalityOptions.extend({
-        brandId: z.string().cuid(),
-      })
-    )
-    .query(
-      async ({
-        input: { limit, page, search, sortBy, sortOrder, brandId: id },
-        ctx,
-      }) => {
-        try {
-          const products = await ctx.prisma.product.findMany({
-            where: {
-              model: {
-                brandId: id,
-                OR: [
-                  {
-                    name: {
-                      contains: search,
-                      mode: "insensitive",
-                    },
-                  },
-                  {
-                    brand: {
-                      name: {
-                        contains: search,
-                        mode: "insensitive",
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-            skip: limit * (page - 1),
-            take: limit,
-            orderBy: [
-              {
-                model: {
-                  name: sortBy === "name" ? sortOrder : undefined,
-                },
-              },
-              { createdAt: sortBy === "createdAt" ? sortOrder : undefined },
-            ],
-            include: {
-              images: true,
-              model: {
-                include: {
-                  image: true,
-                  categories: {
-                    include: {
-                      image: true,
-                    },
-                  },
-                  brand: {
-                    include: {
-                      image: true,
-                    },
-                  },
-                },
-              },
-            },
-          });
-          return products;
-        } catch (error) {
-          console.error({ procedure: "getProductsByBrandId", error });
-          return new Error("Error fetching products");
-        }
-      }
-    ),
 });

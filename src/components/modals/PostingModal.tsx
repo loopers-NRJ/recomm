@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { z } from "zod";
 
 import usePostingModal from "@/hooks/usePostingModal";
+import { OptionalItem } from "@/types/item";
 import { api } from "@/utils/api";
 import { uploadImagesToBackend } from "@/utils/imageUpload";
 import { Brand, Category, Model } from "@prisma/client";
@@ -38,36 +39,34 @@ const PostingModal = () => {
   const [showModal, setShowModal] = useState(postingModal.isOpen);
 
   const [searchCategory, setSearchCategory] = useState("");
-  const categoryApi = api.category.getCategories.useQuery({
+  const categoryApi = api.search.category.useQuery({
     search: searchCategory,
   });
-  const [selectedCategory, setSelectedCategory] = useState<
-    Category | undefined
-  >();
+  const [selectedCategory, setSelectedCategory] = useState<OptionalItem>();
 
   // TODO: hardcoded default category id `cllrwmem20005ua9k3cxywefx`
   // this id is for Electronics Category.
   const [searchBrand, setSearchBrand] = useState("");
-  const brandApi = api.category.getBrandsByCategoryId.useQuery({
+  const brandApi = api.search.brands.useQuery({
     categoryId:
       selectedCategory === undefined
         ? "cllrwmem20005ua9k3cxywefx"
         : selectedCategory.id,
     search: searchBrand,
   });
-  const [selectedBrand, setSelectedBrand] = useState<Brand | undefined>();
+  const [selectedBrand, setSelectedBrand] = useState<OptionalItem>();
 
   // TODO: hardcoded default brand id `cllrwmf4n0014ua9kz1iwr1by`
   // this id is for Apple Brand.
   const [searchModel, setSearchModel] = useState("");
-  const modelApi = api.brand.getModelsByBrandId.useQuery({
+  const modelApi = api.search.models.useQuery({
     brandId:
       selectedBrand === undefined
         ? "cllrwmf4n0014ua9kz1iwr1by"
         : selectedBrand.id,
     search: searchModel,
   });
-  const [selectedModel, setSelectedModel] = useState<Model | undefined>();
+  const [selectedModel, setSelectedModel] = useState<OptionalItem>();
 
   const descriptionRef = useRef<HTMLInputElement>(null);
   const priceRef = useRef<HTMLInputElement>(null);

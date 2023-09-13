@@ -10,13 +10,23 @@ export const productRouter = createTRPCRouter({
   getProducts: publicProcedure
     .input(
       functionalityOptions.extend({
+        categoryId: z.string().cuid().optional(),
         brandId: z.string().cuid().optional(),
         modelId: z.string().cuid().optional(),
       })
     )
     .query(
       async ({
-        input: { limit, page, search, sortBy, sortOrder, brandId, modelId },
+        input: {
+          limit,
+          page,
+          search,
+          sortBy,
+          sortOrder,
+          categoryId,
+          brandId,
+          modelId,
+        },
         ctx,
       }) => {
         try {
@@ -26,6 +36,13 @@ export const productRouter = createTRPCRouter({
               model: brandId
                 ? {
                     brandId,
+                    categories: categoryId
+                      ? {
+                          some: {
+                            id: categoryId,
+                          },
+                        }
+                      : undefined,
                   }
                 : undefined,
               OR: [

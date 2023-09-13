@@ -5,21 +5,39 @@ import Container from "@/components/Container";
 import ListingCard from "@/components/ListingCard";
 import Product from "@/types/product";
 import { api } from "@/utils/api";
+import {
+  DefaultPage,
+  DefaultSearch,
+  DefaultSortBy,
+  DefaultSortOrder,
+  SortBy,
+  SortOrder,
+} from "@/utils/validation";
 
 export const Home: NextPage = () => {
   // get products according to the search params
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
 
-  let response;
-  if (params.has("category")) {
-    const categoryId = params.get("category")!;
-    response = api.category.getProductsByCategoryId.useQuery({ categoryId });
-  } else {
-    response = api.product.getProducts.useQuery({});
-  }
+  const page = +(params.get("page") ?? DefaultPage);
+  const search = params.get("search") ?? DefaultSearch;
+  const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
+  const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
+  const modelId = params.get("model") ?? undefined;
+  const categoryId = params.get("category") ?? undefined;
 
-  const { data: products, isLoading, isError } = response;
+  const {
+    data: products,
+    isLoading,
+    isError,
+  } = api.product.getProducts.useQuery({
+    page,
+    search,
+    sortBy,
+    sortOrder,
+    modelId,
+    categoryId,
+  });
 
   if (isLoading) return <div className="pt-24">Loading...</div>;
   else if (isError) return <div>Something went wrong</div>;
