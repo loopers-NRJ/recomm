@@ -63,7 +63,7 @@ const WishCard: FC<WishCardProps> = ({ wish }) => {
           onClick={() => router.push(`/products?category=${wish.model.name}`)}
           disabled={status !== WishStatus.available}
         >
-          View
+          View Products
         </Button>
       </CardFooter>
     </Card>

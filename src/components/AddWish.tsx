@@ -20,7 +20,6 @@ import ComboBox from "./common/ComboBox";
 import { useToast } from "./ui/use-toast";
 
 const AddWish: FC = () => {
-  const [open, setOpen] = useState(false);
   const [searchCategory, setSearchCategory] = useState("");
   const categoryApi = api.category.getCategories.useQuery({
     search: searchCategory,
@@ -112,11 +111,8 @@ const AddWish: FC = () => {
           variant: "destructive",
         });
       }
-      setOpen(false);
-      return toast({
-        title: "Success",
-        description: "Wish Added Successfully",
-      });
+      console.log(result);
+      // TODO: close the model
     } catch (error) {
       console.log(error);
       return toast({
@@ -127,7 +123,7 @@ const AddWish: FC = () => {
     }
   };
   return (
-    <Dialog onOpenChange={setOpen} open={open}>
+    <Dialog>
       <DialogTrigger asChild>
         {/* Plus icon */}
         <AiFillPlusCircle className="text-5xl" />

@@ -1,11 +1,12 @@
 "use client";
 
+// import { useRouter } from "next/router";
 import WishCard from "./WishCard";
 import { api } from "@/utils/api";
 import { useEffect } from "react";
 import LoadingWishes from "./loading/LoadingWishes";
 
-const Wishes = () => {
+function Wishes() {
   const {
     data: wishes,
     isLoading,
@@ -19,6 +20,7 @@ const Wishes = () => {
   if (isLoading) return <LoadingWishes />;
   if (wishes instanceof Error) return <div>Something went wrong</div>;
   if (!wishes || wishes.length === 0) return <div>No data to Show</div>;
+  if (isLoading) return <div>Loading...</div>;
 
   return (
     <div className="mt-10 flex w-full flex-col items-center gap-5">
@@ -29,5 +31,5 @@ const Wishes = () => {
       </div>
     </div>
   );
-};
+}
 export default Wishes;
