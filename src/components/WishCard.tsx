@@ -1,7 +1,10 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { FC } from "react";
+
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardDescription,
@@ -9,9 +12,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { FC } from "react";
+import { api } from "@/utils/api";
 import { Brand, Model, Wish, WishStatus } from "@prisma/client";
-import { useRouter } from "next/navigation";
 
 type WishProp = Wish & {
   model: Model & {
@@ -27,12 +29,12 @@ const WishCard: FC<WishCardProps> = ({ wish }) => {
   const model = wish.model.name;
   const brand = wish.model.brand.name;
   const status = wish.status;
-
-  // TODO: delete wish
-  // const deleteWish = async (id: string) => {
-  //   // await api.wish.deleteWish.useMutation(id);
-  //   // await refetch();
-  // };
+  const deleteWish = api.wish.deleteWish.useMutation();
+  const handleDelete = (id: string) => {
+    deleteWish.mutate({
+      wishId: id,
+    });
+  };
 
   const router = useRouter();
 
@@ -59,10 +61,7 @@ const WishCard: FC<WishCardProps> = ({ wish }) => {
         >
           View
         </Button>
-        <Button
-          // onClick={() => deleteWish(wish.id)}
-          variant={"destructive"}
-        >
+        <Button onClick={() => handleDelete(wish.id)} variant={"destructive"}>
           Delete
         </Button>
       </CardFooter>

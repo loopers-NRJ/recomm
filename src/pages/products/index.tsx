@@ -1,9 +1,9 @@
 import { NextPage } from "next";
 import { useSearchParams } from "next/navigation";
-import LoadingProducts from "@/components/loading/LoadingProducts";
 
 import Container from "@/components/Container";
 import ListingCard from "@/components/ListingCard";
+import LoadingProducts from "@/components/loading/LoadingProducts";
 import Product from "@/types/product";
 import { api } from "@/utils/api";
 import {
@@ -23,9 +23,9 @@ export const ProductsPages: NextPage = () => {
   const search = params.get("search") ?? DefaultSearch;
   const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
   const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
-  const modelId = params.get("model") ?? undefined;
   const categoryId = params.get("category") ?? undefined;
-
+  const brandId = params.get("brand") ?? undefined;
+  const modelId = params.get("model") ?? undefined;
   const {
     data: products,
     isLoading,
@@ -37,6 +37,7 @@ export const ProductsPages: NextPage = () => {
     sortOrder,
     modelId,
     categoryId,
+    brandId,
   });
 
   if (isError || products instanceof Error)

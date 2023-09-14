@@ -1,5 +1,7 @@
 import { Home } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
+import { useRouter } from "next/router";
 import { FC, useCallback } from "react";
 import { RiHeartLine, RiLoopLeftLine } from "react-icons/ri";
 
@@ -20,9 +22,10 @@ interface NavItemsProps {
 
 const NavItems: FC<NavItemsProps> = ({ currentUser }) => {
   const router = useRouter();
-
   const loginModal = useLoginModal();
   const postingModal = usePostingModal();
+  const { data: session } = useSession();
+  const path = usePathname();
 
   const onPost = useCallback(() => {
     if (!currentUser) {
@@ -52,8 +55,10 @@ const NavItems: FC<NavItemsProps> = ({ currentUser }) => {
     <div className="flex w-fit flex-row items-center gap-0 rounded-lg bg-white md:gap-3">
       <Button
         variant={"ghost"}
-        className="min-w-max rounded-lg px-4 py-6 md:px-4 md:py-2"
-        onClick={() => router.push("/")}
+        className={`min-w-max rounded-lg px-4 py-6 md:px-4 md:py-2 ${
+          path === "/" ? `bg-slate-200/50` : ""
+        }`}
+        onClick={() => void router.push("/")}
       >
         <span className="text-xl md:hidden">
           <Home height={20} />
@@ -74,8 +79,10 @@ const NavItems: FC<NavItemsProps> = ({ currentUser }) => {
 
       <Button
         variant={"ghost"}
-        className="min-w-max rounded-lg px-4 py-6 md:px-4 md:py-2"
-        onClick={handleWishListClick}
+        className={`min-w-max rounded-lg px-4 py-6 md:px-4 md:py-2
+        ${path === `/${session?.user.id}/wishlist` ? "bg-slate-200/50" : ""}
+        `}
+        onClick={() => void handleWishListClick()}
       >
         <span className="text-xl md:hidden">
           <RiHeartLine />
@@ -84,9 +91,11 @@ const NavItems: FC<NavItemsProps> = ({ currentUser }) => {
       </Button>
 
       <Button
-        className="min-w-max rounded-lg px-4 py-6 md:gap-2 md:px-4 md:py-2"
+        className={`min-w-max rounded-lg px-4 py-6 md:gap-2 md:px-4 md:py-2 ${
+          path === `/${session?.user.id}/profile` ? "bg-slate-200/50" : ""
+        }`}
         variant={"ghost"}
-        onClick={handleProfileClick}
+        onClick={() => void handleProfileClick()}
       >
         <div>
           <Avatar src={currentUser?.image} />

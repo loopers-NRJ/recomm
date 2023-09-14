@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { BiHome } from "react-icons/bi";
 import { IconType } from "react-icons/lib/esm/iconBase";
 
 import { api } from "@/utils/api";

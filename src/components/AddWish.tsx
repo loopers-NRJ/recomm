@@ -26,8 +26,6 @@ const AddWish: FC = () => {
   });
   const [selectedCategory, setSelectedCategory] = useState<OptionalItem>();
 
-  // TODO: hardcoded default category id `cllrwmem20005ua9k3cxywefx`
-  // this id is for Electronics Category.
   const [searchBrand, setSearchBrand] = useState("");
   const brandApi = api.search.brands.useQuery({
     categoryId: selectedCategory?.id,
@@ -35,8 +33,6 @@ const AddWish: FC = () => {
   });
   const [selectedBrand, setSelectedBrand] = useState<OptionalItem>();
 
-  // TODO: hardcoded default brand id `cllrwmf4n0014ua9kz1iwr1by`
-  // this id is for Apple Brand.
   const [searchModel, setSearchModel] = useState("");
   const modelApi = api.search.models.useQuery({
     brandId: selectedBrand?.id,
@@ -52,7 +48,6 @@ const AddWish: FC = () => {
     brandApi.data instanceof Error ||
     modelApi.data instanceof Error
   ) {
-    // TODO: display the error message
     const error =
       categoryApi.data instanceof Error
         ? categoryApi.data
