@@ -16,7 +16,7 @@ const BottomBar: FC<BottomBarProps> = () => {
 
   return (
     <div className="fixed bottom-4 left-0 z-30 flex w-full items-center justify-center md:hidden">
-      <div className="rounded-full border">
+      <div className="rounded-lg border bg-white shadow-sm">
         <NavItems currentUser={user}></NavItems>
       </div>
     </div>

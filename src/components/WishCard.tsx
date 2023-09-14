@@ -54,16 +54,16 @@ const WishCard: FC<WishCardProps> = ({ wish }) => {
       </div>
       <CardFooter className="flex-col items-end gap-2 p-6">
         <Button
+          onClick={() => router.push(`/products?category=${wish.model.name}`)}
+          disabled={status !== WishStatus.available}
+        >
+          View
+        </Button>
+        <Button
           // onClick={() => deleteWish(wish.id)}
           variant={"destructive"}
         >
           Delete
-        </Button>
-        <Button
-          onClick={() => router.push(`/products?category=${wish.model.name}`)}
-          disabled={status !== WishStatus.available}
-        >
-          View Products
         </Button>
       </CardFooter>
     </Card>

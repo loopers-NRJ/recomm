@@ -49,10 +49,10 @@ const NavItems: FC<NavItemsProps> = ({ currentUser }) => {
   }, [currentUser, loginModal, router]);
 
   return (
-    <div className="flex w-fit flex-row items-center gap-0 rounded-full bg-white md:gap-3">
+    <div className="flex w-fit flex-row items-center gap-0 rounded-lg bg-white md:gap-3">
       <Button
         variant={"ghost"}
-        className="min-w-max rounded-full px-4 py-6 md:px-4 md:py-2"
+        className="min-w-max rounded-lg px-4 py-6 md:px-4 md:py-2"
         onClick={() => router.push("/")}
       >
         <span className="text-xl md:hidden">
@@ -63,7 +63,7 @@ const NavItems: FC<NavItemsProps> = ({ currentUser }) => {
 
       <Button
         variant={"ghost"}
-        className="min-w-max rounded-full px-4 py-6 md:px-4 md:py-2"
+        className="min-w-max rounded-lg px-4 py-6 md:px-4 md:py-2"
         onClick={onPost}
       >
         <span className="text-xl md:hidden">
@@ -74,7 +74,7 @@ const NavItems: FC<NavItemsProps> = ({ currentUser }) => {
 
       <Button
         variant={"ghost"}
-        className="min-w-max rounded-full px-4 py-6 md:px-4 md:py-2"
+        className="min-w-max rounded-lg px-4 py-6 md:px-4 md:py-2"
         onClick={handleWishListClick}
       >
         <span className="text-xl md:hidden">
@@ -84,7 +84,7 @@ const NavItems: FC<NavItemsProps> = ({ currentUser }) => {
       </Button>
 
       <Button
-        className="min-w-max rounded-full px-4 py-6 md:gap-2 md:px-4 md:py-2"
+        className="min-w-max rounded-lg px-4 py-6 md:gap-2 md:px-4 md:py-2"
         variant={"ghost"}
         onClick={handleProfileClick}
       >

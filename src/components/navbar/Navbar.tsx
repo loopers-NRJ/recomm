@@ -1,4 +1,4 @@
-import { Search } from "lucide-react";
+import Search from "@/components/search/Search";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 

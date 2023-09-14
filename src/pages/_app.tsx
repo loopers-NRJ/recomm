@@ -13,7 +13,7 @@ import { api } from "@/utils/api";
 const ModalRenderer = dynamic(
   () => import("../components/modals/core/modal-renderer"),
   {
-    loading: () => <p>Loading...</p>,
+    loading: () => null,
     ssr: false,
   }
 );
