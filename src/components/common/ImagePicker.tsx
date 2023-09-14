@@ -1,6 +1,7 @@
 import { Loader2 as Spinner, Plus } from "lucide-react";
 import Image from "next/image";
 import { FC, useState } from "react";
+import { v4 as uuid } from "uuid";
 
 interface ImageFile {
   id: string;
@@ -13,6 +14,7 @@ interface ImagePickerProps {
   maxImageSizeInMB?: number;
   setImages: (images: File[] | ((prev: File[]) => File[])) => void;
   acceptedImageFormats?: string[];
+  images: File[];
 }
 
 const ImagePicker: FC<ImagePickerProps> = ({
@@ -20,15 +22,21 @@ const ImagePicker: FC<ImagePickerProps> = ({
   maxImages = 5,
   acceptedImageFormats = ["image/jpeg", "image/jpg", "image/webp"],
   setImages: setImagesToParent,
+  images: parentImages,
 }) => {
-  const [images, setImages] = useState<ImageFile[]>([]);
+  const [images, setImages] = useState<ImageFile[]>(
+    parentImages.map((image) => ({
+      id: image.name,
+      file: image,
+      progress: 100,
+    }))
+  );
 
   const handleImageSelect = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const imageCompression = (await import("browser-image-compression"))
       .default;
-    const { v4: uuid } = await import("uuid");
     const { toast } = await import("../ui/use-toast");
 
     const newImages = [];

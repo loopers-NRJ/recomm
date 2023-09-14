@@ -5,7 +5,8 @@ import { useEffect, useState } from "react";
 import usePostingModal from "@/hooks/usePostingModal";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross1Icon } from "@radix-ui/react-icons";
-import { TabsDemo } from "../common/Tabs";
+
+import { PostingTabs } from "../common/Tabs";
 
 const PostingModal = () => {
   const postingModal = usePostingModal();
@@ -44,7 +45,10 @@ const PostingModal = () => {
             <Cross1Icon onClick={onClose} />
           </Dialog.Close>
           {/* Form */}
-          <TabsDemo setShowModal={setShowModal} postingModal={postingModal} />
+          <PostingTabs
+            setShowModal={setShowModal}
+            postingModal={postingModal}
+          />
         </Dialog.DialogContent>
       </Dialog.Portal>
     </Dialog.Root>
