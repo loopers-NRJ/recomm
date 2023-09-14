@@ -1,13 +1,15 @@
-import { api } from "@/utils/api";
+import { useRouter } from "next/router";
 import { FC, useEffect } from "react";
+
+import { api } from "@/utils/api";
+import { debounce } from "@/utils/helper";
 
 interface SuggestionProps {
   searchKey: string | undefined;
 }
 
 const Suggestions: FC<SuggestionProps> = ({ searchKey }) => {
-  console.log(searchKey);
-
+  const router = useRouter();
   const {
     data: suggestions,
     isLoading,
@@ -17,19 +19,17 @@ const Suggestions: FC<SuggestionProps> = ({ searchKey }) => {
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (searchKey && searchKey.length > 2) {
-      timer = setTimeout(() => {
-        void refetch();
-      }, 500);
+      debounce(() => void refetch())();
     }
     return () => {
       clearTimeout(timer);
     };
-  }, [searchKey]);
+  }, [refetch, searchKey]);
 
   if (isLoading)
     return (
       <div
-        className={`suggestions absolute left-0 top-10 w-full border bg-white`}
+        className={`suggestions absolute left-0 top-10 rounded-md border bg-white text-center md:w-[100px] lg:w-[300px]`}
       >
         Loading...
       </div>
@@ -37,7 +37,7 @@ const Suggestions: FC<SuggestionProps> = ({ searchKey }) => {
   if (suggestions instanceof Error)
     return (
       <div
-        className={`suggestions absolute left-0 top-10 w-full border bg-white`}
+        className={`suggestions absolute left-0 top-10 rounded-md border bg-white md:w-[100px] lg:w-[300px]`}
       >
         {suggestions.message}
       </div>
@@ -45,11 +45,9 @@ const Suggestions: FC<SuggestionProps> = ({ searchKey }) => {
 
   const { categories, brands, models } = suggestions!;
 
-  console.log(suggestions);
-
   return (
     <div
-      className={`suggestions absolute left-0 top-10 w-full border bg-white ${
+      className={`suggestions absolute left-0 top-10 w-full rounded-md border bg-white md:w-[100px] lg:w-[300px] ${
         categories === undefined ||
         brands === undefined ||
         models === undefined ||
@@ -61,6 +59,9 @@ const Suggestions: FC<SuggestionProps> = ({ searchKey }) => {
       {categories?.map((category) => (
         <div
           key={category.id}
+          onClick={() => {
+            void router.push(`/products/?category=${category.id}`);
+          }}
           className="flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm text-slate-400 hover:bg-slate-200/50"
         >
           <span>{category.name}</span>
@@ -70,6 +71,9 @@ const Suggestions: FC<SuggestionProps> = ({ searchKey }) => {
       {brands?.map((brand) => (
         <div
           key={brand.id}
+          onClick={() => {
+            void router.push(`/products/?brand=${brand.id}`);
+          }}
           className="flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm text-slate-400 hover:bg-slate-200/50"
         >
           <span>{brand.name}</span>
@@ -79,6 +83,9 @@ const Suggestions: FC<SuggestionProps> = ({ searchKey }) => {
       {models?.map((modal) => (
         <div
           key={modal.id}
+          onClick={() => {
+            void router.push(`/products/?model=${modal.id}`);
+          }}
           className="flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm text-slate-400 hover:bg-slate-200/50"
         >
           <span>{modal.name}</span>
