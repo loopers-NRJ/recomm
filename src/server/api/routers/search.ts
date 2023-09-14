@@ -10,7 +10,6 @@ export const searchRouter = createTRPCRouter({
     .input(functionalityOptions)
     .query(
       async ({ input: { search, page, limit, sortBy, sortOrder }, ctx }) => {
-        console.log("search:", search);
         if (search === undefined || search === null || search === "") {
           return {};
         }

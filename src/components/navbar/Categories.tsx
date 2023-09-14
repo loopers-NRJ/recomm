@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BiHome } from "react-icons/bi";
 import { IconType } from "react-icons/lib/esm/iconBase";
 
 import { api } from "@/utils/api";
@@ -9,6 +8,7 @@ import { api } from "@/utils/api";
 import Container from "../Container";
 import CategoryBox from "./CategoryBox";
 import LoadingCategories from "./LoadingCategories";
+import { BiHome } from "react-icons/bi";
 
 interface Icon {
   label: string;

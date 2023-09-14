@@ -75,42 +75,13 @@ const ProfilePage: NextPage = () => {
                   href="#"
                   className="col-span-1 block rounded-lg bg-gray-900 px-6 py-3 text-center font-medium leading-6 text-gray-200 hover:bg-black hover:text-white"
                 >
-                  Connect{" "}
-                  <span className="hidden font-bold md:inline-block">
-                    with @{userData.name}
-                  </span>
+                  Edit Profile
                 </a>
                 <a
                   onClick={() => void signOut({ callbackUrl: "/" })}
                   className="col-span-1 block cursor-pointer rounded-lg bg-gray-900 px-6 py-3 text-center font-medium leading-6 text-gray-200 hover:bg-black hover:text-white"
                 >
                   Log Out
-                </a>
-              </div>
-              <div className="my-5 flex items-center justify-between px-6">
-                <a
-                  href=""
-                  className="w-full rounded py-3 text-center text-sm font-medium text-gray-500 transition duration-150 ease-in hover:bg-gray-100 hover:text-gray-900"
-                >
-                  Facebook
-                </a>
-                <a
-                  href=""
-                  className="w-full rounded py-3 text-center text-sm font-medium text-gray-500 transition duration-150 ease-in hover:bg-gray-100 hover:text-gray-900"
-                >
-                  Twitter
-                </a>
-                <a
-                  href=""
-                  className="w-full rounded py-3 text-center text-sm font-medium text-gray-500 transition duration-150 ease-in hover:bg-gray-100 hover:text-gray-900"
-                >
-                  Instagram
-                </a>
-                <a
-                  href=""
-                  className="w-full rounded py-3 text-center text-sm font-medium text-gray-500 transition duration-150 ease-in hover:bg-gray-100 hover:text-gray-900"
-                >
-                  Email
                 </a>
               </div>
 

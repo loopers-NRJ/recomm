@@ -99,7 +99,6 @@ const AddWish: FC = () => {
         });
       }
       console.log(result);
-      // TODO: close the model
     } catch (error) {
       console.log(error);
       return toast({
@@ -110,7 +109,7 @@ const AddWish: FC = () => {
     }
   };
   return (
-    <Dialog>
+    <Dialog modal>
       <DialogTrigger asChild>
         {/* Plus icon */}
         <AiFillPlusCircle className="text-5xl" />

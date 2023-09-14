@@ -82,23 +82,29 @@ const ProductPage: NextPage = () => {
             {/* Bidding List */}
             <div className="order-first mb-10 md:order-last md:col-span-3">
               <div className="overflow-hidden rounded-xl border-[1px] border-neutral-200 bg-white">
-                <div className="flex flex-row items-end justify-between p-4">
-                  <div className="text-lg font-semibold">Product Price: </div>
-                  <div className="text-2xl font-semibold">
-                    <span className="text-xs font-light">Rs. </span>
-                    {product.price}
+                {(!user || user?.id !== product.seller.id) ?? (
+                  <div className="">
+                    <div className="flex flex-row items-end justify-between p-4">
+                      <div className="text-lg font-semibold">
+                        Product Price:{" "}
+                      </div>
+                      <div className="text-2xl font-semibold">
+                        <span className="text-xs font-light">Rs. </span>
+                        {product.price}
+                      </div>
+                    </div>
+                    <hr />
+                    <div className="p-4">
+                      <Button
+                        disabled={!user || user?.id === product.seller.id}
+                        label="Place Bid"
+                        onClick={() => {
+                          biddingModal.onOpen(product.roomId);
+                        }}
+                      />
+                    </div>
                   </div>
-                </div>
-                <hr />
-                <div className="p-4">
-                  <Button
-                    disabled={!user || user?.id === product.seller.id}
-                    label="Place Bid"
-                    onClick={() => {
-                      biddingModal.onOpen(product.roomId);
-                    }}
-                  />
-                </div>
+                )}
                 <hr />
                 <div className="flex flex-row items-center justify-between p-4 text-lg font-semibold">
                   <h1>Bidding List</h1>

@@ -44,7 +44,13 @@ export const Home: NextPage = () => {
   else if (isError) return <div>Something went wrong</div>;
   else if (products instanceof Error) return <div>{products.message}</div>;
   else if (!products || products.length === 0)
-    return <div className="pt-24">No data to Show</div>;
+    return (
+      <Container>
+        <div className="flex h-[500px] items-center justify-center pt-24 font-semibold">
+          No Products Available
+        </div>
+      </Container>
+    );
 
   return (
     <main>
