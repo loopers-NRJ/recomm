@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { BiHome } from "react-icons/bi";
 import { IconType } from "react-icons/lib/esm/iconBase";
 
 import { api } from "@/utils/api";
@@ -105,7 +106,7 @@ const Categories = () => {
   return (
     <Container>
       <div className="flex flex-row items-center justify-between overflow-x-auto pt-4">
-        {/* <CategoryBox label="All" icon={BiHome} /> */}
+        <CategoryBox label="All" icon={BiHome} />
         {categories.map((item, i) => (
           <CategoryBox
             key={item.label}
