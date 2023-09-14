@@ -1,4 +1,5 @@
 import { FC } from "react";
+
 import {
   Select,
   SelectContent,
@@ -22,7 +23,6 @@ const BidDurationPicker: FC<BidDurationPickerProps> = ({ setEndDate }) => {
     <Select
       onValueChange={(value) => {
         setEndDate(value as unknown as Date);
-        console.log(value);
       }}
       defaultValue={`${Date.now() + 7 * 3600 * 24}`}
     >

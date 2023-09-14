@@ -43,7 +43,17 @@ const Suggestions: FC<SuggestionProps> = ({ searchKey }) => {
       </div>
     );
 
-  const { categories, brands, models } = suggestions!;
+  if (suggestions === undefined) {
+    return (
+      <div
+        className={`suggestions absolute left-0 top-10 rounded-md border bg-white md:w-[100px] lg:w-[300px]`}
+      >
+        No Suggestions
+      </div>
+    );
+  }
+
+  const { categories, brands, models } = suggestions;
 
   return (
     <div

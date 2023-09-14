@@ -47,7 +47,7 @@ const Carousel: FC<CarouselProps> = ({ images }) => {
   return (
     <div className="relative flex flex-col gap-4">
       <button
-        className="absolute top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full p-2 disabled:opacity-0"
+        className="absolute top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full p-2 text-white disabled:opacity-0"
         onClick={(e) => swipeTo(current - 1, e)}
         disabled={current === 0}
       >
@@ -55,7 +55,7 @@ const Carousel: FC<CarouselProps> = ({ images }) => {
       </button>
 
       <button
-        className="absolute right-0 top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full p-2 disabled:opacity-0"
+        className="absolute right-0 top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full p-2 text-white disabled:opacity-0"
         onClick={(e) => swipeTo(current + 1, e)}
         disabled={current === images.length - 1}
       >
@@ -85,7 +85,7 @@ const Carousel: FC<CarouselProps> = ({ images }) => {
               key={index}
               className={`${
                 current === index ? "h-3 w-3" : "h-2 w-2"
-              } cursor-pointer rounded-full bg-black`}
+              } cursor-pointer rounded-full bg-white`}
               onClick={(e) => swipeTo(index, e)}
             />
           ))}
