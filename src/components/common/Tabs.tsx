@@ -1,11 +1,9 @@
-import ImagePicker from "../common/ImagePicker";
-import { Brand, Category, Model } from "@prisma/client";
-import ComboBox from "../common/ComboBox";
-import { Input } from "../ui/input";
-import BidDurationPicker from "../common/BidDurationPicker";
-import { Button } from "@/components/ui/button";
-import { uploadImagesToBackend } from "@/utils/imageUpload";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+import { FC, useEffect, useState } from "react";
+import { z } from "zod";
 
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -16,14 +14,17 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FC, useEffect, useRef, useState } from "react";
+import { PostingModalStore } from "@/hooks/usePostingModal";
 import { OptionalItem } from "@/types/item";
 import { api } from "@/utils/api";
-import { useRouter } from "next/router";
+import { uploadImagesToBackend } from "@/utils/imageUpload";
+import { Brand, Category, Model } from "@prisma/client";
+
+import BidDurationPicker from "../common/BidDurationPicker";
+import ComboBox from "../common/ComboBox";
+import ImagePicker from "../common/ImagePicker";
+import { Input } from "../ui/input";
 import { toast } from "../ui/use-toast";
-import { z } from "zod";
-import { useSession } from "next-auth/react";
-import { PostingModalStore } from "@/hooks/usePostingModal";
 
 const productSchema = z.object({
   price: z
@@ -36,12 +37,15 @@ const productSchema = z.object({
   categoryId: z.string().min(1),
 });
 
-interface TabsDemoProps {
+interface PostingTabsProps {
   setShowModal: (bool: boolean) => void;
   postingModal: PostingModalStore;
 }
 
-export const TabsDemo: FC<TabsDemoProps> = ({ setShowModal, postingModal }) => {
+export const PostingTabs: FC<PostingTabsProps> = ({
+  setShowModal,
+  postingModal,
+}) => {
   const router = useRouter();
   const [searchCategory, setSearchCategory] = useState("");
   const categoryApi = api.search.category.useQuery({
@@ -54,8 +58,6 @@ export const TabsDemo: FC<TabsDemoProps> = ({ setShowModal, postingModal }) => {
   const session = useSession();
   const userId = session.data?.user.id;
 
-  // TODO: hardcoded default category id `cllrwmem20005ua9k3cxywefx`
-  // this id is for Electronics Category.
   const [searchBrand, setSearchBrand] = useState("");
   const brandApi = api.search.brands.useQuery({
     categoryId: selectedCategory?.id,
@@ -63,8 +65,6 @@ export const TabsDemo: FC<TabsDemoProps> = ({ setShowModal, postingModal }) => {
   });
   const [selectedBrand, setSelectedBrand] = useState<OptionalItem>();
 
-  // TODO: hardcoded default brand id `cllrwmf4n0014ua9kz1iwr1by`
-  // this id is for Apple Brand.
   const [searchModel, setSearchModel] = useState("");
   const modelApi = api.search.models.useQuery({
     brandId: selectedBrand?.id,
@@ -72,13 +72,13 @@ export const TabsDemo: FC<TabsDemoProps> = ({ setShowModal, postingModal }) => {
   });
   const [selectedModel, setSelectedModel] = useState<OptionalItem>();
 
-  const descriptionRef = useRef<HTMLInputElement>(null);
-  const priceRef = useRef<HTMLInputElement>(null);
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState(0);
+
   const [images, setImages] = useState<File[]>([]);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
   const uploadProduct = api.product.createProduct.useMutation();
-  // const [loading, setLoading] = useState(false);
 
   // reset the selected brand and model when the category is changed
   useEffect(() => {
@@ -92,11 +92,6 @@ export const TabsDemo: FC<TabsDemoProps> = ({ setShowModal, postingModal }) => {
   }, [selectedBrand]);
 
   const handleSubmit = async () => {
-    if (descriptionRef.current == null || priceRef.current == null) {
-      return;
-    }
-    const description = descriptionRef.current.value;
-    const price = +priceRef.current.value;
     const result = productSchema.safeParse({
       price,
       description,
@@ -173,13 +168,21 @@ export const TabsDemo: FC<TabsDemoProps> = ({ setShowModal, postingModal }) => {
     });
     return;
   }
-  console.log(images, descriptionRef.current?.value, priceRef.current?.value);
+
+  const handleChangeTab = (tab: "tab-1" | "tab-2") => () => {
+    // validate the input if needed
+    changeTab(tab);
+  };
 
   return (
     <Tabs defaultValue="tab-1" value={tab} className="h-full w-full">
       <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="tab-1">Stage 01</TabsTrigger>
-        <TabsTrigger value="tab-2">Stage 02</TabsTrigger>
+        <TabsTrigger value="tab-1" onClick={handleChangeTab("tab-1")}>
+          Stage 01
+        </TabsTrigger>
+        <TabsTrigger value="tab-2" onClick={handleChangeTab("tab-2")}>
+          Stage 02
+        </TabsTrigger>
       </TabsList>
       <TabsContent value="tab-1">
         <Card className="border-none">
@@ -189,6 +192,7 @@ export const TabsDemo: FC<TabsDemoProps> = ({ setShowModal, postingModal }) => {
               Make changes to your posting here. Click next when you are done.
             </CardDescription>
           </CardHeader>
+
           <CardContent className="space-y-2">
             <form className="flex h-full flex-col justify-between">
               <div className="flex flex-col gap-2">
@@ -228,9 +232,15 @@ export const TabsDemo: FC<TabsDemoProps> = ({ setShowModal, postingModal }) => {
                   />
                 </div>
                 <Label>Description</Label>
-                <Input ref={descriptionRef} required />
+                <Input
+                  value={description}
+                  onChange={(e) => {
+                    setDescription(e.target.value);
+                  }}
+                  required
+                />
                 Images
-                <ImagePicker setImages={setImages} />
+                <ImagePicker setImages={setImages} images={images} />
               </div>
             </form>
           </CardContent>
@@ -253,10 +263,10 @@ export const TabsDemo: FC<TabsDemoProps> = ({ setShowModal, postingModal }) => {
             <div className="space-y-1">
               <Label htmlFor="current">Price</Label>
               <Input
-                ref={priceRef}
                 id="price"
                 type="number"
-                defaultValue={0}
+                value={price}
+                onChange={(e) => setPrice(+e.target.value)}
                 required
               />
             </div>
@@ -265,7 +275,7 @@ export const TabsDemo: FC<TabsDemoProps> = ({ setShowModal, postingModal }) => {
               <BidDurationPicker setEndDate={setEndDate} />
             </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="gap-3">
             <Button className="w-full" onClick={() => changeTab("tab-1")}>
               Back
             </Button>
