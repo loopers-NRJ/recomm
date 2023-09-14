@@ -8,6 +8,7 @@ import { api } from "@/utils/api";
 import Container from "../Container";
 import CategoryBox from "./CategoryBox";
 import LoadingCategories from "./LoadingCategories";
+import { BiHome } from "react-icons/bi";
 
 interface Icon {
   label: string;
@@ -105,7 +106,7 @@ const Categories = () => {
   return (
     <Container>
       <div className="flex flex-row items-center justify-between overflow-x-auto pt-4">
-        {/* <CategoryBox label="All" icon={BiHome} /> */}
+        <CategoryBox label="All" icon={BiHome} />
         {categories.map((item, i) => (
           <CategoryBox
             key={item.label}

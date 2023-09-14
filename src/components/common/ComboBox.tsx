@@ -56,7 +56,7 @@ const ComboBox: FC<ComboBoxProps> = ({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[200px] justify-between text-black"
+          className="w-[200px] justify-between text-sm font-normal text-black"
         >
           {selected
             ? (items ?? previousItemsRef.current).find(

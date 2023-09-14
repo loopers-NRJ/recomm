@@ -1,7 +1,7 @@
 import { Home } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FC, useCallback } from "react";
-import { RiCopperCoinLine, RiHeartLine } from "react-icons/ri";
+import { RiHeartLine, RiLoopLeftLine } from "react-icons/ri";
 
 import useLoginModal from "@/hooks/useLoginModal";
 import usePostingModal from "@/hooks/usePostingModal";
@@ -67,7 +67,7 @@ const NavItems: FC<NavItemsProps> = ({ currentUser }) => {
         onClick={onPost}
       >
         <span className="text-xl md:hidden">
-          <RiCopperCoinLine />
+          <RiLoopLeftLine />
         </span>
         <span className="hidden md:block">Sell It</span>
       </Button>
