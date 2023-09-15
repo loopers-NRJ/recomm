@@ -7,13 +7,14 @@
  * need to use are documented accordingly near the end.
  */
 
-import { initTRPC, TRPCError } from "@trpc/server";
-import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
-import { type Session } from "next-auth";
+import { Session } from "next-auth";
 import superjson from "superjson";
 import { ZodError } from "zod";
+
 import { getServerAuthSession } from "@/server/auth";
 import { prisma } from "@/server/db";
+import { initTRPC, TRPCError } from "@trpc/server";
+import { CreateNextContextOptions } from "@trpc/server/adapters/next";
 
 /**
  * 1. CONTEXT
@@ -98,12 +99,32 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
 export const createTRPCRouter = t.router;
 
 /**
+ * Custom middleware to update the user last active state
+ */
+// export const updateLastActiveMiddleware = t.middleware(
+//   async ({ ctx, next }) => {
+//     if (ctx.session?.user) {
+//       await prisma.user.update({
+//         where: {
+//           id: ctx.session.user.id,
+//         },
+//         data: {
+//           lastActive: new Date(),
+//         },
+//       });
+//     }
+//     return next();
+//   }
+// );
+
+/**
  * Public (unauthenticated) procedure
  *
  * This is the base piece you use to build new queries and mutations on your tRPC API. It does not
  * guarantee that a user querying is authorized, but you can still access user session data if they
  * are logged in.
  */
+// export const publicProcedure = t.procedure.use(updateLastActiveMiddleware);
 export const publicProcedure = t.procedure;
 
 /** Reusable middleware that enforces users are logged in before running the procedure. */

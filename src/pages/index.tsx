@@ -61,6 +61,7 @@ export const Home: NextPage = () => {
             <ListingCard
               key={product.id}
               product={product as unknown as Product}
+              hideHeartIcon
             />
           ))}
         </div>

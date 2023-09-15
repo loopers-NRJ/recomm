@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { BiHome, BiSolidCar } from "react-icons/bi";
 import { IconType } from "react-icons/lib/esm/iconBase";
 
@@ -15,7 +15,7 @@ interface Icon {
   label: string;
   icon: IconType;
 }
-const Categories = () => {
+const Categories: FC = () => {
   const { data, isLoading } = api.category.getCategories.useQuery({});
   const [categories, setCategories] = useState<Icon[]>([]);
   const [categoryLoading, setCategoryLoading] = useState<boolean>(true);
@@ -93,11 +93,12 @@ const Categories = () => {
   }, []);
 
   if (data instanceof Error) {
-    return toast({
+    toast({
       title: "Error",
       description: data.message,
       variant: "destructive",
     });
+    return;
   }
 
   // if (isError) {

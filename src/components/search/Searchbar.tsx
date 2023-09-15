@@ -5,7 +5,7 @@ import { Input } from "../ui/input";
 import Suggestions from "./Suggestions";
 
 const Search = () => {
-  const [searchKey, setSearchKey] = useState<string | undefined>(undefined);
+  const [searchKey, setSearchKey] = useState<string>("");
 
   const router = useRouter();
 

@@ -1,10 +1,11 @@
 import { NextPage } from "next";
-import { api } from "@/utils/api";
-import Product from "@/types/product";
-import ListingCard from "@/components/ListingCard";
 import { useRouter } from "next/router";
+
 import Container from "@/components/Container";
+import ListingCard from "@/components/ListingCard";
 import LoadingProducts from "@/components/loading/LoadingProducts";
+import Product from "@/types/product";
+import { api } from "@/utils/api";
 
 const Listings: NextPage = () => {
   // user the params to get User ID
@@ -42,6 +43,7 @@ const Listings: NextPage = () => {
               // currentUser={session?.user as User}
               key={product.id}
               product={product as unknown as Product}
+              hideHeartIcon
             />
           ))}
         </div>

@@ -1,11 +1,12 @@
-import Container from "@/components/Container";
-import { Button } from "@/components/ui/button";
-import useLoginModal from "@/hooks/useLoginModal";
-import { api } from "@/utils/api";
 import { NextPage } from "next";
 import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/router";
+
+import Container from "@/components/Container";
+import { Button } from "@/components/ui/button";
+import useLoginModal from "@/hooks/useLoginModal";
+import { api } from "@/utils/api";
 
 const ProfilePage: NextPage = () => {
   const router = useRouter();
@@ -31,6 +32,7 @@ const ProfilePage: NextPage = () => {
   } else if (!userData) {
     return <main>User not found</main>;
   }
+  // console.log(userData.lastActive);
 
   if (user?.id !== userId) {
     return (

@@ -2,7 +2,6 @@ import { NextPage } from "next";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { GiSofa } from "react-icons/gi";
 
 import BiddingList from "@/components/BiddingList";
 import Button from "@/components/Button";
@@ -10,7 +9,6 @@ import Carousel from "@/components/common/Carousel";
 import Container from "@/components/Container";
 import Heading from "@/components/Heading";
 import HeartButton from "@/components/HeartButton";
-import ListingCategory from "@/components/ListingCategory";
 import Avatar from "@/components/navbar/Avatar";
 import useBiddingModal from "@/hooks/useBiddingModal";
 import { api } from "@/utils/api";
@@ -68,7 +66,8 @@ const ProductPage: NextPage = () => {
                 </div>
               </div>
               <hr />
-              <ListingCategory icon={GiSofa} label="Furniture" />
+              {/* TODO: this icon makes the package 6.9Mb  */}
+              {/* <ListingCategory icon={GiSofa} label="Furniture" /> */}
               <hr />
               <div className="text-lg font-light text-neutral-500">
                 Created on {product.createdAt.toDateString()}.

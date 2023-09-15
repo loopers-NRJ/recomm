@@ -1,26 +1,28 @@
 "use client";
 
-import Product from "@/types/product";
-// import Button from "./Button";
-import HeartButton from "./HeartButton";
 import { useRouter } from "next/router";
+
+import Product from "@/types/product";
+
 // import Image from "next/image";
 import Carousel from "./common/Carousel";
+// import Button from "./Button";
+import HeartButton from "./HeartButton";
 
 interface ListingCardProps {
   isFavourite?: boolean;
   product: Product;
   onFavoriteStateChange?: () => void;
+  hideHeartIcon?: true;
 }
 
 const ListingCard: React.FC<ListingCardProps> = ({
   product,
   isFavourite,
   onFavoriteStateChange,
+  hideHeartIcon = false,
 }) => {
   const router = useRouter();
-
-  const pathname = router.pathname;
 
   return (
     <div
@@ -35,7 +37,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
         <div className="relative w-full overflow-hidden rounded-xl">
           <Carousel images={["/shoe.jpg"]} />
           <div className="absolute right-3 top-3">
-            {pathname !== "/" && (
+            {!hideHeartIcon && (
               <HeartButton
                 productId={product.id}
                 enabled={isFavourite ?? false}

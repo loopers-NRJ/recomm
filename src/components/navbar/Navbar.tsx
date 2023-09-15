@@ -2,7 +2,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 
 import Container from "@/components/Container";
-import Search from "@/components/search/Search";
+import Search from "@/components/search/Searchbar";
 
 import Categories from "./Categories";
 import Logo from "./Logo";

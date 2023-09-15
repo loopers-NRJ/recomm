@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { OptionalItem } from "@/types/item";
+import { FetchItems, OptionalItem } from "@/types/item";
 import { api } from "@/utils/api";
 
 import ComboBox from "./common/ComboBox";
@@ -127,33 +127,42 @@ const AddWish: FC = () => {
             Category
             <ComboBox
               label="Category"
-              items={categoryApi.data}
               selected={selectedCategory}
               onSelect={(category) => setSelectedCategory(category)}
-              refetch={setSearchCategory}
-              loading={categoryApi.isLoading}
+              fetchItems={api.search.category.useQuery as FetchItems}
+              fetchInput={{ search: searchCategory }}
+              value={searchCategory}
+              onChange={(value) => setSearchCategory(value)}
             />
           </div>
           <div className="flex justify-between">
             Brand
             <ComboBox
               label="Brand"
-              items={brandApi.data}
               selected={selectedBrand}
               onSelect={(brand) => setSelectedBrand(brand)}
-              refetch={setSearchBrand}
-              loading={brandApi.isLoading}
+              fetchItems={api.search.brands.useQuery as FetchItems}
+              fetchInput={{
+                categoryId: selectedCategory?.id,
+                search: searchBrand,
+              }}
+              value={searchBrand}
+              onChange={(value) => setSearchBrand(value)}
             />
           </div>
           <div className="flex justify-between">
             Model
             <ComboBox
               label="Model"
-              items={modelApi.data}
               selected={selectedModel}
               onSelect={(model) => setSelectedModel(model)}
-              refetch={setSearchModel}
-              loading={modelApi.isLoading}
+              fetchItems={api.search.models.useQuery as FetchItems}
+              fetchInput={{
+                brandId: selectedBrand?.id,
+                search: searchModel,
+              }}
+              value={searchModel}
+              onChange={(value) => setSearchModel(value)}
             />
           </div>
         </div>
