@@ -5,7 +5,6 @@ import { functionalityOptions } from "@/utils/validation";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 
 export const searchRouter = createTRPCRouter({
-  // all. takes functionality options and returns { categories: [Category], brands: [Brand], models: [Model] }
   all: publicProcedure
     .input(functionalityOptions)
     .query(
@@ -91,7 +90,7 @@ export const searchRouter = createTRPCRouter({
           };
         } catch (error) {
           console.error({ procedure: "search.all", error });
-          return new Error("Failed to fetch categories");
+          return new Error("Something went wrong!");
         }
       }
     ),
@@ -124,7 +123,7 @@ export const searchRouter = createTRPCRouter({
           return categories;
         } catch (error) {
           console.error({ procedure: "search.category", error });
-          return new Error("Failed to fetch categories");
+          return new Error("Something went wrong!");
         }
       }
     ),
@@ -177,7 +176,7 @@ export const searchRouter = createTRPCRouter({
         } catch (error) {
           console.error({ procedure: "search.brands", error });
 
-          return new Error("Error fetching brands");
+          return new Error("Something went wrong!");
         }
       }
     ),
@@ -230,7 +229,7 @@ export const searchRouter = createTRPCRouter({
             procedure: "search.models",
             error,
           });
-          return new Error("Error fetching models");
+          return new Error("Something went wrong!");
         }
       }
     ),

@@ -40,7 +40,7 @@ export const roomRounter = createTRPCRouter({
         });
         return bids;
       } catch (error) {
-        return new Error("Error fetching room");
+        return new Error("Something went wrong!");
       }
     }),
 
@@ -69,46 +69,50 @@ export const roomRounter = createTRPCRouter({
   deleteBid: protectedProcedure
     .input(z.object({ bidId: z.string().cuid() }))
     .mutation(async ({ input: { bidId }, ctx: { prisma, session } }) => {
-      const bid = await prisma.bid.findUnique({
-        where: {
-          id: bidId,
-        },
-        include: {
-          user: true,
-          room: {
-            include: {
-              product: true,
-            },
-          },
-        },
-      });
-      // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
-      if (bid === null || bid.room === null || bid.room.product === null) {
-        return new Error("Bid not found");
-      }
-
-      if (
-        // this condition allows user to delete their own bid
-        bid.user.id !== session.user.id &&
-        // this condition allows seller to delete bid of other users
-        bid.room.product.sellerId !== session.user.id
-      ) {
-        return new Error("You cannot delete this bid");
-      }
-
-      // using void to ignore the returning promise
-      void prisma.bid
-        .delete({
+      try {
+        const bid = await prisma.bid.findUnique({
           where: {
             id: bidId,
           },
-        })
-        .catch((error) => {
-          console.error({
-            procedure: "deleteABid",
-            error,
-          });
+          include: {
+            user: true,
+            room: {
+              include: {
+                product: true,
+              },
+            },
+          },
         });
+        // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
+        if (bid === null || bid.room === null || bid.room.product === null) {
+          return new Error("Bid not found");
+        }
+
+        if (
+          // this condition allows user to delete their own bid
+          bid.user.id !== session.user.id &&
+          // this condition allows seller to delete bid of other users
+          bid.room.product.sellerId !== session.user.id
+        ) {
+          return new Error("You cannot delete this bid");
+        }
+
+        // using void to ignore the returning promise
+        void prisma.bid
+          .delete({
+            where: {
+              id: bidId,
+            },
+          })
+          .catch((error) => {
+            console.error({
+              procedure: "deleteABid",
+              error,
+            });
+          });
+      } catch (error) {
+        return new Error("Something went wrong!");
+      }
     }),
 });
 
@@ -130,7 +134,7 @@ export const getHighestBidByRoomId = async (
     });
     return bid;
   } catch (error) {
-    return new Error("Error fetching room");
+    return new Error("Something went wrong!");
   }
 };
 

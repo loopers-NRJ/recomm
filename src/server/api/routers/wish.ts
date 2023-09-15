@@ -50,7 +50,7 @@ export const wishRouter = createTRPCRouter({
 
         return wish;
       } catch (error) {
-        return new Error("Error creating wish");
+        return new Error("Something went wrong!");
       }
     }),
   deleteWish: protectedProcedure
@@ -76,7 +76,7 @@ export const wishRouter = createTRPCRouter({
         });
         return deletedWish;
       } catch (error) {
-        return new Error("Error deleting wish");
+        return new Error("Something went wrong!");
       }
     }),
 });

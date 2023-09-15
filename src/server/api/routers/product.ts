@@ -97,7 +97,7 @@ export const productRouter = createTRPCRouter({
             error,
           });
 
-          return new Error("Error fetching products");
+          return new Error("Something went wrong!");
         }
       }
     ),
@@ -150,7 +150,7 @@ export const productRouter = createTRPCRouter({
           error,
         });
 
-        return new Error("Error fetching product");
+        return new Error("Something went wrong!");
       }
     }),
   createProduct: protectedProcedure
@@ -230,7 +230,7 @@ export const productRouter = createTRPCRouter({
             procedure: "createProduct",
             error,
           });
-          return new Error("Error creating product");
+          return new Error("Something went wrong!");
         }
       }
     ),
@@ -294,7 +294,7 @@ export const productRouter = createTRPCRouter({
           error,
         });
 
-        return new Error("Error updating product");
+        return new Error("Something went wrong!");
       }
     }),
   deleteProductById: protectedProcedure
@@ -374,7 +374,7 @@ export const productRouter = createTRPCRouter({
           procedure: "deleteProductById",
           error,
         });
-        return new Error("Error deleting product");
+        return new Error("Something went wrong!");
       }
     }),
   addProductToFavorites: protectedProcedure
@@ -420,7 +420,7 @@ export const productRouter = createTRPCRouter({
           procedure: "addProductToFavorites",
           error,
         });
-        return new Error("Error adding product to favorites");
+        return new Error("Something went wrong!");
       }
     }),
   removeProductFromFavorites: protectedProcedure
@@ -466,7 +466,7 @@ export const productRouter = createTRPCRouter({
           procedure: "removeProductFromFavorites",
           error,
         });
-        return new Error("Error removing product from favorites");
+        return new Error("Something went wrong!");
       }
     }),
 });

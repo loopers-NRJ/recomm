@@ -51,7 +51,7 @@ export const brandRouter = createTRPCRouter({
         } catch (error) {
           console.error({ procedure: "getBrands", error });
 
-          return new Error("Error fetching brands");
+          return new Error("Something went wrong!");
         }
       }
     ),
@@ -73,7 +73,7 @@ export const brandRouter = createTRPCRouter({
         return brand;
       } catch (error) {
         console.error({ procedure: "getBrandById", error });
-        return new Error("Error fetching brand");
+        return new Error("Something went wrong!");
       }
     }),
   createBrand: adminProcedure
