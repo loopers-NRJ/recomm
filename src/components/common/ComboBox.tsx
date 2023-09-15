@@ -1,4 +1,4 @@
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { FC, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -15,39 +15,44 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { Item } from "@/types/item";
+import { FetchItems, Item } from "@/types/item";
 import { debounce } from "@/utils/helper";
 
 interface ComboBoxProps {
-  items?: Item[];
   selected?: Item;
   onSelect: (selected?: Item) => void;
   label?: string;
-  refetch?: (partialName: string) => void;
-  loading?: boolean;
+  fetchInput?: unknown;
+  fetchItems: FetchItems;
+  value: string;
+  onChange: (search: string) => void;
+  requiredError?: boolean;
 }
 
 const ComboBox: FC<ComboBoxProps> = ({
-  items: originalItems,
   selected,
   onSelect,
   label = "item",
-  refetch,
-  loading,
+  fetchInput,
+  fetchItems,
+  value: search,
+  onChange: setSearch,
+  requiredError,
 }) => {
   const [open, setOpen] = useState(false);
-  const [items, setItems] = useState(originalItems);
+  const {
+    data: items,
+    isError,
+    isLoading: loading,
+    refetch,
+  } = fetchItems(fetchInput);
   const previousItemsRef = useRef<Item[]>([]);
-
   useEffect(() => {
-    setItems(originalItems);
-  }, [originalItems]);
-
-  useEffect(() => {
-    if (items) {
+    if (items instanceof Array) {
       previousItemsRef.current = items;
     }
   }, [items]);
+  const isItems = items instanceof Array;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -56,10 +61,16 @@ const ComboBox: FC<ComboBoxProps> = ({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[200px] justify-between text-sm font-normal text-black"
+          className={`w-[200px] justify-between text-sm font-normal text-black
+            ${
+              requiredError && !selected
+                ? "border-red-500 text-red-500"
+                : "border-gray-300 text-gray-500"
+            }
+          `}
         >
           {selected
-            ? (items ?? previousItemsRef.current).find(
+            ? (isItems ? items : previousItemsRef.current).find(
                 (item) => item.id === selected.id
               )?.name
             : `Select ${label}...`}
@@ -70,21 +81,27 @@ const ComboBox: FC<ComboBoxProps> = ({
         <Command>
           <CommandInput
             placeholder={`Search ${label}...`}
-            // value={search}
-            onValueChange={(e) => {
-              debounce(() => refetch?.(e))();
+            value={search}
+            onValueChange={(value) => {
+              setSearch(value);
+              debounce(() => refetch?.())();
             }}
           />
           <CommandEmpty>No {label} found.</CommandEmpty>
           <CommandGroup>
-            {(items ?? previousItemsRef.current).map((item) => (
+            {((isItems ? items : previousItemsRef.current).length === 0 &&
+              !loading) ||
+              (isError && (
+                <div className="flex justify-center">No {label} found.</div>
+              ))}
+            {(isItems ? items : previousItemsRef.current).map((item) => (
               <CommandItem
                 key={item.id}
                 onSelect={(currentValue) => {
                   onSelect(
                     currentValue === selected?.name
                       ? undefined
-                      : (items ?? previousItemsRef.current).find(
+                      : (isItems ? items : previousItemsRef.current).find(
                           (item) =>
                             item.name.toLowerCase() ===
                             currentValue.toLowerCase()
@@ -103,7 +120,11 @@ const ComboBox: FC<ComboBoxProps> = ({
                 {item.name}
               </CommandItem>
             ))}
-            {loading && <h1 className="text-center">...</h1>}
+            {loading && (
+              <div className="flex justify-center">
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              </div>
+            )}
           </CommandGroup>
         </Command>
       </PopoverContent>

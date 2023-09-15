@@ -1,22 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BiHome } from "react-icons/bi";
+import { BiHome, BiSolidCar } from "react-icons/bi";
 import { IconType } from "react-icons/lib/esm/iconBase";
 
 import { api } from "@/utils/api";
 
 import Container from "../Container";
+import { toast } from "../ui/use-toast";
 import CategoryBox from "./CategoryBox";
 import LoadingCategories from "./LoadingCategories";
 
 interface Icon {
   label: string;
   icon: IconType;
-  description: string;
 }
 const Categories = () => {
-  const { data } = api.category.getCategories.useQuery({});
+  const { data, isLoading } = api.category.getCategories.useQuery({});
   const [categories, setCategories] = useState<Icon[]>([]);
   const [categoryLoading, setCategoryLoading] = useState<boolean>(true);
   useEffect(() => {
@@ -36,62 +36,54 @@ const Categories = () => {
         {
           label: "Electronics",
           icon: MdDevices,
-          description: "This property is close to the beach!",
+        },
+        {
+          label: "Automobiles",
+          icon: BiSolidCar,
         },
         {
           label: "Clothing",
           icon: PiDressBold,
-          description: "This property is has windmills!",
         },
         {
           label: "Furniture",
           icon: MdOutlineChair,
-          description: "This property is modern!",
         },
         {
           label: "Beauty",
           icon: PiEyeClosedBold,
-          description: "This property is in the countryside!",
         },
         {
           label: "Sports",
           icon: MdSportsSoccer,
-          description: "This is property has a beautiful pool!",
         },
         {
           label: "Toys",
           icon: TbHorseToy,
-          description: "This property is on an island!",
         },
         {
           label: "Groceries",
           icon: MdOutlineLocalGroceryStore,
-          description: "This property is near a lake!",
         },
         {
           label: "Jewelry",
           icon: MdOutlineDiamond,
-          description: "This property has skiing activies!",
         },
         {
           label: "Health",
           icon: LuStethoscope,
-          description: "This property is an ancient castle!",
         },
         {
           label: "Pets",
           icon: LuDog,
-          description: "This property is in a spooky cave!",
         },
         {
           label: "Decor",
           icon: BiHomeHeart,
-          description: "This property offers camping activities!",
         },
         {
           label: "Tools",
           icon: TbTool,
-          description: "This property is in arctic environment!",
         },
       ]);
       setCategoryLoading(false);
@@ -100,8 +92,39 @@ const Categories = () => {
     void importIcons();
   }, []);
 
-  if (data instanceof Error) return <div>Error</div>;
-  if (data === undefined || categoryLoading) return <LoadingCategories />;
+  if (data instanceof Error) {
+    return toast({
+      title: "Error",
+      description: data.message,
+      variant: "destructive",
+    });
+  }
+
+  // if (isError) {
+  //   switch (error.data?.code) {
+  //     case "BAD_REQUEST":
+  //       return toast({
+  //         title: "Error",
+  //         description: error.message,
+  //         variant: "destructive",
+  //       });
+  //     case "UNAUTHORIZED":
+  //       return toast({
+  //         title: "Error",
+  //         description: error.message,
+  //         variant: "destructive",
+  //       });
+  //   }
+  //   return toast({
+  //     title: "Error",
+  //     description: "Something went wrong",
+  //     variant: "destructive",
+  //   });
+  // }
+
+  if (isLoading || data === undefined || categoryLoading) {
+    return <LoadingCategories />;
+  }
 
   return (
     <Container>

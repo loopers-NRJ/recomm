@@ -1,7 +1,6 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { FC, useEffect, useState } from "react";
-import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,130 +14,130 @@ import {
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PostingModalStore } from "@/hooks/usePostingModal";
-import { OptionalItem } from "@/types/item";
+import { FetchItems, OptionalItem } from "@/types/item";
 import { api } from "@/utils/api";
 import { uploadImagesToBackend } from "@/utils/imageUpload";
-import { Brand, Category, Model } from "@prisma/client";
+import { productSchema } from "@/utils/validation";
 
-import BidDurationPicker from "../common/BidDurationPicker";
-import ComboBox from "../common/ComboBox";
-import ImagePicker from "../common/ImagePicker";
 import { Input } from "../ui/input";
 import { toast } from "../ui/use-toast";
+import BidDurationPicker from "./BidDurationPicker";
+import ComboBox from "./ComboBox";
+import ImagePicker from "./ImagePicker";
 
-const productSchema = z.object({
-  price: z
-    .number()
-    .int("Price cannot have decimal values")
-    .positive("Price must not be negative"),
-  description: z.string().min(1),
-  modelId: z.string().min(1),
-  brandId: z.string().min(1),
-  categoryId: z.string().min(1),
-});
+interface FormError {
+  categoryId?: string[] | undefined;
+  brandId?: string[] | undefined;
+  modelId?: string[] | undefined;
+  description?: string[] | undefined;
+  images?: string[] | undefined;
+  price?: string[] | undefined;
+  closedAt?: string[] | undefined;
+}
 
 interface PostingTabsProps {
   setShowModal: (bool: boolean) => void;
   postingModal: PostingModalStore;
 }
 
+type Tab = "tab-1" | "tab-2";
+
+const tab1Schema = productSchema.omit({ price: true, closedAt: true });
+
 export const PostingTabs: FC<PostingTabsProps> = ({
   setShowModal,
   postingModal,
 }) => {
-  const router = useRouter();
   const [searchCategory, setSearchCategory] = useState("");
-  const categoryApi = api.search.category.useQuery({
-    search: searchCategory,
-  });
   const [selectedCategory, setSelectedCategory] = useState<OptionalItem>();
 
-  const [tab, changeTab] = useState<"tab-1" | "tab-2">("tab-1");
-
-  const session = useSession();
-  const userId = session.data?.user.id;
-
   const [searchBrand, setSearchBrand] = useState("");
-  const brandApi = api.search.brands.useQuery({
-    categoryId: selectedCategory?.id,
-    search: searchBrand,
-  });
   const [selectedBrand, setSelectedBrand] = useState<OptionalItem>();
 
   const [searchModel, setSearchModel] = useState("");
-  const modelApi = api.search.models.useQuery({
-    brandId: selectedBrand?.id,
-    search: searchModel,
-  });
   const [selectedModel, setSelectedModel] = useState<OptionalItem>();
 
   const [description, setDescription] = useState("");
-  const [price, setPrice] = useState(0);
-
+  const [price, setPrice] = useState("");
   const [images, setImages] = useState<File[]>([]);
-  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>();
+  const [tab, changeTab] = useState<Tab>("tab-1");
+
+  const [formError, setFormError] = useState<FormError | undefined>();
+  const router = useRouter();
+  const session = useSession();
+  const userId = session.data?.user.id;
 
   const uploadProduct = api.product.createProduct.useMutation();
 
   // reset the selected brand and model when the category is changed
   useEffect(() => {
+    setFormError(undefined);
     setSelectedBrand(undefined);
     setSelectedModel(undefined);
   }, [selectedCategory]);
 
   // reset the selected model when the brand is changed
   useEffect(() => {
+    setFormError(undefined);
     setSelectedModel(undefined);
   }, [selectedBrand]);
 
   const handleSubmit = async () => {
     const result = productSchema.safeParse({
-      price,
+      price: +price,
       description,
       modelId: selectedModel?.id,
       brandId: selectedBrand?.id,
       categoryId: selectedCategory?.id,
+      images,
+      endDate,
     });
-
     if (!result.success) {
-      return toast({
-        title: "Error",
-        description: result.error.message,
-        variant: "destructive",
-      });
+      const fields = result.error.flatten().fieldErrors;
+      // error anything other than price and closedAt are from tab-1
+      // so we need to change tab to tab-1 if there is an error
+      if (!fields.price && !fields.closedAt) {
+        handleChangeTab("tab-1");
+      }
+      return setFormError(fields);
     }
-    const { modelId } = result.data;
+    const { modelId, closedAt } = result.data;
 
-    // setLoading(true);
     const imagesUrls = await uploadImagesToBackend(images);
     if (imagesUrls instanceof Error) {
-      // setLoading(false);
+      console.log(imagesUrls.message);
       return toast({
         title: "Error",
-        description: imagesUrls.message,
+        description: "cannot upload images",
         variant: "destructive",
       });
     }
-
-    const product = await uploadProduct.mutateAsync({
-      price,
-      description,
-      modelId,
-      closedAt: endDate ?? new Date(Date.now() + 60 * 60 * 24 * 7),
-      images: imagesUrls,
-    });
-    if (product instanceof Error) {
-      // setLoading(false);
-      return toast({
+    try {
+      const product = await uploadProduct.mutateAsync({
+        price: +price,
+        description,
+        modelId,
+        closedAt,
+        images: imagesUrls,
+      });
+      if (product instanceof Error) {
+        console.log(product.message);
+        toast({
+          title: "Error",
+          description: product.message,
+          variant: "destructive",
+        });
+      }
+      onClose();
+      void router.push(`/${userId}/listings`);
+    } catch (error) {
+      toast({
         title: "Error",
-        description: product.message,
+        description: "cannot upload product",
         variant: "destructive",
       });
     }
-    // setLoading(false);
-    onClose();
-    //  navigate to listing page
-    void router.push(`/${userId}/listings`);
   };
 
   const onClose = () => {
@@ -148,42 +147,35 @@ export const PostingTabs: FC<PostingTabsProps> = ({
     }, 300);
   };
 
-  if (
-    categoryApi.data instanceof Error ||
-    brandApi.data instanceof Error ||
-    modelApi.data instanceof Error
-  ) {
-    const error =
-      categoryApi.data instanceof Error
-        ? categoryApi.data
-        : brandApi.data instanceof Error
-        ? brandApi.data
-        : modelApi.data instanceof Error
-        ? modelApi.data
-        : null;
-    toast({
-      title: "Error",
-      description: error?.message,
-      variant: "destructive",
-    });
-    return;
-  }
+  const handleChangeTab = (tab: Tab) => {
+    if (tab === "tab-2") {
+      const result = tab1Schema.safeParse({
+        description,
+        modelId: selectedModel?.id,
+        brandId: selectedBrand?.id,
+        categoryId: selectedCategory?.id,
+        images,
+      });
+      if (!result.success) {
+        return setFormError(result.error.flatten().fieldErrors);
+      }
+    }
 
-  const handleChangeTab = (tab: "tab-1" | "tab-2") => () => {
-    // validate the input if needed
+    setFormError(undefined);
     changeTab(tab);
   };
 
   return (
     <Tabs defaultValue="tab-1" value={tab} className="h-full w-full">
       <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="tab-1" onClick={handleChangeTab("tab-1")}>
+        <TabsTrigger value="tab-1" onClick={() => handleChangeTab("tab-1")}>
           Stage 01
         </TabsTrigger>
-        <TabsTrigger value="tab-2" onClick={handleChangeTab("tab-2")}>
+        <TabsTrigger value="tab-2" onClick={() => handleChangeTab("tab-2")}>
           Stage 02
         </TabsTrigger>
       </TabsList>
+
       <TabsContent value="tab-1">
         <Card className="border-none">
           <CardHeader>
@@ -200,35 +192,45 @@ export const PostingTabs: FC<PostingTabsProps> = ({
                   <Label>Category</Label>
                   <ComboBox
                     label="Category"
-                    items={categoryApi.data}
                     selected={selectedCategory}
-                    onSelect={(category) =>
-                      setSelectedCategory(category as Category)
-                    }
-                    refetch={setSearchCategory}
-                    loading={categoryApi.isLoading}
+                    onSelect={(category) => setSelectedCategory(category)}
+                    value={searchCategory}
+                    onChange={setSearchCategory}
+                    fetchItems={api.search.category.useQuery as FetchItems}
+                    fetchInput={{ search: searchCategory }}
+                    requiredError={!!formError?.categoryId}
                   />
                 </div>
                 <div className="flex justify-between">
                   <Label>Brand</Label>
                   <ComboBox
                     label="Brand"
-                    items={brandApi.data}
                     selected={selectedBrand}
-                    onSelect={(brand) => setSelectedBrand(brand as Brand)}
-                    refetch={setSearchBrand}
-                    loading={brandApi.isLoading}
+                    onSelect={(brand) => setSelectedBrand(brand)}
+                    value={searchBrand}
+                    onChange={setSearchBrand}
+                    fetchItems={api.search.brands.useQuery as FetchItems}
+                    fetchInput={{
+                      categoryId: selectedCategory?.id,
+                      search: searchBrand,
+                    }}
+                    requiredError={!!formError?.brandId}
                   />
                 </div>
                 <div className="flex justify-between">
                   <Label>Model</Label>
                   <ComboBox
                     label="Model"
-                    items={modelApi.data}
                     selected={selectedModel}
-                    onSelect={(model) => setSelectedModel(model as Model)}
-                    refetch={setSearchModel}
-                    loading={modelApi.isLoading}
+                    onSelect={(model) => setSelectedModel(model)}
+                    value={searchModel}
+                    onChange={setSearchModel}
+                    fetchItems={api.search.models.useQuery as FetchItems}
+                    fetchInput={{
+                      brandId: selectedBrand?.id,
+                      search: searchModel,
+                    }}
+                    requiredError={!!formError?.modelId}
                   />
                 </div>
                 <Label>Description</Label>
@@ -237,20 +239,31 @@ export const PostingTabs: FC<PostingTabsProps> = ({
                   onChange={(e) => {
                     setDescription(e.target.value);
                   }}
+                  className={`${
+                    formError?.description
+                      ? "border-red-500 text-red-500"
+                      : "border-gray-300 text-gray-500"
+                  }`}
+                  placeholder="Enter description..."
                   required
                 />
                 Images
-                <ImagePicker setImages={setImages} images={images} />
+                <ImagePicker
+                  setImages={setImages}
+                  images={images}
+                  requiredError={!!formError?.images}
+                />
               </div>
             </form>
           </CardContent>
           <CardFooter>
-            <Button className="w-full" onClick={() => changeTab("tab-2")}>
+            <Button className="w-full" onClick={() => handleChangeTab("tab-2")}>
               Next
             </Button>
           </CardFooter>
         </Card>
       </TabsContent>
+
       <TabsContent value="tab-2">
         <Card className="border-none">
           <CardHeader>
@@ -266,17 +279,24 @@ export const PostingTabs: FC<PostingTabsProps> = ({
                 id="price"
                 type="number"
                 value={price}
-                onChange={(e) => setPrice(+e.target.value)}
+                onChange={(e) =>
+                  !Number.isNaN(+e.target.value) && setPrice(e.target.value)
+                }
+                className={`${
+                  formError?.price
+                    ? "border-red-500 text-red-500"
+                    : "border-gray-300 text-gray-500"
+                }`}
                 required
               />
             </div>
             <div className="space-y-1">
               <Label htmlFor="duration">Bidding Duration</Label>
-              <BidDurationPicker setEndDate={setEndDate} />
+              <BidDurationPicker onChange={setEndDate} />
             </div>
           </CardContent>
           <CardFooter className="gap-3">
-            <Button className="w-full" onClick={() => changeTab("tab-1")}>
+            <Button className="w-full" onClick={() => handleChangeTab("tab-1")}>
               Back
             </Button>
             <Button className="w-full" onClick={() => void handleSubmit()}>

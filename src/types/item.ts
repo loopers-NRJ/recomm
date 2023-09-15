@@ -3,4 +3,11 @@ export interface Item {
   name: string;
 }
 
+export type FetchItems = (input: unknown) => {
+  data: Item[] | Error | undefined;
+  isLoading: boolean;
+  isError: boolean;
+  refetch: () => void;
+};
+
 export type OptionalItem = Item | undefined;

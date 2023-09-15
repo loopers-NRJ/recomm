@@ -65,7 +65,7 @@ const Home = () => {
       return setError("create a image to create a brand");
     }
     const result = await createCategoryApi.mutateAsync({
-      name: "test category",
+      name: "test category 2",
       image,
     });
     console.log(result);
@@ -94,7 +94,7 @@ const Home = () => {
       return setError("create a image to create a brand");
     }
     const result = await createBrandApi.mutateAsync({
-      name: "test brand",
+      name: "test brand 2",
       image,
     });
     console.log(result);
@@ -126,7 +126,7 @@ const Home = () => {
       return setError("create a model to create a product");
     }
     const result = await createProductApi.mutateAsync({
-      price: 69,
+      price: 999,
       description: "test product",
       closedAt: new Date(Date.now() + 60 * 60 * 24 * 7),
       images: [image],
@@ -164,7 +164,7 @@ const Home = () => {
       return setError("create brand to create a model");
     }
     const result = await createModelApi.mutateAsync({
-      name: "test model",
+      name: "test model 2",
       brandId: brand.id,
       categoryIds: [category.id],
       image,
@@ -233,7 +233,11 @@ const Home = () => {
         </h2>
 
         <div className="flex justify-between px-4">
-          <ImagePicker setImages={setImageFiles} maxImages={1} />
+          <ImagePicker
+            setImages={setImageFiles}
+            maxImages={1}
+            images={imageFiles}
+          />
           <button
             onClick={() => void uploadImage()}
             className="h-fit rounded-lg bg-primary px-4 py-2 text-primary-foreground"
