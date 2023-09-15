@@ -62,11 +62,7 @@ const ComboBox: FC<ComboBoxProps> = ({
           role="combobox"
           aria-expanded={open}
           className={`w-[200px] justify-between text-sm font-normal text-black
-            ${
-              requiredError && !selected
-                ? "border-red-500 text-red-500"
-                : "border-gray-300 text-gray-500"
-            }
+            ${requiredError && !selected ? "border-red-500" : ""}
           `}
         >
           {selected

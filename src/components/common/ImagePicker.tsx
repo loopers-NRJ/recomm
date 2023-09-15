@@ -190,9 +190,7 @@ const ImagePicker: FC<ImagePickerProps> = ({
         {maxImages - images.length > 0 && (
           <label
             className={`flex h-24 w-24 shrink-0 cursor-pointer items-center justify-center rounded-xl border object-cover ${
-              requiredError
-                ? "border-red-500 text-red-500"
-                : "border-gray-300 text-gray-500"
+              requiredError ? "border-red-500" : ""
             }`}
             htmlFor="image-picker"
           >

@@ -1,3 +1,4 @@
+import { Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { FC, useEffect, useState } from "react";
@@ -16,7 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PostingModalStore } from "@/hooks/usePostingModal";
 import { FetchItems, OptionalItem } from "@/types/item";
 import { api } from "@/utils/api";
-import { uploadImagesToBackend } from "@/utils/imageUpload";
+import { useImageUploader } from "@/utils/imageUpload";
 import { productSchema } from "@/utils/validation";
 
 import { Input } from "../ui/input";
@@ -69,6 +70,7 @@ export const PostingTabs: FC<PostingTabsProps> = ({
   const userId = session.data?.user.id;
 
   const uploadProduct = api.product.createProduct.useMutation();
+  const imageUploader = useImageUploader();
 
   // reset the selected brand and model when the category is changed
   useEffect(() => {
@@ -104,7 +106,7 @@ export const PostingTabs: FC<PostingTabsProps> = ({
     }
     const { modelId, closedAt } = result.data;
 
-    const imagesUrls = await uploadImagesToBackend(images);
+    const imagesUrls = await imageUploader.upload(images);
     if (imagesUrls instanceof Error) {
       console.log(imagesUrls.message);
       return toast({
@@ -295,13 +297,26 @@ export const PostingTabs: FC<PostingTabsProps> = ({
               <BidDurationPicker onChange={setEndDate} />
             </div>
           </CardContent>
-          <CardFooter className="gap-3">
-            <Button className="w-full" onClick={() => handleChangeTab("tab-1")}>
-              Back
-            </Button>
-            <Button className="w-full" onClick={() => void handleSubmit()}>
-              Post Product
-            </Button>
+          <CardFooter className="flex-col gap-12">
+            <div className="flex w-full gap-3">
+              <Button
+                className="w-full"
+                onClick={() => handleChangeTab("tab-1")}
+              >
+                Back
+              </Button>
+              <Button className="w-full" onClick={() => void handleSubmit()}>
+                Post Product
+              </Button>
+            </div>
+            {(uploadProduct.isLoading || imageUploader.isLoading) && (
+              <div className="flex flex-col items-center gap-4">
+                {imageUploader.isLoading && "Uploading images please wait..."}
+                {uploadProduct.isLoading &&
+                  "Creating your product please wait..."}
+                <Loader2 className="text-primary-500 h-8 w-8 animate-spin" />
+              </div>
+            )}
           </CardFooter>
         </Card>
       </TabsContent>

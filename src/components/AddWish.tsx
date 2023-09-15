@@ -17,7 +17,7 @@ import { FetchItems, OptionalItem } from "@/types/item";
 import { api } from "@/utils/api";
 
 import ComboBox from "./common/ComboBox";
-import { useToast } from "./ui/use-toast";
+import { toast } from "./ui/use-toast";
 
 const AddWish: FC = () => {
   const [searchCategory, setSearchCategory] = useState("");
@@ -41,7 +41,6 @@ const AddWish: FC = () => {
   const [selectedModel, setSelectedModel] = useState<OptionalItem>();
 
   const { mutateAsync: createWish } = api.wish.createWish.useMutation();
-  const { toast } = useToast();
 
   if (
     categoryApi.data instanceof Error ||

@@ -39,7 +39,7 @@ const WishCard: FC<WishCardProps> = ({ wish }) => {
   const router = useRouter();
 
   return (
-    <Card className="flex w-[350px] items-center justify-between md:w-[500px]">
+    <Card className="flex w-full items-center justify-between md:w-[500px]">
       <div className="flex flex-col gap-0">
         <CardHeader>
           <CardTitle className="text-lg md:text-xl">
