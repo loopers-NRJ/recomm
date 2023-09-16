@@ -39,6 +39,10 @@ const CategoryTable: FC<TableProps> = ({
     console.log(categoriesApi.error);
     return <div>Something went wrong</div>;
   }
+  if (deleteCategoryApi.isError) {
+    console.log(deleteCategoryApi.error);
+    return <div>Something went wrong</div>;
+  }
   if (categoriesApi.data instanceof Error) {
     return <div>{categoriesApi.data.message}</div>;
   }

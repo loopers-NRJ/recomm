@@ -158,25 +158,29 @@ export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
  */
 export const adminProcedure = protectedProcedure.use(async ({ ctx, next }) => {
   // check if the user is an admin
-  // let isAdmin = false;
-  // try {
-  //   const admin = await prisma.admin.findFirst({
-  //     where: {
-  //       id: ctx.session.user.id,
-  //     },
-  //   });
-  //   isAdmin = admin !== null;
-  // } catch (error) {
-  //   console.log("cannot validate the user in admin route: ", error);
-  //   isAdmin = false;
-  // }
-  // if (!isAdmin) {
-  //   throw new TRPCError({ code: "UNAUTHORIZED" });
-  // }
+  let isAdmin = false;
+  try {
+    const admin = await prisma.admin.findFirst({
+      where: {
+        id: ctx.session.user.id,
+      },
+    });
+    isAdmin = admin !== null;
+  } catch (error) {
+    console.error({
+      procedure: "admin auth middleware",
+      message: "cannot validate the user in admin route: ",
+      error,
+    });
+    isAdmin = false;
+  }
+  if (!isAdmin) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
   return next({
     ctx: {
       // infers the `session` as non-nullable
-      session: { ...ctx.session, user: ctx.session.user, isAdmin: true },
+      session: { ...ctx.session, user: ctx.session.user },
     },
   });
 });

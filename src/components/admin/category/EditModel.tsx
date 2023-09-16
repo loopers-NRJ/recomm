@@ -87,7 +87,9 @@ export const EditModel: FC<EditModelProps> = ({
             value={categoryName}
             onChange={(e) => {
               setCategoryName(e.target.value);
-              if (error) setError(undefined);
+              if (error) {
+                setError(undefined);
+              }
             }}
           />
         </Label>
