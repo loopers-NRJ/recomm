@@ -71,9 +71,9 @@ const Carousel: FC<CarouselProps> = ({ images }) => {
             src={image}
             ref={(element) => refs.current.push(element)}
             alt="image"
-            width={150}
-            height={150}
-            className="h-72 w-full flex-shrink-0 snap-center snap-always rounded-xl object-cover"
+            width={100}
+            height={100}
+            className="h-48 w-full flex-shrink-0 snap-center snap-always rounded-xl object-cover"
             loading="lazy"
           />
         ))}
