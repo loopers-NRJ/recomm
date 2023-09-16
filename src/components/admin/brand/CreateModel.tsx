@@ -79,7 +79,7 @@ export const CreateModel: FC<CreateModelProps> = ({
               onClick={() => void uploadImage()}
               disabled={uploader.isLoading}
             >
-              Upload
+              Upload Image
             </Button>
           ) : (
             <Button

@@ -41,6 +41,11 @@ model VerificationToken {
     @@unique([identifier, token])
 }
 
+enum Role {
+    ADMIN
+    USER
+}
+
 model User {
     id                String    @id @default(cuid())
     name              String?
@@ -55,17 +60,9 @@ model User {
     favoriteProducts  Product[] @relation("favoriteProducts")
     wishes            Wish[]
     bids              Bid[]
-    admin             Admin?
+    role              Role?
     createdAt         DateTime  @default(now())
     updatedAt         DateTime  @updatedAt
-}
-
-model Admin {
-    id        String   @id @default(cuid())
-    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-    userId    String   @unique
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
 }
 
 model Category {

@@ -105,7 +105,7 @@ export const EditModel: FC<EditModelProps> = ({
               onClick={() => void uploadImage()}
               disabled={uploader.isLoading}
             >
-              Upload
+              Upload Image
             </Button>
           ) : (
             <Button
@@ -113,10 +113,12 @@ export const EditModel: FC<EditModelProps> = ({
               disabled={
                 updateCategoryApi.isLoading ||
                 categoryName.trim() === "" ||
-                categoryName === category?.name
+                (categoryName === category?.name && image === undefined)
               }
             >
-              Update Category
+              {image !== undefined && categoryName === category?.name
+                ? "Update Category image"
+                : "Update category"}
             </Button>
           )}
         </div>

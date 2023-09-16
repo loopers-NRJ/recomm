@@ -103,7 +103,7 @@ export const EditModel: FC<EditModelProps> = ({
               onClick={() => void uploadImage()}
               disabled={uploader.isLoading}
             >
-              Upload
+              Upload Image
             </Button>
           ) : (
             <Button

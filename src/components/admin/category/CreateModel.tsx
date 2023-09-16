@@ -89,7 +89,7 @@ export const CreateModel: FC<CreateModelProps> = ({
               onClick={() => void uploadImage()}
               disabled={uploader.isLoading}
             >
-              Upload
+              Upload Image
             </Button>
           ) : (
             <Button
@@ -98,7 +98,9 @@ export const CreateModel: FC<CreateModelProps> = ({
                 categoryName.trim() === "" || createCategoryApi.isLoading
               }
             >
-              Create Category
+              {image === undefined
+                ? "Create Category without image"
+                : "Create Category"}
             </Button>
           )}
         </div>
