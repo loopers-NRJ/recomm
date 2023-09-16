@@ -14,20 +14,16 @@ export interface CreateModelProps {
   createModelVisibility: boolean;
   setCreateModelVisibility: (value: boolean) => void;
   onCreate: () => void;
-  parentName?: string;
-  parentId: string | null;
 }
 
 export const CreateModel: FC<CreateModelProps> = ({
   createModelVisibility,
   setCreateModelVisibility,
   onCreate,
-  parentId,
-  parentName,
 }) => {
-  const createCategoryApi = api.category.createCategory.useMutation();
+  const createBrandApi = api.brand.createBrand.useMutation();
 
-  const [categoryName, setCategoryName] = useState("");
+  const [brandName, setBrandName] = useState("");
   // file object to store the file to upload
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   // image object returned from server after uploading the image
@@ -45,11 +41,10 @@ export const CreateModel: FC<CreateModelProps> = ({
     setImage(result[0]);
   };
 
-  const createCategory = async () => {
-    const result = await createCategoryApi.mutateAsync({
-      name: categoryName,
+  const createBrand = async () => {
+    const result = await createBrandApi.mutateAsync({
+      name: brandName,
       image,
-      parentCategoryId: parentId ?? undefined,
     });
     if (result instanceof Error) {
       return setError(result.message);
@@ -65,17 +60,12 @@ export const CreateModel: FC<CreateModelProps> = ({
     >
       <section className="flex flex-col gap-4 p-4">
         <Label className="my-4">
-          Category Name
+          Brand Name
           <Input
             className="my-2"
-            value={categoryName}
-            onChange={(e) => setCategoryName(e.target.value)}
+            value={brandName}
+            onChange={(e) => setBrandName(e.target.value)}
           />
-        </Label>
-
-        <Label className="flex items-center justify-between">
-          <div>Parent Category</div>
-          <div>{parentName ?? "None"}</div>
         </Label>
 
         <div className="flex items-end justify-between gap-8">
@@ -93,12 +83,10 @@ export const CreateModel: FC<CreateModelProps> = ({
             </Button>
           ) : (
             <Button
-              onClick={() => void createCategory()}
-              disabled={
-                categoryName.trim() === "" || createCategoryApi.isLoading
-              }
+              onClick={() => void createBrand()}
+              disabled={brandName.trim() === "" || createBrandApi.isLoading}
             >
-              Create Category
+              Create Brand
             </Button>
           )}
         </div>

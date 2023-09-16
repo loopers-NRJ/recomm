@@ -27,7 +27,7 @@ const AdminPageModal: FC<PostingModalProps> = ({
         {/* Content */}
         <Dialog.DialogContent
           onKeyDown={(e) => e.key === "Escape" && setVisibility(false)}
-          className={`fixed inset-0 z-50 mx-auto h-full w-full rounded-lg bg-white p-8 text-foreground shadow-sm transition-all duration-300 md:my-10 md:h-auto md:w-4/6 lg:h-auto lg:w-3/6 xl:w-2/5
+          className={`fixed inset-0 z-50 mx-auto h-full w-full rounded-lg bg-white p-8 text-foreground shadow-sm transition-all duration-300 md:my-10 md:h-fit md:w-4/6 lg:h-fit lg:w-3/6 xl:w-2/5
             ${visibility ? "translate-y-0" : "translate-y-full"}
             ${visibility ? "opacity-100" : "opacity-0"}`}
         >
