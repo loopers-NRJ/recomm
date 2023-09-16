@@ -24,8 +24,6 @@ const ListingCard: React.FC<ListingCardProps> = ({
 }) => {
   const router = useRouter();
 
-  console.log("images:", product.images);
-
   return (
     <div
       onClick={() => {
