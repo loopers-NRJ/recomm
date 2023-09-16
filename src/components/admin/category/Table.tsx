@@ -65,7 +65,7 @@ const CategoryTable: FC<TableProps> = ({
     {
       id: "createdAt",
       header: "Created At",
-      accessorFn: (row) => row.createdAt.toLocaleString(),
+      accessorFn: (row) => row.createdAt.toLocaleString("en-US"),
     },
     {
       id: "edit",

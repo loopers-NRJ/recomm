@@ -18,7 +18,7 @@ export const columns: ColumnDef<Brand>[] = [
   {
     id: "createdAt",
     header: "Created At",
-    accessorFn: (row) => row.createdAt.toLocaleString(),
+    accessorFn: (row) => row.createdAt.toLocaleString("en-US"),
   },
   {
     id: "edit",
