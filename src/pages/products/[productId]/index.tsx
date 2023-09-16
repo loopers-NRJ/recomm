@@ -47,7 +47,7 @@ const ProductPage: NextPage = () => {
           <Heading title={product.model.name} />
 
           <div className="relative h-72 w-full overflow-hidden rounded-xl">
-            <Carousel images={["/shoe.jpg", "/shoe.jpg", "/shoe.jpg"]} />
+            <Carousel images={product.images} />
             <div className="absolute right-5 top-5">
               <HeartButton productId={product.id} enabled={isFavorited} />
             </div>

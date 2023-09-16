@@ -3,7 +3,7 @@ import { FC, useEffect, useRef, useState } from "react";
 import { BiLeftArrow, BiRightArrow } from "react-icons/bi";
 
 interface CarouselProps {
-  images: string[];
+  images: { url: string }[];
 }
 
 const Carousel: FC<CarouselProps> = ({ images }) => {
@@ -67,8 +67,8 @@ const Carousel: FC<CarouselProps> = ({ images }) => {
       >
         {images.map((image, index) => (
           <Image
-            key={image + index}
-            src={image}
+            key={image.url + index}
+            src={image.url}
             ref={(element) => refs.current.push(element)}
             alt="image"
             width={100}
@@ -84,8 +84,8 @@ const Carousel: FC<CarouselProps> = ({ images }) => {
             <div
               key={index}
               className={`${
-                current === index ? "h-3 w-3" : "h-2 w-2"
-              } cursor-pointer rounded-full bg-white`}
+                current === index ? "w-3" : "w-2"
+              } aspect-square cursor-pointer rounded-full bg-white`}
               onClick={(e) => swipeTo(index, e)}
             />
           ))}
