@@ -1,11 +1,13 @@
 "use client";
 
+import { useSession } from "next-auth/react";
+import { useEffect } from "react";
+
+import { api } from "@/utils/api";
+
+import LoadingWishes from "./loading/LoadingWishes";
 // import { useRouter } from "next/router";
 import WishCard from "./WishCard";
-import { api } from "@/utils/api";
-import { useEffect } from "react";
-import LoadingWishes from "./loading/LoadingWishes";
-import { useSession } from "next-auth/react";
 
 function Wishes() {
   const session = useSession();
@@ -18,7 +20,7 @@ function Wishes() {
 
   useEffect(() => {
     void refetch();
-  }, [refetch, session, wishes]);
+  }, [refetch, session.status]);
 
   useEffect(() => {
     void refetch();

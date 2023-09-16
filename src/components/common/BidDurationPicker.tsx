@@ -1,9 +1,7 @@
 import { FC } from "react";
 
-import { Select } from "../ui/select";
-
 interface BidDurationPickerProps {
-  setEndDate: (date: Date | undefined) => void;
+  onChange: (date: Date | undefined) => void;
 }
 
 const plans = [
@@ -12,29 +10,29 @@ const plans = [
   { label: "30 Days", value: 30 },
 ];
 
-const BidDurationPicker: FC<BidDurationPickerProps> = ({ setEndDate }) => {
+const BidDurationPicker: FC<BidDurationPickerProps> = ({
+  onChange: handleChange,
+}) => {
   return (
-    <Select
-      onValueChange={(value) => {
-        setEndDate(new Date(+value));
-        console.log(new Date(+value), +value);
-      }}
-      defaultValue={``}
+    <select
+      defaultValue={plans[0]?.value}
+      className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+      onChange={(e) =>
+        handleChange(new Date(+e.target.value + Date.now() * 60 * 60 * 24))
+      }
     >
-      {/* <SelectTrigger id="area">
-        <SelectValue placeholder="Select" />
-      </SelectTrigger> */}
-      <select className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-        {plans.map((plan) => (
-          <option
-            key={plan.value}
-            value={`${Date.now() + plan.value * 3600 * 24}`}
-          >
-            {plan.label}
-          </option>
-        ))}
-      </select>
-    </Select>
+      {/* TODO: Design this dropdown menu */}
+      {plans.map((plan) => (
+        <option
+          key={plan.value}
+          value={`${plan.value}`}
+          className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+        >
+          {plan.label}
+        </option>
+      ))}
+    </select>
   );
 };
+
 export default BidDurationPicker;

@@ -1,6 +1,8 @@
-import { functionalityOptions } from "@/utils/validation";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { z } from "zod";
+
+import { functionalityOptions } from "@/utils/validation";
+
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const userRouter = createTRPCRouter({
   getUsers: publicProcedure
@@ -25,7 +27,7 @@ export const userRouter = createTRPCRouter({
           });
           return users;
         } catch (error) {
-          return new Error("Error fetching users");
+          return new Error("Something went wrong!");
         }
       }
     ),
@@ -43,7 +45,7 @@ export const userRouter = createTRPCRouter({
         }
         return user;
       } catch (error) {
-        return new Error("Error fetching user");
+        return new Error("Something went wrong!");
       }
     }),
   getMyBids: protectedProcedure
@@ -97,7 +99,7 @@ export const userRouter = createTRPCRouter({
           });
           return bids;
         } catch (error) {
-          return new Error("Error fetching user bids");
+          return new Error("Something went wrong!");
         }
       }
     ),
@@ -157,7 +159,7 @@ export const userRouter = createTRPCRouter({
           });
           return favoritedProducts;
         } catch (error) {
-          return new Error("Error fetching user favorites");
+          return new Error("Something went wrong!");
         }
       }
     ),
@@ -212,7 +214,7 @@ export const userRouter = createTRPCRouter({
           });
           return listings;
         } catch (error) {
-          return new Error("Error fetching user listings");
+          return new Error("Something went wrong!");
         }
       }
     ),
@@ -259,7 +261,7 @@ export const userRouter = createTRPCRouter({
           });
           return purchases;
         } catch (error) {
-          return new Error("Error fetching user purchases");
+          return new Error("Something went wrong!");
         }
       }
     ),
@@ -313,7 +315,7 @@ export const userRouter = createTRPCRouter({
           });
           return wishes;
         } catch (error) {
-          return new Error("Error fetching user wishes");
+          return new Error("Something went wrong!");
         }
       }
     ),

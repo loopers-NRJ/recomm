@@ -35,7 +35,7 @@ export const categoryRouter = createTRPCRouter({
           return categories;
         } catch (error) {
           console.error({ procedure: "getCategories", error });
-          return new Error("Failed to fetch categories");
+          return new Error("Something went wrong!");
         }
       }
     ),
@@ -57,7 +57,7 @@ export const categoryRouter = createTRPCRouter({
         return category;
       } catch (error) {
         console.error({ procedure: "getCategoryById", error });
-        return new Error("Failed to fetch category");
+        return new Error("Something went wrong!");
       }
     }),
   createCategory: adminProcedure

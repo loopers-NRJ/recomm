@@ -61,7 +61,7 @@ export const modelRouter = createTRPCRouter({
             procedure: "getModels",
             error,
           });
-          return new Error("Error fetching models");
+          return new Error("Something went wrong!");
         }
       }
     ),
@@ -96,7 +96,7 @@ export const modelRouter = createTRPCRouter({
           procedure: "getModelById",
           error,
         });
-        return new Error("Error fetching model");
+        return new Error("Something went wrong!");
       }
     }),
   createModel: adminProcedure

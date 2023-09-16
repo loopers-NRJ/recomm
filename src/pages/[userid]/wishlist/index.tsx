@@ -1,4 +1,5 @@
 import { NextPage } from "next";
+
 import AddWish from "@/components/AddWish";
 import Container from "@/components/Container";
 import Heading from "@/components/Heading";

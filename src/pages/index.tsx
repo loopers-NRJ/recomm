@@ -40,10 +40,16 @@ export const Home: NextPage = () => {
     categoryId,
   });
 
-  if (isLoading) return <LoadingProducts />;
-  else if (isError) return <div>Something went wrong</div>;
-  else if (products instanceof Error) return <div>{products.message}</div>;
-  else if (!products || products.length === 0)
+  if (isLoading) {
+    return <LoadingProducts />;
+  }
+  if (isError) {
+    return <div>Something went wrong</div>;
+  }
+  if (products instanceof Error) {
+    return <div>{products.message}</div>;
+  }
+  if (products === undefined || products.length === 0) {
     return (
       <Container>
         <div className="flex h-[500px] items-center justify-center pt-24 font-semibold">
@@ -51,26 +57,17 @@ export const Home: NextPage = () => {
         </div>
       </Container>
     );
+  }
 
   return (
     <main>
       <Container>
-        <div
-          className="
-            grid
-            grid-cols-1
-            gap-8
-            pt-24
-            xs:grid-cols-2
-            sm:grid-cols-3
-            md:grid-cols-4
-            lg:grid-cols-5
-          "
-        >
+        <div className="grid grid-cols-1 gap-8 pt-24 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {products.map((product) => (
             <ListingCard
               key={product.id}
               product={product as unknown as Product}
+              hideHeartIcon
             />
           ))}
         </div>

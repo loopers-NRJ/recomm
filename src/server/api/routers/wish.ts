@@ -20,17 +20,14 @@ export const wishRouter = createTRPCRouter({
         if (existingWish !== null) {
           return new Error("wish already exists");
         }
-        const result = await ctx.prisma.product.aggregate({
+        const product = await ctx.prisma.product.findFirst({
           where: {
             modelId: id,
             buyerId: null,
           },
-          _count: {
-            _all: true,
-          },
         });
         const status: WishStatus =
-          result._count._all !== 0 ? WishStatus.available : WishStatus.pending;
+          product !== null ? WishStatus.available : WishStatus.pending;
 
         const wish = await ctx.prisma.wish.create({
           data: {
@@ -50,7 +47,7 @@ export const wishRouter = createTRPCRouter({
 
         return wish;
       } catch (error) {
-        return new Error("Error creating wish");
+        return new Error("Something went wrong!");
       }
     }),
   deleteWish: protectedProcedure
@@ -76,7 +73,7 @@ export const wishRouter = createTRPCRouter({
         });
         return deletedWish;
       } catch (error) {
-        return new Error("Error deleting wish");
+        return new Error("Something went wrong!");
       }
     }),
 });

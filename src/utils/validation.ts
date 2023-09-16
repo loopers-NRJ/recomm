@@ -25,4 +25,36 @@ export const imageInputs = z.object({
   height: z.number().int(),
 });
 
+export const productSchema = z.object({
+  price: z
+    .number({
+      required_error: "Enter a price",
+      invalid_type_error: "Price must be a number",
+    })
+    .int("Price cannot have decimal values")
+    .positive("Price must not be negative"),
+  description: z
+    .string({
+      required_error: "Enter a description",
+    })
+    .min(1, "Please provide a description to your product"),
+  modelId: z.string({
+    required_error: "Select a model",
+  }),
+  brandId: z.string({
+    required_error: "Select a brand",
+  }),
+  categoryId: z.string({
+    required_error: "Select a category",
+  }),
+  images: z.array(z.any()).nonempty("Upload at least one image"),
+  closedAt: z
+    .date()
+    .default(() => new Date(Date.now() + 60 * 60 * 24 * 7))
+    .refine((date) => date.getTime() > Date.now(), {
+      message: "Date must be in the future",
+      params: {},
+    }),
+});
+
 export type Image = z.infer<typeof imageInputs>;

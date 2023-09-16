@@ -6,7 +6,7 @@ import Suggestions from "./Suggestions";
 import { BiSearch } from "react-icons/bi";
 
 const Search = () => {
-  const [searchKey, setSearchKey] = useState<string | undefined>(undefined);
+  const [searchKey, setSearchKey] = useState<string>("");
 
   const router = useRouter();
 

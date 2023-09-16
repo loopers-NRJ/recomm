@@ -6,7 +6,7 @@ import usePostingModal from "@/hooks/usePostingModal";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross1Icon } from "@radix-ui/react-icons";
 
-import { PostingTabs } from "../common/Tabs";
+import { PostingTabs } from "../common/PostingTabs";
 
 const PostingModal = () => {
   const postingModal = usePostingModal();

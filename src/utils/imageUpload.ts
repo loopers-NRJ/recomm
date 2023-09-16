@@ -1,8 +1,9 @@
+import { useState } from "react";
 import { z } from "zod";
 
 import { imageInputs } from "./validation";
 
-export const uploadImagesToBackend = async (images: File[]) => {
+const uploadImagesToBackend = async (images: File[]) => {
   const formData = new FormData();
 
   images.forEach((image) => {
@@ -34,4 +35,19 @@ export const uploadImagesToBackend = async (images: File[]) => {
     console.log(error);
     return new Error("cannot upload the images.");
   }
+};
+
+export const useImageUploader = () => {
+  const [isLoading, setLoading] = useState(false);
+  return {
+    isLoading,
+    upload: async (images: File[]) => {
+      setLoading(true);
+      try {
+        return await uploadImagesToBackend(images);
+      } finally {
+        setLoading(false);
+      }
+    },
+  };
 };

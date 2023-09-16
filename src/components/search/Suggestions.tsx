@@ -58,15 +58,12 @@ const Suggestions: FC<SuggestionProps> = ({ searchKey }) => {
   return (
     <div
       className={`suggestions absolute left-0 top-10 w-full rounded-md border bg-white md:w-[100px] lg:w-[300px] ${
-        categories === undefined ||
-        brands === undefined ||
-        models === undefined ||
-        (categories.length === 0 && brands.length === 0 && models.length === 0)
+        categories.length === 0 && brands.length === 0 && models.length === 0
           ? `hidden`
           : `block`
       }`}
     >
-      {categories?.map((category) => (
+      {categories.map((category) => (
         <div
           key={category.id}
           onClick={() => {
@@ -78,7 +75,7 @@ const Suggestions: FC<SuggestionProps> = ({ searchKey }) => {
           <span className="text-slate-500">in Category</span>
         </div>
       ))}
-      {brands?.map((brand) => (
+      {brands.map((brand) => (
         <div
           key={brand.id}
           onClick={() => {
@@ -90,7 +87,7 @@ const Suggestions: FC<SuggestionProps> = ({ searchKey }) => {
           <span className="text-slate-500">in Brand</span>
         </div>
       ))}
-      {models?.map((modal) => (
+      {models.map((modal) => (
         <div
           key={modal.id}
           onClick={() => {
