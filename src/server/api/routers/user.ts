@@ -75,6 +75,14 @@ export const userRouter = createTRPCRouter({
                           },
                         },
                       },
+                      {
+                        category: {
+                          name: {
+                            contains: search,
+                            mode: "insensitive",
+                          },
+                        },
+                      },
                     ],
                   },
                 },
@@ -127,6 +135,14 @@ export const userRouter = createTRPCRouter({
                   },
                   {
                     brand: {
+                      name: {
+                        contains: search,
+                        mode: "insensitive",
+                      },
+                    },
+                  },
+                  {
+                    category: {
                       name: {
                         contains: search,
                         mode: "insensitive",
@@ -190,6 +206,14 @@ export const userRouter = createTRPCRouter({
                       },
                     },
                   },
+                  {
+                    category: {
+                      name: {
+                        contains: search,
+                        mode: "insensitive",
+                      },
+                    },
+                  },
                 ],
               },
             },
@@ -243,6 +267,14 @@ export const userRouter = createTRPCRouter({
                       },
                     },
                   },
+                  {
+                    category: {
+                      name: {
+                        contains: search,
+                        mode: "insensitive",
+                      },
+                    },
+                  },
                 ],
               },
             },
@@ -290,6 +322,14 @@ export const userRouter = createTRPCRouter({
                       },
                     },
                   },
+                  {
+                    category: {
+                      name: {
+                        contains: search,
+                        mode: "insensitive",
+                      },
+                    },
+                  },
                 ],
               },
             },
@@ -308,7 +348,17 @@ export const userRouter = createTRPCRouter({
             include: {
               model: {
                 include: {
-                  brand: true,
+                  brand: {
+                    include: {
+                      image: true,
+                    },
+                  },
+                  image: true,
+                  category: {
+                    include: {
+                      image: true,
+                    },
+                  },
                 },
               },
             },

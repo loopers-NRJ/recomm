@@ -149,11 +149,7 @@ export const searchRouter = createTRPCRouter({
               models: categoryId
                 ? {
                     some: {
-                      categories: {
-                        some: {
-                          id: categoryId,
-                        },
-                      },
+                      categoryId,
                     },
                   }
                 : undefined,
@@ -197,11 +193,9 @@ export const searchRouter = createTRPCRouter({
           const models = await ctx.prisma.model.findMany({
             where: {
               brandId,
-              categories: categoryId
+              category: categoryId
                 ? {
-                    some: {
-                      id: categoryId,
-                    },
+                    id: categoryId,
                   }
                 : undefined,
               name: {

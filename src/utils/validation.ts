@@ -33,6 +33,11 @@ export const productSchema = z.object({
     })
     .int("Price cannot have decimal values")
     .positive("Price must not be negative"),
+  title: z
+    .string({
+      required_error: "Enter a title",
+    })
+    .min(1, "Please provide a title to your product"),
   description: z
     .string({
       required_error: "Enter a description",

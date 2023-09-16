@@ -21,14 +21,8 @@ export const modelRouter = createTRPCRouter({
         try {
           const models = await ctx.prisma.model.findMany({
             where: {
+              categoryId,
               brandId,
-              categories: categoryId
-                ? {
-                    some: {
-                      id: categoryId,
-                    },
-                  }
-                : undefined,
               name: {
                 contains: search,
                 mode: "insensitive",
@@ -47,7 +41,7 @@ export const modelRouter = createTRPCRouter({
                   image: true,
                 },
               },
-              categories: {
+              category: {
                 include: {
                   image: true,
                 },
@@ -79,7 +73,7 @@ export const modelRouter = createTRPCRouter({
                 image: true,
               },
             },
-            categories: {
+            category: {
               include: {
                 image: true,
               },
@@ -104,11 +98,11 @@ export const modelRouter = createTRPCRouter({
       z.object({
         name: z.string().min(1).max(255),
         brandId: z.string().cuid(),
-        categoryIds: z.array(z.string().cuid()),
+        categoryId: z.string().cuid(),
         image: imageInputs,
       })
     )
-    .mutation(async ({ input: { name, brandId, categoryIds, image }, ctx }) => {
+    .mutation(async ({ input: { name, brandId, categoryId, image }, ctx }) => {
       try {
         const existingModel = await ctx.prisma.model.findFirst({
           where: {
@@ -121,8 +115,10 @@ export const modelRouter = createTRPCRouter({
         const model = await ctx.prisma.model.create({
           data: {
             name,
-            categories: {
-              connect: categoryIds.map((id) => ({ id })),
+            category: {
+              connect: {
+                id: categoryId,
+              },
             },
             brand: {
               connect: {
@@ -139,7 +135,7 @@ export const modelRouter = createTRPCRouter({
                 image: true,
               },
             },
-            categories: {
+            category: {
               include: {
                 image: true,
               },
@@ -162,26 +158,26 @@ export const modelRouter = createTRPCRouter({
         z.object({
           id: z.string().cuid(),
           name: z.string().min(1).max(255),
-          categoryIds: z.array(z.string().cuid()).optional(),
+          categoryId: z.string().cuid().optional(),
           image: imageInputs.optional(),
         }),
         z.object({
           id: z.string().cuid(),
           name: z.string().min(1).max(255).optional(),
-          categoryIds: z.array(z.string().cuid()),
+          categoryId: z.string().cuid(),
           image: imageInputs.optional(),
         }),
         z.object({
           id: z.string().cuid(),
           name: z.string().min(1).max(255).optional(),
-          categoryIds: z.array(z.string().cuid()).optional(),
+          categoryId: z.string().cuid().optional(),
           image: imageInputs,
         }),
       ])
     )
     .mutation(
       async ({
-        input: { id, name: newName, categoryIds, image: newImage },
+        input: { id, name: newName, categoryId, image: newImage },
         ctx,
       }) => {
         try {
@@ -215,10 +211,12 @@ export const modelRouter = createTRPCRouter({
             },
             data: {
               name: newName,
-              categories:
-                categoryIds !== undefined
+              category:
+                categoryId !== undefined
                   ? {
-                      set: categoryIds.map((id) => ({ id })),
+                      connect: {
+                        id: categoryId,
+                      },
                     }
                   : undefined,
               image:
@@ -234,7 +232,7 @@ export const modelRouter = createTRPCRouter({
                   image: true,
                 },
               },
-              categories: {
+              category: {
                 include: {
                   image: true,
                 },
@@ -285,7 +283,7 @@ export const modelRouter = createTRPCRouter({
         });
 
         // using void to not wait for the promise to resolve
-        void ctx.prisma.modelImage
+        void ctx.prisma.image
           .delete({
             where: {
               id: existingModel.image.id,

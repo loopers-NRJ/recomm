@@ -27,11 +27,7 @@ export const brandRouter = createTRPCRouter({
               models: categoryId
                 ? {
                     some: {
-                      categories: {
-                        some: {
-                          id: categoryId,
-                        },
-                      },
+                      categoryId,
                     },
                   }
                 : undefined,
@@ -213,7 +209,7 @@ export const brandRouter = createTRPCRouter({
         });
 
         // using void to not wait for the promise to resolve
-        void ctx.prisma.brandImage
+        void ctx.prisma.image
           .delete({
             where: {
               id: existingBrand.image.id,

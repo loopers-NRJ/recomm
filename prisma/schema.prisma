@@ -47,6 +47,7 @@ model User {
     email             String?   @unique
     emailVerified     DateTime?
     image             String?
+    lastActive        DateTime?
     accounts          Account[]
     sessions          Session[]
     listedProducts    Product[] @relation("listedProducts")
@@ -68,59 +69,97 @@ model Admin {
 }
 
 model Category {
-    id        String        @id @default(cuid())
-    name      String        @unique
-    image     CategoryImage @relation(fields: [imageId], references: [id], onDelete: Cascade)
-    imageId   String        @unique
-    // properties for subCategories. uncomment if needed
-    // subCategories Category[] @relation("SubCategory")
-    // parentCategory      Category?  @relation("SubCategory", fields: [parentCategoryId], references: [id], onDelete: Cascade)
-    // parentCategoryId    String?
-    models    Model[]
-    createdAt DateTime      @default(now())
-    updatedAt DateTime      @updatedAt
+    id               String     @id @default(cuid())
+    name             String     @unique
+    image            Image      @relation(fields: [imageId], references: [id], onDelete: Cascade)
+    imageId          String     @unique
+    subCategories    Category[] @relation("SubCategory")
+    parentCategory   Category?  @relation("SubCategory", fields: [parentCategoryId], references: [id], onDelete: Cascade)
+    parentCategoryId String?
+    models           Model[]
+    createdAt        DateTime   @default(now())
+    updatedAt        DateTime   @updatedAt
+
+    @@unique([name, parentCategoryId])
+    @@index([parentCategoryId])
 }
 
 model Brand {
-    id        String     @id @default(cuid())
-    name      String     @unique
-    image     BrandImage @relation(fields: [imageId], references: [id], onDelete: Cascade)
-    imageId   String     @unique
+    id        String   @id @default(cuid())
+    name      String   @unique
+    image     Image    @relation(fields: [imageId], references: [id], onDelete: Cascade)
+    imageId   String   @unique
     models    Model[]
-    createdAt DateTime   @default(now())
-    updatedAt DateTime   @updatedAt
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
 model Model {
-    id         String     @id @default(cuid())
-    name       String     @unique
-    brand      Brand      @relation(fields: [brandId], references: [id], onDelete: Cascade)
-    brandId    String
-    image      ModelImage @relation(fields: [imageId], references: [id], onDelete: Cascade)
-    imageId    String     @unique
-    categories Category[]
-    products   Product[]
-    wishes     Wish[]
-    createdAt  DateTime   @default(now())
-    updatedAt  DateTime   @updatedAt
+    id             String          @id @default(cuid())
+    name           String          @unique
+    image          Image           @relation(fields: [imageId], references: [id], onDelete: Cascade)
+    imageId        String          @unique
+    category       Category        @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+    categoryId     String
+    brand          Brand           @relation(fields: [brandId], references: [id], onDelete: Cascade)
+    brandId        String
+    products       Product[]
+    wishes         Wish[]
+    createdAt      DateTime        @default(now())
+    updatedAt      DateTime        @updatedAt
+    varientOptions VarientOption[]
+    varientValues  VarientValue[]
+
+    @@index([categoryId]) // to fetch all models by category
+    @@index([brandId]) // to fetch all models by brand
+}
+
+model VarientOption {
+    id            String         @id @default(cuid())
+    name          String
+    model         Model?         @relation(fields: [modelId], references: [id], onDelete: Cascade)
+    modelId       String?
+    varientValues VarientValue[]
+
+    @@unique([name, modelId])
+    @@index([modelId]) // to fetch all varient options by model
+}
+
+model VarientValue {
+    id       String         @id @default(cuid())
+    name     String
+    option   VarientOption? @relation(fields: [optionId], references: [id], onDelete: Cascade)
+    optionId String?
+    model    Model?         @relation(fields: [modelId], references: [id], onDelete: Cascade)
+    modelId  String?
+    products Product[]
+
+    @@unique([name, optionId, modelId])
+    @@index([optionId]) // to fetch all varient values by varient option
 }
 
 model Product {
-    id             String   @id @default(cuid())
+    id             String         @id @default(cuid())
     price          Float
+    title          String
     description    String
     images         Image[]
-    model          Model    @relation(fields: [modelId], references: [id], onDelete: Cascade)
+    varientValues  VarientValue[]
+    model          Model          @relation(fields: [modelId], references: [id], onDelete: Cascade)
     modelId        String
-    seller         User     @relation("listedProducts", fields: [sellerId], references: [id], onDelete: Cascade)
+    seller         User           @relation("listedProducts", fields: [sellerId], references: [id], onDelete: Cascade)
     sellerId       String
-    buyer          User?    @relation("purchasedProducts", fields: [buyerId], references: [id], onDelete: SetNull)
+    buyer          User?          @relation("purchasedProducts", fields: [buyerId], references: [id], onDelete: SetNull)
     buyerId        String?
-    favoritedUsers User[]   @relation("favoriteProducts")
-    room           Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
-    roomId         String   @unique
-    createdAt      DateTime @default(now())
-    updatedAt      DateTime @updatedAt
+    favoritedUsers User[]         @relation("favoriteProducts")
+    room           Room           @relation(fields: [roomId], references: [id], onDelete: Cascade)
+    roomId         String         @unique
+    createdAt      DateTime       @default(now())
+    updatedAt      DateTime       @updatedAt
+
+    // @@index([buyerId]) // to fetch all products by buyer (not needed)(uncomment if needed)
+    @@index([sellerId]) // to fetch all products by seller
+    @@index([modelId]) // to fetch all products by model
 }
 
 model Room {
@@ -140,6 +179,9 @@ model Bid {
     room      Room?    @relation(fields: [roomId], references: [id], onDelete: Cascade)
     roomId    String?
     createdAt DateTime @default(now())
+
+    @@index([userId]) // to fetch all bids by user
+    @@index([roomId]) // to fetch all bids by room
 }
 
 enum WishStatus {
@@ -156,22 +198,11 @@ model Wish {
     userId    String
     createdAt DateTime   @default(now())
     updatedAt DateTime   @updatedAt
+
+    @@index([userId]) // to fetch all wishes by user
 }
 
 model Image {
-    id        String   @id @default(cuid())
-    publicId  String
-    url       String
-    fileType  String
-    width     Int
-    height    Int
-    products  Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
-    productId String?
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-}
-
-model CategoryImage {
     id        String    @id @default(cuid())
     publicId  String
     url       String
@@ -181,28 +212,10 @@ model CategoryImage {
     createdAt DateTime  @default(now())
     updatedAt DateTime  @updatedAt
     category  Category?
-}
-
-model BrandImage {
-    id        String   @id @default(cuid())
-    publicId  String
-    url       String
-    fileType  String
-    width     Int
-    height    Int
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    brand     Brand?
-}
-
-model ModelImage {
-    id        String   @id @default(cuid())
-    publicId  String
-    url       String
-    fileType  String
-    width     Int
-    height    Int
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
     model     Model?
+    brand     Brand?
+    product   Product?  @relation(fields: [productId], references: [id], onDelete: Cascade)
+    productId String?
+
+    @@index([productId]) // to fetch all images by product
 }

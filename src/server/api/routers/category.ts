@@ -65,14 +65,16 @@ export const categoryRouter = createTRPCRouter({
       z.object({
         name: z.string().min(3).max(255),
         image: imageInputs,
+        parentCategoryId: z.string().cuid().optional(),
       })
     )
-    .mutation(async ({ input: { name, image }, ctx }) => {
+    .mutation(async ({ input: { name, image, parentCategoryId }, ctx }) => {
       try {
         // checking whether the category already exists
         const existingCategory = await ctx.prisma.category.findUnique({
           where: {
             name,
+            parentCategoryId,
           },
           select: {
             name: true,
@@ -85,6 +87,11 @@ export const categoryRouter = createTRPCRouter({
         const category = await ctx.prisma.category.create({
           data: {
             name,
+            parentCategory: {
+              connect: {
+                id: parentCategoryId,
+              },
+            },
             image: {
               create: image,
             },
@@ -204,7 +211,7 @@ export const categoryRouter = createTRPCRouter({
         });
 
         // using void to not wait for the promise to resolve
-        void ctx.prisma.categoryImage
+        void ctx.prisma.image
           .delete({
             where: {
               id: existingCategory.image.id,

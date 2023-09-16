@@ -1,15 +1,18 @@
 "use client";
 
 import { NextPage } from "next";
-import { api } from "@/utils/api";
-import Product from "@/types/product";
-import ListingCard from "@/components/ListingCard";
-import Container from "@/components/Container";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
+
+import Container from "@/components/Container";
+import ListingCard from "@/components/ListingCard";
 import LoadingProducts from "@/components/loading/LoadingProducts";
+import Product from "@/types/product";
+import { api } from "@/utils/api";
 
 const Favourites: NextPage = () => {
+  const session = useSession();
+
   const {
     data: products,
     isLoading,
@@ -17,7 +20,6 @@ const Favourites: NextPage = () => {
     // error,
     refetch,
   } = api.user.getMyFavorites.useQuery({});
-  const session = useSession();
 
   useEffect(() => {
     void refetch();

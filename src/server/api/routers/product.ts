@@ -33,29 +33,25 @@ export const productRouter = createTRPCRouter({
           const products = await ctx.prisma.product.findMany({
             where: {
               modelId,
-              model: brandId
-                ? {
-                    brandId,
-                    categories: categoryId
-                      ? {
-                          some: {
-                            id: categoryId,
-                          },
-                        }
-                      : undefined,
-                  }
-                : undefined,
-              OR: [
-                {
-                  model: {
+              model: {
+                categoryId,
+                brandId,
+                OR: [
+                  {
                     name: {
                       contains: search,
                       mode: "insensitive",
                     },
                   },
-                },
-                {
-                  model: {
+                  {
+                    category: {
+                      name: {
+                        contains: search,
+                        mode: "insensitive",
+                      },
+                    },
+                  },
+                  {
                     brand: {
                       name: {
                         contains: search,
@@ -63,8 +59,8 @@ export const productRouter = createTRPCRouter({
                       },
                     },
                   },
-                },
-              ],
+                ],
+              },
             },
             skip: limit * (page - 1),
             take: limit,
@@ -84,7 +80,7 @@ export const productRouter = createTRPCRouter({
               model: {
                 include: {
                   brand: true,
-                  categories: true,
+                  category: true,
                 },
               },
               room: true,
@@ -156,6 +152,7 @@ export const productRouter = createTRPCRouter({
   createProduct: protectedProcedure
     .input(
       z.object({
+        title: z.string(),
         price: z.number().int().gt(0),
         description: z.string(),
         images: z.array(imageInputs),
@@ -165,7 +162,7 @@ export const productRouter = createTRPCRouter({
     )
     .mutation(
       async ({
-        input: { price, description, images, modelId, closedAt },
+        input: { title, price, description, images, modelId, closedAt },
         ctx,
       }) => {
         if (closedAt < new Date()) {
@@ -183,6 +180,7 @@ export const productRouter = createTRPCRouter({
           }
           const product = await ctx.prisma.product.create({
             data: {
+              title,
               price,
               description,
               images: {
@@ -215,15 +213,24 @@ export const productRouter = createTRPCRouter({
           });
 
           // Updating all the wishes with the modeiId to available
-          await ctx.prisma.wish.updateMany({
-            where: {
-              modelId,
-              status: WishStatus.pending,
-            },
-            data: {
-              status: WishStatus.available,
-            },
-          });
+          void ctx.prisma.wish
+            .updateMany({
+              where: {
+                modelId,
+                status: WishStatus.pending,
+              },
+              data: {
+                status: WishStatus.available,
+              },
+            })
+            .catch((error) => {
+              console.error({
+                procedure: "createProduct",
+                message: "cannot update wishes",
+                error,
+              });
+            });
+
           return product;
         } catch (error) {
           console.error({

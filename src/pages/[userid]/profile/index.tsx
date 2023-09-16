@@ -32,7 +32,6 @@ const ProfilePage: NextPage = () => {
   } else if (!userData) {
     return <main>User not found</main>;
   }
-  // console.log(userData.lastActive);
 
   if (user?.id !== userId) {
     return (

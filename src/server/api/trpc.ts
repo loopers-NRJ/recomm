@@ -101,21 +101,21 @@ export const createTRPCRouter = t.router;
 /**
  * Custom middleware to update the user last active state
  */
-// export const updateLastActiveMiddleware = t.middleware(
-//   async ({ ctx, next }) => {
-//     if (ctx.session?.user) {
-//       await prisma.user.update({
-//         where: {
-//           id: ctx.session.user.id,
-//         },
-//         data: {
-//           lastActive: new Date(),
-//         },
-//       });
-//     }
-//     return next();
-//   }
-// );
+export const updateLastActiveMiddleware = t.middleware(
+  async ({ ctx, next }) => {
+    if (ctx.session?.user) {
+      await prisma.user.update({
+        where: {
+          id: ctx.session.user.id,
+        },
+        data: {
+          lastActive: new Date(),
+        },
+      });
+    }
+    return next();
+  }
+);
 
 /**
  * Public (unauthenticated) procedure
@@ -124,8 +124,8 @@ export const createTRPCRouter = t.router;
  * guarantee that a user querying is authorized, but you can still access user session data if they
  * are logged in.
  */
-// export const publicProcedure = t.procedure.use(updateLastActiveMiddleware);
-export const publicProcedure = t.procedure;
+export const publicProcedure = t.procedure.use(updateLastActiveMiddleware);
+// export const publicProcedure = t.procedure;
 
 /** Reusable middleware that enforces users are logged in before running the procedure. */
 const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {

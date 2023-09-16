@@ -30,6 +30,7 @@ interface FormError {
   categoryId?: string[] | undefined;
   brandId?: string[] | undefined;
   modelId?: string[] | undefined;
+  title?: string[] | undefined;
   description?: string[] | undefined;
   images?: string[] | undefined;
   price?: string[] | undefined;
@@ -58,6 +59,7 @@ export const PostingTabs: FC<PostingTabsProps> = ({
   const [searchModel, setSearchModel] = useState("");
   const [selectedModel, setSelectedModel] = useState<OptionalItem>();
 
+  const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [images, setImages] = useState<File[]>([]);
@@ -117,6 +119,7 @@ export const PostingTabs: FC<PostingTabsProps> = ({
     }
     try {
       const product = await uploadProduct.mutateAsync({
+        title,
         price: +price,
         description,
         modelId,
@@ -152,6 +155,7 @@ export const PostingTabs: FC<PostingTabsProps> = ({
   const handleChangeTab = (tab: Tab) => {
     if (tab === "tab-2") {
       const result = tab1Schema.safeParse({
+        title,
         description,
         modelId: selectedModel?.id,
         brandId: selectedBrand?.id,
@@ -235,6 +239,20 @@ export const PostingTabs: FC<PostingTabsProps> = ({
                     requiredError={!!formError?.modelId}
                   />
                 </div>
+                <Label>Title</Label>
+                <Input
+                  value={title}
+                  onChange={(e) => {
+                    setTitle(e.target.value);
+                  }}
+                  className={`${
+                    formError?.title
+                      ? "border-red-500 text-red-500"
+                      : "border-gray-300 text-gray-500"
+                  }`}
+                  placeholder="Enter title..."
+                  required
+                />
                 <Label>Description</Label>
                 <Input
                   value={description}
