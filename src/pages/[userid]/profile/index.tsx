@@ -120,14 +120,16 @@ const ProfilePage: NextPage = () => {
                   User Info
                 </h3>
                 <div className="mt-5 flex w-full flex-col items-center overflow-hidden text-sm">
-                  <a
-                    onClick={() => void router.push(`/${userId}/favourites`)}
-                    className=" block w-full border-t border-gray-100 py-4 pl-6 pr-3 text-gray-600 transition duration-150 hover:bg-gray-100"
-                  >
-                    My Favourites
-                    {/* TODO */}
-                    {/* <span className="text-xs text-gray-500">count of favourites</span> */}
-                  </a>
+                  {userId === session.data?.user.id && (
+                    <a
+                      onClick={() => void router.push(`/favourites`)}
+                      className=" block w-full border-t border-gray-100 py-4 pl-6 pr-3 text-gray-600 transition duration-150 hover:bg-gray-100"
+                    >
+                      My Favourites
+                      {/* TODO */}
+                      {/* <span className="text-xs text-gray-500">count of favourites</span> */}
+                    </a>
+                  )}
 
                   <a
                     onClick={() => void router.push(`/${userId}/listings`)}
@@ -138,14 +140,16 @@ const ProfilePage: NextPage = () => {
                     {/* <span className="text-xs text-gray-500">count of listings</span> */}
                   </a>
 
-                  <a
-                    onClick={() => void router.push(`/${userId}/wishlist`)}
-                    className=" block w-full border-t border-gray-100 py-4 pl-6 pr-3 text-gray-600 transition duration-150 hover:bg-gray-100"
-                  >
-                    WishList
-                    {/* TODO */}
-                    {/* <span className="text-xs text-gray-500">count of wishes</span> */}
-                  </a>
+                  {userId === session.data?.user.id && (
+                    <a
+                      onClick={() => void router.push(`/wishlist`)}
+                      className=" block w-full border-t border-gray-100 py-4 pl-6 pr-3 text-gray-600 transition duration-150 hover:bg-gray-100"
+                    >
+                      WishList
+                      {/* TODO */}
+                      {/* <span className="text-xs text-gray-500">count of wishes</span> */}
+                    </a>
+                  )}
                 </div>
               </div>
             </div>

@@ -33,7 +33,7 @@ const ComboBox: FC<ComboBoxProps> = ({
   selected,
   onSelect,
   label = "item",
-  fetchInput,
+  fetchInput = {},
   fetchItems,
   value: search,
   onChange: setSearch,

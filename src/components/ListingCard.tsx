@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/router";
 
-import Product from "@/types/product";
+import { Product } from "@/types/prisma";
 
 // import Image from "next/image";
 import Carousel from "./common/Carousel";

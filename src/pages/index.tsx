@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import Container from "@/components/Container";
 import ListingCard from "@/components/ListingCard";
 import LoadingProducts from "@/components/loading/LoadingProducts";
-import Product from "@/types/product";
+import { Product } from "@/types/prisma";
 import { api } from "@/utils/api";
 import {
   DefaultPage,
