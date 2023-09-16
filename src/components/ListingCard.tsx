@@ -27,7 +27,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
   return (
     <div
       onClick={() => {
-        router.push(`/products/${product.id}/`).catch((err) => {
+        router.push(`/products/${product.slug}/${product.id}/`).catch((err) => {
           console.log(err);
         });
       }}

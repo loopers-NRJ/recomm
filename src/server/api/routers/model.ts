@@ -1,3 +1,4 @@
+import slugify from "slugify";
 import { z } from "zod";
 
 import { deleteImage } from "@/lib/cloudinary";
@@ -99,7 +100,7 @@ export const modelRouter = createTRPCRouter({
         name: z.string().min(1).max(255),
         brandId: z.string().cuid(),
         categoryId: z.string().cuid(),
-        image: imageInputs,
+        image: imageInputs.optional(),
       })
     )
     .mutation(async ({ input: { name, brandId, categoryId, image }, ctx }) => {
@@ -115,6 +116,7 @@ export const modelRouter = createTRPCRouter({
         const model = await ctx.prisma.model.create({
           data: {
             name,
+            slug: slugify(name),
             category: {
               connect: {
                 id: categoryId,
@@ -125,9 +127,11 @@ export const modelRouter = createTRPCRouter({
                 id: brandId,
               },
             },
-            image: {
-              create: image,
-            },
+            image: image
+              ? {
+                  create: image,
+                }
+              : undefined,
           },
           include: {
             brand: {
@@ -211,6 +215,7 @@ export const modelRouter = createTRPCRouter({
             },
             data: {
               name: newName,
+              slug: newName ? slugify(newName) : undefined,
               category:
                 categoryId !== undefined
                   ? {
@@ -281,39 +286,39 @@ export const modelRouter = createTRPCRouter({
             id,
           },
         });
-
-        // using void to not wait for the promise to resolve
-        void ctx.prisma.image
-          .delete({
-            where: {
-              id: existingModel.image.id,
-            },
-          })
-          .catch((error) => {
-            console.error({
-              procedure: "deleteBrandById",
-              message: "cannot able delete the old image in database",
-              error,
+        if (existingModel.image !== null) {
+          // using void to not wait for the promise to resolve
+          void ctx.prisma.image
+            .delete({
+              where: {
+                id: existingModel.image.id,
+              },
+            })
+            .catch((error) => {
+              console.error({
+                procedure: "deleteBrandById",
+                message: "cannot able delete the old image in database",
+                error,
+              });
             });
-          });
 
-        // using void to not wait for the promise to resolve
-        void deleteImage(existingModel.image.publicId)
-          .then((error) => {
-            if (error instanceof Error) {
+          // using void to not wait for the promise to resolve
+          void deleteImage(existingModel.image.publicId)
+            .then((error) => {
+              if (error instanceof Error) {
+                console.error({
+                  procedure: "deleteModelById",
+                  error,
+                });
+              }
+            })
+            .catch((error) => {
               console.error({
                 procedure: "deleteModelById",
                 error,
               });
-            }
-          })
-          .catch((error) => {
-            console.error({
-              procedure: "deleteModelById",
-              error,
             });
-          });
-
+        }
         return model;
       } catch (error) {
         console.error({

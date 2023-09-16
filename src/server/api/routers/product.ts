@@ -1,3 +1,4 @@
+import slugify from "slugify";
 import { z } from "zod";
 
 import { deleteImage } from "@/lib/cloudinary";
@@ -181,6 +182,7 @@ export const productRouter = createTRPCRouter({
           const product = await ctx.prisma.product.create({
             data: {
               title,
+              slug: slugify(title),
               price,
               description,
               images: {
@@ -242,68 +244,68 @@ export const productRouter = createTRPCRouter({
       }
     ),
 
-  updateProductById: protectedProcedure
-    .input(
-      z.union([
-        z.object({
-          productId: z.string().cuid(),
-          price: z.number().int().gt(0),
-          description: z.string().optional(),
-          // images: z.array(imageInputs).optional(),
-        }),
-        z.object({
-          productId: z.string().cuid(),
-          price: z.number().int().gt(0).optional(),
-          description: z.string(),
-          // images: z.array(imageInputs).optional(),
-        }),
-        z.object({
-          productId: z.string().cuid(),
-          price: z.number().int().gt(0).optional(),
-          description: z.string().optional(),
-          // images: z.array(imageInputs),
-        }),
-      ])
-    )
-    .mutation(async ({ input: { productId: id, description, price }, ctx }) => {
-      try {
-        const user = ctx.session.user;
-        const existingProduct = await ctx.prisma.product.findUnique({
-          where: {
-            id,
-          },
-        });
-        if (existingProduct === null) {
-          return new Error("Product does not exist");
-        }
-        if (existingProduct.sellerId !== user.id) {
-          return new Error("You are not the seller of this product");
-        }
-        const product = await ctx.prisma.product.update({
-          where: {
-            id,
-          },
-          data: {
-            description,
-            price,
-          },
-          include: {
-            buyer: true,
-            seller: true,
-            model: true,
-            room: true,
-          },
-        });
-        return product;
-      } catch (error) {
-        console.error({
-          procedure: "updateProductById",
-          error,
-        });
+  // updateProductById: protectedProcedure
+  //   .input(
+  //     z.union([
+  //       z.object({
+  //         productId: z.string().cuid(),
+  //         price: z.number().int().gt(0),
+  //         description: z.string().optional(),
+  //         // images: z.array(imageInputs).optional(),
+  //       }),
+  //       z.object({
+  //         productId: z.string().cuid(),
+  //         price: z.number().int().gt(0).optional(),
+  //         description: z.string(),
+  //         // images: z.array(imageInputs).optional(),
+  //       }),
+  //       z.object({
+  //         productId: z.string().cuid(),
+  //         price: z.number().int().gt(0).optional(),
+  //         description: z.string().optional(),
+  //         // images: z.array(imageInputs),
+  //       }),
+  //     ])
+  //   )
+  //   .mutation(async ({ input: { productId: id, description, price }, ctx }) => {
+  //     try {
+  //       const user = ctx.session.user;
+  //       const existingProduct = await ctx.prisma.product.findUnique({
+  //         where: {
+  //           id,
+  //         },
+  //       });
+  //       if (existingProduct === null) {
+  //         return new Error("Product does not exist");
+  //       }
+  //       if (existingProduct.sellerId !== user.id) {
+  //         return new Error("You are not the seller of this product");
+  //       }
+  //       const product = await ctx.prisma.product.update({
+  //         where: {
+  //           id,
+  //         },
+  //         data: {
+  //           description,
+  //           price,
+  //         },
+  //         include: {
+  //           buyer: true,
+  //           seller: true,
+  //           model: true,
+  //           room: true,
+  //         },
+  //       });
+  //       return product;
+  //     } catch (error) {
+  //       console.error({
+  //         procedure: "updateProductById",
+  //         error,
+  //       });
 
-        return new Error("Something went wrong!");
-      }
-    }),
+  //       return new Error("Something went wrong!");
+  //     }
+  //   }),
   deleteProductById: protectedProcedure
     .input(z.object({ productId: z.string().cuid() }))
     .mutation(async ({ input: { productId: id }, ctx }) => {

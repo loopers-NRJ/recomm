@@ -1,3 +1,4 @@
+import slugify from "slugify";
 import { z } from "zod";
 
 import { deleteImage } from "@/lib/cloudinary";
@@ -76,7 +77,7 @@ export const brandRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string(),
-        image: imageInputs,
+        image: imageInputs.optional(),
       })
     )
     .mutation(async ({ input: { name, image }, ctx }) => {
@@ -94,9 +95,12 @@ export const brandRouter = createTRPCRouter({
         const brand = await ctx.prisma.brand.create({
           data: {
             name,
-            image: {
-              create: image,
-            },
+            slug: slugify(name),
+            image: image
+              ? {
+                  create: image,
+                }
+              : undefined,
           },
           include: {
             image: true,
@@ -162,6 +166,7 @@ export const brandRouter = createTRPCRouter({
             },
             data: {
               name: newName,
+              slug: newName ? slugify(newName) : undefined,
               image: {
                 create: newImage,
               },
@@ -209,37 +214,38 @@ export const brandRouter = createTRPCRouter({
         });
 
         // using void to not wait for the promise to resolve
-        void ctx.prisma.image
-          .delete({
-            where: {
-              id: existingBrand.image.id,
-            },
-          })
-          .catch((error) => {
-            console.error({
-              procedure: "deleteBrandById",
-              message: "cannot able delete the old image in database",
-              error,
+        if (existingBrand.image !== null) {
+          void ctx.prisma.image
+            .delete({
+              where: {
+                id: existingBrand.image.id,
+              },
+            })
+            .catch((error) => {
+              console.error({
+                procedure: "deleteBrandById",
+                message: "cannot able delete the old image in database",
+                error,
+              });
             });
-          });
 
-        // using void to not wait for the promise to resolve
-        void deleteImage(existingBrand.image.publicId)
-          .then((error) => {
-            if (error instanceof Error) {
+          // using void to not wait for the promise to resolve
+          void deleteImage(existingBrand.image.publicId)
+            .then((error) => {
+              if (error instanceof Error) {
+                console.error({
+                  procedure: "deleteBrandById",
+                  error,
+                });
+              }
+            })
+            .catch((error) => {
               console.error({
                 procedure: "deleteBrandById",
                 error,
               });
-            }
-          })
-          .catch((error) => {
-            console.error({
-              procedure: "deleteBrandById",
-              error,
             });
-          });
-
+        }
         return brand;
       } catch (error) {
         console.error("Error deleteBrandById", error);

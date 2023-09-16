@@ -1,3 +1,4 @@
+import slugify from "slugify";
 import { z } from "zod";
 
 import { deleteImage } from "@/lib/cloudinary";
@@ -10,9 +11,14 @@ import { functionalityOptions, imageInputs } from "@/utils/validation";
 
 export const categoryRouter = createTRPCRouter({
   getCategories: publicProcedure
-    .input(functionalityOptions)
+    .input(
+      functionalityOptions.extend({ parentId: z.string().cuid().nullish() })
+    )
     .query(
-      async ({ input: { search, page, limit, sortBy, sortOrder }, ctx }) => {
+      async ({
+        input: { search, page, limit, sortBy, sortOrder, parentId },
+        ctx,
+      }) => {
         try {
           const categories = await ctx.prisma.category.findMany({
             where: {
@@ -20,6 +26,7 @@ export const categoryRouter = createTRPCRouter({
                 contains: search,
                 mode: "insensitive",
               },
+              parentCategoryId: parentId,
             },
             skip: (page - 1) * limit,
             take: limit,
@@ -60,11 +67,36 @@ export const categoryRouter = createTRPCRouter({
         return new Error("Something went wrong!");
       }
     }),
+
+  getCategoryByIdOrNull: publicProcedure
+    .input(z.object({ categoryId: z.string().cuid().nullish() }))
+    .query(async ({ input: { categoryId: id }, ctx }) => {
+      try {
+        if (!id) {
+          return null;
+        }
+        const category = await ctx.prisma.category.findUnique({
+          where: {
+            id,
+          },
+          include: {
+            image: true,
+          },
+        });
+        if (category === null) {
+          return new Error("Category does not exist");
+        }
+        return category;
+      } catch (error) {
+        console.error({ procedure: "getCategoryById", error });
+        return new Error("Something went wrong!");
+      }
+    }),
   createCategory: adminProcedure
     .input(
       z.object({
         name: z.string().min(3).max(255),
-        image: imageInputs,
+        image: imageInputs.optional(),
         parentCategoryId: z.string().cuid().optional(),
       })
     )
@@ -87,14 +119,19 @@ export const categoryRouter = createTRPCRouter({
         const category = await ctx.prisma.category.create({
           data: {
             name,
-            parentCategory: {
-              connect: {
-                id: parentCategoryId,
-              },
-            },
-            image: {
-              create: image,
-            },
+            slug: slugify(name),
+            parentCategory: parentCategoryId
+              ? {
+                  connect: {
+                    id: parentCategoryId,
+                  },
+                }
+              : undefined,
+            image: image
+              ? {
+                  create: image,
+                }
+              : undefined,
           },
           include: {
             image: true,
@@ -160,6 +197,7 @@ export const categoryRouter = createTRPCRouter({
           },
           data: {
             name,
+            slug: name ? slugify(name) : undefined,
             image: {
               create: image,
             },
@@ -169,7 +207,7 @@ export const categoryRouter = createTRPCRouter({
           },
         });
         // deleting the old image from cloudinary
-        if (image !== undefined) {
+        if (image !== undefined && existingCategory.image !== null) {
           const error = await deleteImage(existingCategory.image.publicId);
           if (error) {
             console.error({
@@ -209,41 +247,41 @@ export const categoryRouter = createTRPCRouter({
             id,
           },
         });
-
-        // using void to not wait for the promise to resolve
-        void ctx.prisma.image
-          .delete({
-            where: {
-              id: existingCategory.image.id,
-            },
-          })
-          .catch((error) => {
-            console.error({
-              procedure: "deleteCategoryById",
-              message: "cannot able delete the old image in database",
-              error,
-            });
-          });
-
-        // using void to not wait for the promise to resolve
-        void deleteImage(existingCategory.image.publicId)
-          .then((error) => {
-            if (error instanceof Error) {
+        if (existingCategory.image !== null) {
+          // using void to not wait for the promise to resolve
+          void ctx.prisma.image
+            .delete({
+              where: {
+                id: existingCategory.image.id,
+              },
+            })
+            .catch((error) => {
               console.error({
                 procedure: "deleteCategoryById",
                 message: "cannot able delete the old image in database",
                 error,
               });
-            }
-          })
-          .catch((error) => {
-            console.error({
-              procedure: "deleteCategoryById",
-              message: "cannot able delete the old image in database",
-              error,
             });
-          });
 
+          // using void to not wait for the promise to resolve
+          void deleteImage(existingCategory.image.publicId)
+            .then((error) => {
+              if (error instanceof Error) {
+                console.error({
+                  procedure: "deleteCategoryById",
+                  message: "cannot able delete the old image in database",
+                  error,
+                });
+              }
+            })
+            .catch((error) => {
+              console.error({
+                procedure: "deleteCategoryById",
+                message: "cannot able delete the old image in database",
+                error,
+              });
+            });
+        }
         return category;
       } catch (error) {
         console.error({

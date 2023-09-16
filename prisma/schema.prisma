@@ -71,8 +71,9 @@ model Admin {
 model Category {
     id               String     @id @default(cuid())
     name             String     @unique
-    image            Image      @relation(fields: [imageId], references: [id], onDelete: Cascade)
-    imageId          String     @unique
+    slug             String
+    image            Image?     @relation(fields: [imageId], references: [id], onDelete: SetNull)
+    imageId          String?    @unique
     subCategories    Category[] @relation("SubCategory")
     parentCategory   Category?  @relation("SubCategory", fields: [parentCategoryId], references: [id], onDelete: Cascade)
     parentCategoryId String?
@@ -87,8 +88,9 @@ model Category {
 model Brand {
     id        String   @id @default(cuid())
     name      String   @unique
-    image     Image    @relation(fields: [imageId], references: [id], onDelete: Cascade)
-    imageId   String   @unique
+    slug      String
+    image     Image?   @relation(fields: [imageId], references: [id], onDelete: SetNull)
+    imageId   String?  @unique
     models    Model[]
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -97,8 +99,9 @@ model Brand {
 model Model {
     id             String          @id @default(cuid())
     name           String          @unique
-    image          Image           @relation(fields: [imageId], references: [id], onDelete: Cascade)
-    imageId        String          @unique
+    slug           String
+    image          Image?          @relation(fields: [imageId], references: [id], onDelete: SetNull)
+    imageId        String?         @unique
     category       Category        @relation(fields: [categoryId], references: [id], onDelete: Cascade)
     categoryId     String
     brand          Brand           @relation(fields: [brandId], references: [id], onDelete: Cascade)
@@ -142,6 +145,7 @@ model Product {
     id             String         @id @default(cuid())
     price          Float
     title          String
+    slug           String
     description    String
     images         Image[]
     varientValues  VarientValue[]
