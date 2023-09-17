@@ -1,6 +1,8 @@
 "use client";
 import { FC, useEffect, useState } from "react";
+
 import { api } from "@/utils/api";
+
 import Container from "../Container";
 import { toast } from "../ui/use-toast";
 import CategoryBox from "./CategoryBox";
@@ -133,7 +135,7 @@ const Categories: FC = () => {
             id={
               data instanceof Error || data === undefined
                 ? undefined
-                : data[i]?.id
+                : data.categories[i]?.id
             }
           />
         ))}

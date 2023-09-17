@@ -20,26 +20,42 @@ export const categoryRouter = createTRPCRouter({
         ctx,
       }) => {
         try {
-          const categories = await ctx.prisma.category.findMany({
-            where: {
-              name: {
-                contains: search,
-                mode: "insensitive",
+          const [total, categories] = await ctx.prisma.$transaction([
+            ctx.prisma.category.count({
+              where: {
+                name: {
+                  contains: search,
+                  mode: "insensitive",
+                },
+                parentCategoryId: parentId,
               },
-              parentCategoryId: parentId,
-            },
-            skip: (page - 1) * limit,
-            take: limit,
-            orderBy: [
-              {
-                [sortBy]: sortOrder,
+            }),
+            ctx.prisma.category.findMany({
+              where: {
+                name: {
+                  contains: search,
+                  mode: "insensitive",
+                },
+                parentCategoryId: parentId,
               },
-            ],
-            include: {
-              image: true,
-            },
-          });
-          return categories;
+              skip: (page - 1) * limit,
+              take: limit,
+              orderBy: [
+                {
+                  [sortBy]: sortOrder,
+                },
+              ],
+              include: {
+                image: true,
+              },
+            }),
+          ]);
+
+          return {
+            totalPages: Math.ceil(total / limit),
+            currentPage: page,
+            categories,
+          };
         } catch (error) {
           console.error({ procedure: "getCategories", error });
           return new Error("Something went wrong!");

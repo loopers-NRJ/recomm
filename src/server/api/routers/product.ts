@@ -32,67 +32,106 @@ export const productRouter = createTRPCRouter({
           brandId,
           modelId,
         },
-        ctx,
+        ctx: { prisma },
       }) => {
         try {
-          const products = await ctx.prisma.product.findMany({
-            where: {
-              modelId,
-              model: {
-                categoryId,
-                brandId,
-                OR: [
-                  {
-                    name: {
-                      contains: search,
-                      mode: "insensitive",
-                    },
-                  },
-                  {
-                    category: {
-                      name: {
-                        contains: search,
-                        mode: "insensitive",
-                      },
-                    },
-                  },
-                  {
-                    brand: {
-                      name: {
-                        contains: search,
-                        mode: "insensitive",
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-            skip: limit * (page - 1),
-            take: limit,
-            orderBy: [
-              {
+          const [count, products] = await prisma.$transaction([
+            prisma.product.count({
+              where: {
+                modelId,
                 model: {
-                  name: sortBy === "name" ? sortOrder : undefined,
+                  categoryId,
+                  brandId,
+                  OR: [
+                    {
+                      name: {
+                        contains: search,
+                        mode: "insensitive",
+                      },
+                    },
+                    {
+                      category: {
+                        name: {
+                          contains: search,
+                          mode: "insensitive",
+                        },
+                      },
+                    },
+                    {
+                      brand: {
+                        name: {
+                          contains: search,
+                          mode: "insensitive",
+                        },
+                      },
+                    },
+                  ],
                 },
               },
-              {
-                createdAt: sortBy === "createdAt" ? sortOrder : undefined,
-              },
-            ],
-            include: {
-              buyer: true,
-              seller: true,
-              model: {
-                include: {
-                  brand: true,
-                  category: true,
+            }),
+            prisma.product.findMany({
+              where: {
+                modelId,
+                model: {
+                  categoryId,
+                  brandId,
+                  OR: [
+                    {
+                      name: {
+                        contains: search,
+                        mode: "insensitive",
+                      },
+                    },
+                    {
+                      category: {
+                        name: {
+                          contains: search,
+                          mode: "insensitive",
+                        },
+                      },
+                    },
+                    {
+                      brand: {
+                        name: {
+                          contains: search,
+                          mode: "insensitive",
+                        },
+                      },
+                    },
+                  ],
                 },
               },
-              images: true,
-              room: true,
-            },
-          });
-          return products;
+              skip: limit * (page - 1),
+              take: limit,
+              orderBy: [
+                {
+                  model: {
+                    name: sortBy === "name" ? sortOrder : undefined,
+                  },
+                },
+                {
+                  createdAt: sortBy === "createdAt" ? sortOrder : undefined,
+                },
+              ],
+              include: {
+                buyer: true,
+                seller: true,
+                model: {
+                  include: {
+                    brand: true,
+                    category: true,
+                  },
+                },
+                images: true,
+                room: true,
+              },
+            }),
+          ]);
+          return {
+            totalPages: Math.ceil(count / limit),
+            currentPage: page,
+            products,
+          };
         } catch (error) {
           console.error({
             procedure: "getProducts",

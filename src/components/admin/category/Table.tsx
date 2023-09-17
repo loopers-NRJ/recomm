@@ -4,7 +4,9 @@ import { useRouter } from "next/router";
 import { FC, useState } from "react";
 
 import useAdminModal from "@/hooks/useAdminModel";
+import { Pagination } from "@/types/admin";
 import { api } from "@/utils/api";
+import { DefaultLimit } from "@/utils/validation";
 import { Category } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 
@@ -21,7 +23,16 @@ const CategoryTable: FC<CategoryTableProps> = ({ path }) => {
   const parentId = (path[path.length - 1]?.split("=") ??
     ([null, null] as const))[1];
 
-  const categoriesApi = api.category.getCategories.useQuery({ parentId });
+  const [pagination, setPagination] = useState<Pagination>({
+    pageIndex: 1,
+    pageSize: DefaultLimit,
+  });
+
+  const categoriesApi = api.category.getCategories.useQuery({
+    parentId,
+    page: pagination.pageIndex,
+    limit: pagination.pageSize,
+  });
 
   const parentCategoryApi = api.category.getCategoryByIdOrNull.useQuery({
     categoryId: parentId,
@@ -138,7 +149,13 @@ const CategoryTable: FC<CategoryTableProps> = ({ path }) => {
       {categoriesApi.isLoading ? (
         <div className="flex justify-center">Loading...</div>
       ) : (
-        <DataTable columns={columns} data={categoriesApi.data.categories} />
+        <DataTable
+          columns={columns}
+          data={categoriesApi.data.categories}
+          pagination={pagination}
+          pageCount={categoriesApi.data.totalPages}
+          setPagination={setPagination}
+        />
       )}
     </>
   );

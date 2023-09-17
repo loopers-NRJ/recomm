@@ -2,7 +2,9 @@ import { Pen, Trash } from "lucide-react";
 import { useState } from "react";
 
 import useAdminModal from "@/hooks/useAdminModel";
+import { Pagination } from "@/types/admin";
 import { api } from "@/utils/api";
+import { DefaultLimit } from "@/utils/validation";
 import { Brand } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 
@@ -12,12 +14,22 @@ import { CreateModel } from "./CreateModel";
 import { EditModel } from "./EditModel";
 
 const BrandTable = () => {
-  const brandApi = api.brand.getBrands.useQuery({});
+  const [pagination, setPagination] = useState<Pagination>({
+    pageIndex: 1,
+    pageSize: DefaultLimit,
+  });
+
+  const brandApi = api.brand.getBrands.useQuery({
+    page: pagination.pageIndex,
+    limit: pagination.pageSize,
+  });
+
   const [editableBrand, setEditableBrand] = useState<Brand>();
   const deleteBrandApi = api.brand.deleteBrandById.useMutation();
   // this state is to disable the delete button when admin clicks on it
   const [deleteBrandId, setDeleteBrandId] = useState<string>();
   const { open: openModel } = useAdminModal();
+
   if (brandApi.isLoading) {
     return <div>Loading...</div>;
   }
@@ -98,7 +110,13 @@ const BrandTable = () => {
         <CreateModel onCreate={() => void brandApi.refetch()} />
       )}
 
-      <DataTable columns={columns} data={brandApi.data} />
+      <DataTable
+        columns={columns}
+        data={brandApi.data.brands}
+        pageCount={brandApi.data.totalPages}
+        pagination={pagination}
+        setPagination={setPagination}
+      />
     </>
   );
 };

@@ -1,15 +1,25 @@
 import { Trash } from "lucide-react";
 import { useState } from "react";
 
+import { Pagination } from "@/types/admin";
 import { Product } from "@/types/prisma";
 import { api } from "@/utils/api";
+import { DefaultLimit } from "@/utils/validation";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { Button } from "../../ui/button";
 import { DataTable } from "../Table";
 
 const ProductTable = () => {
-  const productApi = api.product.getProducts.useQuery({});
+  const [pagination, setPagination] = useState<Pagination>({
+    pageIndex: 1,
+    pageSize: DefaultLimit,
+  });
+
+  const productApi = api.product.getProducts.useQuery({
+    page: pagination.pageIndex,
+    limit: pagination.pageSize,
+  });
   const deleteProduct = api.product.deleteProductById.useMutation();
   const [deleteId, setDeleteId] = useState<string>();
   const columns: ColumnDef<Omit<Product, "room">>[] = [
@@ -77,7 +87,15 @@ const ProductTable = () => {
   if (productApi.data instanceof Error) {
     return <div>{productApi.data.message}</div>;
   }
-  return <DataTable columns={columns} data={productApi.data} />;
+  return (
+    <DataTable
+      columns={columns}
+      data={productApi.data.products}
+      pageCount={productApi.data.totalPages}
+      pagination={pagination}
+      setPagination={setPagination}
+    />
+  );
 };
 
 export default ProductTable;

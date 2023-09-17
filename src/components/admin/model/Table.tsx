@@ -2,8 +2,10 @@ import { Pen, Trash } from "lucide-react";
 import { useState } from "react";
 
 import useAdminModal from "@/hooks/useAdminModel";
+import { Pagination } from "@/types/admin";
 import { Model } from "@/types/prisma";
 import { api } from "@/utils/api";
+import { DefaultLimit } from "@/utils/validation";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { Button } from "../../ui/button";
@@ -12,7 +14,15 @@ import { CreateModel } from "./CreateModel";
 import { EditModel } from "./EditModel";
 
 const ModelTable = () => {
-  const modelApi = api.model.getModels.useQuery({});
+  const [pagination, setPagination] = useState<Pagination>({
+    pageIndex: 1,
+    pageSize: DefaultLimit,
+  });
+
+  const modelApi = api.model.getModels.useQuery({
+    page: pagination.pageIndex,
+    limit: pagination.pageSize,
+  });
 
   const deleteModelApi = api.model.deleteModelById.useMutation();
   const [deleteModelId, setDeleteModelId] = useState<string>();
@@ -105,7 +115,13 @@ const ModelTable = () => {
       ) : (
         <CreateModel onCreate={() => void modelApi.refetch()} />
       )}
-      <DataTable columns={columns} data={modelApi.data} />
+      <DataTable
+        columns={columns}
+        data={modelApi.data.models}
+        pageCount={modelApi.data.totalPages}
+        pagination={pagination}
+        setPagination={setPagination}
+      />
     </>
   );
 };

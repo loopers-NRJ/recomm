@@ -26,11 +26,7 @@ export const ProductsPages: NextPage = () => {
   const categoryId = params.get("category") ?? undefined;
   const brandId = params.get("brand") ?? undefined;
   const modelId = params.get("model") ?? undefined;
-  const {
-    data: products,
-    isLoading,
-    isError,
-  } = api.product.getProducts.useQuery({
+  const productsApi = api.product.getProducts.useQuery({
     page,
     search,
     sortBy,
@@ -40,10 +36,10 @@ export const ProductsPages: NextPage = () => {
     brandId,
   });
 
-  if (isError || products instanceof Error)
+  if (productsApi.isError || productsApi.data instanceof Error)
     return <div>Something went wrong</div>;
-  if (isLoading) return <LoadingProducts />;
-  if (!products || products.length === 0)
+  if (productsApi.isLoading) return <LoadingProducts />;
+  if (!productsApi.data || productsApi.data.products.length === 0)
     return <div className="pt-24">No data to Show</div>;
 
   return (
@@ -61,7 +57,7 @@ export const ProductsPages: NextPage = () => {
             2xl:grid-cols-6
           "
         >
-          {products.map((product) => (
+          {productsApi.data.products.map((product) => (
             <ListingCard
               key={product.id}
               product={product as unknown as Product}

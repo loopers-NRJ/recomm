@@ -27,11 +27,7 @@ export const Home: NextPage = () => {
   const modelId = params.get("model") ?? undefined;
   const categoryId = params.get("category") ?? undefined;
 
-  const {
-    data: products,
-    isLoading,
-    isError,
-  } = api.product.getProducts.useQuery({
+  const { data, isLoading, isError } = api.product.getProducts.useQuery({
     page,
     search,
     sortBy,
@@ -46,10 +42,10 @@ export const Home: NextPage = () => {
   if (isError) {
     return <div>Something went wrong</div>;
   }
-  if (products instanceof Error) {
-    return <div>{products.message}</div>;
+  if (data instanceof Error) {
+    return <div>{data.message}</div>;
   }
-  if (products === undefined || products.length === 0) {
+  if (data === undefined || data.products.length === 0) {
     return (
       <Container>
         <div className="flex h-[500px] items-center justify-center pt-24 font-semibold">
@@ -63,7 +59,7 @@ export const Home: NextPage = () => {
     <main>
       <Container>
         <div className="grid grid-cols-1 gap-8 pt-24 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {products.map((product) => (
+          {data.products.map((product) => (
             <ListingCard
               key={product.id}
               product={product as unknown as Product}

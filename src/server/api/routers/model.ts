@@ -21,40 +21,56 @@ export const modelRouter = createTRPCRouter({
     .query(
       async ({
         input: { limit, page, search, sortBy, sortOrder, brandId, categoryId },
-        ctx,
+        ctx: { prisma },
       }) => {
         try {
-          const models = await ctx.prisma.model.findMany({
-            where: {
-              categoryId,
-              brandId,
-              name: {
-                contains: search,
-                mode: "insensitive",
-              },
-            },
-            take: limit,
-            skip: (page - 1) * limit,
-            orderBy: [
-              {
-                [sortBy]: sortOrder,
-              },
-            ],
-            include: {
-              brand: {
-                include: {
-                  image: true,
+          const [count, models] = await prisma.$transaction([
+            prisma.model.count({
+              where: {
+                categoryId,
+                brandId,
+                name: {
+                  contains: search,
+                  mode: "insensitive",
                 },
               },
-              category: {
-                include: {
-                  image: true,
+            }),
+            prisma.model.findMany({
+              where: {
+                categoryId,
+                brandId,
+                name: {
+                  contains: search,
+                  mode: "insensitive",
                 },
               },
-              image: true,
-            },
-          });
-          return models;
+              take: limit,
+              skip: (page - 1) * limit,
+              orderBy: [
+                {
+                  [sortBy]: sortOrder,
+                },
+              ],
+              include: {
+                brand: {
+                  include: {
+                    image: true,
+                  },
+                },
+                category: {
+                  include: {
+                    image: true,
+                  },
+                },
+                image: true,
+              },
+            }),
+          ]);
+          return {
+            totalPages: Math.ceil(count / limit),
+            currentPage: page,
+            models,
+          };
         } catch (error) {
           console.error({
             procedure: "getModels",

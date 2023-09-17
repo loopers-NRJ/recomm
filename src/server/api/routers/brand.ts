@@ -20,35 +20,57 @@ export const brandRouter = createTRPCRouter({
     .query(
       async ({
         input: { limit, page, search, sortBy, sortOrder, categoryId },
-        ctx,
+        ctx: { prisma },
       }) => {
         try {
-          const brands = await ctx.prisma.brand.findMany({
-            where: {
-              name: {
-                contains: search,
-                mode: "insensitive",
+          const [count, brands] = await prisma.$transaction([
+            prisma.brand.count({
+              where: {
+                name: {
+                  contains: search,
+                  mode: "insensitive",
+                },
+                models: categoryId
+                  ? {
+                      some: {
+                        categoryId,
+                      },
+                    }
+                  : undefined,
               },
-              models: categoryId
-                ? {
-                    some: {
-                      categoryId,
-                    },
-                  }
-                : undefined,
-            },
-            skip: limit * (page - 1),
-            take: limit,
-            orderBy: [
-              {
-                [sortBy]: sortOrder,
+            }),
+            prisma.brand.findMany({
+              where: {
+                name: {
+                  contains: search,
+                  mode: "insensitive",
+                },
+                models: categoryId
+                  ? {
+                      some: {
+                        categoryId,
+                      },
+                    }
+                  : undefined,
               },
-            ],
-            include: {
-              image: true,
-            },
-          });
-          return brands;
+              skip: limit * (page - 1),
+              take: limit,
+              orderBy: [
+                {
+                  [sortBy]: sortOrder,
+                },
+              ],
+              include: {
+                image: true,
+              },
+            }),
+          ]);
+
+          return {
+            totalPages: Math.ceil(count / limit),
+            currentPage: page,
+            brands,
+          };
         } catch (error) {
           console.error({ procedure: "getBrands", error });
 
