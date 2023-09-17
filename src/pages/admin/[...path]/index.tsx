@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import useAdminModal from "@/hooks/AdminModel";
+import useAdminModal from "@/hooks/useAdminModel";
 
 const titles = ["category", "brands", "models", "products"] as const;
 type Title = (typeof titles)[number];

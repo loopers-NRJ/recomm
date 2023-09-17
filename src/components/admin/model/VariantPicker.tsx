@@ -2,50 +2,60 @@ import { FC } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Variant } from "@/types/admin";
 
-interface VariantPickerProps {
-  variants: Variant[];
+import type { AdminVariantInput as Variant } from "@/types/admin";
+
+interface AdminVariantPickerProps {
+  variantOptions: Variant[];
   setVariants: (
     newVarientsOrSetter: Variant[] | ((oldVarients: Variant[]) => Variant[])
   ) => void;
 }
 
-const VariantPicker: FC<VariantPickerProps> = ({ variants, setVariants }) => {
+const AdminVariantPicker: FC<AdminVariantPickerProps> = ({
+  variantOptions: options,
+  setVariants,
+}) => {
   return (
     <div className="rounded-lg border px-1">
-      {variants.map((variant) => (
+      {options.map((option) => (
         <div
           className="VARIANT-CONTAINER my-2 flex flex-row flex-wrap gap-1"
-          key={variant.id}
+          key={option.id}
         >
           <Input
-            value={variant.option}
+            value={option.name}
             onKeyDown={(e) => {
-              if (e.key === "Backspace" && variant.option.length === 0) {
-                setVariants(variants.filter((v) => v.id !== variant.id));
+              if (
+                e.key === "Backspace" &&
+                option.name.length === 0 &&
+                option.variantValues.length === 0
+              ) {
+                setVariants(options.filter((v) => v.id !== option.id));
               }
             }}
             onChange={(e) =>
               setVariants(
-                variants.map((v) =>
-                  v.id === variant.id ? { ...v, option: e.target.value } : v
+                options.map((v) =>
+                  v.id === option.id ? { ...v, name: e.target.value } : v
                 )
               )
             }
-            placeholder="Attribute"
+            placeholder="Option"
             className="VARIANT-OPTION-INPUT sm:w-fit"
           />
           <div className="VARIANT-VALUES-CONTAINER min-h-10 flex w-fit flex-grow flex-wrap items-center gap-1 rounded-md border border-input bg-background p-1">
-            {variant.values.map((item, index) => (
+            {option.variantValues.map((item, index) => (
               <Button
                 key={item}
                 onClick={() => {
-                  const newValues = [...variant.values];
+                  const newValues = [...option.variantValues];
                   newValues.splice(index, 1);
                   setVariants(
-                    variants.map((v) =>
-                      v.id === variant.id ? { ...v, values: newValues } : v
+                    options.map((v) =>
+                      v.id === option.id
+                        ? { ...v, variantValues: newValues }
+                        : v
                     )
                   );
                 }}
@@ -59,17 +69,17 @@ const VariantPicker: FC<VariantPickerProps> = ({ variants, setVariants }) => {
             <input
               type="text"
               className="VARIANT-VALUE-INPUT w-0 flex-grow outline-none"
-              value={variant.search}
+              value={option.search}
               placeholder="Values"
               onKeyDown={(e) => {
-                if (e.key === "Backspace" && variant.search.length === 0) {
-                  const newValues = [...variant.values];
+                if (e.key === "Backspace" && option.search.length === 0) {
+                  const newValues = [...option.variantValues];
                   setVariants(
-                    variants.map((v) =>
-                      v.id === variant.id
+                    options.map((v) =>
+                      v.id === option.id
                         ? {
                             ...v,
-                            values: newValues,
+                            variantValues: newValues,
                             search: (newValues.pop() ?? "") + " ",
                           }
                         : v
@@ -84,11 +94,14 @@ const VariantPicker: FC<VariantPickerProps> = ({ variants, setVariants }) => {
                   text.trim().length > 0
                 ) {
                   setVariants(
-                    variants.map((v) =>
-                      v.id === variant.id
+                    options.map((v) =>
+                      v.id === option.id
                         ? {
                             ...v,
-                            values: [...v.values, variant.search.trim()],
+                            variantValues: [
+                              ...v.variantValues,
+                              option.search.trim(),
+                            ],
                             search: "",
                           }
                         : v
@@ -96,8 +109,8 @@ const VariantPicker: FC<VariantPickerProps> = ({ variants, setVariants }) => {
                   );
                 } else {
                   setVariants(
-                    variants.map((v) =>
-                      v.id === variant.id ? { ...v, search: text } : v
+                    options.map((v) =>
+                      v.id === option.id ? { ...v, search: text } : v
                     )
                   );
                 }
@@ -110,4 +123,4 @@ const VariantPicker: FC<VariantPickerProps> = ({ variants, setVariants }) => {
   );
 };
 
-export default VariantPicker;
+export default AdminVariantPicker;

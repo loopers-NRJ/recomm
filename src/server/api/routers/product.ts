@@ -2,7 +2,11 @@ import slugify from "slugify";
 import { z } from "zod";
 
 import { deleteImage } from "@/lib/cloudinary";
-import { functionalityOptions, imageInputs } from "@/utils/validation";
+import {
+  functionalityOptions,
+  productSchema,
+  validateVariant,
+} from "@/utils/validation";
 import { WishStatus } from "@prisma/client";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
@@ -151,19 +155,18 @@ export const productRouter = createTRPCRouter({
       }
     }),
   createProduct: protectedProcedure
-    .input(
-      z.object({
-        title: z.string(),
-        price: z.number().int().gt(0),
-        description: z.string(),
-        images: z.array(imageInputs),
-        closedAt: z.date(),
-        modelId: z.string().cuid(),
-      })
-    )
+    .input(productSchema)
     .mutation(
       async ({
-        input: { title, price, description, images, modelId, closedAt },
+        input: {
+          title,
+          price,
+          description,
+          images,
+          modelId,
+          closedAt,
+          variantOptions: providedVariantOptions,
+        },
         ctx,
       }) => {
         if (closedAt < new Date()) {
@@ -175,10 +178,26 @@ export const productRouter = createTRPCRouter({
             where: {
               id: modelId,
             },
+            include: {
+              variantOptions: {
+                include: {
+                  variantValues: true,
+                },
+              },
+            },
           });
           if (model === null) {
             return new Error("Model does not exist");
           }
+
+          const valid = validateVariant(
+            model.variantOptions,
+            providedVariantOptions
+          );
+          if (!valid) {
+            return new Error("Invalid variant options");
+          }
+
           const product = await ctx.prisma.product.create({
             data: {
               title,
@@ -204,6 +223,11 @@ export const productRouter = createTRPCRouter({
                 create: {
                   closedAt,
                 },
+              },
+              varientValues: {
+                connect: providedVariantOptions.map((variantOption) => ({
+                  id: variantOption.valueId,
+                })),
               },
             },
             include: {

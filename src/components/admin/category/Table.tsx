@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { FC, useState } from "react";
 
-import useAdminModal from "@/hooks/AdminModel";
+import useAdminModal from "@/hooks/useAdminModel";
 import { api } from "@/utils/api";
 import { Category } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";

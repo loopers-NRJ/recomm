@@ -6,6 +6,8 @@ import {
   Model as PrismaModel,
   Product as PrismaProduct,
   User,
+  VariantOption as PrismaVariantOption,
+  VariantValue as PrismaVariantValue,
 } from "@prisma/client";
 
 export type Product = PrismaProduct & {
@@ -28,4 +30,8 @@ export type Model = PrismaModel & {
     image: Image | null;
   };
   image: Image | null;
+};
+
+export type VariantOption = PrismaVariantOption & {
+  variantValues: PrismaVariantValue[];
 };

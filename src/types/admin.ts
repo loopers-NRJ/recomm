@@ -1,6 +1,6 @@
-export interface Variant {
+export interface AdminVariantInput {
   id: string;
-  option: string;
-  values: string[];
   search: string;
+  name: string;
+  variantValues: string[];
 }

@@ -1,7 +1,7 @@
 import { Pen, Trash } from "lucide-react";
 import { useState } from "react";
 
-import useAdminModal from "@/hooks/AdminModel";
+import useAdminModal from "@/hooks/useAdminModel";
 import { api } from "@/utils/api";
 import { Brand } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";

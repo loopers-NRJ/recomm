@@ -1,4 +1,5 @@
 import { Pen, Trash } from "lucide-react";
+import { useState } from "react";
 
 import { Model } from "@/types/prisma";
 import { api } from "@/utils/api";
@@ -8,51 +9,11 @@ import { Button } from "../../ui/button";
 import { DataTable } from "../Table";
 import { CreateModel } from "./CreateModel";
 
-export const columns: ColumnDef<Model>[] = [
-  {
-    id: "Name",
-    header: "Name",
-    accessorFn: (row) => row.name,
-  },
-  {
-    id: "Brand",
-    header: "Brand",
-    accessorFn: (row) => row.brand.name,
-  },
-  {
-    id: "Category",
-    header: "Category",
-    accessorFn: (row) => row.category.name,
-  },
-  {
-    id: "createdAt",
-    header: "Created At",
-    accessorFn: (row) => row.createdAt.toLocaleString("en-US"),
-  },
-  {
-    id: "edit",
-    header: "",
-    accessorFn: (row) => row.id,
-    cell: () => (
-      <Button>
-        <Pen />
-      </Button>
-    ),
-  },
-  {
-    id: "delete",
-    header: "",
-    accessorFn: (row) => row.id,
-    cell: () => (
-      <Button variant="destructive">
-        <Trash />
-      </Button>
-    ),
-  },
-];
-
 const ModelTable = () => {
   const modelApi = api.model.getModels.useQuery({});
+
+  const deleteModelApi = api.model.deleteModelById.useMutation();
+  const [deleteModelId, setDeleteModelId] = useState<string>();
   if (modelApi.isLoading) {
     return <div>Loading...</div>;
   }
@@ -63,6 +24,67 @@ const ModelTable = () => {
   if (modelApi.data instanceof Error) {
     return <div>{modelApi.data.message}</div>;
   }
+
+  const columns: ColumnDef<Model>[] = [
+    {
+      id: "Name",
+      header: "Name",
+      accessorFn: (row) => row.name,
+    },
+    {
+      id: "Brand",
+      header: "Brand",
+      accessorFn: (row) => row.brand.name,
+    },
+    {
+      id: "Category",
+      header: "Category",
+      accessorFn: (row) => row.category.name,
+    },
+    {
+      id: "createdAt",
+      header: "Created At",
+      accessorFn: (row) => row.createdAt.toLocaleString("en-US"),
+    },
+    {
+      id: "updatedAt",
+      header: "Updated At",
+      accessorFn: (row) => row.updatedAt.toLocaleString("en-US"),
+    },
+    {
+      id: "edit",
+      header: "",
+      accessorFn: (row) => row.id,
+      cell: () => (
+        <Button>
+          <Pen />
+        </Button>
+      ),
+    },
+    {
+      id: "delete",
+      header: "",
+      accessorFn: (row) => row.id,
+      cell: ({ row }) => (
+        <Button
+          variant="destructive"
+          onClick={() => {
+            setDeleteModelId(row.id);
+            void deleteModelApi
+              .mutateAsync({ modelId: row.original.id })
+              .then(async () => {
+                await modelApi.refetch();
+                setDeleteModelId(undefined);
+              });
+          }}
+          disabled={deleteModelId === row.id}
+        >
+          <Trash />
+        </Button>
+      ),
+    },
+  ];
+
   return (
     <>
       <CreateModel onCreate={() => void modelApi.refetch()} />

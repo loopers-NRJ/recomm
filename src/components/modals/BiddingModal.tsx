@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import * as Dialog from "@radix-ui/react-dialog";
-import useBiddingModal from "@/hooks/useBiddingModal";
-import { Cross1Icon } from "@radix-ui/react-icons";
 import { FC, useEffect, useState } from "react";
-import { DialogHeader } from "../ui/dialog";
+
+import useBiddingModal from "@/hooks/useBiddingModal";
+import * as Dialog from "@radix-ui/react-dialog";
+import { Cross1Icon } from "@radix-ui/react-icons";
+
 import BidForm from "../BidForm";
+import { DialogHeader } from "../ui/dialog";
 
 const BiddingModal: FC = () => {
   const biddingModal = useBiddingModal();
@@ -32,7 +34,7 @@ const BiddingModal: FC = () => {
         {/* Content */}
         <div className="fixed right-0 top-0 z-50 flex h-full w-full items-end justify-center md:items-center">
           <Dialog.DialogContent
-            className={`translate relative z-50 h-[40%] w-full rounded-xl bg-white p-8 text-foreground shadow-sm duration-300 md:h-auto md:w-4/6 lg:h-auto lg:w-3/6 xl:w-2/5
+            className={`translate relative z-50 h-[40%] w-full overflow-auto rounded-xl bg-white p-8 text-foreground shadow-sm duration-300 md:h-auto md:w-4/6 lg:h-auto lg:w-3/6 xl:w-2/5
               ${showModal ? "translate-y-0" : "translate-y-full"}
               ${showModal ? "opacity-100" : "opacity-0"}`}
           >

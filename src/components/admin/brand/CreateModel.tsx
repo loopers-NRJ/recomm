@@ -1,6 +1,6 @@
 import { FC, useState } from "react";
 
-import useAdminModal from "@/hooks/AdminModel";
+import useAdminModal from "@/hooks/useAdminModel";
 import { api } from "@/utils/api";
 import { useImageUploader } from "@/utils/imageUpload";
 import { Image } from "@/utils/validation";
@@ -9,7 +9,7 @@ import ImagePicker from "../../common/ImagePicker";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { Label } from "../../ui/label";
-import AdminPageModal from "../PopupModel";
+import AdminPageModal from "../AdminPageModel";
 
 export interface CreateModelProps {
   onCreate: () => void;

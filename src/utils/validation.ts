@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { VariantOption } from "@/types/prisma";
+
 export const DefaultPage = 1;
 export const DefaultLimit = 30;
 export const MaxLimit = 100;
@@ -25,7 +27,14 @@ export const imageInputs = z.object({
   height: z.number().int(),
 });
 
+export type Image = z.infer<typeof imageInputs>;
+
 export const productSchema = z.object({
+  title: z
+    .string({
+      required_error: "Enter a title",
+    })
+    .min(1, "Please provide a title to your product"),
   price: z
     .number({
       required_error: "Enter a price",
@@ -33,26 +42,21 @@ export const productSchema = z.object({
     })
     .int("Price cannot have decimal values")
     .positive("Price must not be negative"),
-  title: z
-    .string({
-      required_error: "Enter a title",
-    })
-    .min(1, "Please provide a title to your product"),
   description: z
     .string({
       required_error: "Enter a description",
     })
     .min(1, "Please provide a description to your product"),
-  modelId: z.string({
-    required_error: "Select a model",
+  images: z.array(imageInputs).nonempty("Upload at least one image"),
+  categoryId: z.string({
+    required_error: "Select a category",
   }),
   brandId: z.string({
     required_error: "Select a brand",
   }),
-  categoryId: z.string({
-    required_error: "Select a category",
+  modelId: z.string({
+    required_error: "Select a model",
   }),
-  images: z.array(z.any()).nonempty("Upload at least one image"),
   closedAt: z
     .date()
     .default(() => new Date(Date.now() + 60 * 60 * 24 * 7))
@@ -60,6 +64,82 @@ export const productSchema = z.object({
       message: "Date must be in the future",
       params: {},
     }),
+  variantOptions: z
+    .array(
+      z.object({
+        optionId: z
+          .string({
+            required_error: "Select an option for all variants",
+          })
+          .cuid(),
+        valueId: z
+          .string({
+            required_error: "Select an option for all variants",
+          })
+          .cuid()
+          .nonempty({ message: "Enter at least one value" }),
+      })
+    )
+    .default([]),
 });
 
-export type Image = z.infer<typeof imageInputs>;
+export const ModelSchema = z.object({
+  name: z
+    .string({
+      required_error: "Enter a name",
+    })
+    .min(1, "Enter a name")
+    .max(255, "Name must be less than 255 characters"),
+  brandId: z.string({ required_error: "Select a brand" }).cuid(),
+  categoryId: z
+    .string({
+      required_error: "Select a category",
+    })
+    .cuid(),
+  variantOptions: z.array(
+    z.object({
+      name: z
+        .string({
+          required_error: "Enter an option",
+        })
+        .min(1, "Enter an option")
+        .max(25, "Option must be less than 25 characters"),
+      variantValues: z
+        .array(
+          z
+            .string({
+              required_error: "Enter a value",
+            })
+            .min(1, "Enter a value")
+            .max(25, "Value must be less than 25 characters")
+        )
+        .nonempty({ message: "Enter at least one value" }),
+    })
+  ),
+  image: imageInputs.optional(),
+});
+
+type ProvidedVariantOption = z.infer<typeof productSchema>["variantOptions"][0];
+
+export const validateVariant = (
+  variantOptions: VariantOption[],
+  providedVariantOptions: ProvidedVariantOption[]
+) => {
+  for (const option of variantOptions) {
+    // check if the model varient option is provided
+    const providedOption = providedVariantOptions.find(
+      (providedVarientOption) => providedVarientOption.optionId === option.id
+    );
+    if (!providedOption) {
+      return { id: option.id, message: `Select Varient for ${option.name}` };
+    }
+    // check if the value for the varient option is provided
+    const providedValue = option.variantValues.find(
+      (variantValue) => variantValue.id === providedOption.valueId
+    );
+    if (!providedValue) {
+      return { id: option.id, message: `Select Varient for ${option.name}` };
+    }
+  }
+  return true;
+};

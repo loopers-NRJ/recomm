@@ -80,6 +80,11 @@ export const modelRouter = createTRPCRouter({
               },
             },
             image: true,
+            variantOptions: {
+              include: {
+                variantValues: true,
+              },
+            },
           },
         });
         if (model === null) {
@@ -94,44 +99,17 @@ export const modelRouter = createTRPCRouter({
         return new Error("Something went wrong!");
       }
     }),
-  createModel: adminProcedure
-    .input(
-      z.object({
-        name: z.string().min(1).max(255),
-        brandId: z.string().cuid(),
-        categoryId: z.string().cuid(),
-        image: imageInputs.optional(),
-      })
-    )
-    .mutation(async ({ input: { name, brandId, categoryId, image }, ctx }) => {
+
+  getModelByIdOrNull: publicProcedure
+    .input(z.object({ modelId: z.string().cuid().nullish() }))
+    .query(async ({ input: { modelId: id }, ctx }) => {
       try {
-        const existingModel = await ctx.prisma.model.findFirst({
-          where: {
-            name,
-          },
-        });
-        if (existingModel !== null) {
-          return new Error(`Model ${name} already exists`);
+        if (!id) {
+          return null;
         }
-        const model = await ctx.prisma.model.create({
-          data: {
-            name,
-            slug: slugify(name),
-            category: {
-              connect: {
-                id: categoryId,
-              },
-            },
-            brand: {
-              connect: {
-                id: brandId,
-              },
-            },
-            image: image
-              ? {
-                  create: image,
-                }
-              : undefined,
+        const model = await ctx.prisma.model.findUnique({
+          where: {
+            id,
           },
           include: {
             brand: {
@@ -145,17 +123,122 @@ export const modelRouter = createTRPCRouter({
               },
             },
             image: true,
+            variantOptions: {
+              include: {
+                variantValues: true,
+              },
+            },
           },
         });
+        if (model === null) {
+          return new Error("Model not found");
+        }
         return model;
       } catch (error) {
         console.error({
-          procedure: "createModelById",
+          procedure: "getModelById",
           error,
         });
-        return new Error("Error creating model");
+        return new Error("Something went wrong!");
       }
     }),
+
+  createModel: adminProcedure
+    .input(
+      z.object({
+        name: z.string().min(1).max(255),
+        brandId: z.string().cuid(),
+        categoryId: z.string().cuid(),
+        variantOptions: z.array(
+          z.object({
+            name: z.string().min(1).max(255),
+            variantValues: z.array(z.string().min(1).max(255)).nonempty(),
+          })
+        ),
+        image: imageInputs.optional(),
+      })
+    )
+    .mutation(
+      ({
+        input: { name, brandId, categoryId, image, variantOptions: variants },
+        ctx,
+      }) => {
+        return ctx.prisma.$transaction(async (prisma) => {
+          try {
+            const existingModel = await prisma.model.findFirst({
+              where: {
+                name,
+              },
+            });
+            if (existingModel !== null) {
+              return new Error(`Model ${name} already exists`);
+            }
+
+            const model = await prisma.model.create({
+              data: {
+                name,
+                slug: slugify(name),
+                category: {
+                  connect: {
+                    id: categoryId,
+                  },
+                },
+                brand: {
+                  connect: {
+                    id: brandId,
+                  },
+                },
+                image: image
+                  ? {
+                      create: image,
+                    }
+                  : undefined,
+              },
+              include: {
+                brand: {
+                  include: {
+                    image: true,
+                  },
+                },
+                category: {
+                  include: {
+                    image: true,
+                  },
+                },
+                image: true,
+              },
+            });
+            for (const variant of variants) {
+              await prisma.variantOption.create({
+                data: {
+                  name: variant.name,
+                  model: {
+                    connect: {
+                      id: model.id,
+                    },
+                  },
+                  variantValues: {
+                    createMany: {
+                      data: variant.variantValues.map((value) => ({
+                        name: value,
+                        modelId: model.id,
+                      })),
+                    },
+                  },
+                },
+              });
+            }
+            return model;
+          } catch (error) {
+            console.error({
+              procedure: "createModelById",
+              error,
+            });
+            return new Error("Error creating model");
+          }
+        });
+      }
+    ),
   updateModelById: adminProcedure
     .input(
       z.union([

@@ -107,28 +107,28 @@ model Model {
     wishes         Wish[]
     createdAt      DateTime        @default(now())
     updatedAt      DateTime        @updatedAt
-    varientOptions VarientOption[]
-    varientValues  VarientValue[]
+    variantOptions VariantOption[]
+    variantValues  VariantValue[]
 
     @@index([categoryId]) // to fetch all models by category
     @@index([brandId]) // to fetch all models by brand
 }
 
-model VarientOption {
+model VariantOption {
     id            String         @id @default(cuid())
     name          String
     model         Model?         @relation(fields: [modelId], references: [id], onDelete: Cascade)
     modelId       String?
-    varientValues VarientValue[]
+    variantValues VariantValue[]
 
     @@unique([name, modelId])
     @@index([modelId]) // to fetch all varient options by model
 }
 
-model VarientValue {
+model VariantValue {
     id       String         @id @default(cuid())
     name     String
-    option   VarientOption? @relation(fields: [optionId], references: [id], onDelete: Cascade)
+    option   VariantOption? @relation(fields: [optionId], references: [id], onDelete: Cascade)
     optionId String?
     model    Model?         @relation(fields: [modelId], references: [id], onDelete: Cascade)
     modelId  String?
@@ -145,7 +145,7 @@ model Product {
     slug           String
     description    String
     images         Image[]
-    varientValues  VarientValue[]
+    varientValues  VariantValue[]
     model          Model          @relation(fields: [modelId], references: [id], onDelete: Cascade)
     modelId        String
     seller         User           @relation("listedProducts", fields: [sellerId], references: [id], onDelete: Cascade)
