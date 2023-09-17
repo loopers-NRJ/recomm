@@ -2,9 +2,9 @@ import { Loader2 } from "lucide-react";
 import { FC, useState } from "react";
 
 import useAdminModal from "@/hooks/useAdminModel";
+import { Model } from "@/types/prisma";
 import { api } from "@/utils/api";
 import { useImageUploader } from "@/utils/imageUpload";
-import { Brand } from "@prisma/client";
 
 import ImagePicker from "../../common/ImagePicker";
 import { Button } from "../../ui/button";
@@ -13,19 +13,19 @@ import { Label } from "../../ui/label";
 import AdminPageModal from "../AdminPageModel";
 
 interface EditModelProps {
-  brand: Brand;
-  setBrand: (value: Brand | undefined) => void;
+  model: Model;
+  setModel: (value: Model | undefined) => void;
   onEdit: () => void;
 }
 
 export const EditModel: FC<EditModelProps> = ({
-  brand,
-  setBrand,
+  model,
+  setModel,
   onEdit: afterEdit,
 }) => {
-  const updateBrandApi = api.brand.updateBrandById.useMutation();
+  const updateModelApi = api.model.updateModelById.useMutation();
 
-  const [brandName, setBrandName] = useState(brand.name);
+  const [modelName, setModelName] = useState(model.name);
   // file object to store the file to upload
   const [imageFiles, setImageFiles] = useState<File[]>([]);
 
@@ -33,7 +33,7 @@ export const EditModel: FC<EditModelProps> = ({
   const [error, setError] = useState<string>();
   const { close: closeModel } = useAdminModal();
 
-  const updateBrand = async () => {
+  const updateModel = async () => {
     let image;
     if (imageFiles.length > 0) {
       const result = await uploader.upload(imageFiles);
@@ -42,15 +42,16 @@ export const EditModel: FC<EditModelProps> = ({
       }
       image = result[0];
     }
-    const result = await updateBrandApi.mutateAsync({
-      id: brand.id,
-      name: brandName,
+
+    const result = await updateModelApi.mutateAsync({
+      id: model.id,
+      name: modelName,
       image,
     });
     if (result instanceof Error) {
       return setError(result.message);
     }
-    setBrand(undefined);
+    setModel(undefined);
     closeModel();
     afterEdit();
   };
@@ -58,14 +59,14 @@ export const EditModel: FC<EditModelProps> = ({
   return (
     <AdminPageModal>
       <section className="flex flex-col gap-4 p-4">
-        <h1 className="text-lg font-bold">Edit Brand - {brand.name}</h1>
+        <h1 className="text-lg font-bold">Edit Model - {model.name}</h1>
         <Label className="my-4">
           New name
           <Input
             className="my-2"
-            value={brandName}
+            value={modelName}
             onChange={(e) => {
-              setBrandName(e.target.value);
+              setModelName(e.target.value);
               if (error) setError(undefined);
             }}
           />
@@ -78,15 +79,15 @@ export const EditModel: FC<EditModelProps> = ({
             images={imageFiles}
           />
           <Button
-            onClick={() => void updateBrand()}
+            onClick={() => void updateModel()}
             disabled={
               uploader.isLoading ||
-              updateBrandApi.isLoading ||
-              brandName.trim() === "" ||
-              brandName === brand.name
+              updateModelApi.isLoading ||
+              ((modelName.trim() === "" || modelName === model.name) &&
+                imageFiles.length === 0)
             }
           >
-            {imageFiles.length > 0 ? "Upload Image" : "Update Brand"}
+            {imageFiles.length > 0 ? "Update Model Image" : "Update Model"}
           </Button>
         </div>
         {uploader.isLoading && (
@@ -95,9 +96,9 @@ export const EditModel: FC<EditModelProps> = ({
             <Loader2 className="animate-spin" />
           </div>
         )}
-        {updateBrandApi.isLoading && (
+        {updateModelApi.isLoading && (
           <div className="flex flex-col items-center justify-center rounded-lg border p-2">
-            Updating Brand {brandName} ...
+            Updating Model {modelName} ...
             <Loader2 className="animate-spin" />
           </div>
         )}

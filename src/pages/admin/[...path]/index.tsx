@@ -23,7 +23,7 @@ type Title = (typeof titles)[number];
 const AdminPage = () => {
   const router = useRouter();
   const path = router.query.path;
-  const { toggle } = useAdminModal();
+  const { open } = useAdminModal();
   // check if the path is valid title
   if (
     !path ||
@@ -78,7 +78,7 @@ const AdminPage = () => {
           </SelectContent>
         </Select>
 
-        <Button onClick={toggle}>New</Button>
+        {title !== "products" && <Button onClick={open}>New</Button>}
       </div>
       <div className="my-4">
         <Table path={path.slice(1)} />

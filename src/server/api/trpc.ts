@@ -157,17 +157,40 @@ export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
  * If you want a query or mutation to ONLY be accessible to admins.
  *
  */
-export const adminProcedure = protectedProcedure.use(async ({ ctx, next }) => {
-  // check if the user is an admin
+export const adminWriteProcedure = protectedProcedure.use(
+  async ({ ctx, next }) => {
+    // check if the user is an admin
+    if (ctx.session.user.role !== Role.ADMIN_WRITE) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
 
-  if (ctx.session.user.role !== Role.ADMIN) {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
+    return next({
+      ctx: {
+        // infers the `session` as non-nullable
+        session: { ...ctx.session, user: ctx.session.user },
+      },
+    });
   }
+);
 
-  return next({
-    ctx: {
-      // infers the `session` as non-nullable
-      session: { ...ctx.session, user: ctx.session.user },
-    },
-  });
-});
+/**
+ * Protected (admin authenticated) procedure
+ *
+ * If you want a query or mutation to ONLY be accessible to admins.
+ *
+ */
+export const adminReadProcedure = protectedProcedure.use(
+  async ({ ctx, next }) => {
+    // check if the user is an admin
+    if (ctx.session.user.role !== Role.ADMIN_READ) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+
+    return next({
+      ctx: {
+        // infers the `session` as non-nullable
+        session: { ...ctx.session, user: ctx.session.user },
+      },
+    });
+  }
+);

@@ -42,7 +42,8 @@ model VerificationToken {
 }
 
 enum Role {
-    ADMIN
+    ADMIN_WRITE
+    ADMIN_READ
     USER
 }
 

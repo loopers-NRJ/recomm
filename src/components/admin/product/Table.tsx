@@ -1,60 +1,83 @@
-import { Pen, Trash } from "lucide-react";
+import { Trash } from "lucide-react";
+import { useState } from "react";
 
+import { Product } from "@/types/prisma";
 import { api } from "@/utils/api";
-import { Product } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { Button } from "../../ui/button";
 import { DataTable } from "../Table";
 
-export const columns: ColumnDef<Product>[] = [
-  {
-    id: "Name",
-    header: "Name",
-    accessorFn: (row) => row.title,
-  },
-  {
-    id: "createdAt",
-    header: "Created At",
-    accessorFn: (row) => row.createdAt.toLocaleString("en-US"),
-  },
-  {
-    id: "edit",
-    header: "Edit",
-    accessorFn: (row) => row.id,
-    cell: () => (
-      <Button>
-        <Pen />
-      </Button>
-    ),
-  },
-  {
-    id: "delete",
-    header: "Delete",
-    accessorFn: (row) => row.id,
-    cell: () => (
-      <Button variant="destructive">
-        <Trash />
-      </Button>
-    ),
-  },
-];
-
 const ProductTable = () => {
-  const { data, isLoading, isError, error } = api.product.getProducts.useQuery(
-    {}
-  );
-  if (isLoading) {
+  const productApi = api.product.getProducts.useQuery({});
+  const deleteProduct = api.product.deleteProductById.useMutation();
+  const [deleteId, setDeleteId] = useState<string>();
+  const columns: ColumnDef<Omit<Product, "room">>[] = [
+    {
+      id: "name",
+      header: "Name",
+      accessorFn: (row) => row.title,
+    },
+    {
+      id: "price",
+      header: "Price",
+      accessorFn: (row) => row.price,
+    },
+    {
+      id: "brand",
+      header: "Brand",
+      accessorFn: (row) => row.model.brand.name,
+    },
+    {
+      id: "model",
+      header: "Model",
+      accessorFn: (row) => row.model.name,
+    },
+    {
+      id: "seller",
+      header: "Seller name",
+      accessorFn: (row) => row.seller.name,
+    },
+    {
+      id: "createdAt",
+      header: "Created At",
+      accessorFn: (row) => row.createdAt.toLocaleString("en-US"),
+    },
+    {
+      id: "delete",
+      header: "Delete",
+      accessorFn: (row) => row.id,
+      cell: ({ row }) => (
+        <Button
+          variant="destructive"
+          onClick={() => {
+            setDeleteId(row.original.id);
+            void deleteProduct
+              .mutateAsync({ productId: row.original.id })
+              .then(async () => {
+                await productApi.refetch();
+                setDeleteId(undefined);
+              });
+          }}
+          disabled={deleteId === row.original.id}
+        >
+          <Trash />
+        </Button>
+      ),
+    },
+  ];
+
+  if (productApi.isLoading) {
     return <div>Loading...</div>;
   }
-  if (isError) {
-    console.log(error);
+  if (productApi.isError) {
+    console.log(productApi.error);
     return <div>Error</div>;
   }
-  if (data instanceof Error) {
-    return <div>{data.message}</div>;
+  if (productApi.data instanceof Error) {
+    return <div>{productApi.data.message}</div>;
   }
-  return <DataTable columns={columns} data={data} />;
+  return <DataTable columns={columns} data={productApi.data} />;
 };
 
 export default ProductTable;

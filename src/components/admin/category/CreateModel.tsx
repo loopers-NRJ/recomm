@@ -1,9 +1,9 @@
+import { Loader2 } from "lucide-react";
 import { FC, useState } from "react";
 
 import useAdminModal from "@/hooks/useAdminModel";
 import { api } from "@/utils/api";
 import { useImageUploader } from "@/utils/imageUpload";
-import { Image } from "@/utils/validation";
 
 import ImagePicker from "../../common/ImagePicker";
 import { Button } from "../../ui/button";
@@ -27,25 +27,24 @@ export const CreateModel: FC<CreateModelProps> = ({
   const [categoryName, setCategoryName] = useState("");
   // file object to store the file to upload
   const [imageFiles, setImageFiles] = useState<File[]>([]);
-  // image object returned from server after uploading the image
-  const [image, setImage] = useState<Image>();
 
   const uploader = useImageUploader();
   const [error, setError] = useState<string>();
 
-  const uploadImage = async () => {
-    const result = await uploader.upload(imageFiles);
-    console.log(result);
-    if (result instanceof Error) {
-      return setError(result.message);
-    }
-    setImage(result[0]);
-  };
-
   const createCategory = async () => {
+    let image;
+    if (imageFiles.length > 0) {
+      image = await uploader.upload(imageFiles);
+      if (image instanceof Error) {
+        return setError(image.message);
+      }
+      if (image.length < 1) {
+        return setError("Invalid image");
+      }
+    }
     const result = await createCategoryApi.mutateAsync({
       name: categoryName,
-      image,
+      image: image?.[0],
       parentCategoryId: parentId ?? undefined,
     });
     if (result instanceof Error) {
@@ -78,29 +77,40 @@ export const CreateModel: FC<CreateModelProps> = ({
             maxImages={1}
             images={imageFiles}
           />
-          {imageFiles.length > 0 && image === undefined ? (
-            <Button
-              onClick={() => void uploadImage()}
-              disabled={uploader.isLoading}
-            >
-              Upload Image
-            </Button>
-          ) : (
-            <Button
-              onClick={() => void createCategory()}
-              disabled={
-                categoryName.trim() === "" || createCategoryApi.isLoading
-              }
-            >
-              {image === undefined
-                ? "Create Category without image"
-                : "Create Category"}
-            </Button>
-          )}
+          <Button
+            // onClick={() => void uploadImage()}
+            onClick={() => void createCategory()}
+            disabled={
+              categoryName.trim() === "" ||
+              createCategoryApi.isLoading ||
+              uploader.isLoading
+            }
+          >
+            {imageFiles.length > 0
+              ? "Create Category"
+              : "Create Category without image"}
+          </Button>
         </div>
       </section>
 
-      <div>{error}</div>
+      {uploader.isLoading && (
+        <div className="flex flex-col items-center justify-center rounded-lg border p-2">
+          Uploading image...
+          <Loader2 className="animate-spin" />
+        </div>
+      )}
+      {createCategoryApi.isLoading && (
+        <div className="flex flex-col items-center justify-center rounded-lg border p-2">
+          Creating Category {categoryName} ...
+          <Loader2 className="animate-spin" />
+        </div>
+      )}
+
+      {error && (
+        <div className="rounded-lg border border-red-500 p-2 text-red-500">
+          {error}
+        </div>
+      )}
     </AdminPageModal>
   );
 };

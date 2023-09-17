@@ -13,8 +13,9 @@ import {
 export type Product = PrismaProduct & {
   model: PrismaModel & {
     brand: Brand;
-    categories: Category[];
+    category: Category;
   };
+  seller: User;
   room?: {
     bids: (Bid & {
       user: User;

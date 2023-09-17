@@ -1,3 +1,4 @@
+import { Loader2 } from "lucide-react";
 import { FC, useEffect, useState } from "react";
 
 import useAdminModal from "@/hooks/useAdminModel";
@@ -123,8 +124,21 @@ export const EditModel: FC<EditModelProps> = ({
             </Button>
           )}
         </div>
+        {uploader.isLoading && (
+          <div className="flex flex-col items-center justify-center rounded-lg border p-2">
+            Uploading image...
+            <Loader2 className="animate-spin" />
+          </div>
+        )}
+        {updateCategoryApi.isLoading && (
+          <div className="flex flex-col items-center justify-center rounded-lg border p-2">
+            Updating Category {categoryName} ...
+            <Loader2 className="animate-spin" />
+          </div>
+        )}
+
         {error && (
-          <div className="rounded-lg border border-red-400 p-4 text-center text-red-400">
+          <div className="rounded-lg border border-red-500 p-2 text-red-500">
             {error}
           </div>
         )}

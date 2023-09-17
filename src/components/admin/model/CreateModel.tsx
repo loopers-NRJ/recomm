@@ -1,3 +1,4 @@
+import { Loader2 } from "lucide-react";
 import { FC, useEffect, useState } from "react";
 import { v4 as uuid } from "uuid";
 
@@ -17,7 +18,6 @@ import AdminPageModal from "../AdminPageModel";
 import AdminVariantPicker from "./VariantPicker";
 
 import type { AdminVariantInput as VariantOptions } from "@/types/admin";
-
 export interface CreateModelProps {
   onCreate: () => void;
 }
@@ -252,6 +252,25 @@ export const CreateModel: FC<CreateModelProps> = ({ onCreate }) => {
                   Create Model
                 </Button>
               </div>
+
+              {uploader.isLoading && (
+                <div className="flex flex-col items-center justify-center rounded-lg border p-2">
+                  Uploading image...
+                  <Loader2 className="animate-spin" />
+                </div>
+              )}
+              {createModelApi.isLoading && (
+                <div className="flex flex-col items-center justify-center rounded-lg border p-2">
+                  Creating Model {modelName} ...
+                  <Loader2 className="animate-spin" />
+                </div>
+              )}
+
+              {error && (
+                <div className="rounded-lg border border-red-500 p-2 text-red-500">
+                  {error}
+                </div>
+              )}
             </section>
           </TabsContent>
         </Tabs>

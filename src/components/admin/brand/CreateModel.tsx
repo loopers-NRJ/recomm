@@ -1,3 +1,4 @@
+import { Loader2 } from "lucide-react";
 import { FC, useState } from "react";
 
 import useAdminModal from "@/hooks/useAdminModel";
@@ -84,7 +85,24 @@ export const CreateModel: FC<CreateModelProps> = ({ onCreate }) => {
         </div>
       </section>
 
-      <div>{error}</div>
+      {uploader.isLoading && (
+        <div className="flex flex-col items-center justify-center rounded-lg border p-2">
+          Uploading image...
+          <Loader2 className="animate-spin" />
+        </div>
+      )}
+      {createBrandApi.isLoading && (
+        <div className="flex flex-col items-center justify-center rounded-lg border p-2">
+          Creating Brand {brandName} ...
+          <Loader2 className="animate-spin" />
+        </div>
+      )}
+
+      {error && (
+        <div className="rounded-lg border border-red-500 p-2 text-red-500">
+          {error}
+        </div>
+      )}
     </AdminPageModal>
   );
 };

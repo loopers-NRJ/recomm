@@ -1,6 +1,7 @@
 import { Pen, Trash } from "lucide-react";
 import { useState } from "react";
 
+import useAdminModal from "@/hooks/useAdminModel";
 import { Model } from "@/types/prisma";
 import { api } from "@/utils/api";
 import { ColumnDef } from "@tanstack/react-table";
@@ -8,12 +9,15 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "../../ui/button";
 import { DataTable } from "../Table";
 import { CreateModel } from "./CreateModel";
+import { EditModel } from "./EditModel";
 
 const ModelTable = () => {
   const modelApi = api.model.getModels.useQuery({});
 
   const deleteModelApi = api.model.deleteModelById.useMutation();
   const [deleteModelId, setDeleteModelId] = useState<string>();
+  const [editableModel, setEditableModel] = useState<Model>();
+  const { open: openModel } = useAdminModal();
   if (modelApi.isLoading) {
     return <div>Loading...</div>;
   }
@@ -55,8 +59,13 @@ const ModelTable = () => {
       id: "edit",
       header: "",
       accessorFn: (row) => row.id,
-      cell: () => (
-        <Button>
+      cell: ({ row }) => (
+        <Button
+          onClick={() => {
+            setEditableModel(row.original);
+            openModel();
+          }}
+        >
           <Pen />
         </Button>
       ),
@@ -87,8 +96,15 @@ const ModelTable = () => {
 
   return (
     <>
-      <CreateModel onCreate={() => void modelApi.refetch()} />
-
+      {editableModel ? (
+        <EditModel
+          model={editableModel}
+          setModel={setEditableModel}
+          onEdit={() => void modelApi.refetch()}
+        />
+      ) : (
+        <CreateModel onCreate={() => void modelApi.refetch()} />
+      )}
       <DataTable columns={columns} data={modelApi.data} />
     </>
   );

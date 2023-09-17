@@ -2,7 +2,7 @@ import { create } from "zustand";
 
 interface AdminModalStore {
   visibility: boolean;
-  open: (roomId: string) => void;
+  open: () => void;
   close: () => void;
   toggle: () => void;
 }

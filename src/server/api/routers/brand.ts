@@ -4,7 +4,11 @@ import { z } from "zod";
 import { deleteImage } from "@/lib/cloudinary";
 import { functionalityOptions, imageInputs } from "@/utils/validation";
 
-import { adminProcedure, createTRPCRouter, publicProcedure } from "../trpc";
+import {
+  adminWriteProcedure,
+  createTRPCRouter,
+  publicProcedure,
+} from "../trpc";
 
 export const brandRouter = createTRPCRouter({
   getBrands: publicProcedure
@@ -73,7 +77,7 @@ export const brandRouter = createTRPCRouter({
         return new Error("Something went wrong!");
       }
     }),
-  createBrand: adminProcedure
+  createBrand: adminWriteProcedure
     .input(
       z.object({
         name: z.string(),
@@ -112,7 +116,7 @@ export const brandRouter = createTRPCRouter({
         return new Error("Error creating brand");
       }
     }),
-  updateBrandById: adminProcedure
+  updateBrandById: adminWriteProcedure
     .input(
       z.union([
         z.object({
@@ -192,7 +196,7 @@ export const brandRouter = createTRPCRouter({
         }
       }
     ),
-  deleteBrandById: adminProcedure
+  deleteBrandById: adminWriteProcedure
     .input(z.object({ brandId: z.string().cuid() }))
     .mutation(async ({ input: { brandId: id }, ctx }) => {
       try {

@@ -4,7 +4,11 @@ import { z } from "zod";
 import { deleteImage } from "@/lib/cloudinary";
 import { functionalityOptions, imageInputs } from "@/utils/validation";
 
-import { adminProcedure, createTRPCRouter, publicProcedure } from "../trpc";
+import {
+  adminWriteProcedure,
+  createTRPCRouter,
+  publicProcedure,
+} from "../trpc";
 
 export const modelRouter = createTRPCRouter({
   getModels: publicProcedure
@@ -143,7 +147,7 @@ export const modelRouter = createTRPCRouter({
       }
     }),
 
-  createModel: adminProcedure
+  createModel: adminWriteProcedure
     .input(
       z.object({
         name: z.string().min(1).max(255),
@@ -239,7 +243,7 @@ export const modelRouter = createTRPCRouter({
         });
       }
     ),
-  updateModelById: adminProcedure
+  updateModelById: adminWriteProcedure
     .input(
       z.union([
         z.object({
@@ -349,7 +353,7 @@ export const modelRouter = createTRPCRouter({
         }
       }
     ),
-  deleteModelById: adminProcedure
+  deleteModelById: adminWriteProcedure
     .input(z.object({ modelId: z.string().cuid() }))
     .mutation(async ({ input: { modelId: id }, ctx }) => {
       try {

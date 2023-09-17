@@ -7,7 +7,7 @@ import {
   productSchema,
   validateVariant,
 } from "@/utils/validation";
-import { WishStatus } from "@prisma/client";
+import { Role, WishStatus } from "@prisma/client";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
@@ -357,7 +357,10 @@ export const productRouter = createTRPCRouter({
         if (existingProduct === null) {
           return new Error("Product does not exist");
         }
-        if (existingProduct.sellerId !== user.id) {
+        if (
+          existingProduct.sellerId !== user.id &&
+          user.role !== Role.ADMIN_WRITE
+        ) {
           return new Error("You are not the seller of this product");
         }
         if (existingProduct.buyerId !== null) {

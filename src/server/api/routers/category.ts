@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { deleteImage } from "@/lib/cloudinary";
 import {
-  adminProcedure,
+  adminWriteProcedure,
   createTRPCRouter,
   publicProcedure,
 } from "@/server/api/trpc";
@@ -92,7 +92,7 @@ export const categoryRouter = createTRPCRouter({
         return new Error("Something went wrong!");
       }
     }),
-  createCategory: adminProcedure
+  createCategory: adminWriteProcedure
     .input(
       z.object({
         name: z.string().min(3).max(255),
@@ -143,7 +143,7 @@ export const categoryRouter = createTRPCRouter({
         return new Error(`Cannot create the category with name: ${name}`);
       }
     }),
-  updateCategoryById: adminProcedure
+  updateCategoryById: adminWriteProcedure
     .input(
       z.union([
         z.object({
@@ -225,7 +225,7 @@ export const categoryRouter = createTRPCRouter({
         return new Error(`Cannot update the category with id: ${id}`);
       }
     }),
-  deleteCategoryById: adminProcedure
+  deleteCategoryById: adminWriteProcedure
     .input(z.object({ categoryId: z.string().cuid() }))
     .mutation(async ({ input: { categoryId: id }, ctx }) => {
       try {
