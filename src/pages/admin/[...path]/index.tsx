@@ -22,11 +22,15 @@ type Title = (typeof titles)[number];
 
 const AdminPage = () => {
   const router = useRouter();
-  const path = router.query.path as [string, ...string[]];
-  const title = path[0] as Title;
+  const path = router.query.path;
   const { toggle } = useAdminModal();
   // check if the path is valid title
-  if (!titles.includes(title)) {
+  if (
+    !path ||
+    !(path instanceof Array) ||
+    path.length === 0 ||
+    !titles.includes(path[0] as Title)
+  ) {
     return (
       <Container>
         <div className="flex h-12 items-center text-lg font-bold">
@@ -36,6 +40,8 @@ const AdminPage = () => {
       </Container>
     );
   }
+
+  const title = path[0] as Title;
 
   let Table: React.FC<{ path: string[] }>;
   switch (title) {
