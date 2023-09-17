@@ -1,7 +1,6 @@
 "use client";
 
 import { FC, useState } from "react";
-import { AiFillPlusCircle } from "react-icons/ai";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -98,7 +97,6 @@ const AddWish: FC = () => {
         });
       }
       console.log(result);
-      // TODO: close the model
     } catch (error) {
       console.log(error);
       return toast({
@@ -109,10 +107,25 @@ const AddWish: FC = () => {
     }
   };
   return (
-    <Dialog>
+    <Dialog modal>
       <DialogTrigger asChild>
         {/* Plus icon */}
-        <AiFillPlusCircle className="text-5xl" />
+        <div className="flex aspect-square w-10  items-center justify-center rounded-lg bg-black text-5xl text-white">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="h-6 w-6"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 4.5v15m7.5-7.5h-15"
+            />
+          </svg>
+        </div>
       </DialogTrigger>
       <DialogContent className="w-[350px] md:w-full">
         <DialogHeader>

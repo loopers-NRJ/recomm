@@ -1,9 +1,8 @@
 import Image from "next/image";
 import { FC, useEffect, useRef, useState } from "react";
-import { BiLeftArrow, BiRightArrow } from "react-icons/bi";
 
 interface CarouselProps {
-  images: string[];
+  images: { url: string }[];
 }
 
 const Carousel: FC<CarouselProps> = ({ images }) => {
@@ -47,19 +46,45 @@ const Carousel: FC<CarouselProps> = ({ images }) => {
   return (
     <div className="relative flex flex-col gap-4">
       <button
-        className="absolute top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full p-2 text-white disabled:opacity-0"
+        className="left-arrow absolute top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full p-2 text-white disabled:opacity-0"
         onClick={(e) => swipeTo(current - 1, e)}
         disabled={current === 0}
       >
-        <BiLeftArrow />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+          stroke="currentColor"
+          className="h-6 w-6"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M15.75 19.5L8.25 12l7.5-7.5"
+          />
+        </svg>
       </button>
 
       <button
-        className="absolute right-0 top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full p-2 text-white disabled:opacity-0"
+        className="right-arrow absolute right-0 top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full p-2 text-white disabled:opacity-0"
         onClick={(e) => swipeTo(current + 1, e)}
         disabled={current === images.length - 1}
       >
-        <BiRightArrow />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+          stroke="currentColor"
+          className="h-6 w-6"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M8.25 4.5l7.5 7.5-7.5 7.5"
+          />
+        </svg>
       </button>
       <div
         className="flex snap-x snap-mandatory gap-4 overflow-auto"
@@ -67,13 +92,13 @@ const Carousel: FC<CarouselProps> = ({ images }) => {
       >
         {images.map((image, index) => (
           <Image
-            key={image + index}
-            src={image}
+            key={image.url + index}
+            src={image.url}
             ref={(element) => refs.current.push(element)}
             alt="image"
-            width={150}
-            height={150}
-            className="h-72 w-full flex-shrink-0 snap-center snap-always rounded-xl object-cover"
+            width={100}
+            height={100}
+            className="h-48 w-full flex-shrink-0 snap-center snap-always rounded-xl object-cover"
             loading="lazy"
           />
         ))}
@@ -84,8 +109,8 @@ const Carousel: FC<CarouselProps> = ({ images }) => {
             <div
               key={index}
               className={`${
-                current === index ? "h-3 w-3" : "h-2 w-2"
-              } cursor-pointer rounded-full bg-white`}
+                current === index ? "w-3" : "w-2"
+              } aspect-square cursor-pointer rounded-full bg-white`}
               onClick={(e) => swipeTo(index, e)}
             />
           ))}

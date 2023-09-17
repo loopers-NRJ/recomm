@@ -35,7 +35,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
     >
       <div className="flex w-full flex-col gap-2">
         <div className="relative w-full overflow-hidden rounded-xl">
-          <Carousel images={["/shoe.jpg"]} />
+          <Carousel images={product.images} />
           <div className="absolute right-3 top-3">
             {!hideHeartIcon && (
               <HeartButton

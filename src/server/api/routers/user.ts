@@ -155,6 +155,7 @@ export const userRouter = createTRPCRouter({
                   bids: true,
                 },
               },
+              images: true,
             },
           });
           return favoritedProducts;
@@ -210,6 +211,7 @@ export const userRouter = createTRPCRouter({
               seller: true,
               model: true,
               room: true,
+              images: true,
             },
           });
           return listings;

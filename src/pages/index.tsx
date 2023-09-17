@@ -50,13 +50,19 @@ export const Home: NextPage = () => {
     return <div>{products.message}</div>;
   }
   if (products === undefined || products.length === 0) {
-    return <div className="pt-24">No products to Show</div>;
+    return (
+      <Container>
+        <div className="flex h-[500px] items-center justify-center pt-24 font-semibold">
+          No Products Available
+        </div>
+      </Container>
+    );
   }
 
   return (
     <main>
       <Container>
-        <div className="grid grid-cols-1 gap-8 pt-24 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-6">
+        <div className="grid grid-cols-1 gap-8 pt-24 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {products.map((product) => (
             <ListingCard
               key={product.id}

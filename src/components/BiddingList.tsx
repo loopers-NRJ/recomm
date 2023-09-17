@@ -48,14 +48,14 @@ const BiddingList: FC<BiddingListProps> = ({ room }) => {
                     <p className="text-sm font-medium leading-none">
                       {bid.user.name}
                     </p>
-                    <p className="text-sm text-muted-foreground">
+                    {/* <p className="text-sm text-muted-foreground">
                       {bid.user.email}
-                    </p>
+                    </p> */}
                   </div>
                 </div>
 
-                <div className="text-lg font-semibold">
-                  <span className="text-xs font-light">Rs. </span>
+                <div className="font-semibold">
+                  <span className="text-xs font-light">₹ </span>
                   {bid.price}
                 </div>
               </div>

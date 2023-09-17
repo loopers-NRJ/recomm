@@ -10,6 +10,7 @@ export type ProductObj = Product & {
       user: User;
     })[];
   };
+  images: { url: string }[];
 };
 
 export default ProductObj;

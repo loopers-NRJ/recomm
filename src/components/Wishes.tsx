@@ -22,6 +22,10 @@ function Wishes() {
     void refetch();
   }, [refetch, session.status]);
 
+  useEffect(() => {
+    void refetch();
+  }, []);
+
   if (isLoading) return <LoadingWishes />;
   if (wishes instanceof Error) return <div>Something went wrong</div>;
   if (!wishes || wishes.length === 0) return <div>No data to Show</div>;
