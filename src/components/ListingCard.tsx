@@ -1,12 +1,7 @@
 "use client";
 
-import { useRouter } from "next/router";
-
 import Product from "@/types/product";
-
-// import Image from "next/image";
 import Carousel from "./common/Carousel";
-// import Button from "./Button";
 import HeartButton from "./HeartButton";
 import Link from "next/link";
 
