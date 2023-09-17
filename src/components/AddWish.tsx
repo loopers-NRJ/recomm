@@ -96,7 +96,7 @@ const AddWish: FC = () => {
           variant: "destructive",
         });
       }
-      console.log(result);
+      // TODO: navigate to the wish list page
     } catch (error) {
       console.log(error);
       return toast({

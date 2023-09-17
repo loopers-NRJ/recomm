@@ -30,7 +30,6 @@ export const CreateModel: FC<CreateModelProps> = ({ onCreate }) => {
 
   const uploadImage = async () => {
     const result = await uploader.upload(imageFiles);
-    console.log(result);
     if (result instanceof Error) {
       return setError(result.message);
     }

@@ -5,13 +5,13 @@
 import { signIn } from "next-auth/react";
 import { useCallback, useState } from "react";
 
+// import Heading from "../Heading";
+import Button from "@/components/Button";
+import Heading from "@/components/Heading";
 import useLoginModal from "@/hooks/useLoginModal";
 import useRegisterModal from "@/hooks/useRegisterModal";
 
 import Modal from "./Modal";
-// import Heading from "../Heading";
-import Button from "@/components/Button";
-import Heading from "@/components/Heading";
 
 const RegisterModal = () => {
   const registerModal = useRegisterModal();
@@ -104,10 +104,7 @@ const RegisterModal = () => {
       title="Register"
       actionLabel=""
       onClose={registerModal.onClose}
-      onSubmit={() => {
-        console.log("submit clicked");
-        setIsLoading(true);
-      }}
+      onSubmit={() => setIsLoading(true)}
       body={bodyContent}
       footer={footerContent}
     />

@@ -91,7 +91,6 @@ export const CreateModel: FC<CreateModelProps> = ({ onCreate }) => {
 
   const uploadImage = async () => {
     const result = await uploader.upload(imageFiles);
-    console.log(result);
     if (result instanceof Error) {
       return setError(result.message);
     }
@@ -110,8 +109,6 @@ export const CreateModel: FC<CreateModelProps> = ({ onCreate }) => {
     });
 
     if (!validationresult.success) {
-      console.log(validationresult.error.flatten().fieldErrors);
-
       return setFormError(validationresult.error.flatten().fieldErrors);
     }
 

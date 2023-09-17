@@ -19,7 +19,7 @@ export const uploadImagesToBackend = async (images: File[]) => {
     });
 
     if (!result.ok) {
-      console.log(result);
+      console.log(await result.text());
       return new Error("cannot upload the images.");
     }
     const data = await result.json();
