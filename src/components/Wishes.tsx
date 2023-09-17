@@ -6,7 +6,6 @@ import { useEffect } from "react";
 import { api } from "@/utils/api";
 
 import LoadingWishes from "./loading/LoadingWishes";
-// import { useRouter } from "next/router";
 import WishCard from "./WishCard";
 
 function Wishes() {
@@ -21,6 +20,10 @@ function Wishes() {
   useEffect(() => {
     void refetch();
   }, [refetch, session.status]);
+
+  useEffect(() => {
+    void refetch();
+  }, [refetch]);
 
   if (isLoading) return <LoadingWishes />;
   if (wishes instanceof Error) return <div>Something went wrong</div>;

@@ -3,7 +3,6 @@
 import { CldUploadWidget } from "next-cloudinary";
 import Image from "next/image";
 import { useCallback } from "react";
-import { TbPhotoPlus } from "react-icons/tb";
 
 declare global {
   let cloudinary: unknown;
@@ -55,7 +54,22 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onChange, value }) => {
               hover:opacity-70
             "
           >
-            <TbPhotoPlus size={50} />
+            <div className="plus-icon">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="h-6 w-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 4.5v15m7.5-7.5h-15"
+                />
+              </svg>
+            </div>
             <div className="text-lg font-semibold">Click to upload</div>
             {value && (
               <div

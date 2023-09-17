@@ -88,6 +88,7 @@ export const productRouter = createTRPCRouter({
                   category: true,
                 },
               },
+              images: true,
               room: true,
             },
           });

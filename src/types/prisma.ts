@@ -20,6 +20,7 @@ export type Product = PrismaProduct & {
       user: User;
     })[];
   };
+  images: Image[];
 };
 
 export type Model = PrismaModel & {

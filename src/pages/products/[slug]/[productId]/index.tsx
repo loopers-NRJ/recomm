@@ -47,7 +47,7 @@ const ProductPage: NextPage = () => {
           <Heading title={product.model.name} />
 
           <div className="relative h-72 w-full overflow-hidden rounded-xl">
-            <Carousel images={["/shoe.jpg", "/shoe.jpg", "/shoe.jpg"]} />
+            <Carousel images={product.images} />
             <div className="absolute right-5 top-5">
               <HeartButton productId={product.id} enabled={isFavorited} />
             </div>
@@ -81,23 +81,29 @@ const ProductPage: NextPage = () => {
             {/* Bidding List */}
             <div className="order-first mb-10 md:order-last md:col-span-3">
               <div className="overflow-hidden rounded-xl border-[1px] border-neutral-200 bg-white">
-                <div className="flex flex-row items-end justify-between p-4">
-                  <div className="text-lg font-semibold">Product Price: </div>
-                  <div className="text-2xl font-semibold">
-                    <span className="text-xs font-light">Rs. </span>
-                    {product.price}
+                {(!user || user?.id !== product.seller.id) ?? (
+                  <div className="">
+                    <div className="flex flex-row items-end justify-between p-4">
+                      <div className="text-lg font-semibold">
+                        Product Price:{" "}
+                      </div>
+                      <div className="text-2xl font-semibold">
+                        <span className="text-xs font-light">Rs. </span>
+                        {product.price}
+                      </div>
+                    </div>
+                    <hr />
+                    <div className="p-4">
+                      <Button
+                        disabled={!user || user?.id === product.seller.id}
+                        label="Place Bid"
+                        onClick={() => {
+                          biddingModal.onOpen(product.roomId);
+                        }}
+                      />
+                    </div>
                   </div>
-                </div>
-                <hr />
-                <div className="p-4">
-                  <Button
-                    disabled={!user || user?.id === product.seller.id}
-                    label="Place Bid"
-                    onClick={() => {
-                      biddingModal.onOpen(product.roomId);
-                    }}
-                  />
-                </div>
+                )}
                 <hr />
                 <div className="flex flex-row items-center justify-between p-4 text-lg font-semibold">
                   <h1>Bidding List</h1>

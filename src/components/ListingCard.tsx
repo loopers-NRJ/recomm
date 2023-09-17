@@ -1,12 +1,11 @@
 "use client";
 
-import { useRouter } from "next/router";
+import Link from "next/link";
 
 import { Product } from "@/types/prisma";
 
 // import Image from "next/image";
 import Carousel from "./common/Carousel";
-// import Button from "./Button";
 import HeartButton from "./HeartButton";
 
 interface ListingCardProps {
@@ -22,20 +21,14 @@ const ListingCard: React.FC<ListingCardProps> = ({
   onFavoriteStateChange,
   hideHeartIcon = false,
 }) => {
-  const router = useRouter();
-
   return (
-    <div
-      onClick={() => {
-        router.push(`/products/${product.slug}/${product.id}/`).catch((err) => {
-          console.log(err);
-        });
-      }}
+    <Link
+      href={`/products/${product.slug}/${product.id}`}
       className="group col-span-1 cursor-pointer"
     >
       <div className="flex w-full flex-col gap-2">
         <div className="relative w-full overflow-hidden rounded-xl">
-          <Carousel images={["/shoe.jpg"]} />
+          <Carousel images={product.images} />
           <div className="absolute right-3 top-3">
             {!hideHeartIcon && (
               <HeartButton
@@ -51,7 +44,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
           <div className="font-semibold">$ {product.price}</div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 

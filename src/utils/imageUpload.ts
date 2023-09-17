@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { imageInputs } from "./validation";
 
-const uploadImagesToBackend = async (images: File[]) => {
+export const uploadImagesToBackend = async (images: File[]) => {
   const formData = new FormData();
 
   images.forEach((image) => {

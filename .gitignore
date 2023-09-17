@@ -46,3 +46,7 @@ package-lock.json
 
 # bun pkg
 bun.lockb
+
+# vscode
+.vscode
+.vscode/*
