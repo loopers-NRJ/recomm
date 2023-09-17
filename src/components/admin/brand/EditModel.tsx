@@ -13,7 +13,7 @@ import { Label } from "../../ui/label";
 import AdminPageModal from "../AdminPageModel";
 
 interface EditModelProps {
-  brand: Brand | undefined;
+  brand: Brand;
   setBrand: (value: Brand | undefined) => void;
   onEdit: () => void;
 }
@@ -25,7 +25,7 @@ export const EditModel: FC<EditModelProps> = ({
 }) => {
   const updateBrandApi = api.brand.updateBrandById.useMutation();
 
-  const [brandName, setBrandName] = useState(brand?.name ?? "");
+  const [brandName, setBrandName] = useState(brand.name);
   // file object to store the file to upload
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   // image object returned from server after uploading the image
@@ -78,7 +78,7 @@ export const EditModel: FC<EditModelProps> = ({
   return (
     <AdminPageModal>
       <section className="flex flex-col gap-4 p-4">
-        <h1 className="text-lg font-bold">Edit Brand - {brand?.name}</h1>
+        <h1 className="text-lg font-bold">Edit Brand - {brand.name}</h1>
         <Label className="my-4">
           New name
           <Input
@@ -110,7 +110,7 @@ export const EditModel: FC<EditModelProps> = ({
               disabled={
                 updateBrandApi.isLoading ||
                 brandName.trim() === "" ||
-                brandName === brand?.name
+                brandName === brand.name
               }
             >
               Update Brand

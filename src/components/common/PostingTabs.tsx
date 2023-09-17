@@ -118,6 +118,11 @@ export const PostingTabs: FC<PostingTabsProps> = ({
     if (images.length === 0) {
       return setFormError({ images: ["Please select at least one image"] });
     }
+
+    const variantOptions = Object.entries(selectedVariants).map(
+      ([optionId, valueId]) => ({ optionId, valueId })
+    );
+
     const result = productSchema.omit({ images: true }).safeParse({
       title,
       price: +price,
@@ -125,6 +130,7 @@ export const PostingTabs: FC<PostingTabsProps> = ({
       modelId: selectedModel?.id,
       brandId: selectedBrand?.id,
       categoryId: selectedCategory?.id,
+      variantOptions,
       endDate,
     });
     if (!result.success) {

@@ -88,13 +88,15 @@ const BrandTable = () => {
 
   return (
     <>
-      <CreateModel onCreate={() => void brandApi.refetch()} />
-
-      <EditModel
-        brand={editableBrand}
-        setBrand={setEditableBrand}
-        onEdit={() => void brandApi.refetch()}
-      />
+      {editableBrand ? (
+        <EditModel
+          brand={editableBrand}
+          setBrand={setEditableBrand}
+          onEdit={() => void brandApi.refetch()}
+        />
+      ) : (
+        <CreateModel onCreate={() => void brandApi.refetch()} />
+      )}
 
       <DataTable columns={columns} data={brandApi.data} />
     </>

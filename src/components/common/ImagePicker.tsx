@@ -19,7 +19,7 @@ interface ImagePickerProps {
 }
 
 const ImagePicker: FC<ImagePickerProps> = ({
-  maxImageSizeInMB = 15,
+  maxImageSizeInMB = 10,
   maxImages = 5,
   acceptedImageFormats = ["image/jpeg", "image/jpg", "image/webp"],
   setImages: setImagesToParent,
@@ -104,7 +104,7 @@ const ImagePicker: FC<ImagePickerProps> = ({
           },
         ]);
         imageCompression(image, {
-          maxSizeMB: 1,
+          maxSizeMB: 3,
           onProgress(progress) {
             setImages((prev) => {
               const newImages = [...prev];

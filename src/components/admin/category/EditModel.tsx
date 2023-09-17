@@ -13,7 +13,7 @@ import { Label } from "../../ui/label";
 import AdminPageModal from "../AdminPageModel";
 
 interface EditModelProps {
-  category: Category | undefined;
+  category: Category;
   setCategory: (value: Category | undefined) => void;
   onEdit: () => void;
 }
@@ -25,7 +25,7 @@ export const EditModel: FC<EditModelProps> = ({
 }) => {
   const updateCategoryApi = api.category.updateCategoryById.useMutation();
 
-  const [categoryName, setCategoryName] = useState(category?.name ?? "");
+  const [categoryName, setCategoryName] = useState(category.name);
   // file object to store the file to upload
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   // image object returned from server after uploading the image
@@ -80,7 +80,7 @@ export const EditModel: FC<EditModelProps> = ({
   return (
     <AdminPageModal>
       <section className="flex flex-col gap-4 p-4">
-        <h1 className="text-lg font-bold">Edit Category - {category?.name}</h1>
+        <h1 className="text-lg font-bold">Edit Category - {category.name}</h1>
         <Label className="my-4">
           New name
           <Input
@@ -114,10 +114,10 @@ export const EditModel: FC<EditModelProps> = ({
               disabled={
                 updateCategoryApi.isLoading ||
                 categoryName.trim() === "" ||
-                (categoryName === category?.name && image === undefined)
+                (categoryName === category.name && image === undefined)
               }
             >
-              {image !== undefined && categoryName === category?.name
+              {image !== undefined && categoryName === category.name
                 ? "Update Category image"
                 : "Update category"}
             </Button>

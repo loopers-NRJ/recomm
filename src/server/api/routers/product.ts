@@ -125,6 +125,11 @@ export const productRouter = createTRPCRouter({
             },
             room: true,
             images: true,
+            varientValues: {
+              include: {
+                option: true,
+              },
+            },
           },
         });
         type ProductWithIsFavorite = typeof product & { isFavorite?: true };
@@ -194,7 +199,7 @@ export const productRouter = createTRPCRouter({
             model.variantOptions,
             providedVariantOptions
           );
-          if (!valid) {
+          if (valid !== true) {
             return new Error("Invalid variant options");
           }
 

@@ -2,7 +2,6 @@ import { create } from "zustand";
 
 interface AdminModalStore {
   visibility: boolean;
-  roomId: string;
   open: (roomId: string) => void;
   close: () => void;
   toggle: () => void;
@@ -10,11 +9,10 @@ interface AdminModalStore {
 
 const useAdminModal = create<AdminModalStore>((set) => ({
   visibility: false,
-  roomId: "",
-  open: (roomId: string) => {
-    set({ visibility: true, roomId });
+  open: () => {
+    set({ visibility: true });
   },
-  close: () => set({ visibility: false, roomId: "" }),
+  close: () => set({ visibility: false }),
   toggle: () => set((state) => ({ ...state, visibility: !state.visibility })),
 }));
 

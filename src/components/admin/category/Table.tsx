@@ -117,19 +117,21 @@ const CategoryTable: FC<CategoryTableProps> = ({ path }) => {
 
   return (
     <>
-      <CreateModel
-        onCreate={() => void categoriesApi.refetch()}
-        parentId={parentId}
-        parentName={parentCategoryApi.data?.name}
-      />
+      {editableCategory ? (
+        <EditModel
+          category={editableCategory}
+          setCategory={setEditableCategory}
+          onEdit={() => void categoriesApi.refetch()}
+        />
+      ) : (
+        <CreateModel
+          onCreate={() => void categoriesApi.refetch()}
+          parentId={parentId}
+          parentName={parentCategoryApi.data?.name}
+        />
+      )}
 
-      <EditModel
-        category={editableCategory}
-        setCategory={setEditableCategory}
-        onEdit={() => void categoriesApi.refetch()}
-      />
-
-      <div className="rounded-lg border p-4">
+      <div className="flex items-center justify-between rounded-lg border px-2 py-2">
         <span className="px-2 font-bold">Category</span>{" "}
         {parentCategoryApi.data?.name ?? ""}
       </div>
