@@ -1,3 +1,5 @@
+import { GetServerSideProps } from "next";
+import { getServerSession } from "next-auth";
 import { useRouter } from "next/router";
 
 import BrandTable from "@/components/admin/brand/Table";
@@ -14,6 +16,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import useAdminModal from "@/hooks/useAdminModel";
+import { authOptions } from "@/server/auth";
+import { Role } from "@prisma/client";
 
 const titles = ["category", "brands", "models", "products"] as const;
 type Title = (typeof titles)[number];
@@ -24,6 +28,7 @@ const AdminPage = () => {
   const router = useRouter();
   const path = router.query.path;
   const { open } = useAdminModal();
+
   // check if the path is valid title
   if (
     !path ||
@@ -88,3 +93,21 @@ const AdminPage = () => {
 };
 
 export default AdminPage;
+
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+  const session = await getServerSession(req, res, authOptions);
+  if (
+    session?.user.role !== Role.ADMIN_READ &&
+    session?.user.role !== Role.ADMIN_WRITE
+  ) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+  return {
+    props: {},
+  };
+};
