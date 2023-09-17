@@ -53,7 +53,7 @@ const BrandTable = () => {
         <Button
           onClick={() => {
             setEditableBrand(row.original);
-            openModel("edit-brand");
+            openModel();
           }}
         >
           <Pen />

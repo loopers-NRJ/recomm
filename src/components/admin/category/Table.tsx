@@ -84,7 +84,7 @@ const CategoryTable: FC<CategoryTableProps> = ({ path }) => {
         <Button
           onClick={() => {
             setEditableCategory(row.original);
-            openModel("edit-category");
+            openModel();
           }}
         >
           <Pen />
@@ -138,7 +138,7 @@ const CategoryTable: FC<CategoryTableProps> = ({ path }) => {
       {categoriesApi.isLoading ? (
         <div className="flex justify-center">Loading...</div>
       ) : (
-        <DataTable columns={columns} data={categoriesApi.data} />
+        <DataTable columns={columns} data={categoriesApi.data.categories} />
       )}
     </>
   );

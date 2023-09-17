@@ -37,7 +37,7 @@ const NavItems: FC<NavItemsProps> = ({ currentUser }) => {
     if (!currentUser) {
       return loginModal.onOpen();
     } else {
-      return router.push(`/${currentUser.id}/wishlist`);
+      return router.push(`/wishlist`);
     }
   }, [currentUser, loginModal, router]);
 
@@ -139,7 +139,7 @@ const NavItems: FC<NavItemsProps> = ({ currentUser }) => {
       <Button
         variant={"ghost"}
         className={`min-w-max rounded-lg px-4 py-6 md:px-4 md:py-2
-        ${path === `/${session?.user.id}/wishlist` ? "bg-slate-200/50" : ""}
+        ${path === `/wishlist` ? "bg-slate-200/50" : ""}
         `}
         onClick={() => void handleWishListClick()}
       >
@@ -149,7 +149,7 @@ const NavItems: FC<NavItemsProps> = ({ currentUser }) => {
 
       <Button
         className={`min-w-max rounded-lg px-4 py-6 md:gap-2 md:px-4 md:py-2 ${
-          path === `/${session?.user.id}/profile` ? "bg-slate-200/50" : ""
+          path === `/${currentUser?.id}/profile` ? "bg-slate-200/50" : ""
         }`}
         variant={"ghost"}
         onClick={() => void handleProfileClick()}
