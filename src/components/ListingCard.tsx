@@ -8,6 +8,7 @@ import Product from "@/types/product";
 import Carousel from "./common/Carousel";
 // import Button from "./Button";
 import HeartButton from "./HeartButton";
+import Link from "next/link";
 
 interface ListingCardProps {
   isFavourite?: boolean;
@@ -22,15 +23,9 @@ const ListingCard: React.FC<ListingCardProps> = ({
   onFavoriteStateChange,
   hideHeartIcon = false,
 }) => {
-  const router = useRouter();
-
   return (
-    <div
-      onClick={() => {
-        router.push(`/products/${product.id}/`).catch((err) => {
-          console.log(err);
-        });
-      }}
+    <Link
+      href={`/products/${product.id}`}
       className="group col-span-1 cursor-pointer"
     >
       <div className="flex w-full flex-col gap-2">
@@ -51,7 +46,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
           <div className="font-semibold">$ {product.price}</div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 
