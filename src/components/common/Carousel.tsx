@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { FC, useEffect, useRef, useState } from "react";
-import { BiLeftArrow, BiRightArrow } from "react-icons/bi";
 
 interface CarouselProps {
   images: { url: string }[];
@@ -47,19 +46,45 @@ const Carousel: FC<CarouselProps> = ({ images }) => {
   return (
     <div className="relative flex flex-col gap-4">
       <button
-        className="absolute top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full p-2 text-white disabled:opacity-0"
+        className="left-arrow absolute top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full p-2 text-white disabled:opacity-0"
         onClick={(e) => swipeTo(current - 1, e)}
         disabled={current === 0}
       >
-        <BiLeftArrow />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+          stroke="currentColor"
+          className="h-6 w-6"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M15.75 19.5L8.25 12l7.5-7.5"
+          />
+        </svg>
       </button>
 
       <button
-        className="absolute right-0 top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full p-2 text-white disabled:opacity-0"
+        className="right-arrow absolute right-0 top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full p-2 text-white disabled:opacity-0"
         onClick={(e) => swipeTo(current + 1, e)}
         disabled={current === images.length - 1}
       >
-        <BiRightArrow />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+          stroke="currentColor"
+          className="h-6 w-6"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M8.25 4.5l7.5 7.5-7.5 7.5"
+          />
+        </svg>
       </button>
       <div
         className="flex snap-x snap-mandatory gap-4 overflow-auto"

@@ -6,7 +6,7 @@ import { useCallback } from "react";
 import { IconType } from "react-icons";
 
 interface CategoryBoxProps {
-  icon: IconType;
+  icon: IconType | JSX.Element;
   label: string;
   id?: string;
 }
@@ -46,7 +46,7 @@ const CategoryBox: React.FC<CategoryBoxProps> = ({ icon: Icon, label, id }) => {
         ${selected ? "text-neutral-800" : "text-neutral-500"}
       `}
     >
-      <Icon size={26} />
+      {typeof Icon === "function" ? <Icon size={26} /> : Icon}
       <div className="text-sm font-medium">{label}</div>
     </div>
   );
