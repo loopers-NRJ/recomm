@@ -1,7 +1,7 @@
 import { Pen, Trash } from "lucide-react";
-import { FC, useState } from "react";
+import { useState } from "react";
 
-import { TableProps } from "@/types/admin";
+import useAdminModal from "@/hooks/AdminModel";
 import { api } from "@/utils/api";
 import { Brand } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
@@ -11,15 +11,13 @@ import { DataTable } from "../Table";
 import { CreateModel } from "./CreateModel";
 import { EditModel } from "./EditModel";
 
-const BrandTable: FC<TableProps> = ({
-  createModelVisibility,
-  setCreateModelVisibility,
-}) => {
+const BrandTable = () => {
   const brandApi = api.brand.getBrands.useQuery({});
-  const [brand, setBrand] = useState<Brand>();
+  const [editableBrand, setEditableBrand] = useState<Brand>();
   const deleteBrandApi = api.brand.deleteBrandById.useMutation();
   // this state is to disable the delete button when admin clicks on it
   const [deleteBrandId, setDeleteBrandId] = useState<string>();
+  const { open: openModel } = useAdminModal();
   if (brandApi.isLoading) {
     return <div>Loading...</div>;
   }
@@ -52,7 +50,12 @@ const BrandTable: FC<TableProps> = ({
       header: "",
       accessorFn: (row) => row.id,
       cell: ({ row }) => (
-        <Button onClick={() => setBrand(row.original)}>
+        <Button
+          onClick={() => {
+            setEditableBrand(row.original);
+            openModel("edit-brand");
+          }}
+        >
           <Pen />
         </Button>
       ),
@@ -85,15 +88,11 @@ const BrandTable: FC<TableProps> = ({
 
   return (
     <>
-      <CreateModel
-        createModelVisibility={createModelVisibility}
-        setCreateModelVisibility={setCreateModelVisibility}
-        onCreate={() => void brandApi.refetch()}
-      />
+      <CreateModel onCreate={() => void brandApi.refetch()} />
 
       <EditModel
-        brand={brand}
-        setBrand={setBrand}
+        brand={editableBrand}
+        setBrand={setEditableBrand}
         onEdit={() => void brandApi.refetch()}
       />
 

@@ -1,5 +1,6 @@
 import { FC, useState } from "react";
 
+import useAdminModal from "@/hooks/AdminModel";
 import { api } from "@/utils/api";
 import { useImageUploader } from "@/utils/imageUpload";
 import { Image } from "@/utils/validation";
@@ -11,22 +12,18 @@ import { Label } from "../../ui/label";
 import AdminPageModal from "../PopupModel";
 
 export interface CreateModelProps {
-  createModelVisibility: boolean;
-  setCreateModelVisibility: (value: boolean) => void;
   onCreate: () => void;
   parentName?: string;
   parentId: string | null;
 }
 
 export const CreateModel: FC<CreateModelProps> = ({
-  createModelVisibility,
-  setCreateModelVisibility,
   onCreate,
   parentId,
   parentName,
 }) => {
   const createCategoryApi = api.category.createCategory.useMutation();
-
+  const { close: closeModel } = useAdminModal();
   const [categoryName, setCategoryName] = useState("");
   // file object to store the file to upload
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -54,15 +51,12 @@ export const CreateModel: FC<CreateModelProps> = ({
     if (result instanceof Error) {
       return setError(result.message);
     }
-    setCreateModelVisibility(false);
+    closeModel();
     onCreate();
   };
 
   return (
-    <AdminPageModal
-      visibility={createModelVisibility}
-      setVisibility={setCreateModelVisibility}
-    >
+    <AdminPageModal>
       <section className="flex flex-col gap-4 p-4">
         <Label className="my-4">
           Category Name

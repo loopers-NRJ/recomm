@@ -1,5 +1,6 @@
-export interface TableProps {
-  createModelVisibility: boolean;
-  setCreateModelVisibility: (value: boolean) => void;
-  path: string[];
+export interface Variant {
+  id: string;
+  option: string;
+  values: string[];
+  search: string;
 }

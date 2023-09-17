@@ -6,6 +6,7 @@ import { ColumnDef } from "@tanstack/react-table";
 
 import { Button } from "../../ui/button";
 import { DataTable } from "../Table";
+import { CreateModel } from "./CreateModel";
 
 export const columns: ColumnDef<Model>[] = [
   {
@@ -51,18 +52,24 @@ export const columns: ColumnDef<Model>[] = [
 ];
 
 const ModelTable = () => {
-  const { data, isLoading, isError, error } = api.model.getModels.useQuery({});
-  if (isLoading) {
+  const modelApi = api.model.getModels.useQuery({});
+  if (modelApi.isLoading) {
     return <div>Loading...</div>;
   }
-  if (isError) {
-    console.log(error);
+  if (modelApi.isError) {
+    console.log(modelApi.error);
     return <div>Error</div>;
   }
-  if (data instanceof Error) {
-    return <div>{data.message}</div>;
+  if (modelApi.data instanceof Error) {
+    return <div>{modelApi.data.message}</div>;
   }
-  return <DataTable columns={columns} data={data} />;
+  return (
+    <>
+      <CreateModel onCreate={() => void modelApi.refetch()} />
+
+      <DataTable columns={columns} data={modelApi.data} />
+    </>
+  );
 };
 
 export default ModelTable;

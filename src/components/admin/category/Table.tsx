@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { FC, useState } from "react";
 
-import { TableProps } from "@/types/admin";
+import useAdminModal from "@/hooks/AdminModel";
 import { api } from "@/utils/api";
 import { Category } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
@@ -13,11 +13,11 @@ import { DataTable } from "../Table";
 import { CreateModel } from "./CreateModel";
 import { EditModel } from "./EditModel";
 
-const CategoryTable: FC<TableProps> = ({
-  path,
-  createModelVisibility,
-  setCreateModelVisibility,
-}) => {
+export interface CategoryTableProps {
+  path: string[];
+}
+
+const CategoryTable: FC<CategoryTableProps> = ({ path }) => {
   const parentId = (path[path.length - 1]?.split("=") ??
     ([null, null] as const))[1];
 
@@ -32,7 +32,7 @@ const CategoryTable: FC<TableProps> = ({
   const [deleteCategoryId, setDeleteCategoryId] = useState("");
 
   const [editableCategory, setEditableCategory] = useState<Category>();
-
+  const { open: openModel } = useAdminModal();
   const router = useRouter();
 
   if (categoriesApi.isError) {
@@ -81,7 +81,12 @@ const CategoryTable: FC<TableProps> = ({
       header: "",
       accessorFn: (row) => row.id,
       cell: ({ row }) => (
-        <Button onClick={() => setEditableCategory(row.original)}>
+        <Button
+          onClick={() => {
+            setEditableCategory(row.original);
+            openModel("edit-category");
+          }}
+        >
           <Pen />
         </Button>
       ),
@@ -116,8 +121,6 @@ const CategoryTable: FC<TableProps> = ({
         onCreate={() => void categoriesApi.refetch()}
         parentId={parentId}
         parentName={parentCategoryApi.data?.name}
-        createModelVisibility={createModelVisibility}
-        setCreateModelVisibility={setCreateModelVisibility}
       />
 
       <EditModel

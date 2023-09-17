@@ -1,5 +1,6 @@
 import { FC, useEffect, useState } from "react";
 
+import useAdminModal from "@/hooks/AdminModel";
 import { api } from "@/utils/api";
 import { useImageUploader } from "@/utils/imageUpload";
 import { Image } from "@/utils/validation";
@@ -32,7 +33,7 @@ export const EditModel: FC<EditModelProps> = ({
 
   const uploader = useImageUploader();
   const [error, setError] = useState<string>();
-
+  const { close: closeModel } = useAdminModal();
   useEffect(() => {
     if (brand) {
       setBrandName(brand.name);
@@ -70,14 +71,12 @@ export const EditModel: FC<EditModelProps> = ({
       return setError(result.message);
     }
     setBrand(undefined);
+    closeModel();
     afterEdit();
   };
 
   return (
-    <AdminPageModal
-      visibility={brand !== undefined}
-      setVisibility={() => setBrand(undefined)}
-    >
+    <AdminPageModal>
       <section className="flex flex-col gap-4 p-4">
         <h1 className="text-lg font-bold">Edit Brand - {brand?.name}</h1>
         <Label className="my-4">

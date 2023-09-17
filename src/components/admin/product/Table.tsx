@@ -1,7 +1,5 @@
 import { Pen, Trash } from "lucide-react";
-import { FC } from "react";
 
-import { TableProps } from "@/types/admin";
 import { api } from "@/utils/api";
 import { Product } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
@@ -42,7 +40,7 @@ export const columns: ColumnDef<Product>[] = [
   },
 ];
 
-const ProductTable: FC<TableProps> = () => {
+const ProductTable = () => {
   const { data, isLoading, isError, error } = api.product.getProducts.useQuery(
     {}
   );

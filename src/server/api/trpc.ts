@@ -13,6 +13,7 @@ import { ZodError } from "zod";
 
 import { getServerAuthSession } from "@/server/auth";
 import { prisma } from "@/server/db";
+import { Role } from "@prisma/client";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { CreateNextContextOptions } from "@trpc/server/adapters/next";
 
@@ -158,25 +159,11 @@ export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
  */
 export const adminProcedure = protectedProcedure.use(async ({ ctx, next }) => {
   // check if the user is an admin
-  let isAdmin = false;
-  try {
-    const admin = await prisma.admin.findFirst({
-      where: {
-        id: ctx.session.user.id,
-      },
-    });
-    isAdmin = admin !== null;
-  } catch (error) {
-    console.error({
-      procedure: "admin auth middleware",
-      message: "cannot validate the user in admin route: ",
-      error,
-    });
-    isAdmin = false;
-  }
-  if (!isAdmin) {
+
+  if (ctx.session.user.role !== Role.ADMIN) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
+
   return next({
     ctx: {
       // infers the `session` as non-nullable

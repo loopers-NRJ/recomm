@@ -1,5 +1,4 @@
 import { useRouter } from "next/router";
-import { useState } from "react";
 
 import BrandTable from "@/components/admin/brand/Table";
 import CategoryTable from "@/components/admin/category/Table";
@@ -14,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { TableProps } from "@/types/admin";
+import useAdminModal from "@/hooks/AdminModel";
 
 const titles = ["category", "brands", "models", "products"] as const;
 type Title = (typeof titles)[number];
@@ -24,8 +23,8 @@ type Title = (typeof titles)[number];
 const AdminPage = () => {
   const router = useRouter();
   const path = router.query.path as [string, ...string[]];
-  const [modelVisibility, setModelVisibility] = useState(false);
   const title = path[0] as Title;
+  const { toggle } = useAdminModal();
   // check if the path is valid title
   if (!titles.includes(title)) {
     return (
@@ -38,7 +37,7 @@ const AdminPage = () => {
     );
   }
 
-  let Table: React.FC<TableProps>;
+  let Table: React.FC<{ path: string[] }>;
   switch (title) {
     case "category":
       Table = CategoryTable;
@@ -73,16 +72,10 @@ const AdminPage = () => {
           </SelectContent>
         </Select>
 
-        <Button onClick={() => setModelVisibility(!modelVisibility)}>
-          New
-        </Button>
+        <Button onClick={toggle}>New</Button>
       </div>
       <div className="my-4">
-        <Table
-          createModelVisibility={modelVisibility}
-          setCreateModelVisibility={setModelVisibility}
-          path={path.slice(1)}
-        />
+        <Table path={path.slice(1)} />
       </div>
     </Container>
   );
