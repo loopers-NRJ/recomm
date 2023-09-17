@@ -66,8 +66,22 @@ const ProductPage: NextPage = () => {
                 </div>
               </div>
               <hr />
-              {/* TODO: this icon makes the package 6.9Mb  */}
-              {/* <ListingCategory icon={GiSofa} label="Furniture" /> */}
+
+              {/* TODO: @naveen design the variants */}
+              {product.varientValues.map((varientValue) => (
+                <div
+                  key={varientValue.id}
+                  className="flex flex-row items-center gap-4"
+                >
+                  <div className="text-lg font-semibold">
+                    {varientValue.option?.name}:
+                  </div>
+                  <div className="rounded-lg border px-2 py-1 text-lg font-light">
+                    {varientValue.name}
+                  </div>
+                </div>
+              ))}
+
               <hr />
               <div className="text-lg font-light text-neutral-500">
                 Created on {product.createdAt.toDateString()}.
