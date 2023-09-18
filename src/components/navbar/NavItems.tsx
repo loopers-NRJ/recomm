@@ -7,7 +7,6 @@ import useLoginModal from "@/hooks/useLoginModal";
 import usePostingModal from "@/hooks/usePostingModal";
 
 import { Button } from "../ui/button";
-import Avatar from "./Avatar";
 import Image from "next/image";
 
 interface NavItemsProps {
