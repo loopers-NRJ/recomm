@@ -18,32 +18,28 @@ interface SuggestionProps {
 const Suggestions: FC<SuggestionProps> = ({ searchKey, setOpen }) => {
   const router = useRouter();
 
-  const {
-    data: suggestions,
-    isLoading,
-    refetch,
-  } = api.search.all.useQuery({ search: searchKey });
+  const suggestionsApi = api.search.all.useQuery({ search: searchKey });
 
   useEffect(() => {
     if (searchKey && searchKey.length > 2) {
-      debounce(() => void refetch())();
+      debounce(() => void suggestionsApi.refetch())();
     }
-  }, [refetch, searchKey]);
+  }, [suggestionsApi, searchKey]);
 
-  if (isLoading)
+  if (suggestionsApi.isLoading)
     return (
       <CommandItem>
         <CommandEmpty>Searching...</CommandEmpty>
       </CommandItem>
     );
-  if (suggestions instanceof Error)
+  if (suggestionsApi.data instanceof Error)
     return (
       <CommandItem>
-        <CommandEmpty>{suggestions.message}</CommandEmpty>
+        <CommandEmpty>{suggestionsApi.data.message}</CommandEmpty>
       </CommandItem>
     );
 
-  if (suggestions === undefined) {
+  if (suggestionsApi.data === undefined) {
     return (
       <CommandGroup>
         <CommandEmpty>No Items found</CommandEmpty>
@@ -51,7 +47,7 @@ const Suggestions: FC<SuggestionProps> = ({ searchKey, setOpen }) => {
     );
   }
 
-  const { categories, brands, models } = suggestions;
+  const { categories, brands, models } = suggestionsApi.data;
 
   return (
     <div className="space-y-2">
