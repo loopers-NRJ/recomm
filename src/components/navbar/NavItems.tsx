@@ -1,4 +1,5 @@
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/router";
 import { FC, useCallback } from "react";
@@ -7,7 +8,6 @@ import useLoginModal from "@/hooks/useLoginModal";
 import usePostingModal from "@/hooks/usePostingModal";
 
 import { Button } from "../ui/button";
-import Avatar from "./Avatar";
 
 interface NavItemsProps {
   currentUser?: {
@@ -57,6 +57,7 @@ const NavItems: FC<NavItemsProps> = ({ currentUser }) => {
         fill="currentColor"
         width={22}
         height={22}
+        className="m-[1px]"
       >
         <path d="M11.47 3.84a.75.75 0 011.06 0l8.69 8.69a.75.75 0 101.06-1.06l-8.689-8.69a2.25 2.25 0 00-3.182 0l-8.69 8.69a.75.75 0 001.061 1.06l8.69-8.69z" />
         <path d="M12 5.432l8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 01-.75-.75v-4.5a.75.75 0 00-.75-.75h-3a.75.75 0 00-.75.75V21a.75.75 0 01-.75.75H5.625a1.875 1.875 0 01-1.875-1.875v-6.198a2.29 2.29 0 00.091-.086L12 5.43z" />
@@ -70,6 +71,7 @@ const NavItems: FC<NavItemsProps> = ({ currentUser }) => {
         stroke="currentColor"
         width={22}
         height={22}
+        className="m-[1px]"
       >
         <path
           strokeLinecap="round"
@@ -99,7 +101,7 @@ const NavItems: FC<NavItemsProps> = ({ currentUser }) => {
 
   const HeartIcon = (
     <svg
-      className="heart"
+      className="heart m-[2px]"
       fill={path === `/${session?.user.id}/wishlist` ? "currentColor" : "none"}
       stroke="currentColor"
       strokeLinecap="round"
@@ -118,7 +120,7 @@ const NavItems: FC<NavItemsProps> = ({ currentUser }) => {
     <div className="flex h-14 w-full flex-row items-center justify-evenly gap-0 rounded-lg bg-white md:h-fit md:w-fit md:gap-3">
       <Button
         variant={"ghost"}
-        className={`w-full min-w-max flex-col rounded-lg px-4 py-6 md:flex-row md:px-4 md:py-2 ${
+        className={`h-full  w-full min-w-max flex-col justify-between rounded-lg px-6 md:flex-row md:px-4 md:py-2 ${
           path === "/"
             ? "rounded-b-none border-b-2 border-b-black md:rounded-md md:border-none md:bg-slate-200/50"
             : ""
@@ -126,21 +128,21 @@ const NavItems: FC<NavItemsProps> = ({ currentUser }) => {
         onClick={() => void router.push("/")}
       >
         <span className="text-xl md:hidden">{HomeIcon}</span>
-        <span className="text-sm md:block md:text-base">Home</span>
+        <span className="text-xs md:text-sm">Home</span>
       </Button>
 
       <Button
         variant={"ghost"}
-        className="w-full min-w-max flex-col rounded-lg px-4 py-6 md:flex-row md:px-4 md:py-2"
+        className="h-full w-full min-w-max flex-col justify-between rounded-lg px-4 md:flex-row md:px-4 md:py-2"
         onClick={onPost}
       >
         <span className="text-xl md:hidden">{CoinIcon}</span>
-        <span className="text-sm md:block md:text-base">Sell It</span>
+        <span className="text-xs md:text-sm">Sell It</span>
       </Button>
 
       <Button
         variant={"ghost"}
-        className={`ms:flex-row w-full min-w-max flex-col rounded-lg px-4 py-6 md:px-4 md:py-2 ${
+        className={`h-full w-full min-w-max flex-col justify-between rounded-lg px-4 md:flex-row md:px-4 md:py-2 ${
           path === `/wishlist`
             ? "rounded-b-none border-b-2 border-b-black md:rounded-md md:border-none md:bg-slate-200/50"
             : ""
@@ -149,11 +151,11 @@ const NavItems: FC<NavItemsProps> = ({ currentUser }) => {
         onClick={() => void handleWishListClick()}
       >
         <span className="text-xl md:hidden">{HeartIcon}</span>
-        <span className="text-sm md:block md:text-base">Wish It</span>
+        <span className="text-xs md:text-sm">Wish It</span>
       </Button>
 
       <Button
-        className={`w-full min-w-max flex-col rounded-lg px-4 py-6 md:flex-row md:gap-2 md:px-4 md:py-2 ${
+        className={`h-full w-full min-w-max flex-col justify-between rounded-lg px-4 md:flex-row md:gap-2 md:px-4 md:py-2 ${
           path === `/${session?.user.id}/profile`
             ? "rounded-b-none border-b-2 border-b-black md:rounded-md md:border-none md:bg-slate-200/50"
             : ""
@@ -161,10 +163,14 @@ const NavItems: FC<NavItemsProps> = ({ currentUser }) => {
         variant={"ghost"}
         onClick={() => void handleProfileClick()}
       >
-        <div>
-          <Avatar src={currentUser?.image} />
-        </div>
-        <span className="text-sm md:block md:text-base">Profile</span>
+        <Image
+          className="rounded-full"
+          height={24}
+          width={24}
+          alt="Avatar"
+          src={currentUser?.image ?? "/placeholder.jpg"}
+        />
+        <span className="text-xs md:text-sm">Profile</span>
       </Button>
     </div>
   );
