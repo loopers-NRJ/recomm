@@ -200,7 +200,6 @@ const CategoryTable = () => {
 
       <div className="flex items-center rounded-lg border px-2 py-2">
         <span className="px-2 font-bold">
-          {" "}
           {parentId === null ? "All Categories" : "Sub Category of"}
         </span>
         {/* TODO: display the category image */}

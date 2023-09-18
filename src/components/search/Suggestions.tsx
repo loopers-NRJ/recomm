@@ -1,3 +1,6 @@
+import { useRouter } from "next/router";
+import { FC, useEffect } from "react";
+
 import {
   CommandEmpty,
   CommandGroup,
@@ -6,9 +9,6 @@ import {
 } from "@/components/ui/command";
 import { api } from "@/utils/api";
 import { debounce } from "@/utils/helper";
-import { Command } from "lucide-react";
-import { useRouter } from "next/router";
-import { FC, useEffect } from "react";
 
 interface SuggestionProps {
   searchKey: string;
