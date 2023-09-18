@@ -35,6 +35,7 @@ export const GET = (
   const connectedUser = { response };
   connectedUsers.add(connectedUser);
 
+  // NOT IMPORTANT
   // TODO: this thing does not works. need to impelement a way to remove user from connectedUsers
   request.on("close", () => {
     connectedUsers.delete(connectedUser);

@@ -46,7 +46,7 @@ export const productSchema = z.object({
     .string({
       required_error: "Enter a description",
     })
-    .min(1, "Please provide a description to your product"),
+    .min(10, "Please provide a description to your product"),
   images: z.array(imageInputs).nonempty("Upload at least one image"),
   categoryId: z.string({
     required_error: "Select a category",

@@ -286,6 +286,7 @@ export const PostingTabs: FC<PostingTabsProps> = ({
                     requiredError={!!formError?.categoryId}
                   />
                 </div>
+
                 <div className="flex items-center justify-between">
                   <Label>Brand</Label>
                   <ComboBox
@@ -320,7 +321,8 @@ export const PostingTabs: FC<PostingTabsProps> = ({
                 </div>
 
                 {modelApi.isLoading ? (
-                  <div className="flex flex-col items-center gap-4">
+                  <div className="mt-3 flex flex-col items-center gap-4">
+                    Loading Variants
                     <Loader2 className="text-primary-500 h-8 w-8 animate-spin" />
                   </div>
                 ) : !modelApi.data ? null : modelApi.data instanceof Error ? (
@@ -418,9 +420,8 @@ export const PostingTabs: FC<PostingTabsProps> = ({
             </div>
             {(uploadProduct.isLoading || imageUploader.isLoading) && (
               <div className="flex flex-col items-center gap-4">
-                {imageUploader.isLoading && "Uploading images please wait..."}
-                {uploadProduct.isLoading &&
-                  "Creating your product please wait..."}
+                {imageUploader.isLoading && "Uploading images ..."}
+                {uploadProduct.isLoading && "Creating your product ..."}
                 <Loader2 className="text-primary-500 h-8 w-8 animate-spin" />
               </div>
             )}

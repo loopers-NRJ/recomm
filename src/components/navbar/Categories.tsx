@@ -42,6 +42,7 @@ const Categories: FC = () => {
   const { data, isLoading } = api.category.getCategories.useQuery({});
   const [categories, setCategories] = useState<Icon[]>([]);
   const [categoryLoading, setCategoryLoading] = useState<boolean>(true);
+
   useEffect(() => {
     const importIcons = async () => {
       setCategories([
@@ -74,11 +75,23 @@ const Categories: FC = () => {
           icon: CarIcon,
         },
         {
-          label: "Groceries",
+          label: "Jewelry",
           icon: CarIcon,
         },
         {
-          label: "Jewelry",
+          label: "Books",
+          icon: CarIcon,
+        },
+        {
+          label: "Pets",
+          icon: CarIcon,
+        },
+        {
+          label: "Kitchen",
+          icon: CarIcon,
+        },
+        {
+          label: "Luxury",
           icon: CarIcon,
         },
       ]);
@@ -125,7 +138,7 @@ const Categories: FC = () => {
 
   return (
     <Container>
-      <div className="flex flex-row items-center justify-between overflow-x-auto pt-4">
+      <div className="flex flex-row items-center justify-between overflow-x-auto pt-4 transition-opacity">
         {/* <CategoryBox label="All" icon={HomeIcon} /> */}
         {categories.map((item, i) => (
           <CategoryBox

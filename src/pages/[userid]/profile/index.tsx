@@ -107,8 +107,6 @@ const ProfilePage: NextPage = () => {
                     className=" block w-full border-t border-gray-100 py-4 pl-6 pr-3 text-gray-600 transition duration-150 hover:bg-gray-100"
                   >
                     Product Listings
-                    {/* TODO */}
-                    {/* <span className="text-xs text-gray-500">count of listings</span> */}
                   </a>
 
                   {userId === session.data?.user.id && (

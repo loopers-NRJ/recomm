@@ -14,10 +14,8 @@ const BottomBar: FC<BottomBarProps> = () => {
   const user = useSession().data?.user;
 
   return (
-    <div className="fixed bottom-4 left-0 z-30 flex w-full items-center justify-center md:hidden">
-      <div className="rounded-lg border bg-white shadow-sm">
-        <NavItems currentUser={user} />
-      </div>
+    <div className="fixed bottom-0 left-0 z-30 flex w-full border p-0 md:hidden">
+      <NavItems currentUser={user} />
     </div>
   );
 };

@@ -40,10 +40,22 @@ export const Home: NextPage = () => {
     return <LoadingProducts />;
   }
   if (isError) {
-    return <div>Something went wrong</div>;
+    return (
+      <Container>
+        <div className="flex h-[500px] items-center justify-center pt-24 font-semibold">
+          Something went wrong
+        </div>
+      </Container>
+    );
   }
   if (data instanceof Error) {
-    return <div>{data.message}</div>;
+    return (
+      <Container>
+        <div className="flex h-[500px] items-center justify-center pt-24 font-semibold">
+          Something went wrong
+        </div>
+      </Container>
+    );
   }
   if (data === undefined || data.products.length === 0) {
     return (

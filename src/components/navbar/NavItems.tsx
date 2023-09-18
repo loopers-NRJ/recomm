@@ -115,41 +115,48 @@ const NavItems: FC<NavItemsProps> = ({ currentUser }) => {
   );
 
   return (
-    <div className="flex w-fit flex-row items-center gap-0 rounded-lg bg-white md:gap-3">
+    <div className="flex h-14 w-full flex-row items-center justify-evenly gap-0 rounded-lg bg-white md:h-fit md:w-fit md:gap-3">
       <Button
         variant={"ghost"}
-        className={`min-w-max rounded-lg px-4 py-6 md:px-4 md:py-2 ${
-          path === "/" ? `bg-slate-200/50` : ""
+        className={`w-full min-w-max flex-col rounded-lg px-4 py-6 md:flex-row md:px-4 md:py-2 ${
+          path === "/"
+            ? "rounded-b-none border-b-2 border-b-black md:rounded-md md:border-none md:bg-slate-200/50"
+            : ""
         }`}
         onClick={() => void router.push("/")}
       >
         <span className="text-xl md:hidden">{HomeIcon}</span>
-        <span className="hidden md:block">Home</span>
+        <span className="text-sm md:block md:text-base">Home</span>
       </Button>
 
       <Button
         variant={"ghost"}
-        className="min-w-max rounded-lg px-4 py-6 md:px-4 md:py-2"
+        className="w-full min-w-max flex-col rounded-lg px-4 py-6 md:flex-row md:px-4 md:py-2"
         onClick={onPost}
       >
         <span className="text-xl md:hidden">{CoinIcon}</span>
-        <span className="hidden md:block">Sell It</span>
+        <span className="text-sm md:block md:text-base">Sell It</span>
       </Button>
 
       <Button
         variant={"ghost"}
-        className={`min-w-max rounded-lg px-4 py-6 md:px-4 md:py-2
-        ${path === `/wishlist` ? "bg-slate-200/50" : ""}
+        className={`ms:flex-row w-full min-w-max flex-col rounded-lg px-4 py-6 md:px-4 md:py-2 ${
+          path === `/wishlist`
+            ? "rounded-b-none border-b-2 border-b-black md:rounded-md md:border-none md:bg-slate-200/50"
+            : ""
+        }
         `}
         onClick={() => void handleWishListClick()}
       >
         <span className="text-xl md:hidden">{HeartIcon}</span>
-        <span className="hidden md:block">Wish It</span>
+        <span className="text-sm md:block md:text-base">Wish It</span>
       </Button>
 
       <Button
-        className={`min-w-max rounded-lg px-4 py-6 md:gap-2 md:px-4 md:py-2 ${
-          path === `/${currentUser?.id}/profile` ? "bg-slate-200/50" : ""
+        className={`w-full min-w-max flex-col rounded-lg px-4 py-6 md:flex-row md:gap-2 md:px-4 md:py-2 ${
+          path === `/${session?.user.id}/profile`
+            ? "rounded-b-none border-b-2 border-b-black md:rounded-md md:border-none md:bg-slate-200/50"
+            : ""
         }`}
         variant={"ghost"}
         onClick={() => void handleProfileClick()}
@@ -157,7 +164,7 @@ const NavItems: FC<NavItemsProps> = ({ currentUser }) => {
         <div>
           <Avatar src={currentUser?.image} />
         </div>
-        <span className="hidden md:block">Profile</span>
+        <span className="text-sm md:block md:text-base">Profile</span>
       </Button>
     </div>
   );
