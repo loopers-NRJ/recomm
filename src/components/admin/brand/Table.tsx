@@ -1,10 +1,21 @@
 import { Pen, Trash } from "lucide-react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/router";
 import { useState } from "react";
 
 import useAdminModal from "@/hooks/useAdminModel";
 import { Pagination } from "@/types/admin";
 import { api } from "@/utils/api";
-import { DefaultLimit } from "@/utils/validation";
+import {
+  DefaultLimit,
+  DefaultPage,
+  DefaultSearch,
+  DefaultSortBy,
+  DefaultSortOrder,
+  SortBy,
+  SortOrder,
+} from "@/utils/validation";
 import { Brand } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 
@@ -14,14 +25,37 @@ import { CreateModel } from "./CreateModel";
 import { EditModel } from "./EditModel";
 
 const BrandTable = () => {
+  const searchParams = useSearchParams();
+
+  const router = useRouter();
+  const path = router.query.path as ["brands", ...string[]];
+  const brandId = path[1];
+  const params = new URLSearchParams(searchParams);
+
+  const page = +(params.get("page") ?? DefaultPage);
+  const limit = +(params.get("limit") ?? DefaultLimit);
+
   const [pagination, setPagination] = useState<Pagination>({
-    pageIndex: 1,
-    pageSize: DefaultLimit,
+    pageIndex: page,
+    pageSize: limit,
   });
 
-  const brandApi = api.brand.getBrands.useQuery({
+  const search = params.get("search") ?? DefaultSearch;
+  const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
+  const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
+  const categoryId = params.get("category") ?? undefined;
+
+  const brandApi = api.brand.getBrandByIdOrNull.useQuery({
+    brandId,
+  });
+
+  const brandsApi = api.brand.getBrands.useQuery({
     page: pagination.pageIndex,
     limit: pagination.pageSize,
+    search,
+    sortBy,
+    sortOrder,
+    categoryId,
   });
 
   const [editableBrand, setEditableBrand] = useState<Brand>();
@@ -30,12 +64,15 @@ const BrandTable = () => {
   const [deleteBrandId, setDeleteBrandId] = useState<string>();
   const { open: openModel } = useAdminModal();
 
-  if (brandApi.isLoading) {
+  if (brandsApi.isLoading) {
     return <div>Loading...</div>;
   }
-  if (brandApi.isError) {
-    console.log(brandApi.error);
+  if (brandsApi.isError || brandApi.isError) {
+    console.log(brandsApi.error ?? brandApi.error);
     return <div>Something went wrong</div>;
+  }
+  if (brandsApi.data instanceof Error) {
+    return <div>{brandsApi.data.message}</div>;
   }
   if (brandApi.data instanceof Error) {
     return <div>{brandApi.data.message}</div>;
@@ -56,6 +93,30 @@ const BrandTable = () => {
       id: "updatedAt",
       header: "Updated At",
       accessorFn: (row) => row.updatedAt.toLocaleString("en-US"),
+    },
+    {
+      id: "models",
+      header: "Models",
+      cell: ({ row }) => (
+        <Link
+          href={`/admin/models?brand=${row.original.id}`}
+          className="text-blue-400 hover:text-blue-600"
+        >
+          Models
+        </Link>
+      ),
+    },
+    {
+      id: "products",
+      header: "Products",
+      cell: ({ row }) => (
+        <Link
+          href={`/admin/products?brand=${row.original.id}`}
+          className="text-blue-400 hover:text-blue-600"
+        >
+          Products
+        </Link>
+      ),
     },
     {
       id: "edit",
@@ -86,7 +147,7 @@ const BrandTable = () => {
                 brandId: row.original.id,
               })
               .then(async () => {
-                await brandApi.refetch();
+                await brandsApi.refetch();
                 setDeleteBrandId(undefined);
               });
           }}
@@ -104,19 +165,50 @@ const BrandTable = () => {
         <EditModel
           brand={editableBrand}
           setBrand={setEditableBrand}
-          onEdit={() => void brandApi.refetch()}
+          onEdit={() => void brandsApi.refetch()}
         />
       ) : (
-        <CreateModel onCreate={() => void brandApi.refetch()} />
+        <CreateModel onCreate={() => void brandsApi.refetch()} />
       )}
+      {brandApi.data ? (
+        <div>
+          <nav>
+            <Link
+              href="/admin/brands"
+              className="text-blue-400 hover:text-blue-600"
+            >
+              Brands
+            </Link>
+            <span className="mx-2">{"/"}</span>
+            <span>{brandApi.data.name}</span>
+          </nav>
 
-      <DataTable
-        columns={columns}
-        data={brandApi.data.brands}
-        pageCount={brandApi.data.totalPages}
-        pagination={pagination}
-        setPagination={setPagination}
-      />
+          {/* TODO: display the brand image here */}
+          <div className="mt-3 flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <div className="text-lg font-medium">Brand Name</div>
+              <div>{brandApi.data.name}</div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="text-lg font-medium">Created At</div>
+              <div>{brandApi.data.createdAt.toLocaleString("en-US")}</div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="text-lg font-medium">Updated At</div>
+              <div>{brandApi.data.updatedAt.toLocaleString("en-US")}</div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <DataTable
+          columns={columns}
+          data={brandsApi.data.brands}
+          pageCount={brandsApi.data.totalPages}
+          pagination={pagination}
+          setPagination={setPagination}
+        />
+      )}
     </>
   );
 };

@@ -99,6 +99,31 @@ export const brandRouter = createTRPCRouter({
         return new Error("Something went wrong!");
       }
     }),
+
+  getBrandByIdOrNull: publicProcedure
+    .input(z.object({ brandId: z.string().cuid().nullish() }))
+    .query(async ({ input: { brandId: id }, ctx }) => {
+      try {
+        if (!id) {
+          return null;
+        }
+        const brand = await ctx.prisma.brand.findUnique({
+          where: {
+            id,
+          },
+          include: {
+            image: true,
+          },
+        });
+        if (brand === null) {
+          return new Error("Brand not found");
+        }
+        return brand;
+      } catch (error) {
+        console.error({ procedure: "getBrandById", error });
+        return new Error("Something went wrong!");
+      }
+    }),
   createBrand: adminWriteProcedure
     .input(
       z.object({

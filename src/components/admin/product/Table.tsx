@@ -1,24 +1,53 @@
 import { Trash } from "lucide-react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { Pagination } from "@/types/admin";
 import { Product } from "@/types/prisma";
 import { api } from "@/utils/api";
-import { DefaultLimit } from "@/utils/validation";
+import {
+  DefaultLimit,
+  DefaultPage,
+  DefaultSearch,
+  DefaultSortBy,
+  DefaultSortOrder,
+  SortBy,
+  SortOrder,
+} from "@/utils/validation";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { Button } from "../../ui/button";
 import { DataTable } from "../Table";
 
 const ProductTable = () => {
+  const searchParams = useSearchParams();
+  const params = new URLSearchParams(searchParams);
+
+  const page = +(params.get("page") ?? DefaultPage);
+  const limit = +(params.get("limit") ?? DefaultLimit);
+
   const [pagination, setPagination] = useState<Pagination>({
-    pageIndex: 1,
-    pageSize: DefaultLimit,
+    pageIndex: page,
+    pageSize: limit,
   });
+
+  const search = params.get("search") ?? DefaultSearch;
+  const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
+  const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
+  const categoryId = params.get("category") ?? undefined;
+  const brandId = params.get("brand") ?? undefined;
+  const modelId = params.get("model") ?? undefined;
 
   const productApi = api.product.getProducts.useQuery({
     page: pagination.pageIndex,
     limit: pagination.pageSize,
+    search,
+    sortBy,
+    sortOrder,
+    modelId,
+    categoryId,
+    brandId,
   });
   const deleteProduct = api.product.deleteProductById.useMutation();
   const [deleteId, setDeleteId] = useState<string>();
@@ -34,19 +63,52 @@ const ProductTable = () => {
       accessorFn: (row) => row.price,
     },
     {
-      id: "brand",
-      header: "Brand",
-      accessorFn: (row) => row.model.brand.name,
+      id: "category",
+      header: "Cateegory",
+      cell: ({ row }) => (
+        <Link
+          href={`/admin/category/${row.original.model.category.slug}=${row.original.model.category.id}`}
+          className="text-blue-400 hover:text-blue-600"
+        >
+          {row.original.model.category.name}
+        </Link>
+      ),
     },
     {
       id: "model",
       header: "Model",
-      accessorFn: (row) => row.model.name,
+      cell: ({ row }) => (
+        <Link
+          href={`/admin/models/${row.original.model.id}`}
+          className="text-blue-400 hover:text-blue-600"
+        >
+          {row.original.model.name}
+        </Link>
+      ),
+    },
+    {
+      id: "brand",
+      header: "Brand",
+      cell: ({ row }) => (
+        <Link
+          href={`/admin/brands/${row.original.model.brand.id}`}
+          className="text-blue-400 hover:text-blue-600"
+        >
+          {row.original.model.brand.name}
+        </Link>
+      ),
     },
     {
       id: "seller",
       header: "Seller name",
-      accessorFn: (row) => row.seller.name,
+      cell: ({ row }) => (
+        <Link
+          href={`/admin/users/${row.original.seller.id}`}
+          className="text-blue-400 hover:text-blue-600"
+        >
+          {row.original.seller.name}
+        </Link>
+      ),
     },
     {
       id: "createdAt",
@@ -56,7 +118,6 @@ const ProductTable = () => {
     {
       id: "delete",
       header: "Delete",
-      accessorFn: (row) => row.id,
       cell: ({ row }) => (
         <Button
           variant="destructive"
