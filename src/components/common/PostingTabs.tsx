@@ -237,13 +237,14 @@ export const PostingTabs: FC<PostingTabsProps> = ({
                 </div>
                 <Label className="mt-3 flex gap-3">
                   Description
-                  {formError?.description?.length! < 10 ? (
-                    <CardDescription className="text-xs font-light text-red-500">
-                      Minimum 10 characters required
-                    </CardDescription>
-                  ) : (
-                    ""
-                  )}
+                  {formError?.description?.length &&
+                    (formError.description.length < 10 ? (
+                      <CardDescription className="text-xs font-light text-red-500">
+                        Minimum 10 characters required
+                      </CardDescription>
+                    ) : (
+                      ""
+                    ))}
                 </Label>
                 <Input
                   value={description}

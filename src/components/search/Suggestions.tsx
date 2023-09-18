@@ -70,7 +70,7 @@ const Suggestions: FC<SuggestionProps> = ({ searchKey, setOpen }) => {
         {categories.map((category) => (
           <CommandItem
             key={category.id}
-            onSelect={(currentValue) => {
+            onSelect={() => {
               void router.push(`/products/?category=${category.id}`);
               setOpen(false);
             }}

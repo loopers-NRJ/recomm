@@ -38,6 +38,7 @@
     "clsx": "^2.0.0",
     "cmdk": "^0.2.0",
     "date-fns": "^2.30.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
     "lucide-react": "^0.269.0",
     "multer": "^1.4.5-lts.1",
     "next": "^13.4.2",
