@@ -27,6 +27,7 @@ interface ComboBoxProps {
   value: string;
   onChange: (search: string) => void;
   requiredError?: boolean;
+  disabled?: boolean;
 }
 
 const ComboBox: FC<ComboBoxProps> = ({
@@ -38,6 +39,7 @@ const ComboBox: FC<ComboBoxProps> = ({
   value: search,
   onChange: setSearch,
   requiredError,
+  disabled,
 }) => {
   const [open, setOpen] = useState(false);
   const {
@@ -64,6 +66,7 @@ const ComboBox: FC<ComboBoxProps> = ({
           className={`w-[200px] justify-between text-sm font-normal text-black
             ${requiredError && !selected ? "border-red-500" : ""}
           `}
+          disabled={disabled}
         >
           {selected
             ? (isItems ? items : previousItemsRef.current).find(
