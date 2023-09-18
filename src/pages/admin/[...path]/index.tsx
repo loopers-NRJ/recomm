@@ -6,6 +6,7 @@ import BrandTable from "@/components/admin/brand/Table";
 import CategoryTable from "@/components/admin/category/Table";
 import ModelTable from "@/components/admin/model/Table";
 import ProductsTable from "@/components/admin/product/Table";
+import UserTable from "@/components/admin/user/Table";
 import Container from "@/components/Container";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,7 +20,7 @@ import useAdminModal from "@/hooks/useAdminModel";
 import { authOptions } from "@/server/auth";
 import { Role } from "@prisma/client";
 
-const titles = ["category", "brands", "models", "products"] as const;
+const titles = ["category", "brands", "models", "products", "users"] as const;
 type Title = (typeof titles)[number];
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -48,7 +49,7 @@ const AdminPage = () => {
 
   const title = path[0] as Title;
 
-  let Table: React.FC<{ path: string[] }>;
+  let Table;
   switch (title) {
     case "category":
       Table = CategoryTable;
@@ -61,6 +62,9 @@ const AdminPage = () => {
       break;
     case "products":
       Table = ProductsTable;
+      break;
+    case "users":
+      Table = UserTable;
       break;
   }
 
@@ -86,7 +90,7 @@ const AdminPage = () => {
         {title !== "products" && <Button onClick={open}>New</Button>}
       </div>
       <div className="my-4">
-        <Table path={path.slice(1)} />
+        <Table />
       </div>
     </Container>
   );

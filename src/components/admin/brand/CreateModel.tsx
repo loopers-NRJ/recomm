@@ -78,7 +78,9 @@ export const CreateModel: FC<CreateModelProps> = ({ onCreate }) => {
               onClick={() => void createBrand()}
               disabled={brandName.trim() === "" || createBrandApi.isLoading}
             >
-              Create Brand
+              {imageFiles.length > 0
+                ? "Create Brand"
+                : "Create Brand without image"}
             </Button>
           )}
         </div>

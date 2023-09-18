@@ -8,24 +8,42 @@ export const userRouter = createTRPCRouter({
   getUsers: publicProcedure
     .input(functionalityOptions)
     .query(
-      async ({ input: { limit, page, search, sortBy, sortOrder }, ctx }) => {
+      async ({
+        input: { limit, page, search, sortBy, sortOrder },
+        ctx: { prisma },
+      }) => {
         try {
-          const users = await ctx.prisma.user.findMany({
-            take: limit,
-            skip: (page - 1) * limit,
-            where: {
-              name: {
-                contains: search,
-                mode: "insensitive",
+          const [count, users] = await prisma.$transaction([
+            prisma.user.count({
+              where: {
+                name: {
+                  contains: search,
+                  mode: "insensitive",
+                },
               },
-            },
-            orderBy: [
-              {
-                [sortBy]: sortOrder,
+            }),
+            prisma.user.findMany({
+              take: limit,
+              skip: (page - 1) * limit,
+              where: {
+                name: {
+                  contains: search,
+                  mode: "insensitive",
+                },
               },
-            ],
-          });
-          return users;
+              orderBy: [
+                {
+                  [sortBy]: sortOrder,
+                },
+              ],
+            }),
+          ]);
+
+          return {
+            totalPages: Math.ceil(count / limit),
+            currentPage: page,
+            users,
+          };
         } catch (error) {
           return new Error("Something went wrong!");
         }

@@ -101,14 +101,13 @@ const ProductTable = () => {
     {
       id: "seller",
       header: "Seller name",
-      cell: ({ row }) => (
-        <Link
-          href={`/admin/users/${row.original.seller.id}`}
-          className="text-blue-400 hover:text-blue-600"
-        >
-          {row.original.seller.name}
-        </Link>
-      ),
+      cell: ({ row }) =>
+        // <Link
+        //   href={`/admin/users/${row.original.seller.id}`}
+        //   className="text-blue-400 hover:text-blue-600"
+        // >
+        row.original.seller.name,
+        // </Link>
     },
     {
       id: "createdAt",
