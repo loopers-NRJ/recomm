@@ -203,7 +203,7 @@ export const PostingTabs: FC<PostingTabsProps> = ({
                     requiredError={!!formError?.categoryId}
                   />
                 </div>
-                <div className="flex justify-between">
+                <div className="flex items-center justify-between">
                   <Label>Brand</Label>
                   <ComboBox
                     label="Brand"
@@ -219,7 +219,7 @@ export const PostingTabs: FC<PostingTabsProps> = ({
                     requiredError={!!formError?.brandId}
                   />
                 </div>
-                <div className="flex justify-between">
+                <div className="flex items-center justify-between">
                   <Label>Model</Label>
                   <ComboBox
                     label="Model"
@@ -235,7 +235,16 @@ export const PostingTabs: FC<PostingTabsProps> = ({
                     requiredError={!!formError?.modelId}
                   />
                 </div>
-                <Label>Description</Label>
+                <Label className="mt-3 flex gap-3">
+                  Description
+                  {formError?.description?.length! < 10 ? (
+                    <CardDescription className="text-xs font-light text-red-500">
+                      Minimum 10 characters required
+                    </CardDescription>
+                  ) : (
+                    ""
+                  )}
+                </Label>
                 <Input
                   value={description}
                   onChange={(e) => {
@@ -243,7 +252,7 @@ export const PostingTabs: FC<PostingTabsProps> = ({
                   }}
                   className={`${
                     formError?.description
-                      ? "border-red-500 text-red-500"
+                      ? "border-red-500 text-red-500 after:flex after:h-20 after:w-20 after:bg-black after:content-['']"
                       : "border-gray-300 text-gray-500"
                   }`}
                   placeholder="Enter description..."

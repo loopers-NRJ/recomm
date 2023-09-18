@@ -36,7 +36,7 @@ const PostingModal = () => {
           onKeyDown={(e) => {
             if (e.key === "Escape") postingModal.onClose();
           }}
-          className={`translate fixed inset-0 z-50 mx-auto h-full w-full rounded-lg bg-white p-8 text-foreground shadow-sm duration-300 md:my-10 md:h-auto md:w-4/6 lg:h-auto lg:w-3/6 xl:w-2/5
+          className={`translate fixed inset-0 z-50 mx-auto h-full w-full rounded-lg bg-white px-3 py-12 text-foreground shadow-sm duration-300 md:my-10 md:h-auto md:w-4/6 md:p-8 lg:h-auto lg:w-3/6 xl:w-2/5
             ${showModal ? "translate-y-0" : "translate-y-full"}
             ${showModal ? "opacity-100" : "opacity-0"}`}
         >
