@@ -3,6 +3,8 @@ import { FC } from "react";
 import { Button } from "@/components/ui/button";
 import { VariantOption } from "@/types/prisma";
 
+import { Label } from "../ui/label";
+
 export interface VariantSelectorProps {
   option: VariantOption;
   selectedVariantId?: string;
@@ -17,10 +19,8 @@ export const VariantSelector: FC<VariantSelectorProps> = ({
   requiredError,
 }) => {
   return (
-    <div className="mt-2 flex items-center">
-      <span className="mr-3 shrink-0 overflow-auto text-lg font-medium">
-        {option.name}
-      </span>
+    <div className="mt-3 flex flex-col items-start justify-between gap-2">
+      <Label>{option.name}</Label>
       <div className="flex flex-wrap gap-1 sm:gap-3">
         {option.variantValues.map((value) => (
           <Button
