@@ -1,50 +1,66 @@
-import { useRouter } from "next/router";
 import { useState } from "react";
-
-import { Input } from "../ui/input";
+import { Command, CommandEmpty, CommandInput } from "@/components/ui/command";
+import * as Dialog from "@radix-ui/react-dialog";
 import Suggestions from "./Suggestions";
+import { useRouter } from "next/router";
 
 const Search = () => {
-  const [searchKey, setSearchKey] = useState<string>("");
+  const [searchKey, setSearchKey] = useState<string | undefined>(undefined);
+  const [open, setOpen] = useState(false);
 
   const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    void router.push(`/products?search=${searchKey}`);
-  };
+  const SearchIcon = (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="currentColor"
+      className="h-6 w-6"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+      />
+    </svg>
+  );
 
   return (
-    <div className="group relative flex cursor-pointer text-slate-400 transition-colors duration-200">
-      <form
-        onSubmit={handleSubmit}
-        className="group flex w-full cursor-pointer items-center justify-center"
-      >
-        <div className="h-6 w-6 md:hidden">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            className="h-6 w-6"
-          >
-            <path
-              fillRule="evenodd"
-              d="M10.5 3.75a6.75 6.75 0 100 13.5 6.75 6.75 0 000-13.5zM2.25 10.5a8.25 8.25 0 1114.59 5.28l4.69 4.69a.75.75 0 11-1.06 1.06l-4.69-4.69A8.25 8.25 0 012.25 10.5z"
-              clipRule="evenodd"
-            />
-          </svg>
+    <Dialog.Root open={open} onOpenChange={setOpen}>
+      <Dialog.Trigger>
+        <div className="flex items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm font-normal text-muted-foreground hover:bg-accent hover:text-foreground md:w-40 lg:w-60">
+          <span className="hidden md:block">Search...</span>
+          {SearchIcon}
         </div>
-
-        <Input
-          type="text"
-          value={searchKey}
-          onChange={(e) => setSearchKey(e.target.value)}
-          placeholder="Search ..."
-          className="mr-2 hidden focus:outline-none focus:ring-0 md:block md:w-[100px] lg:w-[300px]"
-        />
-      </form>
-      <Suggestions searchKey={searchKey} />
-    </div>
+      </Dialog.Trigger>
+      <Dialog.Portal className="relative h-full w-full">
+        <Dialog.Overlay className="fixed inset-0 z-50 bg-black bg-opacity-50 backdrop-blur-sm backdrop-filter transition-opacity" />
+        <Dialog.Content className="absolute right-1/2 top-1/3 z-50 min-w-[300px] translate-x-1/2 rounded-md border bg-white text-center">
+          <Command>
+            <CommandInput
+              onValueChange={(key) => {
+                setSearchKey(key);
+              }}
+              value={searchKey}
+              onKeyDown={(e) => {
+                if (e.nativeEvent.key === "Enter") {
+                  router.push(`/?search=${searchKey}`);
+                  setOpen(false);
+                  setSearchKey(undefined);
+                }
+              }}
+              placeholder="Search Products"
+            />
+            <CommandEmpty>No Items found.</CommandEmpty>
+            {searchKey && (
+              <Suggestions setOpen={setOpen} searchKey={searchKey} />
+            )}
+          </Command>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 };
 export default Search;
