@@ -14,6 +14,12 @@ import {
   SortBy,
   SortOrder,
 } from "@/utils/validation";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "recomm - Home",
+  description: "Buy and sell your products here",
+};
 
 export const Home: NextPage = () => {
   // get products according to the search params

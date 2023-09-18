@@ -1,11 +1,12 @@
 import {
+  CommandEmpty,
   CommandGroup,
   CommandItem,
-  CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
 import { api } from "@/utils/api";
 import { debounce } from "@/utils/helper";
+import { Command } from "lucide-react";
 import { useRouter } from "next/router";
 import { FC, useEffect } from "react";
 
@@ -31,33 +32,21 @@ const Suggestions: FC<SuggestionProps> = ({ searchKey, setOpen }) => {
 
   if (isLoading)
     return (
-      <CommandGroup>
-        <span
-          className={`suggestions absolute left-0 top-10 rounded-md border bg-white md:w-[100px] lg:w-[300px]`}
-        >
-          Loading...
-        </span>
-      </CommandGroup>
+      <CommandItem>
+        <CommandEmpty>Searching...</CommandEmpty>
+      </CommandItem>
     );
   if (suggestions instanceof Error)
     return (
-      <CommandGroup>
-        <span
-          className={`suggestions absolute left-0 top-10 rounded-md border bg-white md:w-[100px] lg:w-[300px]`}
-        >
-          {suggestions.message}
-        </span>
-      </CommandGroup>
+      <CommandItem>
+        <CommandEmpty>{suggestions.message}</CommandEmpty>
+      </CommandItem>
     );
 
   if (suggestions === undefined) {
     return (
       <CommandGroup>
-        <span
-          className={`suggestions absolute left-0 top-10 rounded-md border bg-white md:w-[100px] lg:w-[300px]`}
-        >
-          No Suggestions
-        </span>
+        <CommandEmpty>No Items found</CommandEmpty>
       </CommandGroup>
     );
   }
@@ -65,7 +54,7 @@ const Suggestions: FC<SuggestionProps> = ({ searchKey, setOpen }) => {
   const { categories, brands, models } = suggestions;
 
   return (
-    <CommandList>
+    <div className="space-y-2">
       <CommandGroup heading="Category">
         {categories.map((category) => (
           <CommandItem
@@ -108,7 +97,7 @@ const Suggestions: FC<SuggestionProps> = ({ searchKey, setOpen }) => {
           </CommandItem>
         ))}
       </CommandGroup>
-    </CommandList>
+    </div>
   );
 };
 export default Suggestions;

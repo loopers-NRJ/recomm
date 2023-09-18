@@ -3,6 +3,7 @@ import { Command, CommandEmpty, CommandInput } from "@/components/ui/command";
 import * as Dialog from "@radix-ui/react-dialog";
 import Suggestions from "./Suggestions";
 import { useRouter } from "next/router";
+import { CommandList } from "cmdk";
 
 const Search = () => {
   const [searchKey, setSearchKey] = useState<string | undefined>(undefined);
@@ -53,10 +54,11 @@ const Search = () => {
               }}
               placeholder="Search Products"
             />
-            <CommandEmpty>No Items found.</CommandEmpty>
-            {searchKey && (
-              <Suggestions setOpen={setOpen} searchKey={searchKey} />
-            )}
+            <CommandList>
+              {searchKey && (
+                <Suggestions setOpen={setOpen} searchKey={searchKey} />
+              )}
+            </CommandList>
           </Command>
         </Dialog.Content>
       </Dialog.Portal>
