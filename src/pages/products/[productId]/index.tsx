@@ -66,8 +66,9 @@ const ProductPage: NextPage = () => {
                 </div>
               </div>
               <hr />
-              {/* TODO: this icon makes the package 6.9Mb  */}
-              {/* <ListingCategory icon={GiSofa} label="Furniture" /> */}
+              <div className="w-fit rounded-lg bg-slate-600 px-3 py-2 text-white">
+                Icon
+              </div>
               <hr />
               <div className="text-lg font-light text-neutral-500">
                 Created on {product.createdAt.toDateString()}.
