@@ -41,7 +41,7 @@ export const Home: NextPage = () => {
   });
 
   if (isLoading) {
-    return <LoadingProducts />;
+    return <LoadingProducts className="pt-24" />;
   }
   if (isError) {
     return (
@@ -56,7 +56,7 @@ export const Home: NextPage = () => {
     return (
       <Container>
         <div className="flex h-[500px] items-center justify-center pt-24 font-semibold">
-          Something went wrong
+          {products.message}
         </div>
       </Container>
     );
