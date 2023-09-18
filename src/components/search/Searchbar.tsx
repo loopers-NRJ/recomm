@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Command, CommandEmpty, CommandInput } from "@/components/ui/command";
+import { Command, CommandInput } from "@/components/ui/command";
 import * as Dialog from "@radix-ui/react-dialog";
 import Suggestions from "./Suggestions";
 import { useRouter } from "next/router";
