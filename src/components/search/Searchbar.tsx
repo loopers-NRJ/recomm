@@ -1,9 +1,11 @@
+import { CommandList } from "cmdk";
+import { useRouter } from "next/router";
 import { useState } from "react";
+
 import { Command, CommandInput } from "@/components/ui/command";
 import * as Dialog from "@radix-ui/react-dialog";
+
 import Suggestions from "./Suggestions";
-import { useRouter } from "next/router";
-import { CommandList } from "cmdk";
 
 const Search = () => {
   const [searchKey, setSearchKey] = useState<string | undefined>(undefined);

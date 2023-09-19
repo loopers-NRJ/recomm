@@ -21,7 +21,12 @@ interface ImagePickerProps {
 const ImagePicker: FC<ImagePickerProps> = ({
   maxImageSizeInMB = 10,
   maxImages = 5,
-  acceptedImageFormats = ["image/jpeg", "image/jpg", "image/webp"],
+  acceptedImageFormats = [
+    "image/jpeg",
+    "image/jpg",
+    "image/webp",
+    "image/svg+xml",
+  ],
   setImages: setImagesToParent,
   images: parentImages,
   requiredError,

@@ -301,6 +301,7 @@ export const PostingTabs: FC<PostingTabsProps> = ({
                       search: searchBrand,
                     }}
                     requiredError={!!formError?.brandId}
+                    disabled={!selectedCategory}
                   />
                 </div>
                 <div className="flex items-center justify-between">
@@ -317,15 +318,19 @@ export const PostingTabs: FC<PostingTabsProps> = ({
                       search: searchModel,
                     }}
                     requiredError={!!formError?.modelId}
+                    disabled={!selectedBrand}
                   />
                 </div>
 
-                {modelApi.isLoading ? (
+                {!selectedCategory?.id ||
+                !selectedBrand?.id ||
+                !selectedModel?.id ? null : !modelApi.data ||
+                  modelApi.isLoading ? (
                   <div className="mt-3 flex flex-col items-center gap-4">
                     Loading Variants
                     <Loader2 className="text-primary-500 h-8 w-8 animate-spin" />
                   </div>
-                ) : !modelApi.data ? null : modelApi.data instanceof Error ? (
+                ) : modelApi.data instanceof Error ? (
                   <div className="flex flex-col items-center gap-4">
                     <p className="text-red-500">{modelApi.data.message}</p>
                   </div>
@@ -353,7 +358,15 @@ export const PostingTabs: FC<PostingTabsProps> = ({
             </div>
           </CardContent>
           <CardFooter>
-            <Button className="w-full" onClick={() => handleChangeTab("tab-2")}>
+            <Button
+              className="w-full"
+              onClick={() => handleChangeTab("tab-2")}
+              disabled={
+                !selectedModel ||
+                modelApi.isLoading ||
+                modelApi.data instanceof Error
+              }
+            >
               Next
             </Button>
           </CardFooter>
@@ -400,6 +413,7 @@ export const PostingTabs: FC<PostingTabsProps> = ({
                 setImages={setImages}
                 images={images}
                 requiredError={!!formError?.images}
+                acceptedImageFormats={["image/jpeg", "image/jpg", "image/webp"]}
               />
             </Label>
           </CardContent>
@@ -418,13 +432,6 @@ export const PostingTabs: FC<PostingTabsProps> = ({
                 Next
               </Button>
             </div>
-            {(uploadProduct.isLoading || imageUploader.isLoading) && (
-              <div className="flex flex-col items-center gap-4">
-                {imageUploader.isLoading && "Uploading images ..."}
-                {uploadProduct.isLoading && "Creating your product ..."}
-                <Loader2 className="text-primary-500 h-8 w-8 animate-spin" />
-              </div>
-            )}
           </CardFooter>
         </Card>
       </TabsContent>

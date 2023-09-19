@@ -12,7 +12,6 @@ cloudinary.config({
 export const uploadImage = async (localPath: string) => {
   try {
     const response = await cloudinary.uploader.upload(localPath);
-    // imageInputs.parse(response)
     const image = {
       publicId: response.public_id,
       url: response.secure_url,
