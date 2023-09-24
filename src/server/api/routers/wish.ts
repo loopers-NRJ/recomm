@@ -1,61 +1,83 @@
 import { z } from "zod";
 
+import { idSchema } from "@/utils/validation";
 import { WishStatus } from "@prisma/client";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const wishRouter = createTRPCRouter({
   createWish: protectedProcedure
-    .input(z.object({ modelId: z.string().cuid() }))
-    .mutation(async ({ input: { modelId: id }, ctx }) => {
-      const user = ctx.session.user;
-      try {
-        const existingWish = await ctx.prisma.wish.findFirst({
-          where: {
-            userId: user.id,
-            modelId: id,
-          },
-        });
+    .input(
+      z.object({
+        modelId: idSchema,
+        lowerBound: z.number().int().gt(0),
+        upperBound: z.number().int().gt(0),
+      })
+    )
+    .mutation(
+      async ({
+        input: { modelId: id, lowerBound, upperBound },
+        ctx: { prisma, session },
+      }) => {
+        const user = session.user;
+        try {
+          if (lowerBound > upperBound) {
+            return new Error("Lower bound cannot be greater than upper bound");
+          }
 
-        if (existingWish !== null) {
-          return new Error("wish already exists");
+          const existingWish = await prisma.wish.findFirst({
+            where: {
+              userId: user.id,
+              modelId: id,
+            },
+          });
+
+          if (existingWish !== null) {
+            return new Error("wish already exists");
+          }
+          const product = await prisma.product.findFirst({
+            where: {
+              modelId: id,
+              buyerId: null,
+              price: {
+                gte: lowerBound,
+                lte: upperBound,
+              },
+            },
+          });
+          const status: WishStatus =
+            product !== null ? WishStatus.available : WishStatus.pending;
+
+          const wish = await prisma.wish.create({
+            data: {
+              user: {
+                connect: {
+                  id: user.id,
+                },
+              },
+              model: {
+                connect: {
+                  id,
+                },
+              },
+              lowerBound,
+              upperBound,
+              status,
+            },
+          });
+
+          return wish;
+        } catch (error) {
+          return new Error("Something went wrong!");
         }
-        const product = await ctx.prisma.product.findFirst({
-          where: {
-            modelId: id,
-            buyerId: null,
-          },
-        });
-        const status: WishStatus =
-          product !== null ? WishStatus.available : WishStatus.pending;
-
-        const wish = await ctx.prisma.wish.create({
-          data: {
-            user: {
-              connect: {
-                id: user.id,
-              },
-            },
-            model: {
-              connect: {
-                id,
-              },
-            },
-            status,
-          },
-        });
-
-        return wish;
-      } catch (error) {
-        return new Error("Something went wrong!");
       }
-    }),
+    ),
   deleteWish: protectedProcedure
-    .input(z.object({ wishId: z.string().cuid() }))
-    .mutation(async ({ input: { wishId: id }, ctx }) => {
-      const user = ctx.session.user;
+    .input(z.object({ wishId: idSchema }))
+    .mutation(async ({ input: { wishId: id }, ctx: { prisma, session } }) => {
+      const user = session.user;
       try {
-        const wish = await ctx.prisma.wish.findUnique({
+        const wish = await prisma.wish.findUnique({
           where: {
             id,
           },
@@ -66,7 +88,7 @@ export const wishRouter = createTRPCRouter({
         if (wish.userId !== user.id) {
           return new Error("Wish not found");
         }
-        const deletedWish = await ctx.prisma.wish.delete({
+        const deletedWish = await prisma.wish.delete({
           where: {
             id,
           },

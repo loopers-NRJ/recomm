@@ -7,6 +7,13 @@ import { useState } from "react";
 import useAdminModal from "@/hooks/useAdminModel";
 import { Pagination } from "@/types/admin";
 import { api } from "@/utils/api";
+import { Brand } from "@prisma/client";
+import { ColumnDef } from "@tanstack/react-table";
+
+import { Button } from "../../ui/button";
+import { DataTable } from "../Table";
+import { CreateModel } from "./CreateModel";
+import { EditModel } from "./EditModel";
 import {
   DefaultLimit,
   DefaultPage,
@@ -15,14 +22,7 @@ import {
   DefaultSortOrder,
   SortBy,
   SortOrder,
-} from "@/utils/validation";
-import { Brand } from "@prisma/client";
-import { ColumnDef } from "@tanstack/react-table";
-
-import { Button } from "../../ui/button";
-import { DataTable } from "../Table";
-import { CreateModel } from "./CreateModel";
-import { EditModel } from "./EditModel";
+} from "@/utils/constants";
 
 const BrandTable = () => {
   const searchParams = useSearchParams();
@@ -45,7 +45,7 @@ const BrandTable = () => {
   const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
   const categoryId = params.get("category") ?? undefined;
 
-  const brandApi = api.brand.getBrandByIdOrNull.useQuery({
+  const brandApi = api.brand.getBrandById.useQuery({
     brandId,
   });
 

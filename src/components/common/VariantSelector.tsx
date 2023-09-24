@@ -1,12 +1,12 @@
 import { FC } from "react";
 
 import { Button } from "@/components/ui/button";
-import { VariantOption } from "@/types/prisma";
+import { OptionPayloadIncluded } from "@/types/prisma";
 
 import { Label } from "../ui/label";
 
 export interface VariantSelectorProps {
-  option: VariantOption;
+  option: OptionPayloadIncluded;
   selectedVariantId?: string;
   setSelectedVariantId: (optionId: string, valueId: string) => void;
   requiredError: boolean;
@@ -22,7 +22,7 @@ export const VariantSelector: FC<VariantSelectorProps> = ({
     <div className="mt-3 flex flex-col items-start justify-between gap-2">
       <Label>{option.name}</Label>
       <div className="flex flex-wrap gap-1 sm:gap-3">
-        {option.variantValues.map((value) => (
+        {option.values.map((value) => (
           <Button
             role="button"
             key={value.id}

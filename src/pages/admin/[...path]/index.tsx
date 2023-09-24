@@ -100,10 +100,7 @@ export default AdminPage;
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const session = await getServerSession(req, res, authOptions);
-  if (
-    session?.user.role !== Role.ADMIN_READ &&
-    session?.user.role !== Role.ADMIN_WRITE
-  ) {
+  if (session?.user.role === undefined || session.user.role === Role.USER) {
     return {
       redirect: {
         destination: "/",

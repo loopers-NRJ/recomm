@@ -1,39 +1,119 @@
-import {
-  Bid,
-  Brand,
-  Category,
-  Image,
-  Model as PrismaModel,
-  Product as PrismaProduct,
-  User,
-  VariantOption as PrismaVariantOption,
-  VariantValue as PrismaVariantValue,
-} from "@prisma/client";
+import { OptionType, Prisma, QuestionType } from "@prisma/client";
 
-export type Product = PrismaProduct & {
-  model: PrismaModel & {
-    brand: Brand;
-    category: Category;
-  };
-  seller: User;
-  room?: {
-    bids: (Bid & {
-      user: User;
-    })[];
-  };
-  images: Image[];
-};
+export const productsPayload = Prisma.validator<Prisma.ProductDefaultArgs>()({
+  include: {
+    model: {
+      include: {
+        brand: true,
+        categories: true,
+      },
+    },
+    seller: true,
+    room: true,
+    images: true,
+  },
+});
+export type ProductsPayloadIncluded = Prisma.ProductGetPayload<
+  typeof productsPayload
+>;
 
-export type Model = PrismaModel & {
-  brand: Brand & {
-    image: Image | null;
-  };
-  category: Category & {
-    image: Image | null;
-  };
-  image: Image | null;
-};
+export const singleProductPayload =
+  Prisma.validator<Prisma.ProductDefaultArgs>()({
+    include: {
+      buyer: true,
+      seller: true,
+      model: {
+        include: {
+          image: true,
+          brand: {
+            include: {
+              image: true,
+            },
+          },
+        },
+      },
+      room: {
+        include: {
+          bids: {
+            include: {
+              user: true,
+            },
+          },
+        },
+      },
+      images: true,
+      optionValues: {
+        include: {
+          option: true,
+        },
+      },
+      answers: true,
+    },
+  });
+export type SingleProductPayloadIncluded = Prisma.ProductGetPayload<
+  typeof singleProductPayload
+>;
 
-export type VariantOption = PrismaVariantOption & {
-  variantValues: PrismaVariantValue[];
-};
+export const modelPayload = Prisma.validator<Prisma.ModelDefaultArgs>()({
+  include: {
+    image: true,
+    brand: {
+      include: {
+        image: true,
+      },
+    },
+    categories: {
+      include: {
+        image: true,
+      },
+    },
+  },
+});
+
+export type ModelPayloadIncluded = Prisma.ModelGetPayload<typeof modelPayload>;
+
+export const singleModelPayload = Prisma.validator<Prisma.ModelDefaultArgs>()({
+  include: {
+    image: true,
+    brand: {
+      include: {
+        image: true,
+      },
+    },
+    categories: {
+      include: {
+        image: true,
+      },
+    },
+    options: {
+      include: {
+        values: true,
+      },
+    },
+    questions: true,
+  },
+});
+export type SingleModelPayloadIncluded = Prisma.ModelGetPayload<
+  typeof singleModelPayload
+>;
+
+const OptionPayload = Prisma.validator<Prisma.OptionDefaultArgs>()({
+  include: {
+    values: true,
+  },
+});
+export type OptionPayloadIncluded = Prisma.OptionGetPayload<
+  typeof OptionPayload
+>;
+
+export const OptionTypeArray = [
+  OptionType.Dropdown,
+  OptionType.Checkbox,
+  OptionType.Variant,
+] as const;
+export const QuestionTypeArray = [
+  QuestionType.Text,
+  QuestionType.Paragraph,
+  QuestionType.Number,
+  QuestionType.Date,
+] as const;

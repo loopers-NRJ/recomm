@@ -5,23 +5,23 @@ import { useState } from "react";
 
 import useAdminModal from "@/hooks/useAdminModel";
 import { Pagination } from "@/types/admin";
-import { Model } from "@/types/prisma";
+import { ModelPayloadIncluded } from "@/types/prisma";
 import { api } from "@/utils/api";
-import {
-  DefaultLimit,
-  DefaultPage,
-  DefaultSearch,
-  DefaultSortBy,
-  DefaultSortOrder,
-  SortBy,
-  SortOrder,
-} from "@/utils/validation";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { Button } from "../../ui/button";
 import { DataTable } from "../Table";
 import { CreateModel } from "./CreateModel";
 import { EditModel } from "./EditModel";
+import {
+  DefaultPage,
+  DefaultLimit,
+  DefaultSearch,
+  SortBy,
+  DefaultSortBy,
+  SortOrder,
+  DefaultSortOrder,
+} from "@/utils/constants";
 
 const ModelTable = () => {
   const searchParams = useSearchParams();
@@ -53,7 +53,7 @@ const ModelTable = () => {
 
   const deleteModelApi = api.model.deleteModelById.useMutation();
   const [deleteModelId, setDeleteModelId] = useState<string>();
-  const [editableModel, setEditableModel] = useState<Model>();
+  const [editableModel, setEditableModel] = useState<ModelPayloadIncluded>();
   const { open: openModel } = useAdminModal();
   if (modelApi.isLoading) {
     return <div>Loading...</div>;
@@ -66,7 +66,7 @@ const ModelTable = () => {
     return <div>{modelApi.data.message}</div>;
   }
 
-  const columns: ColumnDef<Model>[] = [
+  const columns: ColumnDef<ModelPayloadIncluded>[] = [
     {
       id: "Name",
       header: "Name",
@@ -80,7 +80,8 @@ const ModelTable = () => {
     {
       id: "Category",
       header: "Category",
-      accessorFn: (row) => row.category.name,
+      // TODO: display the array of categories instead of first one
+      accessorFn: (row) => row.categories[0]?.name,
     },
     {
       id: "createdAt",

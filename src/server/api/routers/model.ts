@@ -2,10 +2,16 @@ import slugify from "slugify";
 import { z } from "zod";
 
 import { deleteImage } from "@/lib/cloudinary";
-import { functionalityOptions, imageInputs } from "@/utils/validation";
+import { modelPayload, singleModelPayload } from "@/types/prisma";
+import {
+  functionalityOptions,
+  idSchema,
+  imageInputs,
+  modelSchema,
+} from "@/utils/validation";
 
 import {
-  adminWriteProcedure,
+  adminCreateProcedure,
   createTRPCRouter,
   publicProcedure,
 } from "../trpc";
@@ -14,34 +20,52 @@ export const modelRouter = createTRPCRouter({
   getModels: publicProcedure
     .input(
       functionalityOptions.extend({
-        categoryId: z.string().cuid().optional(),
-        brandId: z.string().cuid().optional(),
+        categoryId: idSchema.optional(),
+        active: z.boolean().default(true),
+        brandId: idSchema.optional(),
       })
     )
     .query(
       async ({
-        input: { limit, page, search, sortBy, sortOrder, brandId, categoryId },
+        input: {
+          limit,
+          page,
+          search,
+          sortBy,
+          sortOrder,
+          brandId,
+          categoryId,
+          active,
+        },
         ctx: { prisma },
       }) => {
         try {
           const [count, models] = await prisma.$transaction([
             prisma.model.count({
               where: {
-                categoryId,
+                categories: {
+                  some: {
+                    id: categoryId,
+                    active,
+                  },
+                },
                 brandId,
                 name: {
                   contains: search,
-                  mode: "insensitive",
                 },
               },
             }),
             prisma.model.findMany({
               where: {
-                categoryId,
+                categories: {
+                  some: {
+                    id: categoryId,
+                    active,
+                  },
+                },
                 brandId,
                 name: {
                   contains: search,
-                  mode: "insensitive",
                 },
               },
               take: limit,
@@ -51,19 +75,7 @@ export const modelRouter = createTRPCRouter({
                   [sortBy]: sortOrder,
                 },
               ],
-              include: {
-                brand: {
-                  include: {
-                    image: true,
-                  },
-                },
-                category: {
-                  include: {
-                    image: true,
-                  },
-                },
-                image: true,
-              },
+              include: modelPayload.include,
             }),
           ]);
           return {
@@ -81,74 +93,17 @@ export const modelRouter = createTRPCRouter({
       }
     ),
   getModelById: publicProcedure
-    .input(z.object({ modelId: z.string().cuid() }))
-    .query(async ({ input: { modelId: id }, ctx }) => {
-      try {
-        const model = await ctx.prisma.model.findUnique({
-          where: {
-            id,
-          },
-          include: {
-            brand: {
-              include: {
-                image: true,
-              },
-            },
-            category: {
-              include: {
-                image: true,
-              },
-            },
-            image: true,
-            variantOptions: {
-              include: {
-                variantValues: true,
-              },
-            },
-          },
-        });
-        if (model === null) {
-          return new Error("Model not found");
-        }
-        return model;
-      } catch (error) {
-        console.error({
-          procedure: "getModelById",
-          error,
-        });
-        return new Error("Something went wrong!");
-      }
-    }),
-
-  getModelByIdOrNull: publicProcedure
-    .input(z.object({ modelId: z.string().cuid().nullish() }))
-    .query(async ({ input: { modelId: id }, ctx }) => {
+    .input(z.object({ modelId: idSchema.nullish() }))
+    .query(async ({ input: { modelId: id }, ctx: { prisma } }) => {
       try {
         if (!id) {
           return null;
         }
-        const model = await ctx.prisma.model.findUnique({
+        const model = await prisma.model.findUnique({
           where: {
             id,
           },
-          include: {
-            brand: {
-              include: {
-                image: true,
-              },
-            },
-            category: {
-              include: {
-                image: true,
-              },
-            },
-            image: true,
-            variantOptions: {
-              include: {
-                variantValues: true,
-              },
-            },
-          },
+          include: singleModelPayload.include,
         });
         if (model === null) {
           return new Error("Model not found");
@@ -163,27 +118,14 @@ export const modelRouter = createTRPCRouter({
       }
     }),
 
-  createModel: adminWriteProcedure
-    .input(
-      z.object({
-        name: z.string().min(1).max(255),
-        brandId: z.string().cuid(),
-        categoryId: z.string().cuid(),
-        variantOptions: z.array(
-          z.object({
-            name: z.string().min(1).max(255),
-            variantValues: z.array(z.string().min(1).max(255)).nonempty(),
-          })
-        ),
-        image: imageInputs.optional(),
-      })
-    )
+  createModel: adminCreateProcedure
+    .input(modelSchema)
     .mutation(
       ({
-        input: { name, brandId, categoryId, image, variantOptions: variants },
-        ctx,
+        input: { name, brandId, categoryId, image, options, questions },
+        ctx: { prisma },
       }) => {
-        return ctx.prisma.$transaction(async (prisma) => {
+        return prisma.$transaction(async (prisma) => {
           try {
             const existingModel = await prisma.model.findFirst({
               where: {
@@ -198,7 +140,7 @@ export const modelRouter = createTRPCRouter({
               data: {
                 name,
                 slug: slugify(name),
-                category: {
+                categories: {
                   connect: {
                     id: categoryId,
                   },
@@ -213,33 +155,32 @@ export const modelRouter = createTRPCRouter({
                       create: image,
                     }
                   : undefined,
-              },
-              include: {
-                brand: {
-                  include: {
-                    image: true,
+                questions: {
+                  createMany: {
+                    data: questions.map((question) => ({
+                      question: question.question,
+                      type: question.type,
+                      required: question.required,
+                    })),
                   },
                 },
-                category: {
-                  include: {
-                    image: true,
-                  },
-                },
-                image: true,
               },
+              include: modelPayload.include,
             });
-            for (const variant of variants) {
-              await prisma.variantOption.create({
+
+            for (const option of options) {
+              await prisma.option.create({
                 data: {
-                  name: variant.name,
+                  name: option.name,
                   model: {
                     connect: {
                       id: model.id,
                     },
                   },
-                  variantValues: {
+                  type: option.type,
+                  values: {
                     createMany: {
-                      data: variant.variantValues.map((value) => ({
+                      data: option.values.map((value) => ({
                         name: value,
                         modelId: model.id,
                       })),
@@ -248,6 +189,7 @@ export const modelRouter = createTRPCRouter({
                 },
               });
             }
+
             return model;
           } catch (error) {
             console.error({
@@ -259,25 +201,26 @@ export const modelRouter = createTRPCRouter({
         });
       }
     ),
-  updateModelById: adminWriteProcedure
+  updateModelById: adminCreateProcedure
     .input(
       z.union([
+        // TODO: enable updating options and questions
         z.object({
-          id: z.string().cuid(),
+          id: idSchema,
           name: z.string().min(1).max(255),
-          categoryId: z.string().cuid().optional(),
+          categoryId: idSchema.optional(),
           image: imageInputs.optional(),
         }),
         z.object({
-          id: z.string().cuid(),
+          id: idSchema,
           name: z.string().min(1).max(255).optional(),
-          categoryId: z.string().cuid(),
+          categoryId: idSchema,
           image: imageInputs.optional(),
         }),
         z.object({
-          id: z.string().cuid(),
+          id: idSchema,
           name: z.string().min(1).max(255).optional(),
-          categoryId: z.string().cuid().optional(),
+          categoryId: idSchema.optional(),
           image: imageInputs,
         }),
       ])
@@ -285,11 +228,11 @@ export const modelRouter = createTRPCRouter({
     .mutation(
       async ({
         input: { id, name: newName, categoryId, image: newImage },
-        ctx,
+        ctx: { prisma },
       }) => {
         try {
           // check whether the model exists
-          const existingModel = await ctx.prisma.model.findUnique({
+          const existingModel = await prisma.model.findUnique({
             where: {
               id,
             },
@@ -302,7 +245,7 @@ export const modelRouter = createTRPCRouter({
           }
           // check whether the new name is unique
           if (newName !== undefined) {
-            const existingModel = await ctx.prisma.model.findFirst({
+            const existingModel = await prisma.model.findFirst({
               where: {
                 name: newName,
               },
@@ -312,14 +255,14 @@ export const modelRouter = createTRPCRouter({
             }
           }
           // update the model
-          const model = await ctx.prisma.model.update({
+          const model = await prisma.model.update({
             where: {
               id,
             },
             data: {
               name: newName,
               slug: newName ? slugify(newName) : undefined,
-              category:
+              categories:
                 categoryId !== undefined
                   ? {
                       connect: {
@@ -334,19 +277,7 @@ export const modelRouter = createTRPCRouter({
                     }
                   : undefined,
             },
-            include: {
-              brand: {
-                include: {
-                  image: true,
-                },
-              },
-              category: {
-                include: {
-                  image: true,
-                },
-              },
-              image: true,
-            },
+            include: singleModelPayload.include,
           });
           // delete the old image
           if (newImage !== undefined && existingModel.image !== null) {
@@ -369,11 +300,11 @@ export const modelRouter = createTRPCRouter({
         }
       }
     ),
-  deleteModelById: adminWriteProcedure
-    .input(z.object({ modelId: z.string().cuid() }))
-    .mutation(async ({ input: { modelId: id }, ctx }) => {
+  deleteModelById: adminCreateProcedure
+    .input(z.object({ modelId: idSchema }))
+    .mutation(async ({ input: { modelId: id }, ctx: { prisma } }) => {
       try {
-        const existingModel = await ctx.prisma.model.findUnique({
+        const existingModel = await prisma.model.findUnique({
           where: {
             id,
           },
@@ -384,14 +315,14 @@ export const modelRouter = createTRPCRouter({
         if (existingModel === null) {
           return new Error("Model not found");
         }
-        const model = await ctx.prisma.model.delete({
+        const model = await prisma.model.delete({
           where: {
             id,
           },
         });
         if (existingModel.image !== null) {
           // using void to not wait for the promise to resolve
-          void ctx.prisma.image
+          void prisma.image
             .delete({
               where: {
                 id: existingModel.image.id,

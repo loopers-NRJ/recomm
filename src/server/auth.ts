@@ -1,6 +1,5 @@
 import { GetServerSidePropsContext } from "next";
 import { DefaultSession, getServerSession, NextAuthOptions } from "next-auth";
-import EmailProvider from "next-auth/providers/email";
 import GoogleProvider from "next-auth/providers/google";
 
 import { env } from "@/env.mjs";
@@ -54,18 +53,6 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,
-    }),
-    EmailProvider({
-      // server: {
-      //   host: env.EMAIL_HOST,
-      //   port: +env.EMAIL_PORT,
-      //   auth: {
-      //     user: env.EMAIL_USER,
-      //     pass: env.EMAIL_PASS,
-      //   },
-      // },
-      server: env.EMAIL_SERVER,
-      from: env.EMAIL_FROM,
     }),
   ],
 };

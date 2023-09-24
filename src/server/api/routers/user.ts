@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { functionalityOptions } from "@/utils/validation";
+import { functionalityOptions, idSchema } from "@/utils/validation";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
@@ -18,7 +18,6 @@ export const userRouter = createTRPCRouter({
               where: {
                 name: {
                   contains: search,
-                  mode: "insensitive",
                 },
               },
             }),
@@ -28,7 +27,6 @@ export const userRouter = createTRPCRouter({
               where: {
                 name: {
                   contains: search,
-                  mode: "insensitive",
                 },
               },
               orderBy: [
@@ -50,10 +48,10 @@ export const userRouter = createTRPCRouter({
       }
     ),
   getUserById: publicProcedure
-    .input(z.object({ userId: z.string().cuid() }))
-    .query(async ({ input: { userId: id }, ctx }) => {
+    .input(z.object({ userId: idSchema }))
+    .query(async ({ input: { userId: id }, ctx: { prisma } }) => {
       try {
-        const user = await ctx.prisma.user.findUnique({
+        const user = await prisma.user.findUnique({
           where: {
             id,
           },
@@ -69,10 +67,13 @@ export const userRouter = createTRPCRouter({
   getMyBids: protectedProcedure
     .input(functionalityOptions)
     .query(
-      async ({ input: { limit, page, search, sortBy, sortOrder }, ctx }) => {
+      async ({
+        input: { limit, page, search, sortBy, sortOrder },
+        ctx: { prisma, session },
+      }) => {
         try {
-          const user = ctx.session.user;
-          const bids = await ctx.prisma.bid.findMany({
+          const user = session.user;
+          const bids = await prisma.bid.findMany({
             where: {
               userId: user.id,
               room: {
@@ -82,22 +83,21 @@ export const userRouter = createTRPCRouter({
                       {
                         name: {
                           contains: search,
-                          mode: "insensitive",
                         },
                       },
                       {
                         brand: {
                           name: {
                             contains: search,
-                            mode: "insensitive",
                           },
                         },
                       },
                       {
-                        category: {
-                          name: {
-                            contains: search,
-                            mode: "insensitive",
+                        categories: {
+                          some: {
+                            name: {
+                              contains: search,
+                            },
                           },
                         },
                       },
@@ -132,11 +132,14 @@ export const userRouter = createTRPCRouter({
   getMyFavorites: protectedProcedure
     .input(functionalityOptions)
     .query(
-      async ({ input: { limit, page, search, sortBy, sortOrder }, ctx }) => {
-        const id = ctx.session.user.id;
+      async ({
+        input: { limit, page, search, sortBy, sortOrder },
+        ctx: { prisma, session },
+      }) => {
+        const id = session.user.id;
 
         try {
-          const favoritedProducts = await ctx.prisma.product.findMany({
+          const favoritedProducts = await prisma.product.findMany({
             where: {
               favoritedUsers: {
                 some: {
@@ -148,22 +151,21 @@ export const userRouter = createTRPCRouter({
                   {
                     name: {
                       contains: search,
-                      mode: "insensitive",
                     },
                   },
                   {
                     brand: {
                       name: {
                         contains: search,
-                        mode: "insensitive",
                       },
                     },
                   },
                   {
-                    category: {
-                      name: {
-                        contains: search,
-                        mode: "insensitive",
+                    categories: {
+                      some: {
+                        name: {
+                          contains: search,
+                        },
                       },
                     },
                   },
@@ -199,14 +201,14 @@ export const userRouter = createTRPCRouter({
       }
     ),
   getUserListingsById: publicProcedure
-    .input(functionalityOptions.extend({ userId: z.string().cuid() }))
+    .input(functionalityOptions.extend({ userId: idSchema }))
     .query(
       async ({
-        input: { userId: id, limit, page, search, sortBy, sortOrder },
-        ctx,
+        input: { search, userId: id, limit, page, sortBy, sortOrder },
+        ctx: { prisma },
       }) => {
         try {
-          const listings = await ctx.prisma.product.findMany({
+          const listings = await prisma.product.findMany({
             where: {
               sellerId: id,
               model: {
@@ -214,22 +216,21 @@ export const userRouter = createTRPCRouter({
                   {
                     name: {
                       contains: search,
-                      mode: "insensitive",
                     },
                   },
                   {
                     brand: {
                       name: {
                         contains: search,
-                        mode: "insensitive",
                       },
                     },
                   },
                   {
-                    category: {
-                      name: {
-                        contains: search,
-                        mode: "insensitive",
+                    categories: {
+                      some: {
+                        name: {
+                          contains: search,
+                        },
                       },
                     },
                   },
@@ -265,10 +266,13 @@ export const userRouter = createTRPCRouter({
   getMyPurchases: protectedProcedure
     .input(functionalityOptions)
     .query(
-      async ({ input: { limit, page, search, sortBy, sortOrder }, ctx }) => {
-        const id = ctx.session.user.id;
+      async ({
+        input: { limit, page, search, sortBy, sortOrder },
+        ctx: { prisma, session },
+      }) => {
+        const id = session.user.id;
         try {
-          const purchases = await ctx.prisma.product.findMany({
+          const purchases = await prisma.product.findMany({
             where: {
               buyerId: id,
               model: {
@@ -276,22 +280,21 @@ export const userRouter = createTRPCRouter({
                   {
                     name: {
                       contains: search,
-                      mode: "insensitive",
                     },
                   },
                   {
                     brand: {
                       name: {
                         contains: search,
-                        mode: "insensitive",
                       },
                     },
                   },
                   {
-                    category: {
-                      name: {
-                        contains: search,
-                        mode: "insensitive",
+                    categories: {
+                      some: {
+                        name: {
+                          contains: search,
+                        },
                       },
                     },
                   },
@@ -320,10 +323,13 @@ export const userRouter = createTRPCRouter({
   getMywishes: protectedProcedure
     .input(functionalityOptions)
     .query(
-      async ({ input: { limit, page, search, sortBy, sortOrder }, ctx }) => {
-        const id = ctx.session.user.id;
+      async ({
+        input: { limit, page, search, sortBy, sortOrder },
+        ctx: { prisma, session },
+      }) => {
+        const id = session.user.id;
         try {
-          const wishes = await ctx.prisma.wish.findMany({
+          const wishes = await prisma.wish.findMany({
             where: {
               userId: id,
               model: {
@@ -331,22 +337,21 @@ export const userRouter = createTRPCRouter({
                   {
                     name: {
                       contains: search,
-                      mode: "insensitive",
                     },
                   },
                   {
                     brand: {
                       name: {
                         contains: search,
-                        mode: "insensitive",
                       },
                     },
                   },
                   {
-                    category: {
-                      name: {
-                        contains: search,
-                        mode: "insensitive",
+                    categories: {
+                      some: {
+                        name: {
+                          contains: search,
+                        },
                       },
                     },
                   },
@@ -374,7 +379,7 @@ export const userRouter = createTRPCRouter({
                     },
                   },
                   image: true,
-                  category: {
+                  categories: {
                     include: {
                       image: true,
                     },

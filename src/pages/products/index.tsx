@@ -4,16 +4,16 @@ import { useSearchParams } from "next/navigation";
 import Container from "@/components/Container";
 import ListingCard from "@/components/ListingCard";
 import LoadingProducts from "@/components/loading/LoadingProducts";
-import { Product } from "@/types/prisma";
+import { ProductsPayloadIncluded } from "@/types/prisma";
 import { api } from "@/utils/api";
 import {
   DefaultPage,
   DefaultSearch,
-  DefaultSortBy,
-  DefaultSortOrder,
   SortBy,
+  DefaultSortBy,
   SortOrder,
-} from "@/utils/validation";
+  DefaultSortOrder,
+} from "@/utils/constants";
 
 export const ProductsPages: NextPage = () => {
   const searchParams = useSearchParams();
@@ -60,7 +60,7 @@ export const ProductsPages: NextPage = () => {
           {productsApi.data.products.map((product) => (
             <ListingCard
               key={product.id}
-              product={product as unknown as Product}
+              product={product as unknown as ProductsPayloadIncluded}
             />
           ))}
         </div>

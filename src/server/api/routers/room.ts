@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { functionalityOptions } from "@/utils/validation";
+import { functionalityOptions, idSchema } from "@/utils/validation";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
@@ -11,63 +11,62 @@ export const roomRounter = createTRPCRouter({
     .input(
       functionalityOptions
         .pick({ limit: true, page: true, sortOrder: true })
-        .extend({ roomId: z.string().cuid() })
+        .extend({ roomId: idSchema })
     )
-    .query(async ({ input: { roomId: id, limit, page, sortOrder }, ctx }) => {
-      try {
-        // const room = await ctx.prisma.room.findUnique({
-        //   where: {
-        //     id,
-        //   },
-        // });
-        // if (room === null) {
-        //   return new Error("Room not found");
-        // }
-        const bids = await ctx.prisma.bid.findMany({
-          where: {
-            roomId: id,
-          },
-          skip: limit * (page - 1),
-          take: limit,
-          orderBy: [
-            {
-              price: sortOrder,
+    .query(
+      async ({
+        input: { roomId: id, limit, page, sortOrder },
+        ctx: { prisma },
+      }) => {
+        try {
+          const bids = await prisma.bid.findMany({
+            where: {
+              roomId: id,
             },
-          ],
-          include: {
-            user: true,
-          },
-        });
-        return bids;
-      } catch (error) {
-        return new Error("Something went wrong!");
+            skip: limit * (page - 1),
+            take: limit,
+            orderBy: [
+              {
+                price: sortOrder,
+              },
+            ],
+            include: {
+              user: true,
+            },
+          });
+          return bids;
+        } catch (error) {
+          return new Error("Something went wrong!");
+        }
       }
-    }),
+    ),
 
   getHighestBidByRoomId: publicProcedure
-    .input(z.object({ roomId: z.string().cuid() }))
-    .query(async ({ input: { roomId: id }, ctx }) => {
-      return getHighestBidByRoomId(id, ctx.prisma);
+    .input(z.object({ roomId: idSchema }))
+    .query(async ({ input: { roomId: id }, ctx: { prisma } }) => {
+      return getHighestBidByRoomId(id, prisma);
     }),
 
   createBid: protectedProcedure
     .input(
       z.object({
-        roomId: z.string().cuid(),
+        roomId: idSchema,
         price: z.number().int().gt(0),
       })
     )
-    .mutation(async ({ input: { price, roomId }, ctx }) => {
-      return createABid({
-        price,
-        roomId,
-        userId: ctx.session.user.id,
-        prisma: ctx.prisma,
-      });
-    }),
+    .mutation(
+      async ({ input: { price, roomId }, ctx: { prisma, session } }) => {
+        return createABid({
+          price,
+          roomId,
+          userId: session.user.id,
+          prisma,
+        });
+      }
+    ),
 
   deleteBid: protectedProcedure
-    .input(z.object({ bidId: z.string().cuid() }))
+    .input(z.object({ bidId: idSchema }))
     .mutation(async ({ input: { bidId }, ctx: { prisma, session } }) => {
       try {
         const bid = await prisma.bid.findUnique({
@@ -84,7 +83,7 @@ export const roomRounter = createTRPCRouter({
           },
         });
         // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
-        if (bid === null || bid.room === null || bid.room.product === null) {
+        if (bid === null || bid.room.product === null) {
           return new Error("Bid not found");
         }
 

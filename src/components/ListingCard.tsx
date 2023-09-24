@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { Product } from "@/types/prisma";
+import { ProductsPayloadIncluded } from "@/types/prisma";
 
 // import Image from "next/image";
 import Carousel from "./common/Carousel";
@@ -10,7 +10,7 @@ import HeartButton from "./HeartButton";
 
 interface ListingCardProps {
   isFavourite?: boolean;
-  product: Product;
+  product: ProductsPayloadIncluded;
   onFavoriteStateChange?: () => void;
   hideHeartIcon?: true;
 }

@@ -151,16 +151,15 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
  */
 export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
 
-/**
- * Protected (admin authenticated) procedure
- *
- * If you want a query or mutation to ONLY be accessible to admins.
- *
- */
-export const adminWriteProcedure = protectedProcedure.use(
+export const adminReadProcedure = protectedProcedure.use(
   async ({ ctx, next }) => {
-    // check if the user is an admin
-    if (ctx.session.user.role !== Role.ADMIN_WRITE) {
+    const role = ctx.session.user.role;
+    const isAllowed =
+      role === Role.READ ||
+      role === Role.CREATE ||
+      role === Role.UPDATE ||
+      role === Role.DELETE;
+    if (!isAllowed) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
 
@@ -173,16 +172,46 @@ export const adminWriteProcedure = protectedProcedure.use(
   }
 );
 
-/**
- * Protected (admin authenticated) procedure
- *
- * If you want a query or mutation to ONLY be accessible to admins.
- *
- */
-export const adminReadProcedure = protectedProcedure.use(
+export const adminCreateProcedure = protectedProcedure.use(
   async ({ ctx, next }) => {
-    // check if the user is an admin
-    if (ctx.session.user.role !== Role.ADMIN_READ) {
+    const role = ctx.session.user.role;
+    const isAllowed =
+      role === Role.CREATE || role === Role.UPDATE || role === Role.DELETE;
+    if (!isAllowed) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+
+    return next({
+      ctx: {
+        // infers the `session` as non-nullable
+        session: { ...ctx.session, user: ctx.session.user },
+      },
+    });
+  }
+);
+
+export const adminUpdateProcedure = protectedProcedure.use(
+  async ({ ctx, next }) => {
+    const role = ctx.session.user.role;
+    const isAllowed = role === Role.UPDATE || role === Role.DELETE;
+    if (!isAllowed) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+
+    return next({
+      ctx: {
+        // infers the `session` as non-nullable
+        session: { ...ctx.session, user: ctx.session.user },
+      },
+    });
+  }
+);
+
+export const adminDeleteProcedure = protectedProcedure.use(
+  async ({ ctx, next }) => {
+    const role = ctx.session.user.role;
+    const isAllowed = role === Role.DELETE;
+    if (!isAllowed) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
 

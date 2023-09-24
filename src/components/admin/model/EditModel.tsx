@@ -2,7 +2,7 @@ import { Loader2 } from "lucide-react";
 import { FC, useState } from "react";
 
 import useAdminModal from "@/hooks/useAdminModel";
-import { Model } from "@/types/prisma";
+import { ModelPayloadIncluded } from "@/types/prisma";
 import { api } from "@/utils/api";
 import { useImageUploader } from "@/utils/imageUpload";
 
@@ -13,8 +13,8 @@ import { Label } from "../../ui/label";
 import AdminPageModal from "../AdminPageModel";
 
 interface EditModelProps {
-  model: Model;
-  setModel: (value: Model | undefined) => void;
+  model: ModelPayloadIncluded;
+  setModel: (value: ModelPayloadIncluded | undefined) => void;
   onEdit: () => void;
 }
 

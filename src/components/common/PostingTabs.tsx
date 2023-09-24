@@ -18,7 +18,7 @@ import { PostingModalStore } from "@/hooks/usePostingModal";
 import { FetchItems, OptionalItem } from "@/types/item";
 import { api } from "@/utils/api";
 import { useImageUploader } from "@/utils/imageUpload";
-import { productSchema, validateVariant } from "@/utils/validation";
+import { productSchema, validateOptionValues } from "@/utils/validation";
 
 import { Input } from "../ui/input";
 import { toast } from "../ui/use-toast";
@@ -75,7 +75,7 @@ export const PostingTabs: FC<PostingTabsProps> = ({
   const [searchModel, setSearchModel] = useState("");
   const [selectedModel, setSelectedModel] = useState<OptionalItem>();
 
-  const modelApi = api.model.getModelByIdOrNull.useQuery({
+  const modelApi = api.model.getModelById.useQuery({
     modelId: selectedModel?.id,
   });
 
@@ -208,14 +208,16 @@ export const PostingTabs: FC<PostingTabsProps> = ({
         }));
       }
 
-      const error = validateVariant(
-        modelApi.data.variantOptions,
-        variantOptions
-      );
+      // TODO: validate the model options and selected options here
+      // using my custom validateOptionValues function
+      // create UI to receive the answers for the modelQuestions
+      // validate the received answers using `validateQuestionAnswers` function
+      // `validateQuestionAnswers` is defined in src/utils/validation
+      // const error = validateOptionValues(modelApi.data.options, variantOptions);
 
-      if (error !== true) {
-        return setFormError((prev) => ({ ...prev, variantId: [error.id] }));
-      }
+      // if (error !== true) {
+      //   return setFormError((prev) => ({ ...prev, variantId: [error.id] }));
+      // }
     }
 
     if (tab === "tab-3" && currentTab === "tab-2") {
@@ -335,7 +337,7 @@ export const PostingTabs: FC<PostingTabsProps> = ({
                     <p className="text-red-500">{modelApi.data.message}</p>
                   </div>
                 ) : (
-                  modelApi.data.variantOptions.map((option) => (
+                  modelApi.data.options.map((option) => (
                     <VariantSelector
                       key={option.id}
                       option={option}

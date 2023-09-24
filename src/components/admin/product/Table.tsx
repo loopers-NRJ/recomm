@@ -4,21 +4,21 @@ import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { Pagination } from "@/types/admin";
-import { Product } from "@/types/prisma";
+import { ProductsPayloadIncluded } from "@/types/prisma";
 import { api } from "@/utils/api";
-import {
-  DefaultLimit,
-  DefaultPage,
-  DefaultSearch,
-  DefaultSortBy,
-  DefaultSortOrder,
-  SortBy,
-  SortOrder,
-} from "@/utils/validation";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { Button } from "../../ui/button";
 import { DataTable } from "../Table";
+import {
+  DefaultPage,
+  DefaultLimit,
+  DefaultSearch,
+  SortBy,
+  DefaultSortBy,
+  SortOrder,
+  DefaultSortOrder,
+} from "@/utils/constants";
 
 const ProductTable = () => {
   const searchParams = useSearchParams();
@@ -51,7 +51,7 @@ const ProductTable = () => {
   });
   const deleteProduct = api.product.deleteProductById.useMutation();
   const [deleteId, setDeleteId] = useState<string>();
-  const columns: ColumnDef<Omit<Product, "room">>[] = [
+  const columns: ColumnDef<Omit<ProductsPayloadIncluded, "room">>[] = [
     {
       id: "name",
       header: "Name",
@@ -67,10 +67,10 @@ const ProductTable = () => {
       header: "Cateegory",
       cell: ({ row }) => (
         <Link
-          href={`/admin/category/${row.original.model.category.slug}=${row.original.model.category.id}`}
+          href={`/admin/category/${row.original.model.categories[0]?.slug}=${row.original.model.categories[0]?.id}`}
           className="text-blue-400 hover:text-blue-600"
         >
-          {row.original.model.category.name}
+          {row.original.model.categories[0]?.name}
         </Link>
       ),
     },
@@ -107,7 +107,7 @@ const ProductTable = () => {
         //   className="text-blue-400 hover:text-blue-600"
         // >
         row.original.seller.name,
-        // </Link>
+      // </Link>
     },
     {
       id: "createdAt",

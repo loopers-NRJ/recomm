@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import Container from "@/components/Container";
 import ListingCard from "@/components/ListingCard";
 import LoadingProducts from "@/components/loading/LoadingProducts";
-import { Product } from "@/types/prisma";
+import { ProductsPayloadIncluded } from "@/types/prisma";
 import { api } from "@/utils/api";
 
 const Listings: NextPage = () => {
@@ -42,7 +42,7 @@ const Listings: NextPage = () => {
             <ListingCard
               // currentUser={session?.user as User}
               key={product.id}
-              product={product as unknown as Product}
+              product={product as unknown as ProductsPayloadIncluded}
               hideHeartIcon
             />
           ))}

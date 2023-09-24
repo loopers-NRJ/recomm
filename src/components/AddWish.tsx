@@ -88,7 +88,12 @@ const AddWish: FC = () => {
         });
       }
 
-      const result = await createWish({ modelId: selectedModel.id });
+      // TODO: @naveen create uito get the lower and upper bound
+      const result = await createWish({
+        modelId: selectedModel.id,
+        lowerBound: 0,
+        upperBound: 0,
+      });
       if (result instanceof Error) {
         return toast({
           title: "Error",

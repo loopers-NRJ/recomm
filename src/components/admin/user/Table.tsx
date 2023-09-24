@@ -3,19 +3,19 @@ import { useState } from "react";
 
 import { Pagination } from "@/types/admin";
 import { api } from "@/utils/api";
-import {
-  DefaultLimit,
-  DefaultPage,
-  DefaultSearch,
-  DefaultSortBy,
-  DefaultSortOrder,
-  SortBy,
-  SortOrder,
-} from "@/utils/validation";
 import { User } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { DataTable } from "../Table";
+import {
+  DefaultPage,
+  DefaultLimit,
+  DefaultSearch,
+  SortBy,
+  DefaultSortBy,
+  SortOrder,
+  DefaultSortOrder,
+} from "@/utils/constants";
 
 const UserTable = () => {
   const searchParams = useSearchParams();

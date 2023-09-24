@@ -8,7 +8,7 @@ import useAdminModal from "@/hooks/useAdminModel";
 import { FetchItems, Item } from "@/types/item";
 import { api } from "@/utils/api";
 import { useImageUploader } from "@/utils/imageUpload";
-import { Image, ModelSchema } from "@/utils/validation";
+import { Image, modelSchema } from "@/utils/validation";
 
 import ImagePicker from "../../common/ImagePicker";
 import { Button } from "../../ui/button";
@@ -31,7 +31,7 @@ interface FormError {
   variants?: string[] | undefined;
 }
 
-const tab1Schema = ModelSchema.pick({
+const tab1Schema = modelSchema.pick({
   name: true,
   image: true,
   brandId: true,
@@ -100,7 +100,7 @@ export const CreateModel: FC<CreateModelProps> = ({ onCreate }) => {
   const createModel = async () => {
     console.log("create model");
 
-    const validationresult = ModelSchema.safeParse({
+    const validationresult = modelSchema.safeParse({
       name: modelName,
       image,
       brandId: selectedBrand?.id,
@@ -225,7 +225,7 @@ export const CreateModel: FC<CreateModelProps> = ({ onCreate }) => {
                 onClick={() =>
                   setVarientOptions([
                     ...variantOptions,
-                    { id: uuid(), name: "", variantValues: [], search: "" },
+                    { id: uuid(), name: "", values: [], search: "" },
                   ])
                 }
               >

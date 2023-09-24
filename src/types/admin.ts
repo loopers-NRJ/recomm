@@ -2,7 +2,7 @@ export interface AdminVariantInput {
   id: string;
   search: string;
   name: string;
-  variantValues: string[];
+  values: string[];
 }
 
 export interface Pagination {

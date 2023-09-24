@@ -29,7 +29,7 @@ const AdminVariantPicker: FC<AdminVariantPickerProps> = ({
               if (
                 e.key === "Backspace" &&
                 option.name.length === 0 &&
-                option.variantValues.length === 0
+                option.values.length === 0
               ) {
                 setVariants(options.filter((v) => v.id !== option.id));
               }
@@ -45,17 +45,15 @@ const AdminVariantPicker: FC<AdminVariantPickerProps> = ({
             className="VARIANT-OPTION-INPUT sm:w-fit"
           />
           <div className="VARIANT-VALUES-CONTAINER min-h-10 flex w-fit flex-grow flex-wrap items-center gap-1 rounded-md border border-input bg-background p-1">
-            {option.variantValues.map((item, index) => (
+            {option.values.map((item, index) => (
               <Button
                 key={item}
                 onClick={() => {
-                  const newValues = [...option.variantValues];
+                  const newValues = [...option.values];
                   newValues.splice(index, 1);
                   setVariants(
                     options.map((v) =>
-                      v.id === option.id
-                        ? { ...v, variantValues: newValues }
-                        : v
+                      v.id === option.id ? { ...v, values: newValues } : v
                     )
                   );
                 }}
@@ -73,13 +71,13 @@ const AdminVariantPicker: FC<AdminVariantPickerProps> = ({
               placeholder="Values"
               onKeyDown={(e) => {
                 if (e.key === "Backspace" && option.search.length === 0) {
-                  const newValues = [...option.variantValues];
+                  const newValues = [...option.values];
                   setVariants(
                     options.map((v) =>
                       v.id === option.id
                         ? {
                             ...v,
-                            variantValues: newValues,
+                            values: newValues,
                             search: (newValues.pop() ?? "") + " ",
                           }
                         : v
@@ -98,10 +96,7 @@ const AdminVariantPicker: FC<AdminVariantPickerProps> = ({
                       v.id === option.id
                         ? {
                             ...v,
-                            variantValues: [
-                              ...v.variantValues,
-                              option.search.trim(),
-                            ],
+                            values: [...v.values, option.search.trim()],
                             search: "",
                           }
                         : v

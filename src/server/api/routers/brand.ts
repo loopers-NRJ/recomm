@@ -2,10 +2,16 @@ import slugify from "slugify";
 import { z } from "zod";
 
 import { deleteImage } from "@/lib/cloudinary";
-import { functionalityOptions, imageInputs } from "@/utils/validation";
+import {
+  functionalityOptions,
+  idSchema,
+  imageInputs,
+} from "@/utils/validation";
 
 import {
-  adminWriteProcedure,
+  adminCreateProcedure,
+  adminDeleteProcedure,
+  adminUpdateProcedure,
   createTRPCRouter,
   publicProcedure,
 } from "../trpc";
@@ -14,12 +20,13 @@ export const brandRouter = createTRPCRouter({
   getBrands: publicProcedure
     .input(
       functionalityOptions.extend({
-        categoryId: z.string().cuid().optional(),
+        categoryId: idSchema.optional(),
+        active: z.boolean().default(true),
       })
     )
     .query(
       async ({
-        input: { limit, page, search, sortBy, sortOrder, categoryId },
+        input: { limit, page, search, sortBy, sortOrder, categoryId, active },
         ctx: { prisma },
       }) => {
         try {
@@ -28,12 +35,16 @@ export const brandRouter = createTRPCRouter({
               where: {
                 name: {
                   contains: search,
-                  mode: "insensitive",
                 },
                 models: categoryId
                   ? {
                       some: {
-                        categoryId,
+                        categories: {
+                          some: {
+                            id: categoryId,
+                            active,
+                          },
+                        },
                       },
                     }
                   : undefined,
@@ -43,12 +54,16 @@ export const brandRouter = createTRPCRouter({
               where: {
                 name: {
                   contains: search,
-                  mode: "insensitive",
                 },
                 models: categoryId
                   ? {
                       some: {
-                        categoryId,
+                        categories: {
+                          some: {
+                            id: categoryId,
+                            active,
+                          },
+                        },
                       },
                     }
                   : undefined,
@@ -79,10 +94,13 @@ export const brandRouter = createTRPCRouter({
       }
     ),
   getBrandById: publicProcedure
-    .input(z.object({ brandId: z.string().cuid() }))
-    .query(async ({ input: { brandId: id }, ctx }) => {
+    .input(z.object({ brandId: idSchema.nullish() }))
+    .query(async ({ input: { brandId: id }, ctx: { prisma } }) => {
       try {
-        const brand = await ctx.prisma.brand.findUnique({
+        if (!id) {
+          return null;
+        }
+        const brand = await prisma.brand.findUnique({
           where: {
             id,
           },
@@ -100,41 +118,17 @@ export const brandRouter = createTRPCRouter({
       }
     }),
 
-  getBrandByIdOrNull: publicProcedure
-    .input(z.object({ brandId: z.string().cuid().nullish() }))
-    .query(async ({ input: { brandId: id }, ctx }) => {
-      try {
-        if (!id) {
-          return null;
-        }
-        const brand = await ctx.prisma.brand.findUnique({
-          where: {
-            id,
-          },
-          include: {
-            image: true,
-          },
-        });
-        if (brand === null) {
-          return new Error("Brand not found");
-        }
-        return brand;
-      } catch (error) {
-        console.error({ procedure: "getBrandById", error });
-        return new Error("Something went wrong!");
-      }
-    }),
-  createBrand: adminWriteProcedure
+  createBrand: adminCreateProcedure
     .input(
       z.object({
         name: z.string(),
         image: imageInputs.optional(),
       })
     )
-    .mutation(async ({ input: { name, image }, ctx }) => {
+    .mutation(async ({ input: { name, image }, ctx: { prisma } }) => {
       try {
         // checking whether the brand exists
-        const existingBrand = await ctx.prisma.brand.findUnique({
+        const existingBrand = await prisma.brand.findUnique({
           where: {
             name,
           },
@@ -143,7 +137,7 @@ export const brandRouter = createTRPCRouter({
           return new Error(`Brand ${name} already exists`);
         }
         // creating the brand
-        const brand = await ctx.prisma.brand.create({
+        const brand = await prisma.brand.create({
           data: {
             name,
             slug: slugify(name),
@@ -163,26 +157,29 @@ export const brandRouter = createTRPCRouter({
         return new Error("Error creating brand");
       }
     }),
-  updateBrandById: adminWriteProcedure
+  updateBrandById: adminUpdateProcedure
     .input(
       z.union([
         z.object({
-          id: z.string().cuid(),
+          id: idSchema,
           name: z.string().min(1).max(255),
           image: imageInputs.optional(),
         }),
         z.object({
-          id: z.string().cuid(),
+          id: idSchema,
           name: z.string().min(1).max(255).optional(),
           image: imageInputs,
         }),
       ])
     )
     .mutation(
-      async ({ input: { id, name: newName, image: newImage }, ctx }) => {
+      async ({
+        input: { id, name: newName, image: newImage },
+        ctx: { prisma },
+      }) => {
         try {
           // checking whether the brand exists
-          const existingBrand = await ctx.prisma.brand.findUnique({
+          const existingBrand = await prisma.brand.findUnique({
             where: {
               id,
             },
@@ -196,11 +193,10 @@ export const brandRouter = createTRPCRouter({
           }
           // checking whether the new brand name already exists
           if (newName !== undefined && newName !== existingBrand.name) {
-            const existingBrand = await ctx.prisma.brand.findFirst({
+            const existingBrand = await prisma.brand.findFirst({
               where: {
                 name: {
                   equals: newName,
-                  mode: "insensitive",
                 },
               },
               select: {
@@ -211,7 +207,7 @@ export const brandRouter = createTRPCRouter({
               return new Error(`Brand ${newName} already exists`);
             }
           }
-          const brand = await ctx.prisma.brand.update({
+          const brand = await prisma.brand.update({
             where: {
               id,
             },
@@ -243,11 +239,11 @@ export const brandRouter = createTRPCRouter({
         }
       }
     ),
-  deleteBrandById: adminWriteProcedure
-    .input(z.object({ brandId: z.string().cuid() }))
-    .mutation(async ({ input: { brandId: id }, ctx }) => {
+  deleteBrandById: adminDeleteProcedure
+    .input(z.object({ brandId: idSchema }))
+    .mutation(async ({ input: { brandId: id }, ctx: { prisma } }) => {
       try {
-        const existingBrand = await ctx.prisma.brand.findUnique({
+        const existingBrand = await prisma.brand.findUnique({
           where: {
             id,
           },
@@ -258,7 +254,7 @@ export const brandRouter = createTRPCRouter({
         if (existingBrand === null) {
           return new Error("Brand not found");
         }
-        const brand = await ctx.prisma.brand.delete({
+        const brand = await prisma.brand.delete({
           where: {
             id,
           },
@@ -266,7 +262,7 @@ export const brandRouter = createTRPCRouter({
 
         // using void to not wait for the promise to resolve
         if (existingBrand.image !== null) {
-          void ctx.prisma.image
+          void prisma.image
             .delete({
               where: {
                 id: existingBrand.image.id,

@@ -2,10 +2,10 @@ import { z } from "zod";
 
 import { deleteImage } from "@/lib/cloudinary";
 
-import { adminWriteProcedure, createTRPCRouter } from "../trpc";
+import { adminDeleteProcedure, createTRPCRouter } from "../trpc";
 
 export const imageRouter = createTRPCRouter({
-  deleteImage: adminWriteProcedure
+  deleteImage: adminDeleteProcedure
     .input(z.object({ publicId: z.string() }))
     .mutation(({ input: { publicId } }) => {
       return deleteImage(publicId);

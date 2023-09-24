@@ -7,6 +7,13 @@ import { useState } from "react";
 import useAdminModal from "@/hooks/useAdminModel";
 import { Pagination } from "@/types/admin";
 import { api } from "@/utils/api";
+import { Category } from "@prisma/client";
+import { ColumnDef } from "@tanstack/react-table";
+
+import { Button } from "../../ui/button";
+import { DataTable } from "../Table";
+import { CreateModel } from "./CreateModel";
+import { EditModel } from "./EditModel";
 import {
   DefaultLimit,
   DefaultPage,
@@ -15,14 +22,7 @@ import {
   DefaultSortOrder,
   SortBy,
   SortOrder,
-} from "@/utils/validation";
-import { Category } from "@prisma/client";
-import { ColumnDef } from "@tanstack/react-table";
-
-import { Button } from "../../ui/button";
-import { DataTable } from "../Table";
-import { CreateModel } from "./CreateModel";
-import { EditModel } from "./EditModel";
+} from "@/utils/constants";
 
 const CategoryTable = () => {
   const router = useRouter();
@@ -55,7 +55,7 @@ const CategoryTable = () => {
     sortOrder,
   });
 
-  const parentCategoryApi = api.category.getCategoryByIdOrNull.useQuery({
+  const parentCategoryApi = api.category.getCategoryById.useQuery({
     categoryId: parentId,
   });
 

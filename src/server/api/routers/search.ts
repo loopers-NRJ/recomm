@@ -1,14 +1,16 @@
-import { z } from "zod";
-
-import { functionalityOptions } from "@/utils/validation";
+import { functionalityOptions, idSchema } from "@/utils/validation";
 
 import { createTRPCRouter, publicProcedure } from "../trpc";
+import { z } from "zod";
 
 export const searchRouter = createTRPCRouter({
   all: publicProcedure
     .input(functionalityOptions)
     .query(
-      async ({ input: { search, page, limit, sortBy, sortOrder }, ctx }) => {
+      async ({
+        input: { search, page, limit, sortBy, sortOrder },
+        ctx: { prisma },
+      }) => {
         if (search.trim() === "") {
           return {
             categories: [],
@@ -17,12 +19,12 @@ export const searchRouter = createTRPCRouter({
           };
         }
         try {
-          const categories = await ctx.prisma.category.findMany({
+          const categories = await prisma.category.findMany({
             where: {
               name: {
                 contains: search,
-                mode: "insensitive",
               },
+              active: true,
             },
             skip: (page - 1) * limit,
             take: limit,
@@ -39,11 +41,10 @@ export const searchRouter = createTRPCRouter({
             },
           });
 
-          const brands = await ctx.prisma.brand.findMany({
+          const brands = await prisma.brand.findMany({
             where: {
               name: {
                 contains: search,
-                mode: "insensitive",
               },
             },
             skip: limit * (page - 1),
@@ -61,11 +62,10 @@ export const searchRouter = createTRPCRouter({
             },
           });
 
-          const models = await ctx.prisma.model.findMany({
+          const models = await prisma.model.findMany({
             where: {
               name: {
                 contains: search,
-                mode: "insensitive",
               },
             },
             take: limit,
@@ -95,16 +95,19 @@ export const searchRouter = createTRPCRouter({
       }
     ),
   category: publicProcedure
-    .input(functionalityOptions)
+    .input(functionalityOptions.extend({ active: z.boolean().default(true) }))
     .query(
-      async ({ input: { search, page, limit, sortBy, sortOrder }, ctx }) => {
+      async ({
+        input: { search, page, limit, sortBy, sortOrder, active },
+        ctx: { prisma },
+      }) => {
         try {
-          const categories = await ctx.prisma.category.findMany({
+          const categories = await prisma.category.findMany({
             where: {
               name: {
                 contains: search,
-                mode: "insensitive",
               },
+              active,
             },
             skip: (page - 1) * limit,
             take: limit,
@@ -131,25 +134,30 @@ export const searchRouter = createTRPCRouter({
   brands: publicProcedure
     .input(
       functionalityOptions.extend({
-        categoryId: z.string().cuid().optional(),
+        categoryId: idSchema.optional(),
+        active: z.boolean().default(true),
       })
     )
     .query(
       async ({
-        input: { limit, page, search, sortBy, sortOrder, categoryId },
-        ctx,
+        input: { limit, page, search, sortBy, sortOrder, categoryId, active },
+        ctx: { prisma },
       }) => {
         try {
-          const brands = await ctx.prisma.brand.findMany({
+          const brands = await prisma.brand.findMany({
             where: {
               name: {
                 contains: search,
-                mode: "insensitive",
               },
               models: categoryId
                 ? {
                     some: {
-                      categoryId,
+                      categories: {
+                        some: {
+                          id: categoryId,
+                          active,
+                        },
+                      },
                     },
                   }
                 : undefined,
@@ -180,27 +188,39 @@ export const searchRouter = createTRPCRouter({
   models: publicProcedure
     .input(
       functionalityOptions.extend({
-        categoryId: z.string().cuid().optional(),
-        brandId: z.string().cuid().optional(),
+        categoryId: idSchema.optional(),
+        brandId: idSchema.optional(),
+        active: z.boolean().default(true),
       })
     )
     .query(
       async ({
-        input: { limit, page, search, sortBy, sortOrder, brandId, categoryId },
-        ctx,
+        input: {
+          limit,
+          page,
+          search,
+          sortBy,
+          sortOrder,
+          brandId,
+          categoryId,
+          active,
+        },
+        ctx: { prisma },
       }) => {
         try {
-          const models = await ctx.prisma.model.findMany({
+          const models = await prisma.model.findMany({
             where: {
               brandId,
-              category: categoryId
+              categories: categoryId
                 ? {
-                    id: categoryId,
+                    some: {
+                      id: categoryId,
+                      active,
+                    },
                   }
                 : undefined,
               name: {
                 contains: search,
-                mode: "insensitive",
               },
             },
             take: limit,

@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
-  CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "@/components/ui/command";
 import {
   Popover,
@@ -57,7 +57,7 @@ const ComboBox: FC<ComboBoxProps> = ({
   const isItems = items instanceof Array;
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover modal open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -87,7 +87,7 @@ const ComboBox: FC<ComboBoxProps> = ({
             }}
           />
           <CommandEmpty>No {label} found.</CommandEmpty>
-          <CommandGroup>
+          <CommandList className="max-h-40">
             {((isItems ? items : previousItemsRef.current).length === 0 &&
               !loading) ||
               (isError && (
@@ -124,7 +124,7 @@ const ComboBox: FC<ComboBoxProps> = ({
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               </div>
             )}
-          </CommandGroup>
+          </CommandList>
         </Command>
       </PopoverContent>
     </Popover>
