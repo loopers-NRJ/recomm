@@ -5,6 +5,7 @@ generator client {
 datasource db {
     provider = "mysql"
     url      = env("DATABASE_URL")
+    relationMode = "prisma"
 }
 
 model Account {
@@ -23,6 +24,7 @@ model Account {
     user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@unique([provider, providerAccountId])
+    @@index([userId])
 }
 
 model Session {
@@ -31,6 +33,8 @@ model Session {
     userId       String
     expires      DateTime
     user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
 }
 
 model VerificationToken {
@@ -76,7 +80,7 @@ model Category {
     imageId          String?           @unique
     active           Boolean           @default(true)
     subCategories    Category[]        @relation("SubCategory")
-    parentCategory   Category?         @relation("SubCategory", fields: [parentCategoryId], references: [id], onDelete: Cascade)
+    parentCategory   Category?         @relation("SubCategory", fields: [parentCategoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
     parentCategoryId String?
     models           Model[]
     createdAt        DateTime          @default(now())
@@ -158,6 +162,7 @@ model OptionValue {
 
     @@unique([name, optionId, modelId])
     @@index([optionId])
+    @@index([modelId])
 }
 
 enum QuestionType {
@@ -195,6 +200,7 @@ model ModelAnswer {
 
     @@index([productId])
     @@index([questionId])
+    @@index([modelId])
 }
 
 model Product {
@@ -206,7 +212,7 @@ model Product {
     images         Image[]
     optionValues   OptionValue[]
     answers        ModelAnswer[]
-    model          Model         @relation(fields: [modelId], references: [id], onDelete: Restrict)
+    model          Model         @relation(fields: [modelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
     modelId        String
     seller         User          @relation("listedProducts", fields: [sellerId], references: [id], onDelete: Cascade)
     sellerId       String
@@ -220,6 +226,7 @@ model Product {
 
     @@index([sellerId])
     @@index([modelId])
+    @@index([buyerId])
 }
 
 model Room {
@@ -262,6 +269,7 @@ model Wish {
     updatedAt  DateTime   @updatedAt
 
     @@index([userId])
+    @@index([modelId])
 }
 
 model Image {
