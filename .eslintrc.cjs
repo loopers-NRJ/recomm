@@ -28,16 +28,6 @@ const config = {
     "@typescript-eslint/no-unsafe-argument": "off",
     "@typescript-eslint/require-await": "off",
     "no-void": "off",
-    "@typescript-eslint/no-unnecessary-condition": "warn",
-    "@typescript-eslint/no-unused-vars": [
-      "error",
-      {
-        argsIgnorePattern: "^_",
-        varsIgnorePattern: "^_",
-        args: "after-used",
-        ignoreRestSiblings: true,
-      },
-    ],
   },
 };
 
