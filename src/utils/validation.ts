@@ -1,11 +1,11 @@
 import { z } from "zod";
 
 import {
+  OptionPayloadIncluded,
   OptionTypeArray,
   QuestionTypeArray,
-  OptionPayloadIncluded,
 } from "@/types/prisma";
-import { OptionType, ModelQuestion, QuestionType } from "@prisma/client";
+import { ModelQuestion, OptionType, QuestionType } from "@prisma/client";
 
 import {
   DefaultLimit,
@@ -90,10 +90,30 @@ export const productSchema = z.object({
     )
     .default([]),
   answers: z.array(
-    z.object({
-      questionId: idSchema,
-      answer: z.string().trim().min(1, "Enter an answer"),
-    })
+    z.union([
+      z.object({
+        questionId: idSchema,
+        type: z.enum([QuestionType.Text, QuestionType.Paragraph]),
+        answer: z.string().trim().min(1, "Enter an answer"),
+      }),
+      z.object({
+        questionId: idSchema,
+        type: z.enum([QuestionType.Number]),
+        answer: z.number().min(1, "Enter an answer"),
+      }),
+      z.object({
+        questionId: idSchema,
+        type: z.enum([QuestionType.Date]),
+        answer: z
+          .date({
+            required_error: "Enter an answer",
+            invalid_type_error: "Invalid date",
+          })
+          .refine((date) => date.getTime() > Date.now(), {
+            message: "Date must be in the future",
+          }),
+      }),
+    ])
   ),
 });
 
@@ -211,27 +231,6 @@ export const validateQuestionAnswers = (
     if (providedAnswer === undefined) {
       continue;
     }
-    if (!isValidType(question.type, providedAnswer.answer)) {
-      return {
-        id: question.id,
-        message: `Invalid type for ${question.question}`,
-      };
-    }
   }
   return true;
-};
-
-export const isValidType = (type: QuestionType, value: string) => {
-  switch (type) {
-    case QuestionType.Text:
-    case QuestionType.Paragraph:
-      return typeof value === "string" && value.trim().length > 0;
-    case QuestionType.Number:
-      return !isNaN(Number(value));
-    case QuestionType.Date:
-      return !isNaN(Date.parse(value));
-    default:
-      const _exhaustiveCheck: never = type;
-      return _exhaustiveCheck;
-  }
 };

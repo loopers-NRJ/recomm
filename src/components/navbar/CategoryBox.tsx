@@ -3,15 +3,14 @@
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import { useCallback } from "react";
-import { IconType } from "react-icons";
 
 interface CategoryBoxProps {
-  icon: IconType | JSX.Element;
+  icon: JSX.Element;
   label: string;
   id?: string;
 }
 
-const CategoryBox: React.FC<CategoryBoxProps> = ({ icon: Icon, label, id }) => {
+const CategoryBox: React.FC<CategoryBoxProps> = ({ icon, label, id }) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -46,7 +45,7 @@ const CategoryBox: React.FC<CategoryBoxProps> = ({ icon: Icon, label, id }) => {
         ${selected ? "text-neutral-800" : "text-neutral-500"}
       `}
     >
-      {typeof Icon === "function" ? <Icon size={26} /> : Icon}
+      {icon}
       <div className="text-sm font-medium">{label}</div>
     </div>
   );

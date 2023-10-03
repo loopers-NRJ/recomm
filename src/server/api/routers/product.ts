@@ -273,19 +273,16 @@ export const productRouter = createTRPCRouter({
                 connect: optionValueIds.map((id) => ({ id })),
               },
               answers: {
-                create: providedAnswers.map((answer) => ({
-                  answer: answer.answer,
-                  question: {
-                    connect: {
-                      id: answer.questionId,
-                    },
-                  },
-                  model: {
-                    connect: {
-                      id: modelId,
-                    },
-                  },
-                })),
+                createMany: {
+                  data: providedAnswers.map((answer) => ({
+                    answer:
+                      answer.answer instanceof Date
+                        ? answer.answer.getTime().toString()
+                        : `${answer.answer}`,
+                    questionId: answer.questionId,
+                    modelId,
+                  })),
+                },
               },
             },
             include: singleProductPayload.include,

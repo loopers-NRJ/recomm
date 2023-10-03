@@ -7,13 +7,6 @@ import { useState } from "react";
 import useAdminModal from "@/hooks/useAdminModel";
 import { Pagination } from "@/types/admin";
 import { api } from "@/utils/api";
-import { Category } from "@prisma/client";
-import { ColumnDef } from "@tanstack/react-table";
-
-import { Button } from "../../ui/button";
-import { DataTable } from "../Table";
-import { CreateModel } from "./CreateModel";
-import { EditModel } from "./EditModel";
 import {
   DefaultLimit,
   DefaultPage,
@@ -23,6 +16,13 @@ import {
   SortBy,
   SortOrder,
 } from "@/utils/constants";
+import { Category } from "@prisma/client";
+import { ColumnDef } from "@tanstack/react-table";
+
+import { Button } from "../../ui/button";
+import { DataTable } from "../Table";
+import { CreateModel } from "./CreateModel";
+import { EditModel } from "./EditModel";
 
 const CategoryTable = () => {
   const router = useRouter();
@@ -153,6 +153,8 @@ const CategoryTable = () => {
             setEditableCategory(row.original);
             openModel();
           }}
+          variant="ghost"
+          size="sm"
         >
           <Pen />
         </Button>
@@ -164,7 +166,6 @@ const CategoryTable = () => {
       accessorFn: (row) => row.id,
       cell: ({ row }) => (
         <Button
-          variant="destructive"
           onClick={() => {
             setDeleteCategoryId(row.original.id);
             void deleteCategoryApi
@@ -175,8 +176,10 @@ const CategoryTable = () => {
               });
           }}
           disabled={deleteCategoryId === row.original.id}
+          size="sm"
+          variant="ghost"
         >
-          <Trash />
+          <Trash color="red" />
         </Button>
       ),
     },

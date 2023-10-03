@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { FetchItems, OptionalItem } from "@/types/item";
+import { FetchItems, OptionalItem } from "@/types/custom";
 import { api } from "@/utils/api";
 
 import ComboBox from "./common/ComboBox";

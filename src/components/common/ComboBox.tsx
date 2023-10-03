@@ -15,7 +15,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { FetchItems, Item } from "@/types/item";
+import { FetchItems, Item } from "@/types/custom";
 import { debounce } from "@/utils/helper";
 
 interface ComboBoxProps {

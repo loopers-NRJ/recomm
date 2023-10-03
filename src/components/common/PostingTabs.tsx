@@ -15,10 +15,10 @@ import {
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PostingModalStore } from "@/hooks/usePostingModal";
-import { FetchItems, OptionalItem } from "@/types/item";
+import { FetchItems, OptionalItem } from "@/types/custom";
 import { api } from "@/utils/api";
 import { useImageUploader } from "@/utils/imageUpload";
-import { productSchema, validateOptionValues } from "@/utils/validation";
+import { productSchema } from "@/utils/validation";
 
 import { Input } from "../ui/input";
 import { toast } from "../ui/use-toast";
@@ -188,9 +188,9 @@ export const PostingTabs: FC<PostingTabsProps> = ({
   const handleChangeTab = (tab: Tab) => {
     if (tab === "tab-2" && currentTab === "tab-1") {
       // convert the selectedVariants object to array
-      const variantOptions = Object.entries(selectedVariants).map(
-        ([optionId, valueId]) => ({ optionId, valueId })
-      );
+      // const variantOptions = Object.entries(selectedVariants).map(
+      //   ([optionId, valueId]) => ({ optionId, valueId })
+      // );
       const result = tab1Schema.safeParse({
         categoryId: selectedCategory?.id,
         brandId: selectedBrand?.id,

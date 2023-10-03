@@ -1,24 +1,18 @@
-import { Trash } from "lucide-react";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Trash } from 'lucide-react';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { useState } from 'react';
 
-import { Pagination } from "@/types/admin";
-import { ProductsPayloadIncluded } from "@/types/prisma";
-import { api } from "@/utils/api";
-import { ColumnDef } from "@tanstack/react-table";
-
-import { Button } from "../../ui/button";
-import { DataTable } from "../Table";
+import { Pagination } from '@/types/admin';
+import { ProductsPayloadIncluded } from '@/types/prisma';
+import { api } from '@/utils/api';
 import {
-  DefaultPage,
-  DefaultLimit,
-  DefaultSearch,
-  SortBy,
-  DefaultSortBy,
-  SortOrder,
-  DefaultSortOrder,
-} from "@/utils/constants";
+    DefaultLimit, DefaultPage, DefaultSearch, DefaultSortBy, DefaultSortOrder, SortBy, SortOrder
+} from '@/utils/constants';
+import { ColumnDef } from '@tanstack/react-table';
+
+import { Button } from '../../ui/button';
+import { DataTable } from '../Table';
 
 const ProductTable = () => {
   const searchParams = useSearchParams();
@@ -119,7 +113,8 @@ const ProductTable = () => {
       header: "Delete",
       cell: ({ row }) => (
         <Button
-          variant="destructive"
+          size="sm"
+          variant="ghost"
           onClick={() => {
             setDeleteId(row.original.id);
             void deleteProduct
@@ -131,7 +126,7 @@ const ProductTable = () => {
           }}
           disabled={deleteId === row.original.id}
         >
-          <Trash />
+          <Trash color="red" />
         </Button>
       ),
     },

@@ -7,21 +7,21 @@ import useAdminModal from "@/hooks/useAdminModel";
 import { Pagination } from "@/types/admin";
 import { ModelPayloadIncluded } from "@/types/prisma";
 import { api } from "@/utils/api";
+import {
+  DefaultLimit,
+  DefaultPage,
+  DefaultSearch,
+  DefaultSortBy,
+  DefaultSortOrder,
+  SortBy,
+  SortOrder,
+} from "@/utils/constants";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { Button } from "../../ui/button";
 import { DataTable } from "../Table";
 import { CreateModel } from "./CreateModel";
 import { EditModel } from "./EditModel";
-import {
-  DefaultPage,
-  DefaultLimit,
-  DefaultSearch,
-  SortBy,
-  DefaultSortBy,
-  SortOrder,
-  DefaultSortOrder,
-} from "@/utils/constants";
 
 const ModelTable = () => {
   const searchParams = useSearchParams();
@@ -115,6 +115,8 @@ const ModelTable = () => {
             setEditableModel(row.original);
             openModel();
           }}
+          size="sm"
+          variant="ghost"
         >
           <Pen />
         </Button>
@@ -126,7 +128,6 @@ const ModelTable = () => {
       accessorFn: (row) => row.id,
       cell: ({ row }) => (
         <Button
-          variant="destructive"
           onClick={() => {
             setDeleteModelId(row.id);
             void deleteModelApi
@@ -137,8 +138,10 @@ const ModelTable = () => {
               });
           }}
           disabled={deleteModelId === row.id}
+          size="sm"
+          variant="ghost"
         >
-          <Trash />
+          <Trash color="red" />
         </Button>
       ),
     },

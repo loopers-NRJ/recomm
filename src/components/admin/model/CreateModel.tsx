@@ -5,7 +5,7 @@ import { v4 as uuid } from "uuid";
 import ComboBox from "@/components/common/ComboBox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import useAdminModal from "@/hooks/useAdminModel";
-import { FetchItems, Item } from "@/types/item";
+import { FetchItems, Item, Question, questionTypes } from "@/types/custom";
 import { api } from "@/utils/api";
 import { useImageUploader } from "@/utils/imageUpload";
 import { Image, modelSchema } from "@/utils/validation";
@@ -15,7 +15,6 @@ import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { Label } from "../../ui/label";
 import AdminPageModal from "../AdminPageModel";
-import AdminVariantPicker from "./VariantPicker";
 
 import type { AdminVariantInput as VariantOptions } from "@/types/admin";
 export interface CreateModelProps {
@@ -61,9 +60,14 @@ export const CreateModel: FC<CreateModelProps> = ({ onCreate }) => {
   const [error, setError] = useState<string>();
 
   const [formError, setFormError] = useState<FormError>();
-  const [variantOptions, setVarientOptions] = useState<VariantOptions[]>([]);
+  // TODO:
+  const [variantOptions] = useState<VariantOptions[]>([]);
 
   const { close: closeModel } = useAdminModal();
+
+  const [additionalQuestions, setAdditionalQuestions] = useState<Question[]>(
+    []
+  );
 
   useEffect(() => {
     if (modelName.trim() !== "" && formError?.name) {
@@ -215,7 +219,7 @@ export const CreateModel: FC<CreateModelProps> = ({ onCreate }) => {
 
           <TabsContent value="tab-2">
             <section className="flex flex-col gap-4 p-4">
-              <AdminVariantPicker
+              {/* <AdminVariantPicker
                 variantOptions={variantOptions}
                 setVariants={setVarientOptions}
               />
@@ -230,6 +234,37 @@ export const CreateModel: FC<CreateModelProps> = ({ onCreate }) => {
                 }
               >
                 Add new Variant
+              </Button> */}
+
+              {additionalQuestions.map((additionalQuestion) => (
+                <QuestionEditor
+                  key={additionalQuestion.id}
+                  question={additionalQuestion}
+                  setQuestion={(question) => {
+                    const index = additionalQuestions.findIndex(
+                      (q) => q.id === question.id
+                    );
+                    additionalQuestions[index] = question;
+                    setAdditionalQuestions([...additionalQuestions]);
+                  }}
+                />
+              ))}
+
+              <Button
+                variant="ghost"
+                onClick={() =>
+                  setAdditionalQuestions([
+                    ...additionalQuestions,
+                    {
+                      id: uuid(),
+                      question: "",
+                      type: "Text",
+                      required: true,
+                    },
+                  ])
+                }
+              >
+                Add Additional Questions
               </Button>
 
               {/* form to get additional questions */}
@@ -273,5 +308,60 @@ export const CreateModel: FC<CreateModelProps> = ({ onCreate }) => {
         </Tabs>
       </AdminPageModal>
     </>
+  );
+};
+
+export const QuestionEditor: FC<{
+  question: Question;
+  setQuestion: (updated: Question) => void;
+}> = ({ question, setQuestion }) => {
+  // create UI based on the question type
+  return (
+    <div className="flex gap-2">
+      {/* type specific component */}
+      {question.type === "Text" && (
+        <div className="w-3/4">
+          <Label>
+            {question.question}
+            <Input
+              value={question.question}
+              onChange={(e) =>
+                setQuestion({ ...question, question: e.target.value })
+              }
+              placeholder="Enter your Question"
+            />
+          </Label>
+        </div>
+      )}
+
+      {question.type === "Paragraph" && (
+        <div className="w-3/4">
+          <Label>
+            {question.question}
+            <textarea
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              value={question.question}
+              onChange={(e) =>
+                setQuestion({ ...question, question: e.target.value })
+              }
+              placeholder="Enter your Question"
+            />
+          </Label>
+        </div>
+      )}
+
+      <select
+        className="inline-flex w-1/4 items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+        onChange={() => {
+          // change the question based on the selected option
+        }}
+      >
+        {questionTypes.map((questionType) => (
+          <option value={questionType} key={questionType}>
+            {questionType}
+          </option>
+        ))}
+      </select>
+    </div>
   );
 };
