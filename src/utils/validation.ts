@@ -1,11 +1,15 @@
 import { z } from "zod";
 
 import {
-  OptionPayloadIncluded,
-  OptionTypeArray,
-  QuestionTypeArray,
+  MultipleChoiceQuestionPayloadIncluded,
+  MultipleChoiceQuestionTypeArray,
+  AtomicQuestionTypeArray,
 } from "@/types/prisma";
-import { ModelQuestion, OptionType, QuestionType } from "@prisma/client";
+import {
+  AtomicQuestion,
+  MultipleChoiceQuestionType,
+  AtomicQuestionType,
+} from "@prisma/client";
 
 import {
   DefaultLimit,
@@ -16,7 +20,7 @@ import {
 } from "./constants";
 
 export const functionalityOptions = z.object({
-  search: z.string().default(""),
+  search: z.string().trim().default(""),
   limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
   page: z.number().int().positive().default(DefaultPage),
   sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
@@ -32,9 +36,9 @@ export const idSchema = z
   .cuid({ message: "Invalid Id" });
 
 export const imageInputs = z.object({
-  publicId: z.string(),
+  publicId: z.string().trim(),
   url: z.string().url(),
-  fileType: z.string(),
+  fileType: z.string().trim(),
   width: z.number().int(),
   height: z.number().int(),
 });
@@ -71,17 +75,21 @@ export const productSchema = z.object({
     .refine((date) => date.getTime() > Date.now(), {
       message: "Date must be in the future",
     }),
-  options: z
+  multipleChoiceQuestionAnswers: z
     .array(
       z.union([
         z.object({
           optionId: idSchema,
-          type: z.enum([OptionType.Dropdown, OptionType.Variant]),
+          type: z.enum([
+            MultipleChoiceQuestionType.Dropdown,
+            MultipleChoiceQuestionType.Variant,
+            MultipleChoiceQuestionType.RadioGroup,
+          ]),
           valueId: idSchema.nonempty({ message: "Enter at least one value" }),
         }),
         z.object({
           optionId: idSchema,
-          type: z.enum([OptionType.Checkbox]),
+          type: z.enum([MultipleChoiceQuestionType.Checkbox]),
           valueIds: z
             .array(idSchema.nonempty({ message: "Enter at least one value" }))
             .nonempty({ message: "Enter at least one value" }),
@@ -89,22 +97,22 @@ export const productSchema = z.object({
       ])
     )
     .default([]),
-  answers: z.array(
+  atomicQuestionAnswers: z.array(
     z.union([
       z.object({
         questionId: idSchema,
-        type: z.enum([QuestionType.Text, QuestionType.Paragraph]),
-        answer: z.string().trim().min(1, "Enter an answer"),
+        type: z.enum([AtomicQuestionType.Text, AtomicQuestionType.Paragraph]),
+        answerContent: z.string().trim().min(1, "Enter an answer"),
       }),
       z.object({
         questionId: idSchema,
-        type: z.enum([QuestionType.Number]),
-        answer: z.number().min(1, "Enter an answer"),
+        type: z.enum([AtomicQuestionType.Number]),
+        answerContent: z.number().min(1, "Enter an answer"),
       }),
       z.object({
         questionId: idSchema,
-        type: z.enum([QuestionType.Date]),
-        answer: z
+        type: z.enum([AtomicQuestionType.Date]),
+        answerContent: z
           .date({
             required_error: "Enter an answer",
             invalid_type_error: "Invalid date",
@@ -117,103 +125,120 @@ export const productSchema = z.object({
   ),
 });
 
+export const atomicQuestionInput = z.object({
+  questionContent: z
+    .string({
+      required_error: "Enter a question",
+    })
+    .trim()
+    .min(1, "Question cannot be empty")
+    .max(255, "Question must be less than 255 characters"),
+  type: z.enum(AtomicQuestionTypeArray, {
+    required_error: "Select a type for the question",
+    invalid_type_error: "Invalid Question type",
+  }),
+  required: z.boolean().default(true),
+});
+
+export const multipleChoiceQuestionInput = z.object({
+  questionContent: z
+    .string({
+      required_error: "Enter the question",
+    })
+    .trim()
+    .min(1, "Question cannot be empty")
+    .max(255, "Coice must be less than 255 characters"),
+  type: z.enum(MultipleChoiceQuestionTypeArray, {
+    required_error: "Type is required for a question",
+    invalid_type_error: "Invalid Question type",
+  }),
+  required: z.boolean().default(true),
+  choices: z
+    .array(
+      z
+        .string({
+          required_error: "Enter a value",
+        })
+        .trim()
+        .min(1, "Choice cannot be empty")
+        .max(255, "Choice must be less than 255 characters")
+    )
+    .nonempty({ message: "Enter at least one choice" }),
+});
+
 export const modelSchema = z.object({
   name: z
     .string({
       required_error: "Enter a name",
     })
+    .trim()
     .min(1, "Enter a name")
     .max(255, "Name must be less than 255 characters"),
   brandId: idSchema,
   categoryId: idSchema,
-  options: z.array(
-    z.object({
-      name: z
-        .string({
-          required_error: "Enter an option",
-        })
-        .min(1, "Enter an option")
-        .max(25, "Option must be less than 25 characters"),
-      type: z.enum(OptionTypeArray),
-      required: z.boolean().default(true),
-      values: z
-        .array(
-          z
-            .string({
-              required_error: "Enter a value",
-            })
-            .min(1, "Enter a value")
-            .max(25, "Value must be less than 25 characters")
-        )
-        .nonempty({ message: "Enter at least one value" }),
-    })
-  ),
-  questions: z.array(
-    z.object({
-      question: z
-        .string({
-          required_error: "Enter a question",
-        })
-        .trim()
-        .min(1)
-        .max(255),
-      type: z.enum(QuestionTypeArray, {
-        required_error: "Select a type",
-        invalid_type_error: "Invalid type",
-      }),
-      required: z.boolean().default(true),
-    })
-  ),
+  multipleChoiceQuestions: z.array(multipleChoiceQuestionInput),
+  atomicQuestions: z.array(atomicQuestionInput),
   image: imageInputs.optional(),
 });
 
-type ProvidedVariantOption = z.infer<typeof productSchema>["options"][0];
+type ProvidedMultipleChoiceQuestionAnswer = z.infer<
+  typeof productSchema
+>["multipleChoiceQuestionAnswers"][0];
 
-export const validateOptionValues = (
-  variantOptions: OptionPayloadIncluded[],
-  providedVariantOptions: ProvidedVariantOption[]
+export const validateMultipleChoiceQuestionInput = (
+  multipleChoiceQuestions: MultipleChoiceQuestionPayloadIncluded[],
+  providedChoices: ProvidedMultipleChoiceQuestionAnswer[]
 ) => {
-  for (const option of variantOptions) {
-    // check if the model option is provided
-    const providedOption = providedVariantOptions.find(
-      (providedVarientOption) => providedVarientOption.optionId === option.id
+  for (const question of multipleChoiceQuestions) {
+    // check if the model question is provided
+    const providedChoice = providedChoices.find(
+      (providedVarientOption) => providedVarientOption.optionId === question.id
     );
-    // if the model option is not provided and is required
-    if (providedOption === undefined && option.required) {
-      return { id: option.id, message: `Select Varient for ${option.name}` };
+    // if the model question is not provided and is required
+    if (providedChoice === undefined && question.required) {
+      return {
+        id: question.id,
+        message: `Select Varient for ${question.questionContent}`,
+      };
     }
-    // if the model option is not provided and is not required
-    if (providedOption === undefined) {
+    // if the model question is not provided and is not required
+    if (providedChoice === undefined) {
       continue;
     }
-    // if the model option is provided and is a checkbox
-    if (providedOption.type === OptionType.Checkbox) {
-      // check if the provided option has at least one value
-      const providedValues = option.values.filter((variantValue) =>
-        providedOption.valueIds.includes(variantValue.id)
+    // if the model question is provided and is a checkbox
+    if (providedChoice.type === MultipleChoiceQuestionType.Checkbox) {
+      // check if the provided question has at least one value
+      const providedValues = question.choices.filter((choice) =>
+        providedChoice.valueIds.includes(choice.id)
       );
-      // if the provided option has no values
+      // if the provided answer has no values
       if (providedValues.length === 0) {
-        return { id: option.id, message: `Select Varient for ${option.name}` };
+        return {
+          id: question.id,
+          message: `Select Varient for ${question.questionContent}`,
+        };
       }
     } else {
-      // if the model option is provided and is a dropdown or variant
-      // check if the provided option has a value
-      const providedValue = option.values.find(
-        (variantValue) => variantValue.id === providedOption.valueId
+      // if the model question is provided and it is not a checkbox
+      // check if the provided answer has a value
+      const providedValue = question.choices.find(
+        (choice) => choice.id === providedChoice.valueId
       );
-      // if the provided option has no value
+      // if the provided answer has no value
       if (!providedValue) {
-        return { id: option.id, message: `Select Varient for ${option.name}` };
+        return {
+          id: question.id,
+          message: `Select Varient for ${question.questionContent}`,
+        };
       }
     }
   }
   return true;
 };
 
-export const validateQuestionAnswers = (
-  questions: ModelQuestion[],
-  providedAnswers: z.infer<typeof productSchema>["answers"]
+export const validateAtomicQuestionAnswers = (
+  questions: AtomicQuestion[],
+  providedAnswers: z.infer<typeof productSchema>["atomicQuestionAnswers"]
 ) => {
   for (const question of questions) {
     // check if the model question is provided
@@ -224,7 +249,7 @@ export const validateQuestionAnswers = (
     if (providedAnswer === undefined && question.required) {
       return {
         id: question.id,
-        message: `Answer Question for ${question.question}`,
+        message: `Answer Question for ${question.questionContent}`,
       };
     }
     // if the model question is not provided and is not required

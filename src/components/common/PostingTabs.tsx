@@ -44,11 +44,6 @@ interface PostingTabsProps {
   postingModal: PostingModalStore;
 }
 
-// interface SelectedVariant {
-//   optionId: string;
-//   valueId: string;
-// }
-
 type Tab = "tab-1" | "tab-2" | "tab-3";
 
 const tab1Schema = productSchema.pick({
@@ -123,6 +118,7 @@ export const PostingTabs: FC<PostingTabsProps> = ({
       ([optionId, valueId]) => ({ optionId, valueId })
     );
 
+    // TODO: this won't work
     const result = productSchema.omit({ images: true }).safeParse({
       title,
       price: +price,
@@ -187,10 +183,6 @@ export const PostingTabs: FC<PostingTabsProps> = ({
 
   const handleChangeTab = (tab: Tab) => {
     if (tab === "tab-2" && currentTab === "tab-1") {
-      // convert the selectedVariants object to array
-      // const variantOptions = Object.entries(selectedVariants).map(
-      //   ([optionId, valueId]) => ({ optionId, valueId })
-      // );
       const result = tab1Schema.safeParse({
         categoryId: selectedCategory?.id,
         brandId: selectedBrand?.id,
@@ -329,7 +321,7 @@ export const PostingTabs: FC<PostingTabsProps> = ({
                 !selectedModel?.id ? null : !modelApi.data ||
                   modelApi.isLoading ? (
                   <div className="mt-3 flex flex-col items-center gap-4">
-                    Loading Variants
+                    Loading Additional Details...
                     <Loader2 className="text-primary-500 h-8 w-8 animate-spin" />
                   </div>
                 ) : modelApi.data instanceof Error ? (
@@ -337,13 +329,13 @@ export const PostingTabs: FC<PostingTabsProps> = ({
                     <p className="text-red-500">{modelApi.data.message}</p>
                   </div>
                 ) : (
-                  modelApi.data.options.map((option) => (
+                  modelApi.data.multipleChoiceQuestions.map((question) => (
                     <VariantSelector
-                      key={option.id}
-                      option={option}
-                      selectedVariantId={selectedVariants[option.id]}
+                      key={question.id}
+                      question={question}
+                      selectedVariantId={selectedVariants[question.id]}
                       setSelectedVariantId={(optionId, valueId) => {
-                        if (formError?.variantId?.[0] === option.id) {
+                        if (formError?.variantId?.[0] === question.id) {
                           setFormError((prev) => {
                             return { ...prev, variantId: undefined };
                           });
@@ -352,7 +344,7 @@ export const PostingTabs: FC<PostingTabsProps> = ({
                           return { ...prev, [optionId]: valueId };
                         });
                       }}
-                      requiredError={formError?.variantId?.[0] === option.id}
+                      requiredError={formError?.variantId?.[0] === question.id}
                     />
                   ))
                 )}

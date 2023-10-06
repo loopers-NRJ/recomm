@@ -28,7 +28,10 @@ const BiddingModal: FC = () => {
 
   return (
     <Dialog.Root open={biddingModal.isOpen}>
-      <Dialog.Portal className="relative z-50">
+      <Dialog.Portal
+      // TODO: Fix this
+      // className="relative z-50"
+      >
         {/* Overlay */}
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
         {/* Content */}

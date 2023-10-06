@@ -122,7 +122,14 @@ export const modelRouter = createTRPCRouter({
     .input(modelSchema)
     .mutation(
       ({
-        input: { name, brandId, categoryId, image, options, questions },
+        input: {
+          name,
+          brandId,
+          categoryId,
+          image,
+          multipleChoiceQuestions,
+          atomicQuestions,
+        },
         ctx: { prisma },
       }) => {
         return prisma.$transaction(async (prisma) => {
@@ -155,33 +162,29 @@ export const modelRouter = createTRPCRouter({
                       create: image,
                     }
                   : undefined,
-                questions: {
+                atomicQuestions: {
                   createMany: {
-                    data: questions.map((question) => ({
-                      question: question.question,
-                      type: question.type,
-                      required: question.required,
-                    })),
+                    data: atomicQuestions,
                   },
                 },
               },
               include: modelPayload.include,
             });
 
-            for (const option of options) {
-              await prisma.option.create({
+            for (const multipleChoiceQuestion of multipleChoiceQuestions) {
+              await prisma.multipleChoiceQuestion.create({
                 data: {
-                  name: option.name,
+                  questionContent: multipleChoiceQuestion.questionContent,
                   model: {
                     connect: {
                       id: model.id,
                     },
                   },
-                  type: option.type,
-                  values: {
+                  type: multipleChoiceQuestion.type,
+                  choices: {
                     createMany: {
-                      data: option.values.map((value) => ({
-                        name: value,
+                      data: multipleChoiceQuestion.choices.map((value) => ({
+                        value,
                         modelId: model.id,
                       })),
                     },

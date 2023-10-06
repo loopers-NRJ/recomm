@@ -25,7 +25,10 @@ const PostingModal = () => {
 
   return (
     <Dialog.Root open={postingModal.isOpen}>
-      <Dialog.Portal className="relative z-50">
+      <Dialog.Portal
+      // TODO: Fix this
+      // className="relative z-50"
+      >
         {/* Overlay */}
         <Dialog.Overlay
           onClick={postingModal.onClose}

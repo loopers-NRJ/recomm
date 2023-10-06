@@ -1,11 +1,16 @@
 import { Loader2 } from "lucide-react";
-import { FC, useEffect, useState } from "react";
+import { FC, useState } from "react";
 import { v4 as uuid } from "uuid";
 
 import ComboBox from "@/components/common/ComboBox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import useAdminModal from "@/hooks/useAdminModel";
-import { FetchItems, Item, Question, questionTypes } from "@/types/custom";
+import {
+  FetchItems,
+  Item,
+  MultipleChoiceQuestion,
+  Question,
+} from "@/types/custom";
 import { api } from "@/utils/api";
 import { useImageUploader } from "@/utils/imageUpload";
 import { Image, modelSchema } from "@/utils/validation";
@@ -16,19 +21,20 @@ import { Input } from "../../ui/input";
 import { Label } from "../../ui/label";
 import AdminPageModal from "../AdminPageModel";
 
-import type { AdminVariantInput as VariantOptions } from "@/types/admin";
+import { AtomicQuestionType, MultipleChoiceQuestionType } from "@prisma/client";
+import {
+  AtomicQuestionTypeArray,
+  MultipleChoiceQuestionTypeArray,
+} from "@/types/prisma";
+import QuestionEditor from "./QuestionEditor";
+
+import { ZodIssue } from "zod";
+
 export interface CreateModelProps {
   onCreate: () => void;
 }
 
 type Tab = "tab-1" | "tab-2";
-interface FormError {
-  image?: string[] | undefined;
-  name?: string[] | undefined;
-  categoryId?: string[] | undefined;
-  brandId?: string[] | undefined;
-  variants?: string[] | undefined;
-}
 
 const tab1Schema = modelSchema.pick({
   name: true,
@@ -59,9 +65,7 @@ export const CreateModel: FC<CreateModelProps> = ({ onCreate }) => {
   const uploader = useImageUploader();
   const [error, setError] = useState<string>();
 
-  const [formError, setFormError] = useState<FormError>();
-  // TODO:
-  const [variantOptions] = useState<VariantOptions[]>([]);
+  const [formError, setFormError] = useState<ZodIssue[]>();
 
   const { close: closeModel } = useAdminModal();
 
@@ -69,29 +73,36 @@ export const CreateModel: FC<CreateModelProps> = ({ onCreate }) => {
     []
   );
 
-  useEffect(() => {
-    if (modelName.trim() !== "" && formError?.name) {
-      formError.name = undefined;
+  const getAtomicQuestionIndex = (id: string) => {
+    let count = 0;
+    for (const question of additionalQuestions) {
+      if (question.id === id) {
+        return count;
+      }
+      if (
+        AtomicQuestionTypeArray.includes(question.type as AtomicQuestionType)
+      ) {
+        count += 1;
+      }
     }
-  }, [formError, modelName]);
-
-  useEffect(() => {
-    if (formError?.image && image) {
-      formError.image = undefined;
+    return -1;
+  };
+  const getMultipleChoiceQuestionIndex = (id: string) => {
+    let count = 0;
+    for (const question of additionalQuestions) {
+      if (question.id === id) {
+        return count;
+      }
+      if (
+        MultipleChoiceQuestionTypeArray.includes(
+          question.type as MultipleChoiceQuestionType
+        )
+      ) {
+        count += 1;
+      }
     }
-  }, [formError, image]);
-
-  useEffect(() => {
-    if (formError?.brandId && selectedBrand) {
-      formError.brandId = undefined;
-    }
-  }, [formError, selectedBrand]);
-
-  useEffect(() => {
-    if (formError?.categoryId && selectedCategory) {
-      formError.categoryId = undefined;
-    }
-  }, [formError, selectedCategory]);
+    return -1;
+  };
 
   const uploadImage = async () => {
     const result = await uploader.upload(imageFiles);
@@ -102,24 +113,34 @@ export const CreateModel: FC<CreateModelProps> = ({ onCreate }) => {
   };
 
   const createModel = async () => {
-    console.log("create model");
+    // split the the questions into atomic and multiple choice questions
+    const atomicQuestions = additionalQuestions.filter((question) =>
+      AtomicQuestionTypeArray.includes(question.type as AtomicQuestionType)
+    );
+    const multipleChoiceQuestions = additionalQuestions.filter((question) =>
+      MultipleChoiceQuestionTypeArray.includes(
+        question.type as MultipleChoiceQuestionType
+      )
+    ) as MultipleChoiceQuestion[];
 
-    const validationresult = modelSchema.safeParse({
+    const modelValidationResult = modelSchema.safeParse({
       name: modelName,
       image,
       brandId: selectedBrand?.id,
       categoryId: selectedCategory?.id,
-      variantOptions,
+      atomicQuestions,
+      multipleChoiceQuestions,
     });
 
-    if (!validationresult.success) {
-      return setFormError(validationresult.error.flatten().fieldErrors);
+    if (!modelValidationResult.success) {
+      return setFormError(modelValidationResult.error.errors);
     }
 
-    const result = await createModelApi.mutateAsync(validationresult.data);
+    const result = await createModelApi.mutateAsync(modelValidationResult.data);
     if (result instanceof Error) {
       return setError(result.message);
     }
+
     closeModel();
     onCreate();
   };
@@ -133,7 +154,7 @@ export const CreateModel: FC<CreateModelProps> = ({ onCreate }) => {
         image,
       });
       if (!result.success) {
-        return setFormError(result.error.flatten().fieldErrors);
+        return setFormError(result.error.errors);
       }
     }
     setFormError(undefined);
@@ -158,7 +179,11 @@ export const CreateModel: FC<CreateModelProps> = ({ onCreate }) => {
               <Label className="my-4">
                 Model Name
                 <Input
-                  className={`my-2 ${formError?.name ? "border-red-500" : ""}`}
+                  className={`my-2 ${
+                    formError?.find((e) => e.path[0] === "name")
+                      ? "border-red-500"
+                      : ""
+                  }`}
                   value={modelName}
                   onChange={(e) => setModelName(e.target.value)}
                 />
@@ -173,7 +198,9 @@ export const CreateModel: FC<CreateModelProps> = ({ onCreate }) => {
                   onChange={setBrand}
                   selected={selectedBrand}
                   onSelect={setSelectedBrand}
-                  requiredError={!!formError?.brandId}
+                  requiredError={
+                    !!formError?.find((e) => e.path[0] === "brandId")
+                  }
                 />
               </Label>
 
@@ -186,7 +213,9 @@ export const CreateModel: FC<CreateModelProps> = ({ onCreate }) => {
                   onChange={setCategory}
                   selected={selectedCategory}
                   onSelect={setSelectedCategory}
-                  requiredError={!!formError?.categoryId}
+                  requiredError={
+                    !!formError?.find((e) => e.path[0] === "categoryId")
+                  }
                 />
               </Label>
 
@@ -219,27 +248,10 @@ export const CreateModel: FC<CreateModelProps> = ({ onCreate }) => {
 
           <TabsContent value="tab-2">
             <section className="flex flex-col gap-4 p-4">
-              {/* <AdminVariantPicker
-                variantOptions={variantOptions}
-                setVariants={setVarientOptions}
-              />
-
-              <Button
-                variant="ghost"
-                onClick={() =>
-                  setVarientOptions([
-                    ...variantOptions,
-                    { id: uuid(), name: "", values: [], search: "" },
-                  ])
-                }
-              >
-                Add new Variant
-              </Button> */}
-
-              {additionalQuestions.map((additionalQuestion) => (
+              {additionalQuestions.map((question) => (
                 <QuestionEditor
-                  key={additionalQuestion.id}
-                  question={additionalQuestion}
+                  key={question.id}
+                  question={question}
                   setQuestion={(question) => {
                     const index = additionalQuestions.findIndex(
                       (q) => q.id === question.id
@@ -247,6 +259,30 @@ export const CreateModel: FC<CreateModelProps> = ({ onCreate }) => {
                     additionalQuestions[index] = question;
                     setAdditionalQuestions([...additionalQuestions]);
                   }}
+                  changeQuestionType={(newType) => {
+                    const index = additionalQuestions.findIndex(
+                      (q) => q.id === question.id
+                    );
+                    if (
+                      MultipleChoiceQuestionTypeArray.includes(
+                        newType as MultipleChoiceQuestionType
+                      )
+                    ) {
+                      (
+                        additionalQuestions[index] as MultipleChoiceQuestion
+                      ).choices = [];
+                    }
+                    additionalQuestions[index]!.type = newType;
+                    setAdditionalQuestions([...additionalQuestions]);
+                  }}
+                  error={formError?.find((e) =>
+                    AtomicQuestionTypeArray.includes(
+                      question.type as AtomicQuestionType
+                    )
+                      ? e.path[1] === getAtomicQuestionIndex(question.id)
+                      : e.path[1] ===
+                        getMultipleChoiceQuestionIndex(question.id)
+                  )}
                 />
               ))}
 
@@ -257,7 +293,7 @@ export const CreateModel: FC<CreateModelProps> = ({ onCreate }) => {
                     ...additionalQuestions,
                     {
                       id: uuid(),
-                      question: "",
+                      questionContent: "",
                       type: "Text",
                       required: true,
                     },
@@ -308,60 +344,5 @@ export const CreateModel: FC<CreateModelProps> = ({ onCreate }) => {
         </Tabs>
       </AdminPageModal>
     </>
-  );
-};
-
-export const QuestionEditor: FC<{
-  question: Question;
-  setQuestion: (updated: Question) => void;
-}> = ({ question, setQuestion }) => {
-  // create UI based on the question type
-  return (
-    <div className="flex gap-2">
-      {/* type specific component */}
-      {question.type === "Text" && (
-        <div className="w-3/4">
-          <Label>
-            {question.question}
-            <Input
-              value={question.question}
-              onChange={(e) =>
-                setQuestion({ ...question, question: e.target.value })
-              }
-              placeholder="Enter your Question"
-            />
-          </Label>
-        </div>
-      )}
-
-      {question.type === "Paragraph" && (
-        <div className="w-3/4">
-          <Label>
-            {question.question}
-            <textarea
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              value={question.question}
-              onChange={(e) =>
-                setQuestion({ ...question, question: e.target.value })
-              }
-              placeholder="Enter your Question"
-            />
-          </Label>
-        </div>
-      )}
-
-      <select
-        className="inline-flex w-1/4 items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-        onChange={() => {
-          // change the question based on the selected option
-        }}
-      >
-        {questionTypes.map((questionType) => (
-          <option value={questionType} key={questionType}>
-            {questionType}
-          </option>
-        ))}
-      </select>
-    </div>
   );
 };

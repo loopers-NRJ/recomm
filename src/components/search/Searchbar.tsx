@@ -38,7 +38,10 @@ const Search = () => {
           {SearchIcon}
         </div>
       </Dialog.Trigger>
-      <Dialog.Portal className="relative h-full w-full">
+      <Dialog.Portal
+      // TODO: Fix this
+      //  className="relative h-full w-full"
+      >
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black bg-opacity-50 backdrop-blur-sm backdrop-filter transition-opacity" />
         <Dialog.Content className="absolute right-1/2 top-1/3 z-50 min-w-[300px] translate-x-1/2 rounded-md border bg-white text-center">
           <Command>

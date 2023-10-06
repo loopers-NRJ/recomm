@@ -1,4 +1,4 @@
-import { OptionType, QuestionType } from "@prisma/client";
+import { MultipleChoiceQuestionType, AtomicQuestionType } from "@prisma/client";
 
 export interface Item {
   id: string;
@@ -14,50 +14,51 @@ export type FetchItems = (input: unknown) => {
 
 export type OptionalItem = Item | undefined;
 
-export type AllQuestionType = QuestionType | OptionType;
-export const questionTypes: AllQuestionType [] = [
-  QuestionType.Text,
-  QuestionType.Paragraph,
-  QuestionType.Number,
-  QuestionType.Date,
-  OptionType.Dropdown,
-  OptionType.Variant,
-  OptionType.Checkbox,
-];
 export type Question = {
   id: string;
-  question: string;
+  questionContent: string;
   required: boolean;
 } & (
   | {
-      type: QuestionType;
+      type: AtomicQuestionType;
     }
   | {
-      type: OptionType;
-      options: [string, ...string[]];
+      type: MultipleChoiceQuestionType;
+      choices: string[];
     }
 );
+
+export interface MultipleChoiceQuestion {
+  id: string;
+  questionContent: string;
+  required: boolean;
+  type: MultipleChoiceQuestionType;
+  choices: string[];
+}
 
 // TODO: @naveen you may need this type to represent the answer
 export type Answer = { questionId: string } & (
   | {
-      type: Extract<QuestionType, "Text" | "Paragraph">;
+      type: Extract<AtomicQuestionType, "Text" | "Paragraph">;
       answer: string;
     }
   | {
-      type: Extract<QuestionType, "Number">;
+      type: Extract<AtomicQuestionType, "Number">;
       answer: number;
     }
   | {
-      type: Extract<QuestionType, "Date">;
+      type: Extract<AtomicQuestionType, "Date">;
       answer: Date;
     }
   | {
-      type: Extract<OptionType, "Dropdown" | "Variant">;
+      type: Extract<
+        MultipleChoiceQuestionType,
+        "Dropdown" | "Variant" | "RadioGroup"
+      >;
       answerId: string;
     }
   | {
-      type: Extract<OptionType, "Checkbox">;
+      type: Extract<MultipleChoiceQuestionType, "Checkbox">;
       answerId: [string, ...string[]];
     }
 );

@@ -6,10 +6,10 @@ import {
   functionalityOptions,
   idSchema,
   productSchema,
-  validateOptionValues,
-  validateQuestionAnswers,
+  validateMultipleChoiceQuestionInput,
+  validateAtomicQuestionAnswers,
 } from "@/utils/validation";
-import { OptionType, Role, WishStatus } from "@prisma/client";
+import { MultipleChoiceQuestionType, Role, WishStatus } from "@prisma/client";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { productsPayload, singleProductPayload } from "@/types/prisma";
@@ -192,8 +192,8 @@ export const productRouter = createTRPCRouter({
           images,
           modelId,
           closedAt,
-          options: providedOptions,
-          answers: providedAnswers,
+          multipleChoiceQuestionAnswers: providedChoices,
+          atomicQuestionAnswers: providedAnswers,
         },
         ctx: { prisma, session },
       }) => {
@@ -207,35 +207,35 @@ export const productRouter = createTRPCRouter({
               id: modelId,
             },
             include: {
-              options: {
+              multipleChoiceQuestions: {
                 include: {
-                  values: true,
+                  choices: true,
                 },
               },
-              questions: true,
+              atomicQuestions: true,
             },
           });
           if (model === null) {
             return new Error("Model does not exist");
           }
 
-          const isValidValues = validateOptionValues(
-            model.options,
-            providedOptions
+          const isValidValues = validateMultipleChoiceQuestionInput(
+            model.multipleChoiceQuestions,
+            providedChoices
           );
           if (isValidValues !== true) {
-            return new Error("Invalid variant options");
+            return new Error("Invalid option");
           }
 
-          const optionValueIds: string[] = [];
-          providedOptions.forEach((variantOption) =>
-            variantOption.type === OptionType.Checkbox
-              ? optionValueIds.push(...variantOption.valueIds)
-              : optionValueIds.push(variantOption.valueId)
+          const choiceValueIds: string[] = [];
+          providedChoices.forEach((choice) =>
+            choice.type === MultipleChoiceQuestionType.Checkbox
+              ? choiceValueIds.push(...choice.valueIds)
+              : choiceValueIds.push(choice.valueId)
           );
 
-          const isValidAnswers = validateQuestionAnswers(
-            model.questions,
+          const isValidAnswers = validateAtomicQuestionAnswers(
+            model.atomicQuestions,
             providedAnswers
           );
 
@@ -269,16 +269,16 @@ export const productRouter = createTRPCRouter({
                   closedAt,
                 },
               },
-              optionValues: {
-                connect: optionValueIds.map((id) => ({ id })),
+              choices: {
+                connect: choiceValueIds.map((id) => ({ id })),
               },
               answers: {
                 createMany: {
                   data: providedAnswers.map((answer) => ({
-                    answer:
-                      answer.answer instanceof Date
-                        ? answer.answer.getTime().toString()
-                        : `${answer.answer}`,
+                    answerContent:
+                      answer.answerContent instanceof Date
+                        ? answer.answerContent.getTime().toString()
+                        : `${answer.answerContent}`,
                     questionId: answer.questionId,
                     modelId,
                   })),

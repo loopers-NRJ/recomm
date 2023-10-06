@@ -108,95 +108,96 @@ model Brand {
 }
 
 model Model {
-    id           String          @id @default(cuid())
-    name         String          @unique
-    slug         String
-    image        Image?          @relation(fields: [imageId], references: [id], onDelete: SetNull)
-    imageId      String?         @unique
-    categories   Category[]
-    brand        Brand           @relation(fields: [brandId], references: [id], onDelete: Restrict)
-    brandId      String
-    products     Product[]
-    wishes       Wish[]
-    options      Option[]
-    optionValues OptionValue[]
-    questions    ModelQuestion[]
-    answers      ModelAnswer[]
-    createdAt    DateTime        @default(now())
-    updatedAt    DateTime        @updatedAt
+    id                      String                   @id @default(cuid())
+    name                    String                   @unique
+    slug                    String
+    image                   Image?                   @relation(fields: [imageId], references: [id], onDelete: SetNull)
+    imageId                 String?                  @unique
+    categories              Category[]
+    brand                   Brand                    @relation(fields: [brandId], references: [id], onDelete: Restrict)
+    brandId                 String
+    products                Product[]
+    wishes                  Wish[]
+    multipleChoiceQuestions MultipleChoiceQuestion[]
+    choices                 Choice[]
+    atomicQuestions         AtomicQuestion[]
+    answers                 AtomicAnswer[]
+    createdAt               DateTime                 @default(now())
+    updatedAt               DateTime                 @updatedAt
 
     @@index([brandId])
 }
 
-enum OptionType {
+enum MultipleChoiceQuestionType {
     Dropdown
+    RadioGroup
     Checkbox
     Variant
 }
 
-model Option {
-    id        String        @id @default(cuid())
-    name      String
-    values    OptionValue[]
-    type      OptionType
-    required  Boolean       @default(true)
-    model     Model         @relation(fields: [modelId], references: [id], onDelete: Cascade)
-    modelId   String
-    createdAt DateTime      @default(now())
-    updatedAt DateTime      @updatedAt
+model MultipleChoiceQuestion {
+    id              String                     @id @default(cuid())
+    questionContent String
+    choices         Choice[]
+    type            MultipleChoiceQuestionType
+    required        Boolean                    @default(true)
+    model           Model                      @relation(fields: [modelId], references: [id], onDelete: Cascade)
+    modelId         String
+    createdAt       DateTime                   @default(now())
+    updatedAt       DateTime                   @updatedAt
 
-    @@unique([name, modelId])
+    @@unique([questionContent, modelId])
     @@index([modelId])
 }
 
-model OptionValue {
-    id        String    @id @default(cuid())
-    name      String
-    option    Option    @relation(fields: [optionId], references: [id], onDelete: Cascade)
-    optionId  String
-    model     Model     @relation(fields: [modelId], references: [id], onDelete: Cascade)
-    modelId   String
-    products  Product[]
-    createdAt DateTime  @default(now())
-    updatedAt DateTime  @updatedAt
+model Choice {
+    id         String                 @id @default(cuid())
+    value      String
+    question   MultipleChoiceQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+    questionId String
+    model      Model                  @relation(fields: [modelId], references: [id], onDelete: Cascade)
+    modelId    String
+    products   Product[]
+    createdAt  DateTime               @default(now())
+    updatedAt  DateTime               @updatedAt
 
-    @@unique([name, optionId, modelId])
-    @@index([optionId])
+    @@unique([value, questionId, modelId])
+    @@index([questionId])
     @@index([modelId])
 }
 
-enum QuestionType {
+enum AtomicQuestionType {
     Text
     Paragraph
     Number
     Date
 }
 
-model ModelQuestion {
-    id        String        @id @default(cuid())
-    question  String
-    type      QuestionType
-    required  Boolean       @default(true)
-    answers   ModelAnswer[]
-    model     Model         @relation(fields: [modelId], references: [id], onDelete: Cascade)
-    modelId   String
-    createdAt DateTime      @default(now())
-    updatedAt DateTime      @updatedAt
+model AtomicQuestion {
+    id              String             @id @default(cuid())
+    questionContent String
+    type            AtomicQuestionType
+    required        Boolean            @default(true)
+    answers         AtomicAnswer[]
+    model           Model              @relation(fields: [modelId], references: [id], onDelete: Cascade)
+    modelId         String
+    createdAt       DateTime           @default(now())
+    updatedAt       DateTime           @updatedAt
 
     @@index([modelId])
 }
 
-model ModelAnswer {
-    id         String        @id @default(cuid())
-    answer     String
-    question   ModelQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
-    questionId String
-    product    Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
-    productId  String
-    model      Model         @relation(fields: [modelId], references: [id], onDelete: Cascade)
-    modelId    String
-    createdAt  DateTime      @default(now())
-    updatedAt  DateTime      @updatedAt
+model AtomicAnswer {
+    id            String         @id @default(cuid())
+    answerContent String
+    question      AtomicQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+    questionId    String
+    product       Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+    productId     String
+    model         Model          @relation(fields: [modelId], references: [id], onDelete: Cascade)
+    modelId       String
+    createdAt     DateTime       @default(now())
+    updatedAt     DateTime       @updatedAt
 
     @@index([productId])
     @@index([questionId])
@@ -204,25 +205,25 @@ model ModelAnswer {
 }
 
 model Product {
-    id             String        @id @default(cuid())
+    id             String         @id @default(cuid())
     price          Float
     title          String
     slug           String
     description    String
     images         Image[]
-    optionValues   OptionValue[]
-    answers        ModelAnswer[]
-    model          Model         @relation(fields: [modelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    choices        Choice[]
+    answers        AtomicAnswer[]
+    model          Model          @relation(fields: [modelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
     modelId        String
-    seller         User          @relation("listedProducts", fields: [sellerId], references: [id], onDelete: Cascade)
+    seller         User           @relation("listedProducts", fields: [sellerId], references: [id], onDelete: Cascade)
     sellerId       String
-    buyer          User?         @relation("purchasedProducts", fields: [buyerId], references: [id], onDelete: SetNull)
+    buyer          User?          @relation("purchasedProducts", fields: [buyerId], references: [id], onDelete: SetNull)
     buyerId        String?
-    favoritedUsers User[]        @relation("favoriteProducts")
-    room           Room          @relation(fields: [roomId], references: [id], onDelete: Restrict)
-    roomId         String        @unique
-    createdAt      DateTime      @default(now())
-    updatedAt      DateTime      @updatedAt
+    favoritedUsers User[]         @relation("favoriteProducts")
+    room           Room           @relation(fields: [roomId], references: [id], onDelete: Restrict)
+    roomId         String         @unique
+    createdAt      DateTime       @default(now())
+    updatedAt      DateTime       @updatedAt
 
     @@index([sellerId])
     @@index([modelId])

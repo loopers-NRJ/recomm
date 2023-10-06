@@ -1,4 +1,8 @@
-import { OptionType, Prisma, QuestionType } from "@prisma/client";
+import {
+  MultipleChoiceQuestionType,
+  Prisma,
+  AtomicQuestionType,
+} from "@prisma/client";
 
 export const productsPayload = Prisma.validator<Prisma.ProductDefaultArgs>()({
   include: {
@@ -42,12 +46,16 @@ export const singleProductPayload =
         },
       },
       images: true,
-      optionValues: {
+      choices: {
         include: {
-          option: true,
+          question: true,
         },
       },
-      answers: true,
+      answers: {
+        include: {
+          question: true,
+        },
+      },
     },
   });
 export type SingleProductPayloadIncluded = Prisma.ProductGetPayload<
@@ -85,35 +93,53 @@ export const singleModelPayload = Prisma.validator<Prisma.ModelDefaultArgs>()({
         image: true,
       },
     },
-    options: {
+    multipleChoiceQuestions: {
       include: {
-        values: true,
+        choices: true,
       },
     },
-    questions: true,
+    atomicQuestions: true,
   },
 });
 export type SingleModelPayloadIncluded = Prisma.ModelGetPayload<
   typeof singleModelPayload
 >;
 
-const OptionPayload = Prisma.validator<Prisma.OptionDefaultArgs>()({
-  include: {
-    values: true,
-  },
-});
-export type OptionPayloadIncluded = Prisma.OptionGetPayload<
-  typeof OptionPayload
->;
+const MultipleChoiceQuestionPayload =
+  Prisma.validator<Prisma.MultipleChoiceQuestionDefaultArgs>()({
+    include: {
+      choices: true,
+    },
+  });
+export type MultipleChoiceQuestionPayloadIncluded =
+  Prisma.MultipleChoiceQuestionGetPayload<typeof MultipleChoiceQuestionPayload>;
 
-export const OptionTypeArray = [
-  OptionType.Dropdown,
-  OptionType.Checkbox,
-  OptionType.Variant,
+// these fields are hardcoded because zod schema requires a readonly property
+
+// export const MultipleChoiceQuestionTypeArray = Object.keys(
+//   MultipleChoiceQuestionType
+// ) as MultipleChoiceQuestionType[];
+export const MultipleChoiceQuestionTypeArray = [
+  MultipleChoiceQuestionType.Checkbox,
+  MultipleChoiceQuestionType.Dropdown,
+  MultipleChoiceQuestionType.RadioGroup,
+  MultipleChoiceQuestionType.Variant,
 ] as const;
-export const QuestionTypeArray = [
-  QuestionType.Text,
-  QuestionType.Paragraph,
-  QuestionType.Number,
-  QuestionType.Date,
+
+// export const AtomicQuestionTypeArray = Object.keys(
+//   AtomicQuestionType
+// ) as AtomicQuestionType[];
+
+export const AtomicQuestionTypeArray = [
+  AtomicQuestionType.Text,
+  AtomicQuestionType.Paragraph,
+  AtomicQuestionType.Number,
+  AtomicQuestionType.Date,
 ] as const;
+
+export const allQuestionTypes = [
+  ...AtomicQuestionTypeArray,
+  ...MultipleChoiceQuestionTypeArray,
+] as const;
+
+export type AllQuestionType = (typeof allQuestionTypes)[number];

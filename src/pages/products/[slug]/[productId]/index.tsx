@@ -68,16 +68,16 @@ const ProductPage: NextPage = () => {
               <hr />
 
               {/* TODO: @naveen design the variants */}
-              {product.optionValues.map((value) => (
+              {product.choices.map((choice) => (
                 <div
-                  key={value.id}
+                  key={choice.id}
                   className="flex flex-row items-center gap-4"
                 >
                   <div className="text-lg font-semibold">
-                    {value.option?.name}:
+                    {choice.question.questionContent}:
                   </div>
                   <div className="rounded-lg border px-2 py-1 text-lg font-light">
-                    {value.name}
+                    {choice.value}
                   </div>
                 </div>
               ))}
