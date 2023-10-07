@@ -4,7 +4,6 @@ import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
-import useAdminModal from "@/hooks/useAdminModel";
 import { Pagination } from "@/types/admin";
 import { api } from "@/utils/api";
 import {
@@ -19,10 +18,8 @@ import {
 import { Brand } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 
-import { Button } from "../../ui/button";
-import { DataTable } from "../Table";
-import { CreateModel } from "./CreateModel";
-import { EditModel } from "./EditModel";
+import { Button } from "../ui/button";
+import { DataTable } from "./Table";
 
 const BrandTable = () => {
   const searchParams = useSearchParams();
@@ -58,11 +55,9 @@ const BrandTable = () => {
     categoryId,
   });
 
-  const [editableBrand, setEditableBrand] = useState<Brand>();
   const deleteBrandApi = api.brand.deleteBrandById.useMutation();
   // this state is to disable the delete button when admin clicks on it
   const [deleteBrandId, setDeleteBrandId] = useState<string>();
-  const { open: openModel } = useAdminModal();
 
   if (brandsApi.isLoading) {
     return <div>Loading...</div>;
@@ -127,8 +122,7 @@ const BrandTable = () => {
           size="sm"
           variant="ghost"
           onClick={() => {
-            setEditableBrand(row.original);
-            openModel();
+            void router.push(`/admin/brands/edit/?id=${row.original.id}`);
           }}
         >
           <Pen />
@@ -164,15 +158,6 @@ const BrandTable = () => {
 
   return (
     <>
-      {editableBrand ? (
-        <EditModel
-          brand={editableBrand}
-          setBrand={setEditableBrand}
-          onEdit={() => void brandsApi.refetch()}
-        />
-      ) : (
-        <CreateModel onCreate={() => void brandsApi.refetch()} />
-      )}
       {brandApi.data ? (
         <div>
           <nav>
@@ -204,13 +189,23 @@ const BrandTable = () => {
           </div>
         </div>
       ) : (
-        <DataTable
-          columns={columns}
-          data={brandsApi.data.brands}
-          pageCount={brandsApi.data.totalPages}
-          pagination={pagination}
-          setPagination={setPagination}
-        />
+        <>
+          <div className="flex items-center justify-between rounded-lg border px-2 py-2">
+            <div>
+              <span className="px-2 font-bold">Brands</span>
+            </div>
+            <Link href="/admin/brand/create">
+              <Button>New</Button>
+            </Link>
+          </div>
+          <DataTable
+            columns={columns}
+            data={brandsApi.data.brands}
+            pageCount={brandsApi.data.totalPages}
+            pagination={pagination}
+            setPagination={setPagination}
+          />
+        </>
       )}
     </>
   );

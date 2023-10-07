@@ -1,39 +1,57 @@
-import { Loader2 } from "lucide-react";
-import { FC, useState } from "react";
-
-import useAdminModal from "@/hooks/useAdminModel";
+import Container from "@/components/Container";
+import ImagePicker from "@/components/common/ImagePicker";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { authOptions } from "@/server/auth";
 import { api } from "@/utils/api";
 import { useImageUploader } from "@/utils/imageUpload";
-import { Brand } from "@prisma/client";
+import { Role } from "@prisma/client";
+import { Loader2 } from "lucide-react";
+import { GetServerSideProps } from "next";
+import { getServerSession } from "next-auth";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 
-import ImagePicker from "../../common/ImagePicker";
-import { Button } from "../../ui/button";
-import { Input } from "../../ui/input";
-import { Label } from "../../ui/label";
-import AdminPageModal from "../AdminPageModel";
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+  const session = await getServerSession(req, res, authOptions);
+  if (session?.user.role === undefined || session.user.role === Role.USER) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+  return {
+    props: {},
+  };
+};
+const EditBrandPage = () => {
+  const router = useRouter();
+  const brandId = router.query.id as string | undefined;
 
-interface EditModelProps {
-  brand: Brand;
-  setBrand: (value: Brand | undefined) => void;
-  onEdit: () => void;
-}
-
-export const EditModel: FC<EditModelProps> = ({
-  brand,
-  setBrand,
-  onEdit: afterEdit,
-}) => {
   const updateBrandApi = api.brand.updateBrandById.useMutation();
 
-  const [brandName, setBrandName] = useState(brand.name);
+  const brandApi = api.brand.getBrandById.useQuery({ brandId });
+
+  const [brandName, setBrandName] = useState(brandApi.data?.name ?? "");
   // file object to store the file to upload
   const [imageFiles, setImageFiles] = useState<File[]>([]);
 
   const uploader = useImageUploader();
   const [error, setError] = useState<string>();
-  const { close: closeModel } = useAdminModal();
+
+  useEffect(() => {
+    if (brandApi.data && !(brandApi.data instanceof Error)) {
+      setBrandName(brandApi.data.name);
+    }
+  }, [brandApi]);
 
   const updateBrand = async () => {
+    if (brandApi.data == null || brandApi.data instanceof Error) {
+      return;
+    }
     let image;
     if (imageFiles.length > 0) {
       const result = await uploader.upload(imageFiles);
@@ -43,21 +61,30 @@ export const EditModel: FC<EditModelProps> = ({
       image = result[0];
     }
     const result = await updateBrandApi.mutateAsync({
-      id: brand.id,
+      id: brandApi.data.id,
       name: brandName,
       image,
     });
     if (result instanceof Error) {
       return setError(result.message);
     }
-    setBrand(undefined);
-    closeModel();
-    afterEdit();
+    void router.push("/admin/brands");
   };
 
+  if (brandApi.isLoading) {
+    return <h1>Loading</h1>;
+  }
+  if (
+    brandApi.isError ||
+    brandApi.data instanceof Error ||
+    brandApi.data === null
+  ) {
+    return <h1>Something went wrong</h1>;
+  }
+  const { data: brand } = brandApi;
   return (
-    <AdminPageModal>
-      <section className="flex flex-col gap-4 p-4">
+    <Container className="flex justify-center">
+      <section className="flex flex-col gap-4 p-4 md:h-fit md:w-4/6 lg:h-fit lg:w-3/6 xl:w-2/5">
         <h1 className="text-lg font-bold">Edit Brand - {brand.name}</h1>
         <Label className="my-4">
           New name
@@ -108,6 +135,8 @@ export const EditModel: FC<EditModelProps> = ({
           </div>
         )}
       </section>
-    </AdminPageModal>
+    </Container>
   );
 };
+
+export default EditBrandPage;

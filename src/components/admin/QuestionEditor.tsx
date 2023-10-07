@@ -10,14 +10,18 @@ import {
   RadioGroupEditor,
 } from "./Editors";
 import { Switch } from "@/components/ui/switch";
+import { Button } from "../ui/button";
+import { Cross1Icon } from "@radix-ui/react-icons";
 
 interface QuestionEditorProps extends EditorProps {
   changeQuestionType: (newType: AllQuestionType) => void;
+  deleteQuestion: () => void;
 }
 
 export const QuestionEditor: FC<QuestionEditorProps> = ({
   question,
   setQuestion,
+  deleteQuestion,
   changeQuestionType,
   error,
 }) => {
@@ -68,6 +72,14 @@ export const QuestionEditor: FC<QuestionEditorProps> = ({
             </option>
           ))}
         </select>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="h-6 w-6 p-0"
+          onClick={deleteQuestion}
+        >
+          <Cross1Icon className="text-red-400" />
+        </Button>
       </div>
     </div>
   );

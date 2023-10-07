@@ -1,35 +1,45 @@
-import { Loader2 } from "lucide-react";
-import { FC, useState } from "react";
-
-import useAdminModal from "@/hooks/useAdminModel";
+import Container from "@/components/Container";
+import ImagePicker from "@/components/common/ImagePicker";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { authOptions } from "@/server/auth";
 import { api } from "@/utils/api";
 import { useImageUploader } from "@/utils/imageUpload";
+import { Role } from "@prisma/client";
+import { Loader2 } from "lucide-react";
+import { GetServerSideProps } from "next";
+import { getServerSession } from "next-auth";
+import { useRouter } from "next/router";
+import { useState } from "react";
 
-import ImagePicker from "../../common/ImagePicker";
-import { Button } from "../../ui/button";
-import { Input } from "../../ui/input";
-import { Label } from "../../ui/label";
-import AdminPageModal from "../AdminPageModel";
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+  const session = await getServerSession(req, res, authOptions);
+  if (session?.user.role === undefined || session.user.role === Role.USER) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+  return {
+    props: {},
+  };
+};
 
-export interface CreateModelProps {
-  onCreate: () => void;
-  parentName?: string;
-  parentId: string | null;
-}
-
-export const CreateModel: FC<CreateModelProps> = ({
-  onCreate,
-  parentId,
-  parentName,
-}) => {
+const CreateCategoryPage = () => {
   const createCategoryApi = api.category.createCategory.useMutation();
-  const { close: closeModel } = useAdminModal();
   const [categoryName, setCategoryName] = useState("");
   // file object to store the file to upload
   const [imageFiles, setImageFiles] = useState<File[]>([]);
 
   const uploader = useImageUploader();
   const [error, setError] = useState<string>();
+
+  const router = useRouter();
+  const parentName = router.query.parentName as string | undefined;
+  const parentId = router.query.parentId as string | undefined;
 
   const createCategory = async () => {
     let image;
@@ -50,13 +60,12 @@ export const CreateModel: FC<CreateModelProps> = ({
     if (result instanceof Error) {
       return setError(result.message);
     }
-    closeModel();
-    onCreate();
+    void router.push("/admin/category");
   };
 
   return (
-    <AdminPageModal>
-      <section className="flex flex-col gap-4 p-4">
+    <Container className="flex justify-center">
+      <section className="flex h-full w-full flex-col gap-4 p-4 md:h-fit md:w-4/6 lg:h-fit lg:w-3/6 xl:w-2/5">
         <Label className="my-4">
           Category Name
           <Input
@@ -111,6 +120,8 @@ export const CreateModel: FC<CreateModelProps> = ({
           {error}
         </div>
       )}
-    </AdminPageModal>
+    </Container>
   );
 };
+
+export default CreateCategoryPage;

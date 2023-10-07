@@ -2,13 +2,13 @@ import { GetServerSideProps } from "next";
 import { getServerSession } from "next-auth";
 import { useRouter } from "next/router";
 
-import BrandTable from "@/components/admin/brand/Table";
-import CategoryTable from "@/components/admin/category/Table";
-import ModelTable from "@/components/admin/model/Table";
-import ProductsTable from "@/components/admin/product/Table";
-import UserTable from "@/components/admin/user/Table";
+import BrandTable from "@/components/admin/BrandTable";
+import CategoryTable from "@/components/admin/CategoryTable";
+import ModelTable from "@/components/admin/ModelTable";
+import ProductsTable from "@/components/admin/ProductTable";
+import UserTable from "@/components/admin/UserTable";
 import Container from "@/components/Container";
-import { Button } from "@/components/ui/button";
+
 import {
   Select,
   SelectContent,
@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import useAdminModal from "@/hooks/useAdminModel";
+
 import { authOptions } from "@/server/auth";
 import { Role } from "@prisma/client";
 
@@ -28,7 +28,6 @@ type Title = (typeof titles)[number];
 const AdminPage = () => {
   const router = useRouter();
   const path = router.query.path;
-  const { open } = useAdminModal();
 
   // check if the path is valid title
   if (
@@ -86,8 +85,6 @@ const AdminPage = () => {
             ))}
           </SelectContent>
         </Select>
-
-        {title !== "products" && <Button onClick={open}>New</Button>}
       </div>
       <div className="my-4">
         <Table />

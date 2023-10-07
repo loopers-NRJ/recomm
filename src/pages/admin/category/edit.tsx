@@ -1,32 +1,45 @@
-import { Loader2 } from 'lucide-react';
-import { FC, useEffect, useState } from 'react';
+import Container from "@/components/Container";
+import ImagePicker from "@/components/common/ImagePicker";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { authOptions } from "@/server/auth";
+import { api } from "@/utils/api";
+import { useImageUploader } from "@/utils/imageUpload";
+import { Image } from "@/utils/validation";
+import { Role } from "@prisma/client";
+import { Loader2 } from "lucide-react";
+import { GetServerSideProps } from "next";
+import { getServerSession } from "next-auth";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 
-import useAdminModal from '@/hooks/useAdminModel';
-import { api } from '@/utils/api';
-import { useImageUploader } from '@/utils/imageUpload';
-import { Image } from '@/utils/validation';
-import { Category } from '@prisma/client';
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+  const session = await getServerSession(req, res, authOptions);
+  if (session?.user.role === undefined || session.user.role === Role.USER) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+  return {
+    props: {},
+  };
+};
 
-import ImagePicker from '../../common/ImagePicker';
-import { Button } from '../../ui/button';
-import { Input } from '../../ui/input';
-import { Label } from '../../ui/label';
-import AdminPageModal from '../AdminPageModel';
+const EditCategoryPage = () => {
+  const router = useRouter();
+  const categoryId = router.query.id as string | undefined;
 
-interface EditModelProps {
-  category: Category;
-  setCategory: (value: Category | undefined) => void;
-  onEdit: () => void;
-}
+  const categoryApi = api.category.getCategoryById.useQuery({ categoryId });
 
-export const EditModel: FC<EditModelProps> = ({
-  category,
-  setCategory,
-  onEdit: afterEdit,
-}) => {
   const updateCategoryApi = api.category.updateCategoryById.useMutation();
 
-  const [categoryName, setCategoryName] = useState(category.name);
+  const [categoryName, setCategoryName] = useState(
+    categoryApi.data?.name ?? ""
+  );
   // file object to store the file to upload
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   // image object returned from server after uploading the image
@@ -35,15 +48,13 @@ export const EditModel: FC<EditModelProps> = ({
   const uploader = useImageUploader();
   const [error, setError] = useState<string>();
 
-  const { close: closeModel } = useAdminModal();
-
   useEffect(() => {
-    if (category) {
-      setCategoryName(category.name);
+    if (categoryApi.data && !(categoryApi.data instanceof Error)) {
+      setCategoryName(categoryApi.data.name ?? "");
       setImageFiles([]);
       setImage(undefined);
     }
-  }, [category]);
+  }, [categoryApi]);
 
   const uploadImage = async () => {
     if (imageFiles.length === 0) {
@@ -57,7 +68,11 @@ export const EditModel: FC<EditModelProps> = ({
   };
 
   const updateCategory = async () => {
-    if (category === undefined) {
+    if (
+      categoryApi.data === undefined ||
+      categoryApi.data === null ||
+      categoryApi.data instanceof Error
+    ) {
       return;
     }
     if (categoryName.trim() === "") {
@@ -65,22 +80,33 @@ export const EditModel: FC<EditModelProps> = ({
     }
 
     const result = await updateCategoryApi.mutateAsync({
-      id: category.id,
+      id: categoryApi.data.id,
       name: categoryName,
       image,
     });
     if (result instanceof Error) {
       return setError(result.message);
     }
-    setCategory(undefined);
-    closeModel();
-    afterEdit();
+    void router.push("/admin/category");
   };
 
+  if (categoryApi.isLoading) {
+    return <h1>Loading</h1>;
+  }
+  if (
+    categoryApi.isError ||
+    categoryApi.data instanceof Error ||
+    categoryApi.data === null
+  ) {
+    return <h1>Something went wrong</h1>;
+  }
+
   return (
-    <AdminPageModal>
-      <section className="flex flex-col gap-4 p-4">
-        <h1 className="text-lg font-bold">Edit Category - {category.name}</h1>
+    <Container className="flex justify-center">
+      <section className="flex flex-col gap-4 p-4 md:h-fit md:w-4/6 lg:h-fit lg:w-3/6 xl:w-2/5">
+        <h1 className="text-lg font-bold">
+          Edit Category - {categoryApi.data.name}
+        </h1>
         <Label className="my-4">
           New name
           <Input
@@ -114,10 +140,10 @@ export const EditModel: FC<EditModelProps> = ({
               disabled={
                 updateCategoryApi.isLoading ||
                 categoryName.trim() === "" ||
-                (categoryName === category.name && image === undefined)
+                (categoryName === categoryApi.data?.name && image === undefined)
               }
             >
-              {image !== undefined && categoryName === category.name
+              {image !== undefined && categoryName === categoryApi.data.name
                 ? "Update Category image"
                 : "Update category"}
             </Button>
@@ -142,6 +168,8 @@ export const EditModel: FC<EditModelProps> = ({
           </div>
         )}
       </section>
-    </AdminPageModal>
+    </Container>
   );
 };
+
+export default EditCategoryPage;

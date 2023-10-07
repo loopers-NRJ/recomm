@@ -3,7 +3,6 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-import useAdminModal from "@/hooks/useAdminModel";
 import { Pagination } from "@/types/admin";
 import { ModelPayloadIncluded } from "@/types/prisma";
 import { api } from "@/utils/api";
@@ -18,15 +17,14 @@ import {
 } from "@/utils/constants";
 import { ColumnDef } from "@tanstack/react-table";
 
-import { Button } from "../../ui/button";
-import { DataTable } from "../Table";
-import { CreateModel } from "./CreateModel";
-import { EditModel } from "./EditModel";
+import { Button } from "../ui/button";
+import { DataTable } from "./Table";
+import { useRouter } from "next/router";
 
 const ModelTable = () => {
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
-
+  const router = useRouter();
   const page = +(params.get("page") ?? DefaultPage);
   const limit = +(params.get("limit") ?? DefaultLimit);
 
@@ -53,8 +51,7 @@ const ModelTable = () => {
 
   const deleteModelApi = api.model.deleteModelById.useMutation();
   const [deleteModelId, setDeleteModelId] = useState<string>();
-  const [editableModel, setEditableModel] = useState<ModelPayloadIncluded>();
-  const { open: openModel } = useAdminModal();
+
   if (modelApi.isLoading) {
     return <div>Loading...</div>;
   }
@@ -112,8 +109,7 @@ const ModelTable = () => {
       cell: ({ row }) => (
         <Button
           onClick={() => {
-            setEditableModel(row.original);
-            openModel();
+            void router.push(`/admin/models/edit/?id=${row.original.id}`);
           }}
           size="sm"
           variant="ghost"
@@ -149,15 +145,12 @@ const ModelTable = () => {
 
   return (
     <>
-      {editableModel ? (
-        <EditModel
-          model={editableModel}
-          setModel={setEditableModel}
-          onEdit={() => void modelApi.refetch()}
-        />
-      ) : (
-        <CreateModel onCreate={() => void modelApi.refetch()} />
-      )}
+      <div className="flex items-center justify-between rounded-lg border px-2 py-2">
+        <span className="px-2 font-bold">Models</span>
+        <Link href="/admin/models/create">
+          <Button>New</Button>
+        </Link>
+      </div>
       <DataTable
         columns={columns}
         data={modelApi.data.models}

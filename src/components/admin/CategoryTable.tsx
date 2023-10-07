@@ -4,7 +4,6 @@ import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
-import useAdminModal from "@/hooks/useAdminModel";
 import { Pagination } from "@/types/admin";
 import { api } from "@/utils/api";
 import {
@@ -19,10 +18,8 @@ import {
 import { Category } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 
-import { Button } from "../../ui/button";
-import { DataTable } from "../Table";
-import { CreateModel } from "./CreateModel";
-import { EditModel } from "./EditModel";
+import { Button } from "../ui/button";
+import { DataTable } from "./Table";
 import { Switch } from "@/components/ui/switch";
 
 const CategoryTable = () => {
@@ -66,9 +63,6 @@ const CategoryTable = () => {
   const [updatingCategoryId, setUpdatingCategoryId] = useState("");
   // this state is to disable the delete button when the user clicks the delete button
   const [deletingCategoryId, setDeletingCategoryId] = useState("");
-
-  const [editableCategory, setEditableCategory] = useState<Category>();
-  const { open: openModel } = useAdminModal();
 
   if (categoriesApi.isError) {
     console.log(categoriesApi.error);
@@ -187,8 +181,7 @@ const CategoryTable = () => {
       cell: ({ row }) => (
         <Button
           onClick={() => {
-            setEditableCategory(row.original);
-            openModel();
+            void router.push(`/admin/category/edit/?id=${row.original.id}`);
           }}
           variant="ghost"
           size="sm"
@@ -224,26 +217,25 @@ const CategoryTable = () => {
 
   return (
     <>
-      {editableCategory ? (
-        <EditModel
-          category={editableCategory}
-          setCategory={setEditableCategory}
-          onEdit={() => void categoriesApi.refetch()}
-        />
-      ) : (
-        <CreateModel
-          onCreate={() => void categoriesApi.refetch()}
-          parentId={parentId}
-          parentName={parentCategoryApi.data?.name}
-        />
-      )}
-
-      <div className="flex items-center rounded-lg border px-2 py-2">
-        <span className="px-2 font-bold">
-          {parentId === null ? "All Categories" : "Sub Category of"}
-        </span>
-        {/* TODO: display the category image */}
-        {parentCategoryApi.data?.name && ` - ${parentCategoryApi.data?.name}`}
+      <div className="flex items-center justify-between rounded-lg border px-2 py-2">
+        <div>
+          <span className="px-2 font-bold">
+            {parentId === null ? "All Categories" : "Sub Category of"}
+          </span>
+          {/* TODO: display the category image */}
+          {parentCategoryApi.data?.name && ` - ${parentCategoryApi.data?.name}`}
+        </div>
+        <div>
+          <Link
+            href={`/admin/category/create${
+              parentId
+                ? `/?parentId=${parentId}&parentName=${parentCategoryApi.data?.name}`
+                : ""
+            }`}
+          >
+            <Button>New</Button>
+          </Link>
+        </div>
       </div>
       {categoriesApi.isLoading ? (
         <div className="flex justify-center">Loading...</div>

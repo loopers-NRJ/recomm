@@ -1,18 +1,24 @@
-import { Trash } from 'lucide-react';
-import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { Trash } from "lucide-react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 
-import { Pagination } from '@/types/admin';
-import { ProductsPayloadIncluded } from '@/types/prisma';
-import { api } from '@/utils/api';
+import { Pagination } from "@/types/admin";
+import { ProductsPayloadIncluded } from "@/types/prisma";
+import { api } from "@/utils/api";
 import {
-    DefaultLimit, DefaultPage, DefaultSearch, DefaultSortBy, DefaultSortOrder, SortBy, SortOrder
-} from '@/utils/constants';
-import { ColumnDef } from '@tanstack/react-table';
+  DefaultLimit,
+  DefaultPage,
+  DefaultSearch,
+  DefaultSortBy,
+  DefaultSortOrder,
+  SortBy,
+  SortOrder,
+} from "@/utils/constants";
+import { ColumnDef } from "@tanstack/react-table";
 
-import { Button } from '../../ui/button';
-import { DataTable } from '../Table';
+import { Button } from "../ui/button";
+import { DataTable } from "./Table";
 
 const ProductTable = () => {
   const searchParams = useSearchParams();

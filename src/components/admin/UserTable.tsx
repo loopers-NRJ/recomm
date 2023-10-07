@@ -6,7 +6,7 @@ import { api } from "@/utils/api";
 import { User } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 
-import { DataTable } from "../Table";
+import { DataTable } from "./Table";
 import {
   DefaultPage,
   DefaultLimit,
