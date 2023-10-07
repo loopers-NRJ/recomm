@@ -23,6 +23,7 @@ import { Button } from "../../ui/button";
 import { DataTable } from "../Table";
 import { CreateModel } from "./CreateModel";
 import { EditModel } from "./EditModel";
+import { Switch } from "@/components/ui/switch";
 
 const CategoryTable = () => {
   const router = useRouter();
@@ -53,6 +54,7 @@ const CategoryTable = () => {
     search,
     sortBy,
     sortOrder,
+    active: null,
   });
 
   const parentCategoryApi = api.category.getCategoryById.useQuery({
@@ -60,8 +62,10 @@ const CategoryTable = () => {
   });
 
   const deleteCategoryApi = api.category.deleteCategoryById.useMutation();
+  const updateCategoryById = api.category.updateCategoryById.useMutation();
+  const [updatingCategoryId, setUpdatingCategoryId] = useState("");
   // this state is to disable the delete button when the user clicks the delete button
-  const [deleteCategoryId, setDeleteCategoryId] = useState("");
+  const [deletingCategoryId, setDeletingCategoryId] = useState("");
 
   const [editableCategory, setEditableCategory] = useState<Category>();
   const { open: openModel } = useAdminModal();
@@ -121,7 +125,7 @@ const CategoryTable = () => {
     },
     {
       id: "brands",
-      header: "brands",
+      header: "Brands",
       cell: ({ row }) => (
         <Link
           href={`/admin/brands?category=${row.original.id}`}
@@ -141,6 +145,39 @@ const CategoryTable = () => {
         >
           Models
         </Link>
+      ),
+    },
+    {
+      id: "active",
+      header: "Active",
+      accessorFn: (row) => row.id,
+      cell: ({ row }) => (
+        <Switch
+          // onClick={() => {
+          //   setEditableCategory(row.original);
+          //   openModel();
+          // }}
+
+          // variant="ghost"
+          // size="sm"
+          disabled={updatingCategoryId === row.original.id}
+          checked={row.original.active}
+          onCheckedChange={() => {
+            setUpdatingCategoryId(row.original.id);
+            updateCategoryById
+              .mutateAsync({
+                id: row.original.id,
+                active: !row.original.active,
+              })
+              .then(async () => {
+                await categoriesApi.refetch();
+                setUpdatingCategoryId("");
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+          }}
+        />
       ),
     },
     {
@@ -167,15 +204,15 @@ const CategoryTable = () => {
       cell: ({ row }) => (
         <Button
           onClick={() => {
-            setDeleteCategoryId(row.original.id);
+            setDeletingCategoryId(row.original.id);
             void deleteCategoryApi
               .mutateAsync({ categoryId: row.original.id })
               .then(async () => {
                 await categoriesApi.refetch();
-                setDeleteCategoryId("");
+                setDeletingCategoryId("");
               });
           }}
-          disabled={deleteCategoryId === row.original.id}
+          disabled={deletingCategoryId === row.original.id}
           size="sm"
           variant="ghost"
         >

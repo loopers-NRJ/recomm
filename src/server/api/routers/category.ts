@@ -21,7 +21,7 @@ export const categoryRouter = createTRPCRouter({
     .input(
       functionalityOptions.extend({
         parentId: idSchema.nullish(),
-        active: z.boolean().default(true),
+        active: z.boolean().nullable().default(true),
       })
     )
     .query(
@@ -36,7 +36,7 @@ export const categoryRouter = createTRPCRouter({
                 name: {
                   contains: search,
                 },
-                active,
+                active: active ?? undefined,
                 parentCategoryId: parentId,
               },
             }),
@@ -45,7 +45,7 @@ export const categoryRouter = createTRPCRouter({
                 name: {
                   contains: search,
                 },
-                active,
+                active: active ?? undefined,
                 parentCategoryId: parentId,
               },
               skip: (page - 1) * limit,
@@ -158,24 +158,34 @@ export const categoryRouter = createTRPCRouter({
           name: z.string().min(1).max(255),
           image: imageInputs.optional(),
           parentCategoryId: idSchema.optional(),
+          active: z.boolean().optional(),
         }),
         z.object({
           id: idSchema,
           name: z.string().min(1).max(255).optional(),
           image: imageInputs,
           parentCategoryId: idSchema.optional(),
+          active: z.boolean().optional(),
         }),
         z.object({
           id: idSchema,
           name: z.string().min(1).max(255).optional(),
           image: imageInputs.optional(),
           parentCategoryId: idSchema,
+          active: z.boolean().optional(),
+        }),
+        z.object({
+          id: idSchema,
+          name: z.string().min(1).max(255).optional(),
+          image: imageInputs.optional(),
+          parentCategoryId: idSchema.optional(),
+          active: z.boolean(),
         }),
       ])
     )
     .mutation(
       async ({
-        input: { id, name, image, parentCategoryId },
+        input: { id, name, image, parentCategoryId, active },
         ctx: { prisma },
       }) => {
         try {
@@ -226,6 +236,7 @@ export const categoryRouter = createTRPCRouter({
                     },
                   }
                 : undefined,
+              active,
             },
             include: {
               image: true,
