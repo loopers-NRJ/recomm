@@ -45,13 +45,50 @@ model VerificationToken {
     @@unique([identifier, token])
 }
 
-enum Role {
-    DELETE
-    UPDATE
-    CREATE
-    READ
-    USER
+enum AccessType {
+    subscriber // allow to sell and buy products
+    retailer // allow to sell and buy products in large quantity
+
+    // admin level
+    readAccess // allow to view admin page
+
+    createCategory // allow to create category
+    updateCategory // allow to update category
+    deleteCategory // allow to delete category
+
+    createBrand // allow to create brand
+    updateBrand // allow to update brand
+    deleteBrand // allow to delete brand
+
+    createModel // allow to create model
+    updateModel // allow to update model
+    deleteModel // allow to delete model
+
+    updateProduct // allow to update product
+    deleteProduct // allow to delete product
+
+    updateRole // allow to update role of user
 }
+
+model Access {
+    type AccessType @id
+    Role Role[] // many to many relation 
+}
+
+model Role {
+    id       String   @id @default(cuid())
+    name     String   @unique
+    accesses Access[]
+    user     User[]
+
+    @@index([name])
+}
+
+// User - [public]
+// Subscriber - [public, subscribed]
+// Retailer - [public, subscribed, retailer]
+// Customer Service - [public, readAccess]
+// Super Admin - [public, updateRole]
 
 model User {
     id                String    @id @default(cuid())
@@ -67,9 +104,12 @@ model User {
     favoriteProducts  Product[] @relation("favoriteProducts")
     wishes            Wish[]
     bids              Bid[]
-    role              Role?
+    role              Role?     @relation(fields: [roleId], references: [id])
+    roleId            String?
     createdAt         DateTime  @default(now())
     updatedAt         DateTime  @updatedAt
+
+    @@index([roleId])
 }
 
 model Category {

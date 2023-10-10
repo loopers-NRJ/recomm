@@ -3,10 +3,8 @@ import { z } from "zod";
 
 import { deleteImage } from "@/lib/cloudinary";
 import {
-  adminCreateProcedure,
-  adminDeleteProcedure,
-  adminUpdateProcedure,
   createTRPCRouter,
+  getProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
 import { MaxFeaturedCategory } from "@/utils/constants";
@@ -15,6 +13,7 @@ import {
   idSchema,
   imageInputs,
 } from "@/utils/validation";
+import { AccessType } from "@prisma/client";
 
 export const categoryRouter = createTRPCRouter({
   getCategories: publicProcedure
@@ -97,7 +96,7 @@ export const categoryRouter = createTRPCRouter({
       }
     }),
 
-  createCategory: adminCreateProcedure
+  createCategory: getProcedure(AccessType.createCategory)
     .input(
       z.object({
         name: z.string().min(3).max(255),
@@ -150,7 +149,7 @@ export const categoryRouter = createTRPCRouter({
         }
       }
     ),
-  updateCategoryById: adminUpdateProcedure
+  updateCategoryById: getProcedure(AccessType.updateCategory)
     .input(
       z.union([
         z.object({
@@ -262,7 +261,7 @@ export const categoryRouter = createTRPCRouter({
         }
       }
     ),
-  deleteCategoryById: adminDeleteProcedure
+  deleteCategoryById: getProcedure(AccessType.deleteCategory)
     .input(z.object({ categoryId: idSchema }))
     .mutation(async ({ input: { categoryId: id }, ctx: { prisma } }) => {
       try {
@@ -328,7 +327,7 @@ export const categoryRouter = createTRPCRouter({
         return new Error(`Cannot delete category with id: ${id}`);
       }
     }),
-  makeCategoryFeaturedById: adminCreateProcedure
+  makeCategoryFeaturedById: getProcedure(AccessType.updateCategory)
     .input(z.object({ categoryId: idSchema }))
     .mutation(async ({ input: { categoryId: id }, ctx: { prisma } }) => {
       try {
@@ -358,7 +357,7 @@ export const categoryRouter = createTRPCRouter({
         );
       }
     }),
-  removeCategoryFromFeaturedById: adminDeleteProcedure
+  removeCategoryFromFeaturedById: getProcedure(AccessType.updateCategory)
     .input(z.object({ categoryId: idSchema }))
     .mutation(async ({ input: { categoryId: id }, ctx: { prisma } }) => {
       try {

@@ -4,6 +4,18 @@ import {
   AtomicQuestionType,
 } from "@prisma/client";
 
+export const userPayload = Prisma.validator<Prisma.UserDefaultArgs>()({
+  include: {
+    role: {
+      include: {
+        accesses: true,
+      },
+    },
+  },
+});
+
+export type UserPayloadIncluded = Prisma.UserGetPayload<typeof userPayload>;
+
 export const productsPayload = Prisma.validator<Prisma.ProductDefaultArgs>()({
   include: {
     model: {
@@ -143,3 +155,11 @@ export const allQuestionTypes = [
 ] as const;
 
 export type AllQuestionType = (typeof allQuestionTypes)[number];
+
+export const RolePayload = Prisma.validator<Prisma.RoleDefaultArgs>()({
+  include: {
+    accesses: true,
+  },
+});
+
+export type RolePayloadIncluded = Prisma.RoleGetPayload<typeof RolePayload>;

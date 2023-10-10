@@ -19,19 +19,12 @@ import {
 import { api } from "@/utils/api";
 import { useImageUploader } from "@/utils/imageUpload";
 import { Image, modelSchema } from "@/utils/validation";
-import {
-  AtomicQuestionType,
-  MultipleChoiceQuestionType,
-  Role,
-} from "@prisma/client";
+import { AtomicQuestionType, MultipleChoiceQuestionType } from "@prisma/client";
 import { useState } from "react";
 import { ZodIssue } from "zod";
 import { v4 as uuid } from "uuid";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
-import { GetServerSideProps } from "next";
-import { authOptions } from "@/server/auth";
-import { getServerSession } from "next-auth";
 
 type Tab = "tab-1" | "tab-2";
 
@@ -41,21 +34,6 @@ const tab1Schema = modelSchema.pick({
   brandId: true,
   categoryId: true,
 });
-
-export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-  const session = await getServerSession(req, res, authOptions);
-  if (session?.user.role === undefined || session.user.role === Role.USER) {
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
-  }
-  return {
-    props: {},
-  };
-};
 
 const CreateModelPage = () => {
   const [tab, changeTab] = useState<Tab>("tab-1");

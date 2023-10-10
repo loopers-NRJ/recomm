@@ -1,7 +1,8 @@
 import { functionalityOptions, idSchema } from "@/utils/validation";
 
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import { createTRPCRouter, getProcedure, publicProcedure } from "../trpc";
 import { z } from "zod";
+import { AccessType } from "@prisma/client";
 
 export const searchRouter = createTRPCRouter({
   all: publicProcedure
@@ -247,4 +248,18 @@ export const searchRouter = createTRPCRouter({
         }
       }
     ),
+
+  role: getProcedure(AccessType.readAccess).query(
+    async ({ ctx: { prisma } }) => {
+      try {
+        return await prisma.role.findMany({
+          include: {
+            accesses: true,
+          },
+        });
+      } catch (error) {
+        return new Error("Something went wrong!");
+      }
+    }
+  ),
 });

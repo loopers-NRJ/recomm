@@ -10,11 +10,8 @@ import {
   modelSchema,
 } from "@/utils/validation";
 
-import {
-  adminCreateProcedure,
-  createTRPCRouter,
-  publicProcedure,
-} from "../trpc";
+import { createTRPCRouter, getProcedure, publicProcedure } from "../trpc";
+import { AccessType } from "@prisma/client";
 
 export const modelRouter = createTRPCRouter({
   getModels: publicProcedure
@@ -118,7 +115,7 @@ export const modelRouter = createTRPCRouter({
       }
     }),
 
-  createModel: adminCreateProcedure
+  createModel: getProcedure(AccessType.createModel)
     .input(modelSchema)
     .mutation(
       ({
@@ -204,7 +201,7 @@ export const modelRouter = createTRPCRouter({
         });
       }
     ),
-  updateModelById: adminCreateProcedure
+  updateModelById: getProcedure(AccessType.updateModel)
     .input(
       z.union([
         // TODO: enable updating options and questions
@@ -303,7 +300,7 @@ export const modelRouter = createTRPCRouter({
         }
       }
     ),
-  deleteModelById: adminCreateProcedure
+  deleteModelById: getProcedure(AccessType.deleteModel)
     .input(z.object({ modelId: idSchema }))
     .mutation(async ({ input: { modelId: id }, ctx: { prisma } }) => {
       try {

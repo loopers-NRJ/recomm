@@ -34,6 +34,13 @@ export const userRouter = createTRPCRouter({
                   [sortBy]: sortOrder,
                 },
               ],
+              include: {
+                role: {
+                  include: {
+                    accesses: true,
+                  },
+                },
+              },
             }),
           ]);
 

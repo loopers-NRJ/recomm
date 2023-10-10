@@ -13,9 +13,10 @@ import { ZodError } from "zod";
 
 import { getServerAuthSession } from "@/server/auth";
 import { prisma } from "@/server/db";
-import { Role } from "@prisma/client";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { CreateNextContextOptions } from "@trpc/server/adapters/next";
+import { userPayload } from "@/types/prisma";
+import { AccessType } from "@prisma/client";
 
 /**
  * 1. CONTEXT
@@ -39,7 +40,17 @@ interface CreateContextOptions {
  *
  * @see https://create.t3.gg/en/usage/trpc#-serverapitrpcts
  */
-const createInnerTRPCContext = (opts: CreateContextOptions) => {
+const createInnerTRPCContext = async (opts: CreateContextOptions) => {
+  if (opts.session !== null) {
+    const user = await prisma.user.findUnique({
+      where: { id: opts.session.user.id },
+      include: userPayload.include,
+    });
+    if (user !== null) {
+      user.lastActive = new Date();
+      opts.session.user = user;
+    }
+  }
   return {
     session: opts.session,
     prisma,
@@ -57,8 +68,7 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
 
   // Get the session from the server using the getServerSession wrapper function
   const session = await getServerAuthSession({ req, res });
-
-  return createInnerTRPCContext({
+  return await createInnerTRPCContext({
     session,
   });
 };
@@ -133,10 +143,12 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
   if (!ctx.session?.user) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
+  const userAccesses =
+    ctx.session.user.role?.accesses.map((access) => access.type) ?? [];
   return next({
     ctx: {
       // infers the `session` as non-nullable
-      session: { ...ctx.session, user: ctx.session.user },
+      session: { ...ctx.session, user: ctx.session.user, userAccesses },
     },
   });
 });
@@ -151,75 +163,21 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
  */
 export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
 
-export const adminReadProcedure = protectedProcedure.use(
-  async ({ ctx, next }) => {
-    const role = ctx.session.user.role;
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+export const getProcedure = (accessType: AccessType | AccessType[]) => {
+  return protectedProcedure.use(async ({ ctx, next }) => {
     const isAllowed =
-      role === Role.READ ||
-      role === Role.CREATE ||
-      role === Role.UPDATE ||
-      role === Role.DELETE;
+      accessType instanceof Array
+        ? ctx.session.userAccesses.some((access) => accessType.includes(access))
+        : ctx.session.userAccesses.includes(accessType);
     if (!isAllowed) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
-
     return next({
       ctx: {
         // infers the `session` as non-nullable
         session: { ...ctx.session, user: ctx.session.user },
       },
     });
-  }
-);
-
-export const adminCreateProcedure = protectedProcedure.use(
-  async ({ ctx, next }) => {
-    const role = ctx.session.user.role;
-    const isAllowed =
-      role === Role.CREATE || role === Role.UPDATE || role === Role.DELETE;
-    if (!isAllowed) {
-      throw new TRPCError({ code: "UNAUTHORIZED" });
-    }
-
-    return next({
-      ctx: {
-        // infers the `session` as non-nullable
-        session: { ...ctx.session, user: ctx.session.user },
-      },
-    });
-  }
-);
-
-export const adminUpdateProcedure = protectedProcedure.use(
-  async ({ ctx, next }) => {
-    const role = ctx.session.user.role;
-    const isAllowed = role === Role.UPDATE || role === Role.DELETE;
-    if (!isAllowed) {
-      throw new TRPCError({ code: "UNAUTHORIZED" });
-    }
-
-    return next({
-      ctx: {
-        // infers the `session` as non-nullable
-        session: { ...ctx.session, user: ctx.session.user },
-      },
-    });
-  }
-);
-
-export const adminDeleteProcedure = protectedProcedure.use(
-  async ({ ctx, next }) => {
-    const role = ctx.session.user.role;
-    const isAllowed = role === Role.DELETE;
-    if (!isAllowed) {
-      throw new TRPCError({ code: "UNAUTHORIZED" });
-    }
-
-    return next({
-      ctx: {
-        // infers the `session` as non-nullable
-        session: { ...ctx.session, user: ctx.session.user },
-      },
-    });
-  }
-);
+  });
+};

@@ -1,5 +1,3 @@
-import { GetServerSideProps } from "next";
-import { getServerSession } from "next-auth";
 import { useRouter } from "next/router";
 
 import BrandTable from "@/components/admin/BrandTable";
@@ -16,11 +14,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import RoleTable from "@/components/admin/RoleTable";
 
-import { authOptions } from "@/server/auth";
-import { Role } from "@prisma/client";
-
-const titles = ["category", "brands", "models", "products", "users"] as const;
+const titles = [
+  "category",
+  "brands",
+  "models",
+  "products",
+  "users",
+  "roles",
+] as const;
 type Title = (typeof titles)[number];
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -65,6 +68,8 @@ const AdminPage = () => {
     case "users":
       Table = UserTable;
       break;
+    case "roles":
+      Table = RoleTable;
   }
 
   return (
@@ -74,12 +79,12 @@ const AdminPage = () => {
           onValueChange={(value) => void router.push(`/admin/${value}`)}
           value={title}
         >
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-[180px] capitalize">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             {titles.map((title) => (
-              <SelectItem value={title} key={title}>
+              <SelectItem value={title} key={title} className="capitalize">
                 {title}
               </SelectItem>
             ))}
@@ -94,18 +99,3 @@ const AdminPage = () => {
 };
 
 export default AdminPage;
-
-export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-  const session = await getServerSession(req, res, authOptions);
-  if (session?.user.role === undefined || session.user.role === Role.USER) {
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
-  }
-  return {
-    props: {},
-  };
-};

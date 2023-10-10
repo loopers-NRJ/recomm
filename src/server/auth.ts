@@ -5,7 +5,7 @@ import GoogleProvider from "next-auth/providers/google";
 import { env } from "@/env.mjs";
 import { prisma } from "@/server/db";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { Role } from "@prisma/client";
+import { UserPayloadIncluded } from "@/types/prisma";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -15,18 +15,12 @@ import { Role } from "@prisma/client";
  */
 declare module "next-auth" {
   interface Session extends DefaultSession {
-    user: DefaultSession["user"] & {
-      id: string;
-      lastActive: Date;
-      role?: Role;
-      // ...other properties
-    };
+    user: DefaultSession["user"] & UserPayloadIncluded;
   }
 
   interface User {
     // ...other properties
     lastActive: Date;
-    role?: Role;
   }
 }
 

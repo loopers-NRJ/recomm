@@ -8,13 +8,8 @@ import {
   imageInputs,
 } from "@/utils/validation";
 
-import {
-  adminCreateProcedure,
-  adminDeleteProcedure,
-  adminUpdateProcedure,
-  createTRPCRouter,
-  publicProcedure,
-} from "../trpc";
+import { createTRPCRouter, getProcedure, publicProcedure } from "../trpc";
+import { AccessType } from "@prisma/client";
 
 export const brandRouter = createTRPCRouter({
   getBrands: publicProcedure
@@ -118,7 +113,7 @@ export const brandRouter = createTRPCRouter({
       }
     }),
 
-  createBrand: adminCreateProcedure
+  createBrand: getProcedure(AccessType.createBrand)
     .input(
       z.object({
         name: z.string(),
@@ -157,7 +152,7 @@ export const brandRouter = createTRPCRouter({
         return new Error("Error creating brand");
       }
     }),
-  updateBrandById: adminUpdateProcedure
+  updateBrandById: getProcedure(AccessType.updateBrand)
     .input(
       z.union([
         z.object({
@@ -239,7 +234,7 @@ export const brandRouter = createTRPCRouter({
         }
       }
     ),
-  deleteBrandById: adminDeleteProcedure
+  deleteBrandById: getProcedure(AccessType.deleteBrand)
     .input(z.object({ brandId: idSchema }))
     .mutation(async ({ input: { brandId: id }, ctx: { prisma } }) => {
       try {

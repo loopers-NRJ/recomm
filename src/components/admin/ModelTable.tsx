@@ -145,7 +145,7 @@ const ModelTable = () => {
 
   return (
     <>
-      <div className="flex items-center justify-between rounded-lg border px-2 py-2">
+      <div className="flex items-center justify-between rounded-lg px-2 py-2">
         <span className="px-2 font-bold">Models</span>
         <Link href="/admin/models/create">
           <Button>New</Button>

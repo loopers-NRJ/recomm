@@ -190,7 +190,7 @@ const BrandTable = () => {
         </div>
       ) : (
         <>
-          <div className="flex items-center justify-between rounded-lg border px-2 py-2">
+          <div className="flex items-center justify-between rounded-lg px-2 py-2">
             <div>
               <span className="px-2 font-bold">Brands</span>
             </div>

@@ -9,9 +9,13 @@ import {
   validateMultipleChoiceQuestionInput,
   validateAtomicQuestionAnswers,
 } from "@/utils/validation";
-import { MultipleChoiceQuestionType, Role, WishStatus } from "@prisma/client";
+import {
+  AccessType,
+  MultipleChoiceQuestionType,
+  WishStatus,
+} from "@prisma/client";
 
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import { createTRPCRouter, getProcedure, publicProcedure } from "../trpc";
 import { productsPayload, singleProductPayload } from "@/types/prisma";
 
 export const productRouter = createTRPCRouter({
@@ -181,7 +185,7 @@ export const productRouter = createTRPCRouter({
         return new Error("Something went wrong!");
       }
     }),
-  createProduct: protectedProcedure
+  createProduct: getProcedure(AccessType.subscriber)
     .input(productSchema)
     .mutation(
       async ({
@@ -386,7 +390,10 @@ export const productRouter = createTRPCRouter({
   //       return new Error("Something went wrong!");
   //     }
   //   }),
-  deleteProductById: protectedProcedure
+  deleteProductById: getProcedure([
+    AccessType.subscriber,
+    AccessType.deleteProduct,
+  ])
     .input(z.object({ productId: idSchema }))
     .mutation(
       async ({ input: { productId: id }, ctx: { prisma, session } }) => {
@@ -401,10 +408,7 @@ export const productRouter = createTRPCRouter({
           if (existingProduct === null) {
             return new Error("Product does not exist");
           }
-          if (
-            existingProduct.sellerId !== user.id &&
-            user.role !== Role.DELETE
-          ) {
+          if (existingProduct.sellerId !== user.id) {
             return new Error("You are not the seller of this product");
           }
           if (existingProduct.buyerId !== null) {
@@ -464,7 +468,7 @@ export const productRouter = createTRPCRouter({
         }
       }
     ),
-  addProductToFavorites: protectedProcedure
+  addProductToFavorites: getProcedure(AccessType.subscriber)
     .input(z.object({ productId: idSchema }))
     .mutation(
       async ({ input: { productId: id }, ctx: { prisma, session } }) => {
@@ -505,7 +509,7 @@ export const productRouter = createTRPCRouter({
         }
       }
     ),
-  removeProductFromFavorites: protectedProcedure
+  removeProductFromFavorites: getProcedure(AccessType.subscriber)
     .input(z.object({ productId: idSchema }))
     .mutation(
       async ({ input: { productId: id }, ctx: { prisma, session } }) => {

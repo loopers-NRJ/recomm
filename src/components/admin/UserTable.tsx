@@ -3,7 +3,6 @@ import { useState } from "react";
 
 import { Pagination } from "@/types/admin";
 import { api } from "@/utils/api";
-import { User } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { DataTable } from "./Table";
@@ -16,6 +15,9 @@ import {
   SortOrder,
   DefaultSortOrder,
 } from "@/utils/constants";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "../ui/select";
+import { UserPayloadIncluded } from "@/types/prisma";
+import { AccessType } from "@prisma/client";
 
 const UserTable = () => {
   const searchParams = useSearchParams();
@@ -41,7 +43,9 @@ const UserTable = () => {
     sortOrder,
   });
 
-  const columns: ColumnDef<User>[] = [
+  const rolesApi = api.search.role.useQuery();
+
+  const columns: ColumnDef<UserPayloadIncluded>[] = [
     {
       id: "name",
       header: "Name",
@@ -55,7 +59,34 @@ const UserTable = () => {
     {
       id: "role",
       header: "Role",
-      accessorFn: (row) => row.role,
+      cell: ({ row: { original: user } }) => {
+        if (rolesApi.isLoading) {
+          return <div>Loading...</div>;
+        }
+        if (rolesApi.isError || rolesApi.data instanceof Error) {
+          console.log(rolesApi.error);
+          return <div>Error</div>;
+        }
+        return (
+          <Select
+            defaultValue={user.role?.name ?? "User"}
+            disabled={user.role?.accesses
+              .map((role) => role.type)
+              .includes(AccessType.updateRole)}
+          >
+            <SelectTrigger className="w-[180px]">
+              {user.role?.name ?? "User"}
+            </SelectTrigger>
+            <SelectContent>
+              {rolesApi.data.map((role) => (
+                <SelectItem value={role.id} key={role.id}>
+                  {role.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+      },
     },
     {
       id: "lastactive",

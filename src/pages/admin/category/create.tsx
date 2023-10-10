@@ -3,30 +3,11 @@ import ImagePicker from "@/components/common/ImagePicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { authOptions } from "@/server/auth";
 import { api } from "@/utils/api";
 import { useImageUploader } from "@/utils/imageUpload";
-import { Role } from "@prisma/client";
 import { Loader2 } from "lucide-react";
-import { GetServerSideProps } from "next";
-import { getServerSession } from "next-auth";
 import { useRouter } from "next/router";
 import { useState } from "react";
-
-export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-  const session = await getServerSession(req, res, authOptions);
-  if (session?.user.role === undefined || session.user.role === Role.USER) {
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
-  }
-  return {
-    props: {},
-  };
-};
 
 const CreateCategoryPage = () => {
   const createCategoryApi = api.category.createCategory.useMutation();

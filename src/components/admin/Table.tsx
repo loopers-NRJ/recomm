@@ -21,11 +21,11 @@ import { Button } from "../ui/button";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  pagination: Pagination;
-  setPagination: (
+  pagination?: Pagination;
+  setPagination?: (
     pagination: Pagination | ((prev: Pagination) => Pagination)
   ) => void;
-  pageCount: number;
+  pageCount?: number;
 }
 
 export function DataTable<TData, TValue>({
@@ -44,8 +44,8 @@ export function DataTable<TData, TValue>({
     pageCount,
     state: {
       pagination: {
-        pageIndex: pagination.pageIndex - 1,
-        pageSize: pagination.pageSize,
+        pageIndex: pagination?.pageIndex ?? 0 - 1,
+        pageSize: pagination?.pageSize ?? 10,
       },
     },
     onPaginationChange: setPagination,
