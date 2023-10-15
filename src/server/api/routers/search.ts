@@ -1,7 +1,6 @@
 import { functionalityOptions, idSchema } from "@/utils/validation";
 
 import { createTRPCRouter, getProcedure, publicProcedure } from "../trpc";
-import { z } from "zod";
 import { AccessType } from "@prisma/client";
 
 export const searchRouter = createTRPCRouter({
@@ -9,7 +8,7 @@ export const searchRouter = createTRPCRouter({
     .input(functionalityOptions)
     .query(
       async ({
-        input: { search, page, limit, sortBy, sortOrder },
+        input: { search, limit, sortBy, sortOrder },
         ctx: { prisma },
       }) => {
         if (search.trim() === "") {
@@ -20,69 +19,68 @@ export const searchRouter = createTRPCRouter({
           };
         }
         try {
-          const categories = await prisma.category.findMany({
-            where: {
-              name: {
-                contains: search,
+          const [categories, brands, models] = await prisma.$transaction([
+            prisma.category.findMany({
+              where: {
+                name: {
+                  contains: search,
+                },
+                active: true,
               },
-              active: true,
-            },
-            skip: (page - 1) * limit,
-            take: limit,
-            orderBy: [
-              {
-                [sortBy]: sortOrder,
+              take: limit,
+              orderBy: [
+                {
+                  [sortBy]: sortOrder,
+                },
+              ],
+              select: {
+                id: true,
+                name: true,
+                // add image if needed
+                // image: true,
               },
-            ],
-            select: {
-              id: true,
-              name: true,
-              // add image if needed
-              // image: true,
-            },
-          });
+            }),
 
-          const brands = await prisma.brand.findMany({
-            where: {
-              name: {
-                contains: search,
+            prisma.brand.findMany({
+              where: {
+                name: {
+                  contains: search,
+                },
               },
-            },
-            skip: limit * (page - 1),
-            take: limit,
-            orderBy: [
-              {
-                [sortBy]: sortOrder,
+              take: limit,
+              orderBy: [
+                {
+                  [sortBy]: sortOrder,
+                },
+              ],
+              select: {
+                id: true,
+                name: true,
+                // add image if needed
+                // image: true,
               },
-            ],
-            select: {
-              id: true,
-              name: true,
-              // add image if needed
-              // image: true,
-            },
-          });
+            }),
 
-          const models = await prisma.model.findMany({
-            where: {
-              name: {
-                contains: search,
+            prisma.model.findMany({
+              where: {
+                name: {
+                  contains: search,
+                },
               },
-            },
-            take: limit,
-            skip: (page - 1) * limit,
-            orderBy: [
-              {
-                [sortBy]: sortOrder,
+              take: limit,
+              orderBy: [
+                {
+                  [sortBy]: sortOrder,
+                },
+              ],
+              select: {
+                id: true,
+                name: true,
+                // add image if needed
+                // image: true,
               },
-            ],
-            select: {
-              id: true,
-              name: true,
-              // add image if needed
-              // image: true,
-            },
-          });
+            }),
+          ]);
 
           return {
             categories,
@@ -96,11 +94,11 @@ export const searchRouter = createTRPCRouter({
       }
     ),
   category: publicProcedure
-    .input(functionalityOptions.extend({ active: z.boolean().default(true) }))
+    .input(functionalityOptions)
     .query(
       async ({
-        input: { search, page, limit, sortBy, sortOrder, active },
-        ctx: { prisma },
+        input: { search, limit, sortBy, sortOrder, cursor },
+        ctx: { prisma, isAdmin },
       }) => {
         try {
           const categories = await prisma.category.findMany({
@@ -108,10 +106,15 @@ export const searchRouter = createTRPCRouter({
               name: {
                 contains: search,
               },
-              active,
+              active: isAdmin ? undefined : true,
             },
-            skip: (page - 1) * limit,
+
             take: limit,
+            cursor: cursor
+              ? {
+                  id: cursor,
+                }
+              : undefined,
             orderBy: [
               {
                 [sortBy]: sortOrder,
@@ -124,7 +127,11 @@ export const searchRouter = createTRPCRouter({
               // image: true,
             },
           });
-          return categories;
+          return {
+            categories,
+            nextCursor: categories[limit - 1]?.id,
+            previousCursor: cursor,
+          };
         } catch (error) {
           console.error({ procedure: "search.category", error });
           return new Error("Something went wrong!");
@@ -136,13 +143,12 @@ export const searchRouter = createTRPCRouter({
     .input(
       functionalityOptions.extend({
         categoryId: idSchema.optional(),
-        active: z.boolean().default(true),
       })
     )
     .query(
       async ({
-        input: { limit, page, search, sortBy, sortOrder, categoryId, active },
-        ctx: { prisma },
+        input: { limit, search, sortBy, sortOrder, categoryId, cursor },
+        ctx: { prisma, isAdmin },
       }) => {
         try {
           const brands = await prisma.brand.findMany({
@@ -150,21 +156,26 @@ export const searchRouter = createTRPCRouter({
               name: {
                 contains: search,
               },
+              active: isAdmin ? undefined : true,
               models: categoryId
                 ? {
                     some: {
                       categories: {
                         some: {
                           id: categoryId,
-                          active,
+                          active: isAdmin ? undefined : true,
                         },
                       },
                     },
                   }
                 : undefined,
             },
-            skip: limit * (page - 1),
             take: limit,
+            cursor: cursor
+              ? {
+                  id: cursor,
+                }
+              : undefined,
             orderBy: [
               {
                 [sortBy]: sortOrder,
@@ -177,7 +188,11 @@ export const searchRouter = createTRPCRouter({
               // image: true,
             },
           });
-          return brands;
+          return {
+            brands,
+            nextCursor: brands[limit - 1]?.id,
+            previousCursor: cursor,
+          };
         } catch (error) {
           console.error({ procedure: "search.brands", error });
 
@@ -191,32 +206,34 @@ export const searchRouter = createTRPCRouter({
       functionalityOptions.extend({
         categoryId: idSchema.optional(),
         brandId: idSchema.optional(),
-        active: z.boolean().default(true),
       })
     )
     .query(
       async ({
         input: {
           limit,
-          page,
           search,
           sortBy,
           sortOrder,
           brandId,
           categoryId,
-          active,
+          cursor,
         },
-        ctx: { prisma },
+        ctx: { prisma, isAdmin },
       }) => {
         try {
           const models = await prisma.model.findMany({
             where: {
+              active: isAdmin ? undefined : true,
+              brand: {
+                active: isAdmin ? undefined : true,
+              },
               brandId,
               categories: categoryId
                 ? {
                     some: {
                       id: categoryId,
-                      active,
+                      active: isAdmin ? undefined : true,
                     },
                   }
                 : undefined,
@@ -225,7 +242,12 @@ export const searchRouter = createTRPCRouter({
               },
             },
             take: limit,
-            skip: (page - 1) * limit,
+
+            cursor: cursor
+              ? {
+                  id: cursor,
+                }
+              : undefined,
             orderBy: [
               {
                 [sortBy]: sortOrder,
@@ -238,7 +260,11 @@ export const searchRouter = createTRPCRouter({
               // image: true,
             },
           });
-          return models;
+          return {
+            models,
+            nextCursor: models[limit - 1]?.id,
+            previousCursor: cursor,
+          };
         } catch (error) {
           console.error({
             procedure: "search.models",

@@ -1,5 +1,4 @@
 // functionality
-export const DefaultPage = 1;
 export const DefaultLimit = 30;
 export const MaxLimit = 100;
 export const DefaultSortOrder = "desc";

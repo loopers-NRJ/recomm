@@ -7,7 +7,6 @@ import LoadingProducts from "@/components/loading/LoadingProducts";
 import { ProductsPayloadIncluded } from "@/types/prisma";
 import { api } from "@/utils/api";
 import {
-  DefaultPage,
   DefaultSearch,
   SortBy,
   DefaultSortBy,
@@ -19,7 +18,6 @@ export const ProductsPages: NextPage = () => {
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
 
-  const page = +(params.get("page") ?? DefaultPage);
   const search = params.get("search") ?? DefaultSearch;
   const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
   const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
@@ -27,7 +25,6 @@ export const ProductsPages: NextPage = () => {
   const brandId = params.get("brand") ?? undefined;
   const modelId = params.get("model") ?? undefined;
   const productsApi = api.product.getProducts.useQuery({
-    page,
     search,
     sortBy,
     sortOrder,
@@ -45,18 +42,7 @@ export const ProductsPages: NextPage = () => {
   return (
     <main>
       <Container>
-        <div
-          className="
-            grid
-            grid-cols-1 
-            gap-8 
-            sm:grid-cols-2 
-            md:grid-cols-3
-            lg:grid-cols-4
-            xl:grid-cols-5
-            2xl:grid-cols-6
-          "
-        >
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
           {productsApi.data.products.map((product) => (
             <ListingCard
               key={product.id}

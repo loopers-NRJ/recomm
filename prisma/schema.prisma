@@ -116,9 +116,9 @@ model Category {
     id               String            @id @default(cuid())
     name             String            @unique
     slug             String
+    active           Boolean           @default(true)
     image            Image?            @relation(fields: [imageId], references: [id], onDelete: SetNull)
     imageId          String?           @unique
-    active           Boolean           @default(true)
     subCategories    Category[]        @relation("SubCategory")
     parentCategory   Category?         @relation("SubCategory", fields: [parentCategoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
     parentCategoryId String?
@@ -140,6 +140,7 @@ model Brand {
     id        String   @id @default(cuid())
     name      String   @unique
     slug      String
+    active    Boolean  @default(true)
     image     Image?   @relation(fields: [imageId], references: [id], onDelete: SetNull)
     imageId   String?  @unique
     models    Model[]
@@ -151,6 +152,7 @@ model Model {
     id                      String                   @id @default(cuid())
     name                    String                   @unique
     slug                    String
+    active                  Boolean                  @default(true)
     image                   Image?                   @relation(fields: [imageId], references: [id], onDelete: SetNull)
     imageId                 String?                  @unique
     categories              Category[]
@@ -249,6 +251,7 @@ model Product {
     price          Float
     title          String
     slug           String
+    active         Boolean        @default(true)
     description    String
     images         Image[]
     choices        Choice[]

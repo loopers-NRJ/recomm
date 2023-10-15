@@ -124,7 +124,20 @@ export const updateLastActiveMiddleware = t.middleware(
         },
       });
     }
-    return next();
+    const userAccesses =
+      ctx.session?.user.role?.accesses.map((access) => access.type) ?? [];
+    const isAdmin = userAccesses.includes(AccessType.readAccess);
+    return next({
+      ctx: {
+        // infers the `session` as non-nullable
+        session: {
+          ...ctx.session,
+          user: ctx.session?.user,
+          userAccesses,
+        },
+        isAdmin,
+      },
+    });
   }
 );
 
@@ -138,21 +151,6 @@ export const updateLastActiveMiddleware = t.middleware(
 export const publicProcedure = t.procedure.use(updateLastActiveMiddleware);
 // export const publicProcedure = t.procedure;
 
-/** Reusable middleware that enforces users are logged in before running the procedure. */
-const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
-  if (!ctx.session?.user) {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
-  }
-  const userAccesses =
-    ctx.session.user.role?.accesses.map((access) => access.type) ?? [];
-  return next({
-    ctx: {
-      // infers the `session` as non-nullable
-      session: { ...ctx.session, user: ctx.session.user, userAccesses },
-    },
-  });
-});
-
 /**
  * Protected (authenticated) procedure
  *
@@ -161,7 +159,17 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
  *
  * @see https://trpc.io/docs/procedures
  */
-export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
+export const protectedProcedure = publicProcedure.use(({ ctx, next }) => {
+  if (!ctx.session?.user) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+  return next({
+    ctx: {
+      // infers the `session` as non-nullable
+      session: { ...ctx.session, user: ctx.session.user },
+    },
+  });
+});
 
 // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 export const getProcedure = (accessType: AccessType | AccessType[]) => {

@@ -12,11 +12,9 @@ interface BiddingListProps {
 }
 
 const BiddingList: FC<BiddingListProps> = ({ room }) => {
-  const {
-    data: bids,
-    isLoading,
-    refetch,
-  } = api.room.getBidsByRoomId.useQuery({ roomId: room.id });
+  const { data, isLoading, refetch } = api.room.getBidsByRoomId.useQuery({
+    roomId: room.id,
+  });
 
   useEffect(() => {
     void refetch();
@@ -26,8 +24,8 @@ const BiddingList: FC<BiddingListProps> = ({ room }) => {
     return <div>Loading...</div>;
   }
 
-  if (bids instanceof Error) {
-    return <div>{bids.message}</div>;
+  if (data instanceof Error) {
+    return <div>{data.message}</div>;
   }
 
   return (
@@ -38,7 +36,7 @@ const BiddingList: FC<BiddingListProps> = ({ room }) => {
         You can view all the biddings below
       </div>
       <div className="h-80 space-y-2 overflow-scroll">
-        {bids!.map((bid) => (
+        {data?.bids.map((bid) => (
           <Card key={bid.id}>
             <CardContent className="p-5">
               <div className="flex w-full items-center justify-between space-x-4">

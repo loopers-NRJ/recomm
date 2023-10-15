@@ -8,7 +8,6 @@ import { ProductsPayloadIncluded } from "@/types/prisma";
 import { api } from "@/utils/api";
 import type { Metadata } from "next";
 import {
-  DefaultPage,
   DefaultSearch,
   SortBy,
   DefaultSortBy,
@@ -27,7 +26,6 @@ export const Home: NextPage = () => {
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
 
-  const page = +(params.get("page") ?? DefaultPage);
   const search = params.get("search") ?? DefaultSearch;
   const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
   const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
@@ -35,7 +33,6 @@ export const Home: NextPage = () => {
   const categoryId = params.get("category") ?? undefined;
 
   const { data, isLoading, isError } = api.product.getProducts.useQuery({
-    page,
     search,
     sortBy,
     sortOrder,

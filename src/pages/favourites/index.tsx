@@ -14,7 +14,7 @@ const Favourites: NextPage = () => {
   const session = useSession();
 
   const {
-    data: products,
+    data,
     isLoading,
     // isError,
     // error,
@@ -28,25 +28,14 @@ const Favourites: NextPage = () => {
   if (isLoading) return <LoadingProducts />;
 
   // if (isError) return <div>{error.message}</div>;
-  if (products instanceof Error) return <div>Something went wrong</div>;
-  else if (products === undefined || products.length === 0)
+  if (data instanceof Error) return <div>Something went wrong</div>;
+  else if (data === undefined || data.favoritedProducts.length === 0)
     return <div>No Products in the List</div>;
 
   return (
     <Container>
-      <div
-        className="
-            grid 
-            grid-cols-1 
-            gap-8 
-            sm:grid-cols-2 
-            md:grid-cols-3
-            lg:grid-cols-4
-            xl:grid-cols-4
-            2xl:grid-cols-6
-          "
-      >
-        {products.map((product) => (
+      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-6">
+        {data.favoritedProducts.map((product) => (
           <ListingCard
             key={product.id}
             product={product as unknown as ProductsPayloadIncluded}

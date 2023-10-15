@@ -25,118 +25,86 @@ export const productRouter = createTRPCRouter({
         categoryId: idSchema.optional(),
         brandId: idSchema.optional(),
         modelId: idSchema.optional(),
-        active: z.boolean().default(true),
       })
     )
     .query(
       async ({
         input: {
           limit,
-          page,
           search,
           sortBy,
           sortOrder,
           categoryId,
           brandId,
           modelId,
-          active,
+          cursor,
         },
-        ctx: { prisma },
+        ctx: { prisma, isAdmin },
       }) => {
         try {
-          const [count, products] = await prisma.$transaction([
-            prisma.product.count({
-              where: {
-                modelId,
-                model: {
-                  categories: {
-                    some: {
-                      id: categoryId,
-                      active,
+          const products = await prisma.product.findMany({
+            where: {
+              modelId,
+              model: {
+                active: isAdmin ? undefined : true,
+                categories: {
+                  some: {
+                    id: categoryId,
+                    active: isAdmin ? undefined : true,
+                  },
+                },
+                brandId,
+                brand: {
+                  active: isAdmin ? undefined : true,
+                },
+                OR: [
+                  {
+                    name: {
+                      contains: search,
                     },
                   },
-                  brandId,
-                  OR: [
-                    {
-                      name: {
-                        contains: search,
-                      },
-                    },
-                    {
-                      categories: {
-                        some: {
-                          name: {
-                            contains: search,
-                          },
-                        },
-                      },
-                    },
-                    {
-                      brand: {
+                  {
+                    categories: {
+                      some: {
                         name: {
                           contains: search,
                         },
                       },
                     },
-                  ],
-                },
-              },
-            }),
-            prisma.product.findMany({
-              where: {
-                modelId,
-                model: {
-                  categories: {
-                    some: {
-                      id: categoryId,
-                      active,
-                    },
                   },
-                  brandId,
-                  OR: [
-                    {
+                  {
+                    brand: {
                       name: {
                         contains: search,
                       },
                     },
-                    {
-                      categories: {
-                        some: {
-                          name: {
-                            contains: search,
-                          },
-                        },
-                      },
-                    },
-                    {
-                      brand: {
-                        name: {
-                          contains: search,
-                        },
-                      },
-                    },
-                  ],
+                  },
+                ],
+              },
+            },
+
+            take: limit,
+            cursor: cursor
+              ? {
+                  id: cursor,
+                }
+              : undefined,
+            orderBy: [
+              {
+                model: {
+                  name: sortBy === "name" ? sortOrder : undefined,
                 },
               },
-              skip: limit * (page - 1),
-              take: limit,
-              orderBy: [
-                {
-                  model: {
-                    name: sortBy === "name" ? sortOrder : undefined,
-                  },
-                },
-                {
-                  createdAt: sortBy === "createdAt" ? sortOrder : undefined,
-                },
-              ],
-              include: productsPayload.include,
-            }),
-          ]);
+              {
+                createdAt: sortBy === "createdAt" ? sortOrder : undefined,
+              },
+            ],
+            include: productsPayload.include,
+          });
           return {
-            totalPages: Math.ceil(count / limit),
-            currentPage: page,
             products,
+            nextCursor: products[limit - 1]?.id,
+            previousCursor: cursor,
           };
         } catch (error) {
           console.error({
@@ -159,7 +127,7 @@ export const productRouter = createTRPCRouter({
           include: singleProductPayload.include,
         });
         type ProductWithIsFavorite = typeof product & { isFavorite?: true };
-        if (session !== null) {
+        if (session?.user !== undefined) {
           const favorited = await prisma.product.findUnique({
             where: {
               id,

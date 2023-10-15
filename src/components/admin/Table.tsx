@@ -8,7 +8,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Pagination } from "@/types/admin";
 import {
   ColumnDef,
   flexRender,
@@ -21,34 +20,16 @@ import { Button } from "../ui/button";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  pagination?: Pagination;
-  setPagination?: (
-    pagination: Pagination | ((prev: Pagination) => Pagination)
-  ) => void;
-  pageCount?: number;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
-  pagination,
-  setPagination,
-  pageCount,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-
-    manualPagination: true,
-    pageCount,
-    state: {
-      pagination: {
-        pageIndex: pagination?.pageIndex ?? 0 - 1,
-        pageSize: pagination?.pageSize ?? 10,
-      },
-    },
-    onPaginationChange: setPagination,
   });
 
   return (

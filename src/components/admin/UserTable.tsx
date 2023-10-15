@@ -1,13 +1,9 @@
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
-
-import { Pagination } from "@/types/admin";
 import { api } from "@/utils/api";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { DataTable } from "./Table";
 import {
-  DefaultPage,
   DefaultLimit,
   DefaultSearch,
   SortBy,
@@ -23,21 +19,14 @@ const UserTable = () => {
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
 
-  const page = +(params.get("page") ?? DefaultPage);
   const limit = +(params.get("limit") ?? DefaultLimit);
-
-  const [pagination, setPagination] = useState<Pagination>({
-    pageIndex: page,
-    pageSize: limit,
-  });
 
   const search = params.get("search") ?? DefaultSearch;
   const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
   const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
 
   const productApi = api.user.getUsers.useQuery({
-    page: pagination.pageIndex,
-    limit: pagination.pageSize,
+    limit,
     search,
     sortBy,
     sortOrder,
@@ -115,15 +104,7 @@ const UserTable = () => {
   if (productApi.data instanceof Error) {
     return <div>{productApi.data.message}</div>;
   }
-  return (
-    <DataTable
-      columns={columns}
-      data={productApi.data.users}
-      pageCount={productApi.data.totalPages}
-      pagination={pagination}
-      setPagination={setPagination}
-    />
-  );
+  return <DataTable columns={columns} data={productApi.data.users} />;
 };
 
 export default UserTable;

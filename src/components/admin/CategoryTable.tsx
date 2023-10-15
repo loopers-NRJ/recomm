@@ -4,11 +4,9 @@ import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
-import { Pagination } from "@/types/admin";
 import { api } from "@/utils/api";
 import {
   DefaultLimit,
-  DefaultPage,
   DefaultSearch,
   DefaultSortBy,
   DefaultSortOrder,
@@ -32,13 +30,7 @@ const CategoryTable = () => {
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
 
-  const page = +(params.get("page") ?? DefaultPage);
   const limit = +(params.get("limit") ?? DefaultLimit);
-
-  const [pagination, setPagination] = useState<Pagination>({
-    pageIndex: page,
-    pageSize: limit,
-  });
 
   const search = params.get("search") ?? DefaultSearch;
   const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
@@ -46,12 +38,10 @@ const CategoryTable = () => {
 
   const categoriesApi = api.category.getCategories.useQuery({
     parentId,
-    page: pagination.pageIndex,
-    limit: pagination.pageSize,
+    limit,
     search,
     sortBy,
     sortOrder,
-    active: null,
   });
 
   const parentCategoryApi = api.category.getCategoryById.useQuery({
@@ -240,13 +230,7 @@ const CategoryTable = () => {
       {categoriesApi.isLoading ? (
         <div className="flex justify-center">Loading...</div>
       ) : (
-        <DataTable
-          columns={columns}
-          data={categoriesApi.data.categories}
-          pagination={pagination}
-          pageCount={categoriesApi.data.totalPages}
-          setPagination={setPagination}
-        />
+        <DataTable columns={columns} data={categoriesApi.data.categories} />
       )}
     </>
   );

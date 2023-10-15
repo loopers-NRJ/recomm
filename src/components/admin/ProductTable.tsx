@@ -3,12 +3,10 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-import { Pagination } from "@/types/admin";
 import { ProductsPayloadIncluded } from "@/types/prisma";
 import { api } from "@/utils/api";
 import {
   DefaultLimit,
-  DefaultPage,
   DefaultSearch,
   DefaultSortBy,
   DefaultSortOrder,
@@ -24,13 +22,7 @@ const ProductTable = () => {
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
 
-  const page = +(params.get("page") ?? DefaultPage);
   const limit = +(params.get("limit") ?? DefaultLimit);
-
-  const [pagination, setPagination] = useState<Pagination>({
-    pageIndex: page,
-    pageSize: limit,
-  });
 
   const search = params.get("search") ?? DefaultSearch;
   const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
@@ -40,8 +32,7 @@ const ProductTable = () => {
   const modelId = params.get("model") ?? undefined;
 
   const productApi = api.product.getProducts.useQuery({
-    page: pagination.pageIndex,
-    limit: pagination.pageSize,
+    limit,
     search,
     sortBy,
     sortOrder,
@@ -148,15 +139,7 @@ const ProductTable = () => {
   if (productApi.data instanceof Error) {
     return <div>{productApi.data.message}</div>;
   }
-  return (
-    <DataTable
-      columns={columns}
-      data={productApi.data.products}
-      pageCount={productApi.data.totalPages}
-      pagination={pagination}
-      setPagination={setPagination}
-    />
-  );
+  return <DataTable columns={columns} data={productApi.data.products} />;
 };
 
 export default ProductTable;

@@ -4,8 +4,3 @@ export interface AdminVariantInput {
   name: string;
   values: string[];
 }
-
-export interface Pagination {
-  pageIndex: number;
-  pageSize: number;
-}

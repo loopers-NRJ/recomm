@@ -13,19 +13,10 @@ import {
 
 import {
   DefaultLimit,
-  DefaultPage,
   DefaultSortBy,
   DefaultSortOrder,
   MaxLimit,
 } from "./constants";
-
-export const functionalityOptions = z.object({
-  search: z.string().trim().default(""),
-  limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
-  page: z.number().int().positive().default(DefaultPage),
-  sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
-  sortBy: z.enum(["name", "createdAt"]).default(DefaultSortBy),
-});
 
 export const idSchema = z
   .string({
@@ -34,6 +25,14 @@ export const idSchema = z
   .trim()
   .min(1, "Enter an id")
   .cuid({ message: "Invalid Id" });
+
+export const functionalityOptions = z.object({
+  search: z.string().trim().default(""),
+  limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
+  sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
+  sortBy: z.enum(["name", "createdAt"]).default(DefaultSortBy),
+  cursor: idSchema.optional(),
+});
 
 export const imageInputs = z.object({
   publicId: z.string().trim(),

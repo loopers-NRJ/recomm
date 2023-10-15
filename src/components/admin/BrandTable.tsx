@@ -4,11 +4,9 @@ import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
-import { Pagination } from "@/types/admin";
 import { api } from "@/utils/api";
 import {
   DefaultLimit,
-  DefaultPage,
   DefaultSearch,
   DefaultSortBy,
   DefaultSortOrder,
@@ -29,13 +27,7 @@ const BrandTable = () => {
   const brandId = path[1];
   const params = new URLSearchParams(searchParams);
 
-  const page = +(params.get("page") ?? DefaultPage);
   const limit = +(params.get("limit") ?? DefaultLimit);
-
-  const [pagination, setPagination] = useState<Pagination>({
-    pageIndex: page,
-    pageSize: limit,
-  });
 
   const search = params.get("search") ?? DefaultSearch;
   const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
@@ -47,8 +39,7 @@ const BrandTable = () => {
   });
 
   const brandsApi = api.brand.getBrands.useQuery({
-    page: pagination.pageIndex,
-    limit: pagination.pageSize,
+    limit,
     search,
     sortBy,
     sortOrder,
@@ -198,13 +189,7 @@ const BrandTable = () => {
               <Button>New</Button>
             </Link>
           </div>
-          <DataTable
-            columns={columns}
-            data={brandsApi.data.brands}
-            pageCount={brandsApi.data.totalPages}
-            pagination={pagination}
-            setPagination={setPagination}
-          />
+          <DataTable columns={columns} data={brandsApi.data.brands} />
         </>
       )}
     </>

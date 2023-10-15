@@ -10,12 +10,12 @@ export const roomRounter = createTRPCRouter({
   getBidsByRoomId: publicProcedure
     .input(
       functionalityOptions
-        .pick({ limit: true, page: true, sortOrder: true })
+        .pick({ limit: true, page: true, sortOrder: true, cursor: true })
         .extend({ roomId: idSchema })
     )
     .query(
       async ({
-        input: { roomId: id, limit, page, sortOrder },
+        input: { roomId: id, limit, sortOrder, cursor },
         ctx: { prisma },
       }) => {
         try {
@@ -23,8 +23,13 @@ export const roomRounter = createTRPCRouter({
             where: {
               roomId: id,
             },
-            skip: limit * (page - 1),
+
             take: limit,
+            cursor: cursor
+              ? {
+                  id: cursor,
+                }
+              : undefined,
             orderBy: [
               {
                 price: sortOrder,
@@ -34,7 +39,10 @@ export const roomRounter = createTRPCRouter({
               user: true,
             },
           });
-          return bids;
+          return {
+            bids,
+            nextCursor: bids[limit - 1]?.id,
+          };
         } catch (error) {
           return new Error("Something went wrong!");
         }

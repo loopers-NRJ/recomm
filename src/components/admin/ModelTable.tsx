@@ -3,12 +3,10 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-import { Pagination } from "@/types/admin";
 import { ModelPayloadIncluded } from "@/types/prisma";
 import { api } from "@/utils/api";
 import {
   DefaultLimit,
-  DefaultPage,
   DefaultSearch,
   DefaultSortBy,
   DefaultSortOrder,
@@ -25,13 +23,7 @@ const ModelTable = () => {
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
   const router = useRouter();
-  const page = +(params.get("page") ?? DefaultPage);
   const limit = +(params.get("limit") ?? DefaultLimit);
-
-  const [pagination, setPagination] = useState<Pagination>({
-    pageIndex: page,
-    pageSize: limit,
-  });
 
   const search = params.get("search") ?? DefaultSearch;
   const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
@@ -40,8 +32,7 @@ const ModelTable = () => {
   const brandId = params.get("brand") ?? undefined;
 
   const modelApi = api.model.getModels.useQuery({
-    page: pagination.pageIndex,
-    limit: pagination.pageSize,
+    limit,
     search,
     sortBy,
     sortOrder,
@@ -151,13 +142,7 @@ const ModelTable = () => {
           <Button>New</Button>
         </Link>
       </div>
-      <DataTable
-        columns={columns}
-        data={modelApi.data.models}
-        pageCount={modelApi.data.totalPages}
-        pagination={pagination}
-        setPagination={setPagination}
-      />
+      <DataTable columns={columns} data={modelApi.data.models} />
     </>
   );
 };

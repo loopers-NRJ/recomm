@@ -9,45 +9,41 @@ export const userRouter = createTRPCRouter({
     .input(functionalityOptions)
     .query(
       async ({
-        input: { limit, page, search, sortBy, sortOrder },
+        input: { limit, search, sortBy, sortOrder, cursor },
         ctx: { prisma },
       }) => {
         try {
-          const [count, users] = await prisma.$transaction([
-            prisma.user.count({
-              where: {
-                name: {
-                  contains: search,
+          const users = await prisma.user.findMany({
+            take: limit,
+
+            cursor: cursor
+              ? {
+                  id: cursor,
+                }
+              : undefined,
+            where: {
+              name: {
+                contains: search,
+              },
+            },
+            orderBy: [
+              {
+                [sortBy]: sortOrder,
+              },
+            ],
+            include: {
+              role: {
+                include: {
+                  accesses: true,
                 },
               },
-            }),
-            prisma.user.findMany({
-              take: limit,
-              skip: (page - 1) * limit,
-              where: {
-                name: {
-                  contains: search,
-                },
-              },
-              orderBy: [
-                {
-                  [sortBy]: sortOrder,
-                },
-              ],
-              include: {
-                role: {
-                  include: {
-                    accesses: true,
-                  },
-                },
-              },
-            }),
-          ]);
+            },
+          });
 
           return {
-            totalPages: Math.ceil(count / limit),
-            currentPage: page,
             users,
+            nextCursor: users[limit - 1]?.id,
+            previusCursor: cursor,
           };
         } catch (error) {
           return new Error("Something went wrong!");
@@ -75,7 +71,7 @@ export const userRouter = createTRPCRouter({
     .input(functionalityOptions)
     .query(
       async ({
-        input: { limit, page, search, sortBy, sortOrder },
+        input: { limit, search, sortBy, sortOrder, cursor },
         ctx: { prisma, session },
       }) => {
         try {
@@ -114,7 +110,12 @@ export const userRouter = createTRPCRouter({
               },
             },
             take: limit,
-            skip: (page - 1) * limit,
+
+            cursor: cursor
+              ? {
+                  id: cursor,
+                }
+              : undefined,
             orderBy: [
               {
                 room: {
@@ -130,7 +131,11 @@ export const userRouter = createTRPCRouter({
               },
             ],
           });
-          return bids;
+          return {
+            bids,
+            nextCursor: bids[limit - 1]?.id,
+            previousCursor: cursor,
+          };
         } catch (error) {
           return new Error("Something went wrong!");
         }
@@ -140,7 +145,7 @@ export const userRouter = createTRPCRouter({
     .input(functionalityOptions)
     .query(
       async ({
-        input: { limit, page, search, sortBy, sortOrder },
+        input: { limit, search, sortBy, sortOrder, cursor },
         ctx: { prisma, session },
       }) => {
         const id = session.user.id;
@@ -180,7 +185,12 @@ export const userRouter = createTRPCRouter({
               },
             },
             take: limit,
-            skip: (page - 1) * limit,
+
+            cursor: cursor
+              ? {
+                  id: cursor,
+                }
+              : undefined,
             orderBy: [
               {
                 model: {
@@ -201,7 +211,11 @@ export const userRouter = createTRPCRouter({
               images: true,
             },
           });
-          return favoritedProducts;
+          return {
+            favoritedProducts,
+            nextCursor: favoritedProducts[limit - 1]?.id,
+            previousCursor: cursor,
+          };
         } catch (error) {
           return new Error("Something went wrong!");
         }
@@ -211,7 +225,7 @@ export const userRouter = createTRPCRouter({
     .input(functionalityOptions.extend({ userId: idSchema }))
     .query(
       async ({
-        input: { search, userId: id, limit, page, sortBy, sortOrder },
+        input: { search, userId: id, limit, sortBy, sortOrder, cursor },
         ctx: { prisma },
       }) => {
         try {
@@ -245,7 +259,12 @@ export const userRouter = createTRPCRouter({
               },
             },
             take: limit,
-            skip: (page - 1) * limit,
+
+            cursor: cursor
+              ? {
+                  id: cursor,
+                }
+              : undefined,
             orderBy: [
               {
                 model: {
@@ -264,7 +283,11 @@ export const userRouter = createTRPCRouter({
               images: true,
             },
           });
-          return listings;
+          return {
+            listings,
+            nextCursor: listings[limit - 1]?.id,
+            previousCursor: cursor,
+          };
         } catch (error) {
           return new Error("Something went wrong!");
         }
@@ -274,7 +297,7 @@ export const userRouter = createTRPCRouter({
     .input(functionalityOptions)
     .query(
       async ({
-        input: { limit, page, search, sortBy, sortOrder },
+        input: { limit, search, sortBy, sortOrder, cursor },
         ctx: { prisma, session },
       }) => {
         const id = session.user.id;
@@ -309,7 +332,12 @@ export const userRouter = createTRPCRouter({
               },
             },
             take: limit,
-            skip: (page - 1) * limit,
+
+            cursor: cursor
+              ? {
+                  id: cursor,
+                }
+              : undefined,
             orderBy: [
               {
                 model: {
@@ -321,7 +349,11 @@ export const userRouter = createTRPCRouter({
               },
             ],
           });
-          return purchases;
+          return {
+            purchases,
+            nextCursor: purchases[limit - 1]?.id,
+            previousCursor: cursor,
+          };
         } catch (error) {
           return new Error("Something went wrong!");
         }
@@ -331,7 +363,7 @@ export const userRouter = createTRPCRouter({
     .input(functionalityOptions)
     .query(
       async ({
-        input: { limit, page, search, sortBy, sortOrder },
+        input: { limit, search, sortBy, sortOrder, cursor },
         ctx: { prisma, session },
       }) => {
         const id = session.user.id;
@@ -366,7 +398,12 @@ export const userRouter = createTRPCRouter({
               },
             },
             take: limit,
-            skip: (page - 1) * limit,
+
+            cursor: cursor
+              ? {
+                  id: cursor,
+                }
+              : undefined,
             orderBy: [
               {
                 model: {
@@ -395,7 +432,11 @@ export const userRouter = createTRPCRouter({
               },
             },
           });
-          return wishes;
+          return {
+            wishes,
+            nextCursor: wishes[limit - 1]?.id,
+            previousCursor: cursor,
+          };
         } catch (error) {
           return new Error("Something went wrong!");
         }

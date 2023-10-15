@@ -140,16 +140,12 @@ const Categories: FC = () => {
     <Container>
       <div className="flex flex-row items-center justify-between overflow-x-auto pt-4 transition-opacity">
         {/* <CategoryBox label="All" icon={HomeIcon} /> */}
-        {categories.map((item, i) => (
+        {categories.map((item) => (
           <CategoryBox
             key={item.label}
             label={item.label}
             icon={item.icon}
-            id={
-              data instanceof Error || data === undefined
-                ? undefined
-                : data.categories[i]?.id
-            }
+            id={undefined}
           />
         ))}
       </div>

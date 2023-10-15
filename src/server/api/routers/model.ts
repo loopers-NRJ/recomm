@@ -18,7 +18,6 @@ export const modelRouter = createTRPCRouter({
     .input(
       functionalityOptions.extend({
         categoryId: idSchema.optional(),
-        active: z.boolean().default(true),
         brandId: idSchema.optional(),
       })
     )
@@ -26,59 +25,50 @@ export const modelRouter = createTRPCRouter({
       async ({
         input: {
           limit,
-          page,
           search,
           sortBy,
           sortOrder,
           brandId,
           categoryId,
-          active,
+          cursor,
         },
-        ctx: { prisma },
+        ctx: { prisma, isAdmin },
       }) => {
         try {
-          const [count, models] = await prisma.$transaction([
-            prisma.model.count({
-              where: {
-                categories: {
-                  some: {
-                    id: categoryId,
-                    active,
-                  },
-                },
-                brandId,
-                name: {
-                  contains: search,
+          const models = await prisma.model.findMany({
+            where: {
+              categories: {
+                some: {
+                  id: categoryId,
+                  active: isAdmin ? undefined : true,
                 },
               },
-            }),
-            prisma.model.findMany({
-              where: {
-                categories: {
-                  some: {
-                    id: categoryId,
-                    active,
-                  },
-                },
-                brandId,
-                name: {
-                  contains: search,
-                },
+              active: isAdmin ? undefined : true,
+              brandId,
+              brand: {
+                active: isAdmin ? undefined : true,
               },
-              take: limit,
-              skip: (page - 1) * limit,
-              orderBy: [
-                {
-                  [sortBy]: sortOrder,
-                },
-              ],
-              include: modelPayload.include,
-            }),
-          ]);
+              name: {
+                contains: search,
+              },
+            },
+            take: limit,
+            cursor: cursor
+              ? {
+                  id: cursor,
+                }
+              : undefined,
+            orderBy: [
+              {
+                [sortBy]: sortOrder,
+              },
+            ],
+            include: modelPayload.include,
+          });
           return {
-            totalPages: Math.ceil(count / limit),
-            currentPage: page,
             models,
+            nextCursor: models[limit - 1]?.id,
+            previousCursor: cursor,
           };
         } catch (error) {
           console.error({

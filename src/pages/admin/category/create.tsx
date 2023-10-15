@@ -33,16 +33,20 @@ const CreateCategoryPage = () => {
         return setError("Invalid image");
       }
     }
-    const result = await createCategoryApi.mutateAsync({
+    createCategoryApi.mutate({
       name: categoryName,
       image: image?.[0],
       parentCategoryId: parentId ?? undefined,
     });
-    if (result instanceof Error) {
-      return setError(result.message);
-    }
-    void router.push("/admin/category");
   };
+
+  if (
+    createCategoryApi.isSuccess &&
+    createCategoryApi.data !== undefined &&
+    !(createCategoryApi.data instanceof Error)
+  ) {
+    void router.push("/admin/category");
+  }
 
   return (
     <Container className="flex justify-center">
@@ -81,26 +85,33 @@ const CreateCategoryPage = () => {
               : "Create Category without image"}
           </Button>
         </div>
+
+        {uploader.isLoading && (
+          <div className="flex flex-col items-center justify-center rounded-lg border p-2">
+            Uploading image...
+            <Loader2 className="animate-spin" />
+          </div>
+        )}
+        {createCategoryApi.isLoading && (
+          <div className="flex flex-col items-center justify-center rounded-lg border p-2">
+            Creating Category {categoryName} ...
+            <Loader2 className="animate-spin" />
+          </div>
+        )}
+        {createCategoryApi.isError && (
+          <div className="rounded-lg border border-red-500 p-2">
+            {createCategoryApi.error.message}
+          </div>
+        )}
+        {createCategoryApi.data instanceof Error && (
+          <div className="rounded-lg border border-red-500 p-2">
+            {createCategoryApi.data.message}
+          </div>
+        )}
+        {error && (
+          <div className="rounded-lg border border-red-500 p-2">{error}</div>
+        )}
       </section>
-
-      {uploader.isLoading && (
-        <div className="flex flex-col items-center justify-center rounded-lg border p-2">
-          Uploading image...
-          <Loader2 className="animate-spin" />
-        </div>
-      )}
-      {createCategoryApi.isLoading && (
-        <div className="flex flex-col items-center justify-center rounded-lg border p-2">
-          Creating Category {categoryName} ...
-          <Loader2 className="animate-spin" />
-        </div>
-      )}
-
-      {error && (
-        <div className="rounded-lg border border-red-500 p-2 text-red-500">
-          {error}
-        </div>
-      )}
     </Container>
   );
 };

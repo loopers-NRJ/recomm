@@ -20,50 +20,42 @@ export const categoryRouter = createTRPCRouter({
     .input(
       functionalityOptions.extend({
         parentId: idSchema.nullish(),
-        active: z.boolean().nullable().default(true),
       })
     )
     .query(
       async ({
-        input: { search, page, limit, sortBy, sortOrder, parentId, active },
-        ctx: { prisma },
+        input: { search, limit, sortBy, sortOrder, parentId, cursor },
+        ctx: { prisma, isAdmin },
       }) => {
         try {
-          const [total, categories] = await prisma.$transaction([
-            prisma.category.count({
-              where: {
-                name: {
-                  contains: search,
-                },
-                active: active ?? undefined,
-                parentCategoryId: parentId,
+          const categories = await prisma.category.findMany({
+            where: {
+              name: {
+                contains: search,
               },
-            }),
-            prisma.category.findMany({
-              where: {
-                name: {
-                  contains: search,
-                },
-                active: active ?? undefined,
-                parentCategoryId: parentId,
-              },
-              skip: (page - 1) * limit,
-              take: limit,
-              orderBy: [
-                {
-                  [sortBy]: sortOrder,
-                },
-              ],
-              include: {
-                image: true,
-              },
-            }),
-          ]);
+              active: isAdmin ? undefined : true,
+              parentCategoryId: parentId,
+            },
+            cursor: cursor
+              ? {
+                  id: cursor,
+                }
+              : undefined,
 
+            take: limit,
+            orderBy: [
+              {
+                [sortBy]: sortOrder,
+              },
+            ],
+            include: {
+              image: true,
+            },
+          });
           return {
-            totalPages: Math.ceil(total / limit),
-            currentPage: page,
             categories,
+            nextCursor: categories[limit - 1]?.id,
+            previousCursor: cursor,
           };
         } catch (error) {
           console.error({ procedure: "getCategories", error });

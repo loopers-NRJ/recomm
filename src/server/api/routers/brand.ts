@@ -16,70 +16,53 @@ export const brandRouter = createTRPCRouter({
     .input(
       functionalityOptions.extend({
         categoryId: idSchema.optional(),
-        active: z.boolean().default(true),
       })
     )
     .query(
       async ({
-        input: { limit, page, search, sortBy, sortOrder, categoryId, active },
-        ctx: { prisma },
+        input: { limit, search, sortBy, sortOrder, categoryId, cursor },
+        ctx: { prisma, isAdmin },
       }) => {
         try {
-          const [count, brands] = await prisma.$transaction([
-            prisma.brand.count({
-              where: {
-                name: {
-                  contains: search,
-                },
-                models: categoryId
-                  ? {
-                      some: {
-                        categories: {
-                          some: {
-                            id: categoryId,
-                            active,
-                          },
+          const brands = await prisma.brand.findMany({
+            where: {
+              name: {
+                contains: search,
+              },
+              models: categoryId
+                ? {
+                    some: {
+                      categories: {
+                        some: {
+                          id: categoryId,
+                          active: isAdmin ? undefined : true,
                         },
                       },
-                    }
-                  : undefined,
+                    },
+                  }
+                : undefined,
+              active: isAdmin ? undefined : true,
+            },
+            take: limit,
+            cursor: cursor
+              ? {
+                  id: cursor,
+                }
+              : undefined,
+            orderBy: [
+              {
+                [sortBy]: sortOrder,
               },
-            }),
-            prisma.brand.findMany({
-              where: {
-                name: {
-                  contains: search,
-                },
-                models: categoryId
-                  ? {
-                      some: {
-                        categories: {
-                          some: {
-                            id: categoryId,
-                            active,
-                          },
-                        },
-                      },
-                    }
-                  : undefined,
-              },
-              skip: limit * (page - 1),
-              take: limit,
-              orderBy: [
-                {
-                  [sortBy]: sortOrder,
-                },
-              ],
-              include: {
-                image: true,
-              },
-            }),
-          ]);
+            ],
+            include: {
+              image: true,
+            },
+          });
 
           return {
-            totalPages: Math.ceil(count / limit),
-            currentPage: page,
             brands,
+            nextCursor: brands[limit - 1]?.id,
+            previousCursor: cursor,
           };
         } catch (error) {
           console.error({ procedure: "getBrands", error });
