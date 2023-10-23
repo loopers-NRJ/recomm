@@ -9,3 +9,7 @@ export type SortBy = "name" | "createdAt";
 
 // featured Category
 export const MaxFeaturedCategory = 12;
+
+// user location headers
+export const UserLatitudeHeaderName = "user-latitude";
+export const UserLongitudeHeaderName = "user-longitude";

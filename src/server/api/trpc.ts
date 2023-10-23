@@ -15,8 +15,11 @@ import { getServerAuthSession } from "@/server/auth";
 import { prisma } from "@/server/db";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { CreateNextContextOptions } from "@trpc/server/adapters/next";
-import { userPayload } from "@/types/prisma";
 import { AccessType } from "@prisma/client";
+import {
+  UserLatitudeHeaderName,
+  UserLongitudeHeaderName,
+} from "@/utils/constants";
 
 /**
  * 1. CONTEXT
@@ -28,6 +31,7 @@ import { AccessType } from "@prisma/client";
 
 interface CreateContextOptions {
   session: Session | null;
+  headers: Record<string, string | undefined>;
 }
 
 /**
@@ -41,19 +45,10 @@ interface CreateContextOptions {
  * @see https://create.t3.gg/en/usage/trpc#-serverapitrpcts
  */
 const createInnerTRPCContext = async (opts: CreateContextOptions) => {
-  if (opts.session !== null) {
-    const user = await prisma.user.findUnique({
-      where: { id: opts.session.user.id },
-      include: userPayload.include,
-    });
-    if (user !== null) {
-      user.lastActive = new Date();
-      opts.session.user = user;
-    }
-  }
   return {
     session: opts.session,
     prisma,
+    headers: opts.headers,
   };
 };
 
@@ -70,6 +65,7 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
   const session = await getServerAuthSession({ req, res });
   return await createInnerTRPCContext({
     session,
+    headers: req.headers as Record<string, string | undefined>,
   });
 };
 
@@ -110,45 +106,46 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
 export const createTRPCRouter = t.router;
 
 /**
- * Custom middleware to update the user last active state
- */
-export const updateLastActiveMiddleware = t.middleware(
-  async ({ ctx, next }) => {
-    if (ctx.session?.user) {
-      await prisma.user.update({
-        where: {
-          id: ctx.session.user.id,
-        },
-        data: {
-          lastActive: new Date(),
-        },
-      });
-    }
-    const userAccesses =
-      ctx.session?.user.role?.accesses.map((access) => access.type) ?? [];
-    const isAdmin = userAccesses.includes(AccessType.readAccess);
-    return next({
-      ctx: {
-        // infers the `session` as non-nullable
-        session: {
-          ...ctx.session,
-          user: ctx.session?.user,
-          userAccesses,
-        },
-        isAdmin,
-      },
-    });
-  }
-);
-
-/**
  * Public (unauthenticated) procedure
  *
  * This is the base piece you use to build new queries and mutations on your tRPC API. It does not
  * guarantee that a user querying is authorized, but you can still access user session data if they
  * are logged in.
  */
-export const publicProcedure = t.procedure.use(updateLastActiveMiddleware);
+export const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
+  if (ctx.session?.user) {
+    await prisma.user.update({
+      where: {
+        id: ctx.session.user.id,
+      },
+      data: {
+        lastActive: new Date(),
+        latitude:
+          typeof ctx.headers[UserLatitudeHeaderName] === "string"
+            ? parseFloat(ctx.headers[UserLatitudeHeaderName])
+            : undefined,
+        longitude:
+          typeof ctx.headers[UserLongitudeHeaderName] === "string"
+            ? parseFloat(ctx.headers[UserLongitudeHeaderName])
+            : undefined,
+      },
+    });
+  }
+  const userAccesses =
+    ctx.session?.user.role?.accesses.map((access) => access.type) ?? [];
+  const isAdmin = userAccesses.includes(AccessType.readAccess);
+  return next({
+    ctx: {
+      // infers the `session` as non-nullable
+      session: {
+        ...ctx.session,
+        user: ctx.session?.user,
+        userAccesses,
+      },
+      isAdmin,
+    },
+  });
+});
 // export const publicProcedure = t.procedure;
 
 /**

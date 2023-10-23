@@ -14,7 +14,6 @@ import {
   SortOrder,
   DefaultSortOrder,
 } from "@/utils/constants";
-import { useEffect } from "react";
 
 export const metadata: Metadata = {
   title: "recomm - Home",
@@ -38,17 +37,6 @@ export const Home: NextPage = () => {
     sortOrder,
     modelId,
     categoryId,
-  });
-
-  useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        console.log(position);
-      },
-      () => {
-        // error
-      }
-    );
   });
 
   if (isLoading) {

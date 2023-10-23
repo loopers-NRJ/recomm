@@ -9,11 +9,26 @@ import { createTRPCNext } from "@trpc/next";
 import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
 import superjson from "superjson";
 import { type AppRouter } from "@/server/api/root";
+import { UserLatitudeHeaderName, UserLongitudeHeaderName } from "./constants";
 
 const getBaseUrl = () => {
   if (typeof window !== "undefined") return ""; // browser should use relative url
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
   return `http://localhost:${process.env.PORT ?? 3000}`; // dev SSR should use localhost
+};
+
+// location of the user
+let userLatitute: string | undefined;
+let userLongitude: string | undefined;
+export const setUserLocation = ({
+  latitude,
+  longitude,
+}: {
+  latitude: number;
+  longitude: number;
+}) => {
+  userLatitute = `${latitude}`;
+  userLongitude = `${longitude}`;
 };
 
 /** A set of type-safe react-query hooks for your tRPC API. */
@@ -40,10 +55,19 @@ export const api = createTRPCNext<AppRouter>({
         // }),
         httpBatchLink({
           url: `${getBaseUrl()}/api/trpc`,
+          headers() {
+            return userLatitute !== undefined && userLongitude !== undefined
+              ? {
+                  [UserLatitudeHeaderName]: userLatitute,
+                  [UserLongitudeHeaderName]: userLongitude,
+                }
+              : {};
+          },
         }),
       ],
     };
   },
+
   /**
    * Whether tRPC should await queries when server rendering pages.
    *

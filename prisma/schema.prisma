@@ -106,6 +106,10 @@ model User {
     bids              Bid[]
     role              Role?     @relation(fields: [roleId], references: [id])
     roleId            String?
+    // location
+    latitude          Float?
+    longitude         Float?
+    // meta
     createdAt         DateTime  @default(now())
     updatedAt         DateTime  @updatedAt
 

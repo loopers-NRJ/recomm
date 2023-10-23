@@ -8,7 +8,8 @@ import dynamic from "next/dynamic";
 import BottomBar from "@/components/navbar/BottomBar";
 import Navbar from "@/components/navbar/Navbar";
 import { Toaster } from "@/components/ui/toaster";
-import { api } from "@/utils/api";
+import { api, setUserLocation } from "@/utils/api";
+import { useEffect } from "react";
 
 const ModalRenderer = dynamic(
   () => import("../components/modals/core/modal-renderer"),
@@ -22,6 +23,16 @@ const MyApp: AppType<{ session: Session | null }> = ({
   Component,
   pageProps: { session, ...pageProps },
 }) => {
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation(position.coords);
+      },
+      () => {
+        // TODO: handle error
+      }
+    );
+  });
   return (
     <SessionProvider session={session}>
       <Navbar />
