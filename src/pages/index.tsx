@@ -51,15 +51,6 @@ export const Home: NextPage = () => {
       </Container>
     );
   }
-  if (data instanceof Error) {
-    return (
-      <Container>
-        <div className="flex h-[500px] items-center justify-center pt-24 font-semibold">
-          {data.message}
-        </div>
-      </Container>
-    );
-  }
   if (data === undefined || data.products.length === 0) {
     return (
       <Container>

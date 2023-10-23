@@ -10,6 +10,7 @@ import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
 import superjson from "superjson";
 import { type AppRouter } from "@/server/api/root";
 import { UserLatitudeHeaderName, UserLongitudeHeaderName } from "./constants";
+import { ErrorLink } from "./ErrorLink";
 
 const getBaseUrl = () => {
   if (typeof window !== "undefined") return ""; // browser should use relative url
@@ -53,6 +54,7 @@ export const api = createTRPCNext<AppRouter>({
         //     process.env.NODE_ENV === "development" ||
         //     (opts.direction === "down" && opts.result instanceof Error),
         // }),
+        ErrorLink,
         httpBatchLink({
           url: `${getBaseUrl()}/api/trpc`,
           headers() {

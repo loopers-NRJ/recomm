@@ -16,7 +16,7 @@ const Listings: NextPage = () => {
     userId,
   });
 
-  if (isError || data instanceof Error) return <div>Something went wrong</div>;
+  if (isError) return <div>Something went wrong</div>;
   if (!data || data.listings.length === 0) return <div>No data to Show</div>;
   if (isLoading) return <LoadingProducts />;
 

@@ -13,7 +13,6 @@ import {
 } from "@/utils/constants";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "../ui/select";
 import { UserPayloadIncluded } from "@/types/prisma";
-import { AccessType } from "@prisma/client";
 
 const UserTable = () => {
   const searchParams = useSearchParams();
@@ -25,7 +24,7 @@ const UserTable = () => {
   const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
   const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
 
-  const productApi = api.user.getUsers.useQuery({
+  const usersApi = api.user.getUsers.useQuery({
     limit,
     search,
     sortBy,
@@ -33,6 +32,8 @@ const UserTable = () => {
   });
 
   const rolesApi = api.search.role.useQuery();
+
+  const updateUserRole = api.user.updateUserRole.useMutation();
 
   const columns: ColumnDef<UserPayloadIncluded>[] = [
     {
@@ -52,21 +53,30 @@ const UserTable = () => {
         if (rolesApi.isLoading) {
           return <div>Loading...</div>;
         }
-        if (rolesApi.isError || rolesApi.data instanceof Error) {
+        if (rolesApi.isError) {
           console.log(rolesApi.error);
           return <div>Error</div>;
         }
         return (
           <Select
-            defaultValue={user.role?.name ?? "User"}
-            disabled={user.role?.accesses
-              .map((role) => role.type)
-              .includes(AccessType.updateRole)}
+            defaultValue={user.role?.id ?? "user"}
+            onValueChange={(value) => {
+              const roleId = value === "user" ? null : value;
+              void updateUserRole
+                .mutateAsync({
+                  userId: user.id,
+                  roleId,
+                })
+                .then(() => {
+                  void usersApi.refetch();
+                });
+            }}
           >
             <SelectTrigger className="w-[180px]">
               {user.role?.name ?? "User"}
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="user">User</SelectItem>
               {rolesApi.data.map((role) => (
                 <SelectItem value={role.id} key={role.id}>
                   {role.name}
@@ -79,7 +89,7 @@ const UserTable = () => {
     },
     {
       id: "lastactive",
-      header: "last Active",
+      header: "last Seen",
       accessorFn: (row) => row.lastActive?.toLocaleString("en-US") ?? "N/A",
     },
     {
@@ -87,24 +97,16 @@ const UserTable = () => {
       header: "Created At",
       accessorFn: (row) => row.createdAt.toLocaleString("en-US"),
     },
-    {
-      id: "updatedAt",
-      header: "Updated At",
-      accessorFn: (row) => row.updatedAt.toLocaleString("en-US"),
-    },
   ];
 
-  if (productApi.isLoading) {
+  if (usersApi.isLoading) {
     return <div>Loading...</div>;
   }
-  if (productApi.isError) {
-    console.log(productApi.error);
+  if (usersApi.isError) {
+    console.log(usersApi.error);
     return <div>Error</div>;
   }
-  if (productApi.data instanceof Error) {
-    return <div>{productApi.data.message}</div>;
-  }
-  return <DataTable columns={columns} data={productApi.data.users} />;
+  return <DataTable columns={columns} data={usersApi.data.users} />;
 };
 
 export default UserTable;

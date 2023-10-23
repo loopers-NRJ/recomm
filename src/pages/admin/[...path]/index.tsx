@@ -15,9 +15,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import RoleTable from "@/components/admin/RoleTable";
+import FeaturedCategoryTable from "@/components/admin/FeaturedCategoryTable";
 
 const titles = [
   "category",
+  "featured category",
   "brands",
   "models",
   "products",
@@ -25,8 +27,6 @@ const titles = [
   "roles",
 ] as const;
 type Title = (typeof titles)[number];
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
 
 const AdminPage = () => {
   const router = useRouter();
@@ -56,6 +56,9 @@ const AdminPage = () => {
     case "category":
       Table = CategoryTable;
       break;
+    case "featured category":
+      Table = FeaturedCategoryTable;
+      break;
     case "brands":
       Table = BrandTable;
       break;
@@ -70,6 +73,7 @@ const AdminPage = () => {
       break;
     case "roles":
       Table = RoleTable;
+      break;
   }
 
   return (

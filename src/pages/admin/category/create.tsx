@@ -43,7 +43,7 @@ const CreateCategoryPage = () => {
   if (
     createCategoryApi.isSuccess &&
     createCategoryApi.data !== undefined &&
-    !(createCategoryApi.data instanceof Error)
+    !createCategoryApi.isError
   ) {
     void router.push("/admin/category");
   }
@@ -103,9 +103,9 @@ const CreateCategoryPage = () => {
             {createCategoryApi.error.message}
           </div>
         )}
-        {createCategoryApi.data instanceof Error && (
+        {createCategoryApi.isError && (
           <div className="rounded-lg border border-red-500 p-2">
-            {createCategoryApi.data.message}
+            Something went wrong
           </div>
         )}
         {error && (

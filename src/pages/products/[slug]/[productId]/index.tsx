@@ -28,7 +28,6 @@ const ProductPage: NextPage = () => {
   const [isFavorited, setIsFavorited] = useState<true | undefined>();
   useEffect(() => {
     if (product == null) return;
-    if (product instanceof Error) return;
 
     setIsFavorited(product.isFavorite);
   }, [product, session.status]);
@@ -36,7 +35,7 @@ const ProductPage: NextPage = () => {
   if (isLoading) {
     return <div>Loading...</div>;
   }
-  if (product == null || product instanceof Error) {
+  if (product == null) {
     return <div>Product not found</div>;
   }
 

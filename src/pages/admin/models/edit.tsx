@@ -24,13 +24,13 @@ const EditModelPage = () => {
   const [error, setError] = useState<string>();
 
   useEffect(() => {
-    if (modelApi.data != null && !(modelApi.data instanceof Error)) {
+    if (modelApi.data != null && !modelApi.isError) {
       setModelName(modelApi.data.name);
     }
   }, [modelApi]);
 
   const updateModel = async () => {
-    if (modelApi.data == null || modelApi.data instanceof Error) {
+    if (modelApi.data == null || modelApi.isError) {
       return;
     }
     let image;
@@ -42,26 +42,25 @@ const EditModelPage = () => {
       image = result[0];
     }
 
-    const result = await updateModelApi.mutateAsync({
-      id: modelApi.data.id,
-      name: modelName,
-      image,
-    });
-    if (result instanceof Error) {
-      return setError(result.message);
+    try {
+      await updateModelApi.mutateAsync({
+        id: modelApi.data.id,
+        name: modelName,
+        image,
+      });
+      void router.push("/admin/models");
+    } catch (error) {
+      if (error instanceof Error) {
+        return setError(error.message);
+      }
     }
-    void router.push("/admin/models");
   };
 
   if (modelApi.isLoading) {
     return <h1>Loading</h1>;
   }
 
-  if (
-    modelApi.isError ||
-    modelApi.data instanceof Error ||
-    modelApi.data === null
-  ) {
+  if (modelApi.isError || modelApi.data === null) {
     return <h1>Something went wrong</h1>;
   }
 

@@ -9,10 +9,10 @@ export default createNextApiHandler({
   createContext: createTRPCContext,
   onError:
     env.NODE_ENV === "development"
-      ? ({ path, error }) => {
-          console.error(
-            `❌ tRPC failed on ${path ?? "<no-path>"}: ${error.message}`
-          );
+      ? ({ path, error, type, input }) => {
+          if (error.code === "INTERNAL_SERVER_ERROR") {
+            console.error({ path, error, type, input });
+          }
         }
       : undefined,
 });

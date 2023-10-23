@@ -18,34 +18,30 @@ export const roomRounter = createTRPCRouter({
         input: { roomId: id, limit, sortOrder, cursor },
         ctx: { prisma },
       }) => {
-        try {
-          const bids = await prisma.bid.findMany({
-            where: {
-              roomId: id,
-            },
+        const bids = await prisma.bid.findMany({
+          where: {
+            roomId: id,
+          },
 
-            take: limit,
-            cursor: cursor
-              ? {
-                  id: cursor,
-                }
-              : undefined,
-            orderBy: [
-              {
-                price: sortOrder,
-              },
-            ],
-            include: {
-              user: true,
+          take: limit,
+          cursor: cursor
+            ? {
+                id: cursor,
+              }
+            : undefined,
+          orderBy: [
+            {
+              price: sortOrder,
             },
-          });
-          return {
-            bids,
-            nextCursor: bids[limit - 1]?.id,
-          };
-        } catch (error) {
-          return new Error("Something went wrong!");
-        }
+          ],
+          include: {
+            user: true,
+          },
+        });
+        return {
+          bids,
+          nextCursor: bids[limit - 1]?.id,
+        };
       }
     ),
 
@@ -76,50 +72,46 @@ export const roomRounter = createTRPCRouter({
   deleteBid: protectedProcedure
     .input(z.object({ bidId: idSchema }))
     .mutation(async ({ input: { bidId }, ctx: { prisma, session } }) => {
-      try {
-        const bid = await prisma.bid.findUnique({
+      const bid = await prisma.bid.findUnique({
+        where: {
+          id: bidId,
+        },
+        include: {
+          user: true,
+          room: {
+            include: {
+              product: true,
+            },
+          },
+        },
+      });
+      // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
+      if (bid === null || bid.room.product === null) {
+        throw new Error("Bid not found");
+      }
+
+      if (
+        // this condition allows user to delete their own bid
+        bid.user.id !== session.user.id &&
+        // this condition allows seller to delete bid of other users
+        bid.room.product.sellerId !== session.user.id
+      ) {
+        throw new Error("You cannot delete this bid");
+      }
+
+      // using void to ignore the returning promise
+      void prisma.bid
+        .delete({
           where: {
             id: bidId,
           },
-          include: {
-            user: true,
-            room: {
-              include: {
-                product: true,
-              },
-            },
-          },
-        });
-        // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
-        if (bid === null || bid.room.product === null) {
-          return new Error("Bid not found");
-        }
-
-        if (
-          // this condition allows user to delete their own bid
-          bid.user.id !== session.user.id &&
-          // this condition allows seller to delete bid of other users
-          bid.room.product.sellerId !== session.user.id
-        ) {
-          return new Error("You cannot delete this bid");
-        }
-
-        // using void to ignore the returning promise
-        void prisma.bid
-          .delete({
-            where: {
-              id: bidId,
-            },
-          })
-          .catch((error) => {
-            console.error({
-              procedure: "deleteABid",
-              error,
-            });
+        })
+        .catch((error) => {
+          console.error({
+            procedure: "deleteABid",
+            error,
           });
-      } catch (error) {
-        return new Error("Something went wrong!");
-      }
+        });
     }),
 });
 
@@ -127,22 +119,18 @@ export const getHighestBidByRoomId = async (
   id: string,
   prisma: PrismaClient
 ) => {
-  try {
-    const bid = await prisma.bid.findFirst({
-      where: {
-        roomId: id,
-      },
-      include: {
-        user: true,
-      },
-      orderBy: {
-        price: "desc",
-      },
-    });
-    return bid;
-  } catch (error) {
-    return new Error("Something went wrong!");
-  }
+  const bid = await prisma.bid.findFirst({
+    where: {
+      roomId: id,
+    },
+    include: {
+      user: true,
+    },
+    orderBy: {
+      price: "desc",
+    },
+  });
+  return bid;
 };
 
 export const createABid = ({
@@ -157,70 +145,71 @@ export const createABid = ({
   userId: string;
 }) => {
   return prisma.$transaction(async (prisma) => {
-    try {
-      const room = await prisma.room.findUnique({
-        where: {
-          id: roomId,
-        },
-        include: {
-          product: true,
-        },
-      });
-      if (room === null) {
-        return new Error("Room not found");
-      }
-      if (room.product === null) {
-        return new Error(
-          "Product you are trying to bid was not found, try again later"
-        );
-      }
-      if (room.product.price >= price) {
-        return new Error("Bid amount too low");
-      }
-      if (room.product.sellerId === userId) {
-        return new Error("You cannot bid on your own product");
-      }
-      if (room.product.buyerId != null) {
-        return new Error("Product already sold");
-      }
-      const highestBid = await getHighestBidByRoomId(
-        roomId,
-        prisma as PrismaClient
-      );
-
-      if (highestBid !== null && !(highestBid instanceof Error)) {
-        // this condition block user from bidding twice
-        if (highestBid.userId === userId) {
-          return new Error("You are already the highest bidder");
-        }
-        // this condition decides whether to allow user to bid lesser than or equal to the highest bid
-        // if (highestBid.price >= price) {
-        //   return new Error("Bid is too low");
-        // }
-      }
-
-      const bid = await prisma.bid.create({
-        data: {
-          price,
-          room: {
-            connect: {
-              id: roomId,
-            },
-          },
-          user: {
-            connect: {
-              id: userId,
-            },
-          },
-        },
-        include: {
-          user: true,
-        },
-      });
-
-      return bid;
-    } catch (error) {
-      return new Error("cannot create bid");
+    const room = await prisma.room.findUnique({
+      where: {
+        id: roomId,
+      },
+      include: {
+        product: true,
+      },
+    });
+    if (room === null) {
+      throw new Error("Room not found");
     }
+    if (room.product === null) {
+      throw new Error(
+        "Product you are trying to bid was not found, try again later"
+      );
+    }
+    if (room.product.price >= price) {
+      throw new Error("Bid amount too low");
+    }
+    if (room.product.sellerId === userId) {
+      throw new Error("You cannot bid on your own product");
+    }
+    if (room.product.buyerId != null) {
+      throw new Error("Product already sold");
+    }
+
+    let highestBid;
+    try {
+      highestBid = await getHighestBidByRoomId(roomId, prisma as PrismaClient);
+    } catch (error) {
+      console.error({
+        procedure: "createABid",
+        error,
+      });
+      throw new Error("Something went wrong");
+    }
+
+    // this condition block user from bidding twice
+    if (highestBid !== null && highestBid.userId === userId) {
+      throw new Error("You are already the highest bidder");
+    }
+    // this condition decides whether to allow user to bid lesser than or equal to the highest bid
+    // if (highestBid.price >= price) {
+    //   throw new Error("Bid is too low");
+    // }
+
+    const bid = await prisma.bid.create({
+      data: {
+        price,
+        room: {
+          connect: {
+            id: roomId,
+          },
+        },
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
+      },
+      include: {
+        user: true,
+      },
+    });
+
+    return bid;
   });
 };

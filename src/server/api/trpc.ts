@@ -20,6 +20,7 @@ import {
   UserLatitudeHeaderName,
   UserLongitudeHeaderName,
 } from "@/utils/constants";
+import { userPayload } from "@/types/prisma";
 
 /**
  * 1. CONTEXT
@@ -114,7 +115,7 @@ export const createTRPCRouter = t.router;
  */
 export const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
   if (ctx.session?.user) {
-    await prisma.user.update({
+    ctx.session.user = await prisma.user.update({
       where: {
         id: ctx.session.user.id,
       },
@@ -129,6 +130,7 @@ export const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
             ? parseFloat(ctx.headers[UserLongitudeHeaderName])
             : undefined,
       },
+      include: userPayload.include,
     });
   }
   const userAccesses =
@@ -175,6 +177,7 @@ export const getProcedure = (accessType: AccessType | AccessType[]) => {
       accessType instanceof Array
         ? ctx.session.userAccesses.some((access) => accessType.includes(access))
         : ctx.session.userAccesses.includes(accessType);
+
     if (!isAllowed) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }

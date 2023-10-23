@@ -48,7 +48,9 @@ const WishCard: FC<WishCardProps> = ({ wish }) => {
           <CardDescription>{"Electronics"}</CardDescription>
           <Badge
             className="leading-0 w-fit select-none px-2 text-[10px]"
-            variant={status}
+            variant={
+              status === WishStatus.available ? "default" : "destructive"
+            }
           >
             {status}
           </Badge>

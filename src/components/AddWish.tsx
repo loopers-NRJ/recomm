@@ -20,47 +20,18 @@ import { toast } from "./ui/use-toast";
 
 const AddWish: FC = () => {
   const [searchCategory, setSearchCategory] = useState("");
-  const categoryApi = api.search.category.useQuery({
-    search: searchCategory,
-  });
+
   const [selectedCategory, setSelectedCategory] = useState<OptionalItem>();
 
   const [searchBrand, setSearchBrand] = useState("");
-  const brandApi = api.search.brands.useQuery({
-    categoryId: selectedCategory?.id,
-    search: searchBrand,
-  });
+
   const [selectedBrand, setSelectedBrand] = useState<OptionalItem>();
 
   const [searchModel, setSearchModel] = useState("");
-  const modelApi = api.search.models.useQuery({
-    brandId: selectedBrand?.id,
-    search: searchModel,
-  });
+
   const [selectedModel, setSelectedModel] = useState<OptionalItem>();
 
   const { mutateAsync: createWish } = api.wish.createWish.useMutation();
-
-  if (
-    categoryApi.data instanceof Error ||
-    brandApi.data instanceof Error ||
-    modelApi.data instanceof Error
-  ) {
-    const error =
-      categoryApi.data instanceof Error
-        ? categoryApi.data
-        : brandApi.data instanceof Error
-        ? brandApi.data
-        : modelApi.data instanceof Error
-        ? modelApi.data
-        : null;
-    toast({
-      title: "Error",
-      description: error?.message,
-      variant: "destructive",
-    });
-    return;
-  }
 
   const handleClick = async () => {
     try {
@@ -88,19 +59,15 @@ const AddWish: FC = () => {
         });
       }
 
-      // TODO: @naveen create uito get the lower and upper bound
+      // TODO: @naveen create ui to get the lower and upper bound
       const result = await createWish({
         modelId: selectedModel.id,
         lowerBound: 0,
         upperBound: 0,
       });
-      if (result instanceof Error) {
-        return toast({
-          title: "Error",
-          description: result.message,
-          variant: "destructive",
-        });
-      }
+
+      console.log(result);
+
       // TODO: navigate to the wish list page
     } catch (error) {
       console.log(error);

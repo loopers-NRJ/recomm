@@ -16,7 +16,7 @@ const Favourites: NextPage = () => {
   const {
     data,
     isLoading,
-    // isError,
+    isError,
     // error,
     refetch,
   } = api.user.getMyFavorites.useQuery({});
@@ -28,7 +28,7 @@ const Favourites: NextPage = () => {
   if (isLoading) return <LoadingProducts />;
 
   // if (isError) return <div>{error.message}</div>;
-  if (data instanceof Error) return <div>Something went wrong</div>;
+  if (isError) return <div>Something went wrong</div>;
   else if (data === undefined || data.favoritedProducts.length === 0)
     return <div>No Products in the List</div>;
 

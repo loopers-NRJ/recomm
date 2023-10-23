@@ -35,9 +35,6 @@ const RoleTable = () => {
     console.log(rolesApi.error);
     return <div>Error</div>;
   }
-  if (rolesApi.data instanceof Error) {
-    return <div>{rolesApi.data.message}</div>;
-  }
   return (
     <>
       <div className="flex items-center justify-between rounded-lg px-2 py-2">

@@ -30,7 +30,7 @@ const EditCategoryPage = () => {
   const [error, setError] = useState<string>();
 
   useEffect(() => {
-    if (categoryApi.data && !(categoryApi.data instanceof Error)) {
+    if (categoryApi.data && !categoryApi.isError) {
       setCategoryName(categoryApi.data.name ?? "");
       setImageFiles([]);
       setImage(undefined);
@@ -52,33 +52,31 @@ const EditCategoryPage = () => {
     if (
       categoryApi.data === undefined ||
       categoryApi.data === null ||
-      categoryApi.data instanceof Error
+      categoryApi.isError
     ) {
       return;
     }
     if (categoryName.trim() === "") {
       return setError("Category name cannot be empty");
     }
-
-    const result = await updateCategoryApi.mutateAsync({
-      id: categoryApi.data.id,
-      name: categoryName,
-      image,
-    });
-    if (result instanceof Error) {
-      return setError(result.message);
+    try {
+      await updateCategoryApi.mutateAsync({
+        id: categoryApi.data.id,
+        name: categoryName,
+        image,
+      });
+      void router.push("/admin/category");
+    } catch (error) {
+      if (error instanceof Error) {
+        return setError(error.message);
+      }
     }
-    void router.push("/admin/category");
   };
 
   if (categoryApi.isLoading) {
     return <h1>Loading</h1>;
   }
-  if (
-    categoryApi.isError ||
-    categoryApi.data instanceof Error ||
-    categoryApi.data === null
-  ) {
+  if (categoryApi.isError || categoryApi.data === null) {
     return <h1>Something went wrong</h1>;
   }
 

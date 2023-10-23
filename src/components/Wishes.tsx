@@ -22,7 +22,6 @@ function Wishes() {
   }, [refetch]);
 
   if (isLoading) return <LoadingWishes />;
-  if (data instanceof Error) return <div>Something went wrong</div>;
   if (!data || data.wishes.length === 0) return <div>No data to Show</div>;
 
   return (

@@ -33,7 +33,7 @@ export const deleteImage: (publicId: string) => Promise<void | Error> = async (
     await cloudinary.uploader.destroy(publicId);
   } catch (error) {
     console.log(error);
-    return new Error("cannot delete the image");
+    throw new Error("cannot delete the image");
   }
 };
 

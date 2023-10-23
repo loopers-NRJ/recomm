@@ -2,6 +2,7 @@ import {
   MultipleChoiceQuestionType,
   Prisma,
   AtomicQuestionType,
+  AccessType,
 } from "@prisma/client";
 
 export const userPayload = Prisma.validator<Prisma.UserDefaultArgs>()({
@@ -126,7 +127,16 @@ const MultipleChoiceQuestionPayload =
 export type MultipleChoiceQuestionPayloadIncluded =
   Prisma.MultipleChoiceQuestionGetPayload<typeof MultipleChoiceQuestionPayload>;
 
-// these fields are hardcoded because zod schema requires a readonly property
+export const CategoryPayload = Prisma.validator<Prisma.CategoryDefaultArgs>()({
+  include: {
+    image: true,
+    featuredCategory: true,
+  },
+});
+
+export type CategoryPayloadIncluded = Prisma.CategoryGetPayload<
+  typeof CategoryPayload
+>;
 
 // export const MultipleChoiceQuestionTypeArray = Object.keys(
 //   MultipleChoiceQuestionType
@@ -163,3 +173,32 @@ export const RolePayload = Prisma.validator<Prisma.RoleDefaultArgs>()({
 });
 
 export type RolePayloadIncluded = Prisma.RoleGetPayload<typeof RolePayload>;
+
+export const accessTypes = [
+  AccessType.subscriber,
+  AccessType.retailer,
+
+  AccessType.readAccess,
+
+  AccessType.createCategory,
+  AccessType.updateCategory,
+  AccessType.deleteCategory,
+
+  AccessType.createBrand,
+  AccessType.updateBrand,
+  AccessType.deleteBrand,
+
+  AccessType.createModel,
+  AccessType.updateModel,
+  AccessType.deleteModel,
+
+  AccessType.updateProduct,
+  AccessType.deleteProduct,
+
+  AccessType.createRole,
+  AccessType.updateUsersRole,
+  AccessType.deleteRole,
+
+  AccessType.updateUser,
+  AccessType.deleteUser,
+] as const;

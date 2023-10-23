@@ -61,20 +61,26 @@ export const POST = async (
   }
   const roomId = request.query.roomId as string;
   const { price } = await request.body;
-  const bid = await createABid({
-    roomId,
-    price,
-    userId: session.user.id,
-    prisma,
-  });
-  if (bid instanceof Error) {
-    return response.status(400).json(bid.message);
+  if (isNaN(+price)) {
+    return response.status(400).json("Price should be a number");
+  }
+  try {
+    const bid = await createABid({
+      roomId,
+      price: +price,
+      userId: session.user.id,
+      prisma,
+    });
+    connectedUsers.forEach((user) => {
+      sendMessage(bid, user);
+    });
+    return response.status(200).json(bid);
+  } catch (error) {
+    if (error instanceof Error) {
+      return response.status(400).json(error.message);
+    }
   }
 
-  connectedUsers.forEach((user) => {
-    sendMessage(bid, user);
-  });
-  return response.status(200).json(bid);
 };
 
 export default requestDispatcher;

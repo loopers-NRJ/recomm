@@ -4,7 +4,6 @@ import { FC, useEffect, useState } from "react";
 import { api } from "@/utils/api";
 
 import Container from "../Container";
-import { toast } from "../ui/use-toast";
 import CategoryBox from "./CategoryBox";
 import LoadingCategories from "./LoadingCategories";
 
@@ -100,15 +99,6 @@ const Categories: FC = () => {
 
     void importIcons();
   }, []);
-
-  if (data instanceof Error) {
-    toast({
-      title: "Error",
-      description: data.message,
-      variant: "destructive",
-    });
-    return;
-  }
 
   // if (isError) {
   //   switch (error.data?.code) {

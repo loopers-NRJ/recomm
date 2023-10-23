@@ -128,12 +128,14 @@ const CreateModelPage = () => {
       return setFormError(modelValidationResult.error.errors);
     }
 
-    const result = await createModelApi.mutateAsync(modelValidationResult.data);
-    if (result instanceof Error) {
-      return setError(result.message);
+    try {
+      await createModelApi.mutateAsync(modelValidationResult.data);
+      void router.push("/admin/models");
+    } catch (error) {
+      if (error instanceof Error) {
+        return setError(error.message);
+      }
     }
-
-    void router.push("/admin/models");
   };
 
   const handleChangeTab = (tab: Tab) => {

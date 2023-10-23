@@ -136,9 +136,6 @@ const ProductTable = () => {
     console.log(productApi.error);
     return <div>Error</div>;
   }
-  if (productApi.data instanceof Error) {
-    return <div>{productApi.data.message}</div>;
-  }
   return <DataTable columns={columns} data={productApi.data.products} />;
 };
 

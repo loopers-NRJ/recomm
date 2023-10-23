@@ -32,10 +32,10 @@ const Suggestions: FC<SuggestionProps> = ({ searchKey, setOpen }) => {
         <CommandEmpty>Searching...</CommandEmpty>
       </CommandItem>
     );
-  if (suggestionsApi.data instanceof Error)
+  if (suggestionsApi.isError)
     return (
       <CommandItem>
-        <CommandEmpty>{suggestionsApi.data.message}</CommandEmpty>
+        <CommandEmpty>Suggestions not available</CommandEmpty>
       </CommandItem>
     );
 

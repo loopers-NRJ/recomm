@@ -46,6 +46,7 @@ model VerificationToken {
 }
 
 enum AccessType {
+    // public level
     subscriber // allow to sell and buy products
     retailer // allow to sell and buy products in large quantity
 
@@ -67,7 +68,12 @@ enum AccessType {
     updateProduct // allow to update product
     deleteProduct // allow to delete product
 
-    updateRole // allow to update role of user
+    createRole // allow to create role
+    updateUsersRole // allow to update role of user
+    deleteRole // allow to delete role
+
+    updateUser // allow to update user
+    deleteUser // allow to delete user
 }
 
 model Access {
@@ -104,7 +110,7 @@ model User {
     favoriteProducts  Product[] @relation("favoriteProducts")
     wishes            Wish[]
     bids              Bid[]
-    role              Role?     @relation(fields: [roleId], references: [id])
+    role              Role?     @relation(fields: [roleId], references: [id], onDelete: SetNull)
     roleId            String?
     // location
     latitude          Float?

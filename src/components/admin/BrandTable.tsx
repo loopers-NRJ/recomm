@@ -57,12 +57,6 @@ const BrandTable = () => {
     console.log(brandsApi.error ?? brandApi.error);
     return <div>Something went wrong</div>;
   }
-  if (brandsApi.data instanceof Error) {
-    return <div>{brandsApi.data.message}</div>;
-  }
-  if (brandApi.data instanceof Error) {
-    return <div>{brandApi.data.message}</div>;
-  }
 
   const columns: ColumnDef<Brand>[] = [
     {

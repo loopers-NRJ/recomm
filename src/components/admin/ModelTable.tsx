@@ -50,9 +50,6 @@ const ModelTable = () => {
     console.log(modelApi.error);
     return <div>Error</div>;
   }
-  if (modelApi.data instanceof Error) {
-    return <div>{modelApi.data.message}</div>;
-  }
 
   const columns: ColumnDef<ModelPayloadIncluded>[] = [
     {

@@ -13,12 +13,12 @@ import {
   SortBy,
   SortOrder,
 } from "@/utils/constants";
-import { Category } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { Button } from "../ui/button";
 import { DataTable } from "./Table";
 import { Switch } from "@/components/ui/switch";
+import { CategoryPayloadIncluded } from "@/types/prisma";
 
 const CategoryTable = () => {
   const router = useRouter();
@@ -50,9 +50,16 @@ const CategoryTable = () => {
 
   const deleteCategoryApi = api.category.deleteCategoryById.useMutation();
   const updateCategoryById = api.category.updateCategoryById.useMutation();
+  const makeCategoryFeatured =
+    api.category.makeCategoryFeaturedById.useMutation();
+  const removeCategoryFeatured =
+    api.category.removeCategoryFromFeaturedById.useMutation();
+  // this state is to disable the update button when the user clicks the update button
   const [updatingCategoryId, setUpdatingCategoryId] = useState("");
   // this state is to disable the delete button when the user clicks the delete button
   const [deletingCategoryId, setDeletingCategoryId] = useState("");
+  // this state is to disable the featured button when the user clicks the featured button
+  const [featuredCategoryState, setFeaturedCategoryState] = useState("");
 
   if (categoriesApi.isError) {
     console.log(categoriesApi.error);
@@ -62,14 +69,8 @@ const CategoryTable = () => {
     console.log(deleteCategoryApi.error);
     return <div>Something went wrong</div>;
   }
-  if (categoriesApi.data instanceof Error) {
-    return <div>{categoriesApi.data.message}</div>;
-  }
-  if (parentCategoryApi.data instanceof Error) {
-    return <div>{parentCategoryApi.data.message}</div>;
-  }
 
-  const columns: ColumnDef<Category>[] = [
+  const columns: ColumnDef<CategoryPayloadIncluded>[] = [
     {
       id: "Name",
       header: "Name",
@@ -134,18 +135,12 @@ const CategoryTable = () => {
     {
       id: "active",
       header: "Active",
-      accessorFn: (row) => row.id,
       cell: ({ row }) => (
         <Switch
-          // onClick={() => {
-          //   setEditableCategory(row.original);
-          //   openModel();
-          // }}
-
-          // variant="ghost"
-          // size="sm"
           disabled={updatingCategoryId === row.original.id}
           checked={row.original.active}
+          // make the switch blue when active and black when inactive
+          className="data-[state=checked]:bg-blue-500"
           onCheckedChange={() => {
             setUpdatingCategoryId(row.original.id);
             updateCategoryById
@@ -156,6 +151,34 @@ const CategoryTable = () => {
               .then(async () => {
                 await categoriesApi.refetch();
                 setUpdatingCategoryId("");
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+          }}
+        />
+      ),
+    },
+    {
+      id: "is-Featured",
+      header: "Featured",
+      cell: ({ row }) => (
+        <Switch
+          disabled={featuredCategoryState === row.original.id}
+          checked={row.original.featuredCategory !== null}
+          className="data-[state=checked]:bg-yellow-500"
+          onCheckedChange={() => {
+            setFeaturedCategoryState(row.original.id);
+            (row.original.featuredCategory !== null
+              ? removeCategoryFeatured
+              : makeCategoryFeatured
+            )
+              .mutateAsync({
+                categoryId: row.original.id,
+              })
+              .then(async () => {
+                await categoriesApi.refetch();
+                setFeaturedCategoryState("");
               })
               .catch((err) => {
                 console.log(err);

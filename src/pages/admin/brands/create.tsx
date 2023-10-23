@@ -31,15 +31,17 @@ const CreateBrandPage = () => {
   };
 
   const createBrand = async () => {
-    const result = await createBrandApi.mutateAsync({
-      name: brandName,
-      image,
-    });
-    if (result instanceof Error) {
-      return setError(result.message);
+    try {
+      await createBrandApi.mutateAsync({
+        name: brandName,
+        image,
+      });
+      void router.push("/admin/brands");
+    } catch (error) {
+      if (error instanceof Error) {
+        return setError(error.message);
+      }
     }
-
-    void router.push("/admin/brands");
   };
 
   return (

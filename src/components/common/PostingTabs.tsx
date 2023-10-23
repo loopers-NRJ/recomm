@@ -133,14 +133,17 @@ export const PostingTabs: FC<PostingTabsProps> = ({
       const fields = result.error.flatten().fieldErrors;
       return setFormError(fields);
     }
-    const imagesUrls = await imageUploader.upload(images);
-    if (imagesUrls instanceof Error) {
+    let imagesUrls;
+    try {
+      imagesUrls = await imageUploader.upload(images);
+    } catch (error) {
       return toast({
         title: "Error",
         description: "cannot upload images",
         variant: "destructive",
       });
     }
+
     const imageValidation = productSchema
       .pick({ images: true })
       .safeParse({ images: imagesUrls });
@@ -152,17 +155,10 @@ export const PostingTabs: FC<PostingTabsProps> = ({
       });
     }
     try {
-      const product = await uploadProduct.mutateAsync({
+      await uploadProduct.mutateAsync({
         ...result.data,
         images: imageValidation.data.images,
       });
-      if (product instanceof Error) {
-        toast({
-          title: "Error",
-          description: product.message,
-          variant: "destructive",
-        });
-      }
       onClose();
       void router.push(`/${userId}/listings`);
     } catch (error) {
@@ -193,7 +189,7 @@ export const PostingTabs: FC<PostingTabsProps> = ({
         return setFormError(result.error.flatten().fieldErrors);
       }
 
-      if (!modelApi.data || modelApi.data instanceof Error) {
+      if (!modelApi.data) {
         return setFormError((prev) => ({
           ...prev,
           modelId: ["Please select a model"],
@@ -324,9 +320,9 @@ export const PostingTabs: FC<PostingTabsProps> = ({
                     Loading Additional Details...
                     <Loader2 className="text-primary-500 h-8 w-8 animate-spin" />
                   </div>
-                ) : modelApi.data instanceof Error ? (
+                ) : modelApi.isError ? (
                   <div className="flex flex-col items-center gap-4">
-                    <p className="text-red-500">{modelApi.data.message}</p>
+                    <p className="text-red-500">Something went wrong!</p>
                   </div>
                 ) : (
                   modelApi.data.multipleChoiceQuestions.map((question) => (
@@ -356,9 +352,7 @@ export const PostingTabs: FC<PostingTabsProps> = ({
               className="w-full"
               onClick={() => handleChangeTab("tab-2")}
               disabled={
-                !selectedModel ||
-                modelApi.isLoading ||
-                modelApi.data instanceof Error
+                !selectedModel || modelApi.isLoading || modelApi.isError
               }
             >
               Next

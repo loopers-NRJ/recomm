@@ -2,7 +2,13 @@ import { z } from "zod";
 
 import { functionalityOptions, idSchema } from "@/utils/validation";
 
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import {
+  createTRPCRouter,
+  getProcedure,
+  protectedProcedure,
+  publicProcedure,
+} from "../trpc";
+import { AccessType } from "@prisma/client";
 
 export const userRouter = createTRPCRouter({
   getUsers: publicProcedure
@@ -46,7 +52,7 @@ export const userRouter = createTRPCRouter({
             previusCursor: cursor,
           };
         } catch (error) {
-          return new Error("Something went wrong!");
+          throw new Error("Something went wrong!");
         }
       }
     ),
@@ -60,12 +66,32 @@ export const userRouter = createTRPCRouter({
           },
         });
         if (user === null) {
-          return new Error("User not found");
+          throw new Error("User not found");
         }
         return user;
       } catch (error) {
-        return new Error("Something went wrong!");
+        throw new Error("Something went wrong!");
       }
+    }),
+  updateUserRole: getProcedure(AccessType.updateUsersRole)
+    .input(z.object({ userId: idSchema, roleId: idSchema.nullable() }))
+    .mutation(async ({ input: { userId: id, roleId }, ctx: { prisma } }) => {
+      await prisma.user.update({
+        where: {
+          id,
+        },
+        data: {
+          role: roleId
+            ? {
+                connect: {
+                  id: roleId,
+                },
+              }
+            : {
+                disconnect: true,
+              },
+        },
+      });
     }),
   getMyBids: protectedProcedure
     .input(functionalityOptions)
@@ -74,71 +100,67 @@ export const userRouter = createTRPCRouter({
         input: { limit, search, sortBy, sortOrder, cursor },
         ctx: { prisma, session },
       }) => {
-        try {
-          const user = session.user;
-          const bids = await prisma.bid.findMany({
-            where: {
-              userId: user.id,
-              room: {
-                product: {
-                  model: {
-                    OR: [
-                      {
+        const user = session.user;
+        const bids = await prisma.bid.findMany({
+          where: {
+            userId: user.id,
+            room: {
+              product: {
+                model: {
+                  OR: [
+                    {
+                      name: {
+                        contains: search,
+                      },
+                    },
+                    {
+                      brand: {
                         name: {
                           contains: search,
                         },
                       },
-                      {
-                        brand: {
+                    },
+                    {
+                      categories: {
+                        some: {
                           name: {
                             contains: search,
                           },
                         },
                       },
-                      {
-                        categories: {
-                          some: {
-                            name: {
-                              contains: search,
-                            },
-                          },
-                        },
-                      },
-                    ],
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          take: limit,
+
+          cursor: cursor
+            ? {
+                id: cursor,
+              }
+            : undefined,
+          orderBy: [
+            {
+              room: {
+                product: {
+                  model: {
+                    name: sortBy === "name" ? sortOrder : undefined,
                   },
                 },
               },
             },
-            take: limit,
-
-            cursor: cursor
-              ? {
-                  id: cursor,
-                }
-              : undefined,
-            orderBy: [
-              {
-                room: {
-                  product: {
-                    model: {
-                      name: sortBy === "name" ? sortOrder : undefined,
-                    },
-                  },
-                },
-              },
-              {
-                createdAt: sortBy === "createdAt" ? sortOrder : undefined,
-              },
-            ],
-          });
-          return {
-            bids,
-            nextCursor: bids[limit - 1]?.id,
-            previousCursor: cursor,
-          };
-        } catch (error) {
-          return new Error("Something went wrong!");
-        }
+            {
+              createdAt: sortBy === "createdAt" ? sortOrder : undefined,
+            },
+          ],
+        });
+        return {
+          bids,
+          nextCursor: bids[limit - 1]?.id,
+          previousCursor: cursor,
+        };
       }
     ),
   getMyFavorites: protectedProcedure
@@ -149,76 +171,71 @@ export const userRouter = createTRPCRouter({
         ctx: { prisma, session },
       }) => {
         const id = session.user.id;
-
-        try {
-          const favoritedProducts = await prisma.product.findMany({
-            where: {
-              favoritedUsers: {
-                some: {
-                  id,
-                },
+        const favoritedProducts = await prisma.product.findMany({
+          where: {
+            favoritedUsers: {
+              some: {
+                id,
               },
-              model: {
-                OR: [
-                  {
+            },
+            model: {
+              OR: [
+                {
+                  name: {
+                    contains: search,
+                  },
+                },
+                {
+                  brand: {
                     name: {
                       contains: search,
                     },
                   },
-                  {
-                    brand: {
+                },
+                {
+                  categories: {
+                    some: {
                       name: {
                         contains: search,
                       },
                     },
                   },
-                  {
-                    categories: {
-                      some: {
-                        name: {
-                          contains: search,
-                        },
-                      },
-                    },
-                  },
-                ],
-              },
+                },
+              ],
             },
-            take: limit,
+          },
+          take: limit,
 
-            cursor: cursor
-              ? {
-                  id: cursor,
-                }
-              : undefined,
-            orderBy: [
-              {
-                model: {
-                  name: sortBy === "name" ? sortOrder : undefined,
-                },
+          cursor: cursor
+            ? {
+                id: cursor,
+              }
+            : undefined,
+          orderBy: [
+            {
+              model: {
+                name: sortBy === "name" ? sortOrder : undefined,
               },
-              {
-                createdAt: sortBy === "createdAt" ? sortOrder : undefined,
-              },
-            ],
-            include: {
-              model: true,
-              room: {
-                include: {
-                  bids: true,
-                },
-              },
-              images: true,
             },
-          });
-          return {
-            favoritedProducts,
-            nextCursor: favoritedProducts[limit - 1]?.id,
-            previousCursor: cursor,
-          };
-        } catch (error) {
-          return new Error("Something went wrong!");
-        }
+            {
+              createdAt: sortBy === "createdAt" ? sortOrder : undefined,
+            },
+          ],
+          include: {
+            model: true,
+            room: {
+              include: {
+                bids: true,
+              },
+            },
+            images: true,
+          },
+        });
+        return {
+          favoritedProducts,
+          nextCursor: favoritedProducts[limit - 1]?.id,
+          previousCursor: cursor,
+        };
       }
     ),
   getUserListingsById: publicProcedure
@@ -228,69 +245,65 @@ export const userRouter = createTRPCRouter({
         input: { search, userId: id, limit, sortBy, sortOrder, cursor },
         ctx: { prisma },
       }) => {
-        try {
-          const listings = await prisma.product.findMany({
-            where: {
-              sellerId: id,
-              model: {
-                OR: [
-                  {
+        const listings = await prisma.product.findMany({
+          where: {
+            sellerId: id,
+            model: {
+              OR: [
+                {
+                  name: {
+                    contains: search,
+                  },
+                },
+                {
+                  brand: {
                     name: {
                       contains: search,
                     },
                   },
-                  {
-                    brand: {
+                },
+                {
+                  categories: {
+                    some: {
                       name: {
                         contains: search,
                       },
                     },
                   },
-                  {
-                    categories: {
-                      some: {
-                        name: {
-                          contains: search,
-                        },
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-            take: limit,
-
-            cursor: cursor
-              ? {
-                  id: cursor,
-                }
-              : undefined,
-            orderBy: [
-              {
-                model: {
-                  name: sortBy === "name" ? sortOrder : undefined,
                 },
-              },
-              {
-                createdAt: sortBy === "createdAt" ? sortOrder : undefined,
-              },
-            ],
-            include: {
-              buyer: true,
-              seller: true,
-              model: true,
-              room: true,
-              images: true,
+              ],
             },
-          });
-          return {
-            listings,
-            nextCursor: listings[limit - 1]?.id,
-            previousCursor: cursor,
-          };
-        } catch (error) {
-          return new Error("Something went wrong!");
-        }
+          },
+          take: limit,
+
+          cursor: cursor
+            ? {
+                id: cursor,
+              }
+            : undefined,
+          orderBy: [
+            {
+              model: {
+                name: sortBy === "name" ? sortOrder : undefined,
+              },
+            },
+            {
+              createdAt: sortBy === "createdAt" ? sortOrder : undefined,
+            },
+          ],
+          include: {
+            buyer: true,
+            seller: true,
+            model: true,
+            room: true,
+            images: true,
+          },
+        });
+        return {
+          listings,
+          nextCursor: listings[limit - 1]?.id,
+          previousCursor: cursor,
+        };
       }
     ),
   getMyPurchases: protectedProcedure
@@ -301,62 +314,58 @@ export const userRouter = createTRPCRouter({
         ctx: { prisma, session },
       }) => {
         const id = session.user.id;
-        try {
-          const purchases = await prisma.product.findMany({
-            where: {
-              buyerId: id,
-              model: {
-                OR: [
-                  {
+        const purchases = await prisma.product.findMany({
+          where: {
+            buyerId: id,
+            model: {
+              OR: [
+                {
+                  name: {
+                    contains: search,
+                  },
+                },
+                {
+                  brand: {
                     name: {
                       contains: search,
                     },
                   },
-                  {
-                    brand: {
+                },
+                {
+                  categories: {
+                    some: {
                       name: {
                         contains: search,
                       },
                     },
                   },
-                  {
-                    categories: {
-                      some: {
-                        name: {
-                          contains: search,
-                        },
-                      },
-                    },
-                  },
-                ],
+                },
+              ],
+            },
+          },
+          take: limit,
+
+          cursor: cursor
+            ? {
+                id: cursor,
+              }
+            : undefined,
+          orderBy: [
+            {
+              model: {
+                name: sortBy === "name" ? sortOrder : undefined,
               },
             },
-            take: limit,
-
-            cursor: cursor
-              ? {
-                  id: cursor,
-                }
-              : undefined,
-            orderBy: [
-              {
-                model: {
-                  name: sortBy === "name" ? sortOrder : undefined,
-                },
-              },
-              {
-                createdAt: sortBy === "createdAt" ? sortOrder : undefined,
-              },
-            ],
-          });
-          return {
-            purchases,
-            nextCursor: purchases[limit - 1]?.id,
-            previousCursor: cursor,
-          };
-        } catch (error) {
-          return new Error("Something went wrong!");
-        }
+            {
+              createdAt: sortBy === "createdAt" ? sortOrder : undefined,
+            },
+          ],
+        });
+        return {
+          purchases,
+          nextCursor: purchases[limit - 1]?.id,
+          previousCursor: cursor,
+        };
       }
     ),
   getMywishes: protectedProcedure
@@ -367,79 +376,75 @@ export const userRouter = createTRPCRouter({
         ctx: { prisma, session },
       }) => {
         const id = session.user.id;
-        try {
-          const wishes = await prisma.wish.findMany({
-            where: {
-              userId: id,
-              model: {
-                OR: [
-                  {
+        const wishes = await prisma.wish.findMany({
+          where: {
+            userId: id,
+            model: {
+              OR: [
+                {
+                  name: {
+                    contains: search,
+                  },
+                },
+                {
+                  brand: {
                     name: {
                       contains: search,
                     },
                   },
-                  {
-                    brand: {
+                },
+                {
+                  categories: {
+                    some: {
                       name: {
                         contains: search,
                       },
                     },
                   },
-                  {
-                    categories: {
-                      some: {
-                        name: {
-                          contains: search,
-                        },
-                      },
-                    },
-                  },
-                ],
-              },
+                },
+              ],
             },
-            take: limit,
+          },
+          take: limit,
 
-            cursor: cursor
-              ? {
-                  id: cursor,
-                }
-              : undefined,
-            orderBy: [
-              {
-                model: {
-                  name: sortBy === "name" ? sortOrder : undefined,
-                },
-              },
-              {
-                createdAt: sortBy === "createdAt" ? sortOrder : undefined,
-              },
-            ],
-            include: {
+          cursor: cursor
+            ? {
+                id: cursor,
+              }
+            : undefined,
+          orderBy: [
+            {
               model: {
-                include: {
-                  brand: {
-                    include: {
-                      image: true,
-                    },
+                name: sortBy === "name" ? sortOrder : undefined,
+              },
+            },
+            {
+              createdAt: sortBy === "createdAt" ? sortOrder : undefined,
+            },
+          ],
+          include: {
+            model: {
+              include: {
+                brand: {
+                  include: {
+                    image: true,
                   },
-                  image: true,
-                  categories: {
-                    include: {
-                      image: true,
-                    },
+                },
+                image: true,
+                categories: {
+                  include: {
+                    image: true,
                   },
                 },
               },
             },
-          });
-          return {
-            wishes,
-            nextCursor: wishes[limit - 1]?.id,
-            previousCursor: cursor,
-          };
-        } catch (error) {
-          return new Error("Something went wrong!");
-        }
+          },
+        });
+        return {
+          wishes,
+          nextCursor: wishes[limit - 1]?.id,
+          previousCursor: cursor,
+        };
       }
     ),
 });

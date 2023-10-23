@@ -27,8 +27,6 @@ const ProfilePage: NextPage = () => {
     return <main>Loading...</main>;
   } else if (isError) {
     return <main>Something went Wrong</main>;
-  } else if (userData instanceof Error) {
-    return <main>{userData.message}</main>;
   } else if (!userData) {
     return <main>User not found</main>;
   }

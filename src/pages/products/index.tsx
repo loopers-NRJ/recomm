@@ -33,8 +33,7 @@ export const ProductsPages: NextPage = () => {
     brandId,
   });
 
-  if (productsApi.isError || productsApi.data instanceof Error)
-    return <div>Something went wrong</div>;
+  if (productsApi.isError) return <div>Something went wrong</div>;
   if (productsApi.isLoading) return <LoadingProducts />;
   if (!productsApi.data || productsApi.data.products.length === 0)
     return <div className="pt-24">No data to Show</div>;

@@ -25,13 +25,13 @@ const EditBrandPage = () => {
   const [error, setError] = useState<string>();
 
   useEffect(() => {
-    if (brandApi.data && !(brandApi.data instanceof Error)) {
+    if (brandApi.data) {
       setBrandName(brandApi.data.name);
     }
   }, [brandApi]);
 
   const updateBrand = async () => {
-    if (brandApi.data == null || brandApi.data instanceof Error) {
+    if (brandApi.data == null) {
       return;
     }
     let image;
@@ -42,25 +42,24 @@ const EditBrandPage = () => {
       }
       image = result[0];
     }
-    const result = await updateBrandApi.mutateAsync({
-      id: brandApi.data.id,
-      name: brandName,
-      image,
-    });
-    if (result instanceof Error) {
-      return setError(result.message);
+    try {
+      await updateBrandApi.mutateAsync({
+        id: brandApi.data.id,
+        name: brandName,
+        image,
+      });
+      void router.push("/admin/brands");
+    } catch (error) {
+      if (error instanceof Error) {
+        return setError(error.message);
+      }
     }
-    void router.push("/admin/brands");
   };
 
   if (brandApi.isLoading) {
     return <h1>Loading</h1>;
   }
-  if (
-    brandApi.isError ||
-    brandApi.data instanceof Error ||
-    brandApi.data === null
-  ) {
+  if (brandApi.isError || brandApi.data === null) {
     return <h1>Something went wrong</h1>;
   }
   const { data: brand } = brandApi;

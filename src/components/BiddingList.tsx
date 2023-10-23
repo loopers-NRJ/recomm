@@ -24,10 +24,6 @@ const BiddingList: FC<BiddingListProps> = ({ room }) => {
     return <div>Loading...</div>;
   }
 
-  if (data instanceof Error) {
-    return <div>{data.message}</div>;
-  }
-
   return (
     <div className="flex h-full min-h-[20rem] w-full flex-col rounded-lg px-4">
       {/* TODO: Add a duplicate bidding check for users and amount */}
