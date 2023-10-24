@@ -1,17 +1,11 @@
 import Container from "@/components/Container";
 import QuestionEditor from "@/components/admin/QuestionEditor";
-import ComboBox from "@/components/common/ComboBox";
 import ImagePicker from "@/components/common/ImagePicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  FetchItems,
-  Item,
-  MultipleChoiceQuestion,
-  Question,
-} from "@/types/custom";
+import { Item, MultipleChoiceQuestion, Question } from "@/types/custom";
 import {
   AtomicQuestionTypeArray,
   MultipleChoiceQuestionTypeArray,
@@ -25,6 +19,8 @@ import { ZodIssue } from "zod";
 import { v4 as uuid } from "uuid";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
+import BrandComboBox from "@/components/common/BrandComboBox";
+import CategoryComboBox from "@/components/common/CategoryComboBox";
 
 type Tab = "tab-1" | "tab-2";
 
@@ -46,12 +42,8 @@ const CreateModelPage = () => {
   // image object returned from server after uploading the image
   const [image, setImage] = useState<Image>();
 
-  // category
-  const [brand, setBrand] = useState("");
   const [selectedBrand, setSelectedBrand] = useState<Item>();
 
-  // brand
-  const [category, setCategory] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<Item>();
 
   const uploader = useImageUploader();
@@ -185,35 +177,18 @@ const CreateModelPage = () => {
               />
             </Label>
 
-            <Label className="flex items-center justify-between">
-              Brand
-              <ComboBox
-                label="Brand"
-                fetchItems={api.search.brands.useQuery as FetchItems}
-                value={brand}
-                onChange={setBrand}
-                selected={selectedBrand}
-                onSelect={setSelectedBrand}
-                requiredError={
-                  !!formError?.find((e) => e.path[0] === "brandId")
-                }
-              />
-            </Label>
-
-            <Label className="flex items-center justify-between">
-              Category
-              <ComboBox
-                label="Category"
-                fetchItems={api.search.category.useQuery as FetchItems}
-                value={category}
-                onChange={setCategory}
-                selected={selectedCategory}
-                onSelect={setSelectedCategory}
-                requiredError={
-                  !!formError?.find((e) => e.path[0] === "categoryId")
-                }
-              />
-            </Label>
+            <BrandComboBox
+              selected={selectedBrand}
+              onSelect={setSelectedBrand}
+              requiredError={!!formError?.find((e) => e.path[0] === "brandId")}
+            />
+            <CategoryComboBox
+              selected={selectedCategory}
+              onSelect={setSelectedCategory}
+              requiredError={
+                !!formError?.find((e) => e.path[0] === "categoryId")
+              }
+            />
 
             <div className="flex items-end justify-between gap-8">
               <ImagePicker

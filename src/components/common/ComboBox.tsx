@@ -15,15 +15,20 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { FetchItems, Item } from "@/types/custom";
+import { Item } from "@/types/custom";
 import { debounce } from "@/utils/helper";
 
 interface ComboBoxProps {
+  label?: string;
+
   selected?: Item;
   onSelect: (selected?: Item) => void;
-  label?: string;
-  fetchInput?: unknown;
-  fetchItems: FetchItems;
+
+  items?: Item[];
+  refetch?: () => void;
+  isLoading?: boolean;
+  isError?: boolean;
+
   value: string;
   onChange: (search: string) => void;
   requiredError?: boolean;
@@ -34,20 +39,18 @@ const ComboBox: FC<ComboBoxProps> = ({
   selected,
   onSelect,
   label = "item",
-  fetchInput = {},
-  fetchItems,
   value: search,
   onChange: setSearch,
   requiredError,
   disabled,
+
+  items,
+  isLoading,
+  isError,
+  refetch,
 }) => {
   const [open, setOpen] = useState(false);
-  const {
-    data: items,
-    isError,
-    isLoading: loading,
-    refetch,
-  } = fetchItems(fetchInput);
+
   const previousItemsRef = useRef<Item[]>([]);
   useEffect(() => {
     if (items instanceof Array) {
@@ -89,7 +92,7 @@ const ComboBox: FC<ComboBoxProps> = ({
           <CommandEmpty>No {label} found.</CommandEmpty>
           <CommandList className="max-h-40">
             {((isItems ? items : previousItemsRef.current).length === 0 &&
-              !loading) ||
+              !isLoading) ||
               (isError && (
                 <div className="flex justify-center">No {label} found.</div>
               ))}
@@ -119,7 +122,7 @@ const ComboBox: FC<ComboBoxProps> = ({
                 {item.name}
               </CommandItem>
             ))}
-            {loading && (
+            {isLoading && (
               <div className="flex justify-center">
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               </div>

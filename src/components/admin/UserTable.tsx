@@ -13,6 +13,8 @@ import {
 } from "@/utils/constants";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "../ui/select";
 import { UserPayloadIncluded } from "@/types/prisma";
+import { Button } from "../ui/button";
+import Link from "next/link";
 
 const UserTable = () => {
   const searchParams = useSearchParams();
@@ -91,6 +93,35 @@ const UserTable = () => {
       id: "lastactive",
       header: "last Seen",
       accessorFn: (row) => row.lastActive?.toLocaleString("en-US") ?? "N/A",
+    },
+    {
+      id: "latitude",
+      header: "latitude",
+      accessorFn: (row) => row.latitude,
+    },
+    {
+      id: "longitude",
+      header: "longitude",
+      accessorFn: (row) => row.longitude,
+    },
+    {
+      id: "map",
+      header: "map view",
+      cell: ({ row: { original: user } }) => (
+        <Button
+          variant="ghost"
+          disabled={user.latitude === null || user.longitude === null}
+          size="sm"
+          className="p-0"
+        >
+          <Link
+            href={`https://www.google.com/maps/@${user.latitude},${user.longitude}`}
+            className="flex h-full w-full items-center justify-center px-3"
+          >
+            view
+          </Link>
+        </Button>
+      ),
     },
     {
       id: "createdAt",

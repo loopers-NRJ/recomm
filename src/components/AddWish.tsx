@@ -12,22 +12,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { FetchItems, OptionalItem } from "@/types/custom";
+import { OptionalItem } from "@/types/custom";
 import { api } from "@/utils/api";
 
-import ComboBox from "./common/ComboBox";
 import { toast } from "./ui/use-toast";
+import CategoryComboBox from "./common/CategoryComboBox";
+import BrandComboBox from "./common/BrandComboBox";
+import ModelComboBox from "./common/ModelComboBox";
 
 const AddWish: FC = () => {
-  const [searchCategory, setSearchCategory] = useState("");
-
   const [selectedCategory, setSelectedCategory] = useState<OptionalItem>();
 
-  const [searchBrand, setSearchBrand] = useState("");
-
   const [selectedBrand, setSelectedBrand] = useState<OptionalItem>();
-
-  const [searchModel, setSearchModel] = useState("");
 
   const [selectedModel, setSelectedModel] = useState<OptionalItem>();
 
@@ -107,48 +103,21 @@ const AddWish: FC = () => {
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="flex justify-between">
-            Category
-            <ComboBox
-              label="Category"
-              selected={selectedCategory}
-              onSelect={(category) => setSelectedCategory(category)}
-              fetchItems={api.search.category.useQuery as FetchItems}
-              fetchInput={{ search: searchCategory }}
-              value={searchCategory}
-              onChange={(value) => setSearchCategory(value)}
-            />
-          </div>
-          <div className="flex justify-between">
-            Brand
-            <ComboBox
-              label="Brand"
-              selected={selectedBrand}
-              onSelect={(brand) => setSelectedBrand(brand)}
-              fetchItems={api.search.brands.useQuery as FetchItems}
-              fetchInput={{
-                categoryId: selectedCategory?.id,
-                search: searchBrand,
-              }}
-              value={searchBrand}
-              onChange={(value) => setSearchBrand(value)}
-            />
-          </div>
-          <div className="flex justify-between">
-            Model
-            <ComboBox
-              label="Model"
-              selected={selectedModel}
-              onSelect={(model) => setSelectedModel(model)}
-              fetchItems={api.search.models.useQuery as FetchItems}
-              fetchInput={{
-                brandId: selectedBrand?.id,
-                search: searchModel,
-              }}
-              value={searchModel}
-              onChange={(value) => setSearchModel(value)}
-            />
-          </div>
+          <CategoryComboBox
+            selected={selectedCategory}
+            onSelect={setSelectedCategory}
+          />
+          <BrandComboBox
+            selected={selectedBrand}
+            onSelect={setSelectedBrand}
+            categoryId={selectedCategory?.id}
+          />
+          <ModelComboBox
+            selected={selectedModel}
+            onSelect={setSelectedModel}
+            brandId={selectedBrand?.id}
+            categoryId={selectedCategory?.id}
+          />
         </div>
         <DialogFooter>
           <Button type="submit" onClick={() => void handleClick()}>

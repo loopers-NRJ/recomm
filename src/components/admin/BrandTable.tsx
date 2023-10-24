@@ -179,7 +179,7 @@ const BrandTable = () => {
             <div>
               <span className="px-2 font-bold">Brands</span>
             </div>
-            <Link href="/admin/brand/create">
+            <Link href="/admin/brands/create">
               <Button>New</Button>
             </Link>
           </div>

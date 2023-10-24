@@ -15,7 +15,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PostingModalStore } from "@/hooks/usePostingModal";
-import { FetchItems, OptionalItem } from "@/types/custom";
+import { OptionalItem } from "@/types/custom";
 import { api } from "@/utils/api";
 import { useImageUploader } from "@/utils/imageUpload";
 import { productSchema } from "@/utils/validation";
@@ -23,9 +23,11 @@ import { productSchema } from "@/utils/validation";
 import { Input } from "../ui/input";
 import { toast } from "../ui/use-toast";
 import BidDurationPicker from "./BidDurationPicker";
-import ComboBox from "./ComboBox";
 import ImagePicker from "./ImagePicker";
 import { VariantSelector } from "./VariantSelector";
+import CategoryComboBox from "./CategoryComboBox";
+import BrandComboBox from "./BrandComboBox";
+import ModelComboBox from "./ModelComboBox";
 
 interface FormError {
   categoryId?: string[] | undefined;
@@ -61,13 +63,10 @@ export const PostingTabs: FC<PostingTabsProps> = ({
   setShowModal,
   postingModal,
 }) => {
-  const [searchCategory, setSearchCategory] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<OptionalItem>();
 
-  const [searchBrand, setSearchBrand] = useState("");
   const [selectedBrand, setSelectedBrand] = useState<OptionalItem>();
 
-  const [searchModel, setSearchModel] = useState("");
   const [selectedModel, setSelectedModel] = useState<OptionalItem>();
 
   const modelApi = api.model.getModelById.useQuery({
@@ -263,54 +262,26 @@ export const PostingTabs: FC<PostingTabsProps> = ({
           <CardContent className="space-y-2">
             <div className="flex h-full flex-col justify-between">
               <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between">
-                  <Label>Category</Label>
-                  <ComboBox
-                    label="Category"
-                    selected={selectedCategory}
-                    onSelect={(category) => setSelectedCategory(category)}
-                    value={searchCategory}
-                    onChange={setSearchCategory}
-                    fetchItems={api.search.category.useQuery as FetchItems}
-                    fetchInput={{ search: searchCategory }}
-                    requiredError={!!formError?.categoryId}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <Label>Brand</Label>
-                  <ComboBox
-                    label="Brand"
-                    selected={selectedBrand}
-                    onSelect={(brand) => setSelectedBrand(brand)}
-                    value={searchBrand}
-                    onChange={setSearchBrand}
-                    fetchItems={api.search.brands.useQuery as FetchItems}
-                    fetchInput={{
-                      categoryId: selectedCategory?.id,
-                      search: searchBrand,
-                    }}
-                    requiredError={!!formError?.brandId}
-                    disabled={!selectedCategory}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label>Model</Label>
-                  <ComboBox
-                    label="Model"
-                    selected={selectedModel}
-                    onSelect={(model) => setSelectedModel(model)}
-                    value={searchModel}
-                    onChange={setSearchModel}
-                    fetchItems={api.search.models.useQuery as FetchItems}
-                    fetchInput={{
-                      brandId: selectedBrand?.id,
-                      search: searchModel,
-                    }}
-                    requiredError={!!formError?.modelId}
-                    disabled={!selectedBrand}
-                  />
-                </div>
+                <CategoryComboBox
+                  selected={selectedCategory}
+                  onSelect={setSelectedCategory}
+                  requiredError={!!formError?.categoryId}
+                />
+                <BrandComboBox
+                  selected={selectedBrand}
+                  onSelect={setSelectedBrand}
+                  categoryId={selectedCategory?.id}
+                  requiredError={!!formError?.brandId}
+                  disabled={!selectedCategory}
+                />
+                <ModelComboBox
+                  selected={selectedModel}
+                  onSelect={setSelectedModel}
+                  categoryId={selectedCategory?.id}
+                  brandId={selectedBrand?.id}
+                  requiredError={!!formError?.modelId}
+                  disabled={!selectedBrand}
+                />
 
                 {!selectedCategory?.id ||
                 !selectedBrand?.id ||
