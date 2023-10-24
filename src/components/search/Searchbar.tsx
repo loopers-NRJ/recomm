@@ -7,7 +7,7 @@ import Suggestions from "./Suggestions";
 const Search = () => {
   const [searchKey, setSearchKey] = useState<string | undefined>(undefined);
   const [open, setOpen] = useState(false);
-
+  console.log(open);
   const router = useRouter();
 
   return (
