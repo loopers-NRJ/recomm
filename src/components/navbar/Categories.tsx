@@ -128,7 +128,7 @@ const Categories: FC = () => {
 
   return (
     <Container>
-      <div className="flex flex-row items-center justify-between overflow-x-auto pt-4 transition-opacity">
+      <div className="flex flex-row items-center justify-between overflow-x-auto pt-36 transition-opacity">
         {/* <CategoryBox label="All" icon={HomeIcon} /> */}
         {categories.map((item) => (
           <CategoryBox

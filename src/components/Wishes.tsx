@@ -7,6 +7,7 @@ import { api } from "@/utils/api";
 
 import LoadingWishes from "./loading/LoadingWishes";
 import WishCard from "./WishCard";
+import Container from "./Container";
 
 function Wishes() {
   const session = useSession();
@@ -22,7 +23,12 @@ function Wishes() {
   }, [refetch]);
 
   if (isLoading) return <LoadingWishes />;
-  if (!data || data.wishes.length === 0) return <div>No data to Show</div>;
+  if (!data || data.wishes.length === 0)
+    return (
+      <div className="flex h-[300px] w-full items-center justify-center">
+        No Data Available
+      </div>
+    );
 
   return (
     <div className="mt-10 flex w-full flex-col items-center gap-5">

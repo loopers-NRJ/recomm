@@ -14,6 +14,7 @@ import {
   SortOrder,
   DefaultSortOrder,
 } from "@/utils/constants";
+import Categories from "@/components/navbar/Categories";
 
 export const metadata: Metadata = {
   title: "recomm - Home",
@@ -44,25 +45,32 @@ export const Home: NextPage = () => {
   }
   if (isError) {
     return (
-      <Container>
-        <div className="flex h-[500px] items-center justify-center pt-24 font-semibold">
-          Something went wrong
-        </div>
-      </Container>
+      <div>
+        <Categories />
+        <Container>
+          <div className="flex h-[500px] items-center justify-center pt-24 font-semibold">
+            Something went wrong
+          </div>
+        </Container>
+      </div>
     );
   }
   if (data === undefined || data.products.length === 0) {
     return (
-      <Container>
-        <div className="flex h-[500px] items-center justify-center pt-24 font-semibold">
-          No Products Available
-        </div>
-      </Container>
+      <div>
+        <Categories />
+        <Container>
+          <div className="flex h-[500px] items-center justify-center font-semibold">
+            No Products Available
+          </div>
+        </Container>
+      </div>
     );
   }
 
   return (
     <main>
+      <Categories />
       <Container>
         <div className="grid grid-cols-1 gap-8 pt-24 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {data.products.map((product) => (

@@ -46,7 +46,7 @@ const ProfilePage: NextPage = () => {
 
   return (
     <main>
-      <div className="container mx-auto my-24">
+      <div className="container mx-auto my-56">
         <div>
           <div className="relative mx-auto w-full rounded-lg bg-white shadow md:w-5/6 lg:w-4/6 xl:w-3/6">
             <div className="flex justify-center">

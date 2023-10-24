@@ -10,6 +10,7 @@ import Navbar from "@/components/navbar/Navbar";
 import { Toaster } from "@/components/ui/toaster";
 import { api, setUserLocation } from "@/utils/api";
 import { useEffect } from "react";
+import { useRouter } from "next/router";
 
 const ModalRenderer = dynamic(
   () => import("../components/modals/core/modal-renderer"),
@@ -33,16 +34,30 @@ const MyApp: AppType<{ session: Session | null }> = ({
       }
     );
   });
+
+  const pathname = useRouter().pathname;
+
+  const isAdminPage = pathname.match(/admin/g) !== null;
+
   return (
-    <SessionProvider session={session}>
-      <Navbar />
-      <div className="pb-20 pt-28">
-        <Component {...pageProps} session={session} />
+    <div>
+      {!isAdminPage ? (
+        <p className="mt-[200px] hidden text-center md:block">
+          only mobile view available at the moment
+        </p>
+      ) : null}
+      <div className={isAdminPage ? "" : "md:hidden"}>
+        <SessionProvider session={session}>
+          <Navbar />
+          <div className={isAdminPage ? "pb-20 pt-28" : "pb-20"}>
+            <Component {...pageProps} session={session} />
+          </div>
+          <BottomBar />
+          <Toaster />
+          <ModalRenderer />
+        </SessionProvider>
       </div>
-      <BottomBar />
-      <Toaster />
-      <ModalRenderer />
-    </SessionProvider>
+    </div>
   );
 };
 

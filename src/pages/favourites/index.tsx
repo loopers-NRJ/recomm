@@ -28,9 +28,22 @@ const Favourites: NextPage = () => {
   if (isLoading) return <LoadingProducts />;
 
   // if (isError) return <div>{error.message}</div>;
-  if (isError) return <div>Something went wrong</div>;
+  if (isError)
+    return (
+      <Container>
+        <div className="flex h-screen w-full items-center justify-center">
+          Something Went Wrong
+        </div>
+      </Container>
+    );
   else if (data === undefined || data.favoritedProducts.length === 0)
-    return <div>No Products in the List</div>;
+    return (
+      <Container>
+        <div className="flex h-screen w-full items-center justify-center">
+          No Favourites Found
+        </div>
+      </Container>
+    );
 
   return (
     <Container>
