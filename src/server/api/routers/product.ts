@@ -165,6 +165,7 @@ export const productRouter = createTRPCRouter({
                 choices: true,
               },
             },
+            categories: true,
             atomicQuestions: true,
           },
         });
@@ -241,31 +242,68 @@ export const productRouter = createTRPCRouter({
           include: singleProductPayload.include,
         });
 
-        // Updating all the wishes with the modeiId to available
-        void prisma.wish
-          .updateMany({
+        const updateWishes = async () => {
+          // Updating all the wishes with the categoryId to available
+          await prisma.wish.updateMany({
             where: {
-              modelId,
+              brandId: model.brandId,
               status: WishStatus.pending,
               lowerBound: {
-                gte: price,
+                lte: price,
               },
               upperBound: {
-                lte: price,
+                gte: price,
               },
             },
             data: {
               status: WishStatus.available,
             },
-          })
-          .catch((error) => {
-            console.error({
-              procedure: "createProduct",
-              message: "cannot update wishes",
-              error,
-            });
+          });
+          // Updating all the wishes with the brandId to available
+          await prisma.wish.updateMany({
+            where: {
+              categoryId: {
+                in: model.categories.map((category) => category.id),
+              },
+              status: WishStatus.pending,
+              lowerBound: {
+                lte: price,
+              },
+              upperBound: {
+                gte: price,
+              },
+            },
+            data: {
+              status: WishStatus.available,
+            },
           });
 
+          // Updating all the wishes with the modelId to available
+          await prisma.wish.updateMany({
+            where: {
+              modelId,
+              status: WishStatus.pending,
+              lowerBound: {
+                lte: price,
+              },
+              upperBound: {
+                gte: price,
+              },
+            },
+            data: {
+              status: WishStatus.available,
+            },
+          });
+        };
+
+        void updateWishes().catch((error) => {
+          console.error({
+            procedure: "createProduct",
+            message: "cannot update wishes",
+            error,
+          });
+        });
+        
         return product;
       }
     ),

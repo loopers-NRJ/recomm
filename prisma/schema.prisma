@@ -132,6 +132,7 @@ model Category {
     subCategories    Category[]        @relation("SubCategory")
     parentCategory   Category?         @relation("SubCategory", fields: [parentCategoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
     parentCategoryId String?
+    wishes           Wish[]
     models           Model[]
     createdAt        DateTime          @default(now())
     updatedAt        DateTime          @updatedAt
@@ -154,6 +155,7 @@ model Brand {
     image     Image?   @relation(fields: [imageId], references: [id], onDelete: SetNull)
     imageId   String?  @unique
     models    Model[]
+    wishes    Wish[]
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 }
@@ -312,10 +314,14 @@ enum WishStatus {
 
 model Wish {
     id         String     @id @default(cuid())
-    model      Model      @relation(fields: [modelId], references: [id], onDelete: Cascade)
-    modelId    String
     lowerBound Float
     upperBound Float
+    category   Category?  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+    categoryId String?
+    brand      Brand?     @relation(fields: [brandId], references: [id], onDelete: Cascade)
+    brandId    String?
+    model      Model?     @relation(fields: [modelId], references: [id], onDelete: Cascade)
+    modelId    String?
     status     WishStatus @default(pending)
     user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
     userId     String
@@ -323,6 +329,8 @@ model Wish {
     updatedAt  DateTime   @updatedAt
 
     @@index([userId])
+    @@index([categoryId])
+    @@index([brandId])
     @@index([modelId])
 }
 

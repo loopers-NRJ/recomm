@@ -166,14 +166,6 @@ export const allQuestionTypes = [
 
 export type AllQuestionType = (typeof allQuestionTypes)[number];
 
-export const RolePayload = Prisma.validator<Prisma.RoleDefaultArgs>()({
-  include: {
-    accesses: true,
-  },
-});
-
-export type RolePayloadIncluded = Prisma.RoleGetPayload<typeof RolePayload>;
-
 export const accessTypes = [
   AccessType.subscriber,
   AccessType.retailer,
@@ -202,3 +194,21 @@ export const accessTypes = [
   AccessType.updateUser,
   AccessType.deleteUser,
 ] as const;
+
+export const RolePayload = Prisma.validator<Prisma.RoleDefaultArgs>()({
+  include: {
+    accesses: true,
+  },
+});
+
+export type RolePayloadIncluded = Prisma.RoleGetPayload<typeof RolePayload>;
+
+export const wishPayload = Prisma.validator<Prisma.WishDefaultArgs>()({
+  include: {
+    category: true,
+    brand: true,
+    model: true,
+  },
+});
+
+export type WishPayloadIncluded = Prisma.WishGetPayload<typeof wishPayload>;

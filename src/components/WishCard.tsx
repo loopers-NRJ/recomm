@@ -13,21 +13,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { api } from "@/utils/api";
-import { Brand, Model, Wish, WishStatus } from "@prisma/client";
-
-type WishProp = Wish & {
-  model: Model & {
-    brand: Brand;
-  };
-};
+import { WishStatus } from "@prisma/client";
+import { WishPayloadIncluded } from "@/types/prisma";
 
 interface WishCardProps {
-  wish: WishProp;
+  wish: WishPayloadIncluded;
 }
 
 const WishCard: FC<WishCardProps> = ({ wish }) => {
-  const model = wish.model.name;
-  const brand = wish.model.brand.name;
+  const category = wish.category?.name;
+  const model = wish.model?.name;
+  const brand = wish.brand?.name;
   const status = wish.status;
   const deleteWish = api.wish.deleteWish.useMutation();
   const handleDelete = (id: string) => {
@@ -43,7 +39,9 @@ const WishCard: FC<WishCardProps> = ({ wish }) => {
       <div className="flex flex-col gap-0">
         <CardHeader>
           <CardTitle className="text-lg md:text-xl">
-            {brand} {model}
+            Category: {category}
+            Brand: {brand}
+            Model: {model}
           </CardTitle>
           <CardDescription>{"Electronics"}</CardDescription>
           <Badge
@@ -58,7 +56,7 @@ const WishCard: FC<WishCardProps> = ({ wish }) => {
       </div>
       <CardFooter className="flex-col items-end gap-2 p-6">
         <Button
-          onClick={() => router.push(`/products?category=${wish.model.name}`)}
+          onClick={() => router.push(`/products?category=${wish.model?.name}`)}
           disabled={status !== WishStatus.available}
         >
           View

@@ -423,21 +423,9 @@ export const userRouter = createTRPCRouter({
             },
           ],
           include: {
-            model: {
-              include: {
-                brand: {
-                  include: {
-                    image: true,
-                  },
-                },
-                image: true,
-                categories: {
-                  include: {
-                    image: true,
-                  },
-                },
-              },
-            },
+            category: true,
+            brand: true,
+            model: true,
           },
         });
         return {
