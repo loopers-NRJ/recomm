@@ -7,7 +7,7 @@ import { api } from "@/utils/api";
 import { useImageUploader } from "@/utils/imageUpload";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const EditBrandPage = () => {
   const router = useRouter();
@@ -17,18 +17,12 @@ const EditBrandPage = () => {
 
   const brandApi = api.brand.getBrandById.useQuery({ brandId });
 
-  const [brandName, setBrandName] = useState(brandApi.data?.name ?? "");
+  const [brandName, setBrandName] = useState("");
   // file object to store the file to upload
   const [imageFiles, setImageFiles] = useState<File[]>([]);
 
   const uploader = useImageUploader();
   const [error, setError] = useState<string>();
-
-  useEffect(() => {
-    if (brandApi.data) {
-      setBrandName(brandApi.data.name);
-    }
-  }, [brandApi]);
 
   const updateBrand = async () => {
     if (brandApi.data == null) {
