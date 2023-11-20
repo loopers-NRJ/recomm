@@ -12,10 +12,10 @@ import { AccessType } from "@prisma/client";
 
 export const userRouter = createTRPCRouter({
   getUsers: publicProcedure
-    .input(functionalityOptions)
+    .input(functionalityOptions.extend({ role: idSchema.optional() }))
     .query(
       async ({
-        input: { limit, search, sortBy, sortOrder, cursor },
+        input: { limit, search, sortBy, sortOrder, cursor, role },
         ctx: { prisma },
       }) => {
         try {
@@ -31,6 +31,11 @@ export const userRouter = createTRPCRouter({
               name: {
                 contains: search,
               },
+              role: role
+                ? {
+                    id: role,
+                  }
+                : undefined,
             },
             orderBy: [
               {
