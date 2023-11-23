@@ -7,7 +7,6 @@ import { api } from "@/utils/api";
 
 import LoadingWishes from "./loading/LoadingWishes";
 import WishCard from "./WishCard";
-import Container from "./Container";
 
 function Wishes() {
   const session = useSession();

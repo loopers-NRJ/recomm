@@ -16,6 +16,9 @@ import {
 } from "@/components/ui/select";
 import RoleTable from "@/components/admin/RoleTable";
 import FeaturedCategoryTable from "@/components/admin/FeaturedCategoryTable";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import EmployeeTable from "@/components/admin/EmployeeTable";
 
 const titles = [
   "category",
@@ -24,6 +27,7 @@ const titles = [
   "models",
   "products",
   "users",
+  "employees",
   "roles",
 ] as const;
 type Title = (typeof titles)[number];
@@ -71,14 +75,17 @@ const AdminPage = () => {
     case "users":
       Table = UserTable;
       break;
+    case "employees":
+      Table = EmployeeTable;
+      break;
     case "roles":
       Table = RoleTable;
       break;
   }
 
   return (
-    <Container>
-      <div className="flex justify-between">
+    <Container className="md:flex md:gap-3">
+      <div className="md:hidden">
         <Select
           onValueChange={(value) => void router.push(`/admin/${value}`)}
           value={title}
@@ -95,7 +102,24 @@ const AdminPage = () => {
           </SelectContent>
         </Select>
       </div>
-      <div className="my-4">
+      <div className="hidden md:block">
+        <div className="flex h-full flex-col gap-1">
+          {titles.map((title) => (
+            <Button
+              variant="ghost"
+              key={title}
+              className={`rounded px-2 py-3 capitalize ${
+                title === path[0] ? "text-primary-500" : ""
+              }`}
+            >
+              <Link href={`/admin/${title}`} className="hover:text-primary-500">
+                {title}
+              </Link>
+            </Button>
+          ))}
+        </div>
+      </div>
+      <div className="my-4 grow md:m-0">
         <Table />
       </div>
     </Container>
