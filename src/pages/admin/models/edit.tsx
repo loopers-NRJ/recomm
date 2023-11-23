@@ -7,7 +7,7 @@ import { api } from "@/utils/api";
 import { useImageUploader } from "@/utils/imageUpload";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const EditModelPage = () => {
   const router = useRouter();
@@ -16,18 +16,12 @@ const EditModelPage = () => {
 
   const modelApi = api.model.getModelById.useQuery({ modelId });
 
-  const [modelName, setModelName] = useState(modelApi.data?.name ?? "");
+  const [modelName, setModelName] = useState("");
   // file object to store the file to upload
   const [imageFiles, setImageFiles] = useState<File[]>([]);
 
   const uploader = useImageUploader();
   const [error, setError] = useState<string>();
-
-  useEffect(() => {
-    if (modelApi.data != null && !modelApi.isError) {
-      setModelName(modelApi.data.name);
-    }
-  }, [modelApi]);
 
   const updateModel = async () => {
     if (modelApi.data == null || modelApi.isError) {

@@ -8,7 +8,7 @@ import { useImageUploader } from "@/utils/imageUpload";
 import { Image } from "@/utils/validation";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const EditCategoryPage = () => {
   const router = useRouter();
@@ -18,9 +18,7 @@ const EditCategoryPage = () => {
 
   const updateCategoryApi = api.category.updateCategoryById.useMutation();
 
-  const [categoryName, setCategoryName] = useState(
-    categoryApi.data?.name ?? ""
-  );
+  const [categoryName, setCategoryName] = useState("");
   // file object to store the file to upload
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   // image object returned from server after uploading the image
@@ -28,14 +26,6 @@ const EditCategoryPage = () => {
 
   const uploader = useImageUploader();
   const [error, setError] = useState<string>();
-
-  useEffect(() => {
-    if (categoryApi.data && !categoryApi.isError) {
-      setCategoryName(categoryApi.data.name ?? "");
-      setImageFiles([]);
-      setImage(undefined);
-    }
-  }, [categoryApi]);
 
   const uploadImage = async () => {
     if (imageFiles.length === 0) {

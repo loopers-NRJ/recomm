@@ -35,8 +35,6 @@ const Navbar: React.FC = () => {
   const { data: session } = useSession();
   const currentUser = session?.user;
 
-  const isAdminPage = router.pathname.startsWith("/admin");
-
   return (
     <div className="sticky left-0 top-0 z-10 w-full bg-white">
       <div className="py-4">
