@@ -117,7 +117,10 @@ const ProductPage: NextPage = () => {
                 <div className="flex flex-row items-center justify-between p-4 text-lg font-semibold">
                   <h1>Bidding List</h1>
                 </div>
-                <BiddingList room={product.room}></BiddingList>
+                <BiddingList
+                  revalidate={biddingModal.isOpen}
+                  room={product.room}
+                ></BiddingList>
               </div>
             </div>
           </div>
