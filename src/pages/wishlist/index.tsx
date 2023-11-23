@@ -8,7 +8,7 @@ import Wishes from "@/components/Wishes";
 const WishList: NextPage = () => {
   return (
     <Container>
-      <div className="flex justify-between pt-44">
+      <div className="mt-5 flex justify-between">
         <Heading title="Your WishList"></Heading>
         <AddWish />
       </div>
