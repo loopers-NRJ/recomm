@@ -2,6 +2,7 @@ import { AccessType } from "@prisma/client";
 import { createTRPCRouter, getProcedure } from "../trpc";
 import { z } from "zod";
 import { accessTypes } from "@/types/prisma";
+import { idSchema } from "@/utils/validation";
 
 export const RoleRouter = createTRPCRouter({
   getRoles: getProcedure(AccessType.readAccess).query(
@@ -9,6 +10,14 @@ export const RoleRouter = createTRPCRouter({
       return prisma.role.findMany();
     }
   ),
+  getRole: getProcedure(AccessType.readAccess)
+    .input(z.object({ id: idSchema }))
+    .query(async ({ input: { id }, ctx: { prisma } }) => {
+      return prisma.role.findUnique({
+        where: { id },
+        include: { accesses: true },
+      });
+    }),
   createRole: getProcedure(AccessType.createRole)
     .input(
       z.object({

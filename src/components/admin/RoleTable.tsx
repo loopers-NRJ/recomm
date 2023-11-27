@@ -5,10 +5,11 @@ import { DataTable } from "./Table";
 import { RolePayloadIncluded } from "@/types/prisma";
 import { Button } from "../ui/button";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 const RoleTable = () => {
   const rolesApi = api.search.role.useQuery();
-
+  const router = useRouter();
   const columns: ColumnDef<RolePayloadIncluded>[] = [
     {
       id: "name",
@@ -20,7 +21,13 @@ const RoleTable = () => {
       header: "Accesses",
       cell: ({ row: { original: role } }) => {
         return (
-          <Button variant="ghost" className="border">
+          <Button
+            variant="ghost"
+            className="border"
+            onClick={() => {
+              void router.push(`/admin/role/${role.id}`);
+            }}
+          >
             {role.accesses.length} Accesses
           </Button>
         );
