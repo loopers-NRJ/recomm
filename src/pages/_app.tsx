@@ -25,15 +25,17 @@ const MyApp: AppType<{ session: Session | null }> = ({
   pageProps: { session, ...pageProps },
 }) => {
   useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setUserLocation(position.coords);
-      },
-      () => {
-        // TODO: handle error
-      }
-    );
-  });
+    if (session?.user) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation(position.coords);
+        },
+        () => {
+          // TODO: handle error
+        }
+      );
+    }
+  }, [session]);
 
   const pathname = useRouter().pathname;
 
