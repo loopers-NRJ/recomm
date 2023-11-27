@@ -39,8 +39,8 @@ const Favourites: NextPage = () => {
   else if (data === undefined || data.favoritedProducts.length === 0)
     return (
       <Container>
-        <div className="flex h-screen w-full items-center justify-center">
-          No Favourites Found
+        <div className="flex h-[500px] items-center justify-center font-semibold">
+          No Products Available
         </div>
       </Container>
     );

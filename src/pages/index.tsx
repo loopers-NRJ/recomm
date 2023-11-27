@@ -41,7 +41,7 @@ export const Home: NextPage = () => {
   });
 
   if (isLoading) {
-    return <LoadingProducts className="pt-24" />;
+    return <LoadingProducts />;
   }
   if (isError) {
     return (

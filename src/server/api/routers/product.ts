@@ -15,7 +15,12 @@ import {
   WishStatus,
 } from "@prisma/client";
 
-import { createTRPCRouter, getProcedure, publicProcedure } from "../trpc";
+import {
+  createTRPCRouter,
+  getProcedure,
+  protectedProcedure,
+  publicProcedure,
+} from "../trpc";
 import { productsPayload, singleProductPayload } from "@/types/prisma";
 
 export const productRouter = createTRPCRouter({
@@ -303,7 +308,7 @@ export const productRouter = createTRPCRouter({
             error,
           });
         });
-        
+
         return product;
       }
     ),
@@ -440,7 +445,7 @@ export const productRouter = createTRPCRouter({
         return product;
       }
     ),
-  addProductToFavorites: getProcedure(AccessType.subscriber)
+  addProductToFavorites: protectedProcedure
     .input(z.object({ productId: idSchema }))
     .mutation(
       async ({ input: { productId: id }, ctx: { prisma, session } }) => {
@@ -473,7 +478,7 @@ export const productRouter = createTRPCRouter({
         });
       }
     ),
-  removeProductFromFavorites: getProcedure(AccessType.subscriber)
+  removeProductFromFavorites: protectedProcedure
     .input(z.object({ productId: idSchema }))
     .mutation(
       async ({ input: { productId: id }, ctx: { prisma, session } }) => {

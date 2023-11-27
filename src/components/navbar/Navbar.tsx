@@ -35,16 +35,17 @@ const Navbar: React.FC = () => {
   const { data: session } = useSession();
   const currentUser = session?.user;
 
-  const isAdminPage = router.pathname.startsWith("/admin");
-
   return (
-    <div className="fixed left-0 top-0 z-10 w-full bg-white">
+    <div className="sticky left-0 top-0 z-10 w-full bg-white">
       <div className="py-4">
         <Container>
           <div className="flex w-full flex-col items-center justify-between gap-5 pt-3">
             <div className="flex w-full items-center justify-between">
               <Logo />
               <div className="flex h-full w-fit items-center justify-center gap-2">
+                <div className="hidden md:inline">
+                  <NavItems currentUser={currentUser} />
+                </div>
                 <Profile />
                 <div
                   className={
@@ -60,19 +61,12 @@ const Navbar: React.FC = () => {
                 </div>
               </div>
             </div>
-            {!isAdminPage ? (
-              <div className="flex w-full justify-between gap-3">
-                <Search />
-                <p className="flex w-fit items-center rounded-md border px-3 py-2">
-                  Location
-                </p>
-              </div>
-            ) : null}
-            {!isAdminPage ?? (
-              <div className="hidden md:block">
-                <NavItems currentUser={currentUser} />
-              </div>
-            )}
+            <div className="flex w-full justify-between gap-3">
+              <Search />
+              <p className="flex w-fit items-center rounded-md border px-3 py-2">
+                Location
+              </p>
+            </div>
           </div>
         </Container>
       </div>

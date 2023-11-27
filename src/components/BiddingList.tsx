@@ -9,16 +9,17 @@ import { Card, CardContent } from "./ui/card";
 
 interface BiddingListProps {
   room: Room;
+  revalidate: boolean;
 }
 
-const BiddingList: FC<BiddingListProps> = ({ room }) => {
+const BiddingList: FC<BiddingListProps> = ({ room, revalidate }) => {
   const { data, isLoading, refetch } = api.room.getBidsByRoomId.useQuery({
     roomId: room.id,
   });
 
   useEffect(() => {
     void refetch();
-  }, [refetch]);
+  }, [refetch, revalidate]);
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -26,8 +27,6 @@ const BiddingList: FC<BiddingListProps> = ({ room }) => {
 
   return (
     <div className="flex h-full min-h-[20rem] w-full flex-col rounded-lg px-4">
-      {/* TODO: Add a duplicate bidding check for users and amount */}
-      {/* TODO: Add Highest Bidding to Room in Database */}
       <div className="mb-3 text-sm font-light text-slate-500">
         You can view all the biddings below
       </div>
@@ -42,9 +41,6 @@ const BiddingList: FC<BiddingListProps> = ({ room }) => {
                     <p className="text-sm font-medium leading-none">
                       {bid.user.name}
                     </p>
-                    {/* <p className="text-sm text-muted-foreground">
-                      {bid.user.email}
-                    </p> */}
                   </div>
                 </div>
 

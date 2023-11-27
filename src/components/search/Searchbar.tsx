@@ -26,9 +26,11 @@ const Search = () => {
         }}
         placeholder="Search"
       />
-      <CommandList className="absolute left-0 top-11 w-full border bg-white">
-        {searchKey && <Suggestions setOpen={setOpen} searchKey={searchKey} />}
-      </CommandList>
+      {searchKey && (
+        <CommandList className="absolute left-0 top-11 w-full border bg-white">
+          <Suggestions setOpen={setOpen} searchKey={searchKey} />
+        </CommandList>
+      )}
     </Command>
   );
 };
