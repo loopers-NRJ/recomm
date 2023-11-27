@@ -8,7 +8,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 
 const RoleTable = () => {
-  const rolesApi = api.search.role.useQuery();
+  const rolesApi = api.role.getRoles.useQuery();
   const router = useRouter();
   const columns: ColumnDef<RolePayloadIncluded>[] = [
     {

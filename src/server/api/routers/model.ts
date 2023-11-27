@@ -52,6 +52,7 @@ export const modelRouter = createTRPCRouter({
             },
           },
           take: limit,
+          skip: cursor ? 1 : undefined,
           cursor: cursor
             ? {
                 id: cursor,
@@ -67,7 +68,6 @@ export const modelRouter = createTRPCRouter({
         return {
           models,
           nextCursor: models[limit - 1]?.id,
-          previousCursor: cursor,
         };
       }
     ),

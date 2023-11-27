@@ -26,7 +26,7 @@ export default function CategoryComboBox({
         onSelect={onSelect}
         value={search}
         onChange={setSearch}
-        items={categorySearch.data?.categories}
+        items={categorySearch.data}
         isLoading={categorySearch.isLoading}
         isError={categorySearch.isError}
         refetch={() => void categorySearch.refetch()}

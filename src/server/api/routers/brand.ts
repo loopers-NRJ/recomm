@@ -43,6 +43,7 @@ export const brandRouter = createTRPCRouter({
             active: isAdmin ? undefined : true,
           },
           take: limit,
+          skip: cursor ? 1 : undefined,
           cursor: cursor
             ? {
                 id: cursor,
@@ -61,7 +62,6 @@ export const brandRouter = createTRPCRouter({
         return {
           brands,
           nextCursor: brands[limit - 1]?.id,
-          previousCursor: cursor,
         };
       }
     ),

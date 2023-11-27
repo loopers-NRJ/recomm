@@ -43,6 +43,7 @@ export const categoryRouter = createTRPCRouter({
             : undefined,
 
           take: limit,
+          skip: cursor ? 1 : undefined,
           orderBy: [
             {
               [sortBy]: sortOrder,
@@ -53,7 +54,6 @@ export const categoryRouter = createTRPCRouter({
         return {
           categories,
           nextCursor: categories[limit - 1]?.id,
-          previousCursor: cursor,
         };
       }
     ),
@@ -310,6 +310,7 @@ export const categoryRouter = createTRPCRouter({
             : undefined,
 
           take: limit,
+          skip: cursor ? 1 : undefined,
           orderBy: [
             {
               category: {
@@ -328,7 +329,6 @@ export const categoryRouter = createTRPCRouter({
         return {
           categories: categories.map(({ category }) => category),
           nextCursor: categories[limit - 1]?.categoryId,
-          previousCursor: cursor,
         };
       }
     ),

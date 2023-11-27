@@ -4,12 +4,12 @@ import { ColumnDef } from "@tanstack/react-table";
 
 import { DataTable } from "./Table";
 import {
-  DefaultLimit,
   DefaultSearch,
   SortBy,
   DefaultSortBy,
   SortOrder,
   DefaultSortOrder,
+  DefaultLimit,
 } from "@/utils/constants";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "../ui/select";
 import { UserPayloadIncluded } from "@/types/prisma";
@@ -21,17 +21,22 @@ const UserTable = () => {
   const params = new URLSearchParams(searchParams);
 
   const limit = +(params.get("limit") ?? DefaultLimit);
-
   const search = params.get("search") ?? DefaultSearch;
   const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
   const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
-
-  const usersApi = api.user.getUsers.useQuery({
-    limit,
-    search,
-    sortBy,
-    sortOrder,
-  });
+  const usersApi = api.user.getUsers.useInfiniteQuery(
+    {
+      limit,
+      search,
+      sortBy,
+      sortOrder,
+    },
+    {
+      getNextPageParam: (lastPage) => {
+        return lastPage.nextCursor;
+      },
+    }
+  );
 
   const rolesApi = api.search.role.useQuery();
 
@@ -137,7 +142,17 @@ const UserTable = () => {
     console.log(usersApi.error);
     return <div>Error</div>;
   }
-  return <DataTable columns={columns} data={usersApi.data.users} />;
+
+  return (
+    <DataTable
+      columns={columns}
+      data={usersApi.data.pages.flatMap((page) => page.users)}
+      canViewMore={!!usersApi.hasNextPage}
+      viewMore={() => {
+        void usersApi.fetchNextPage();
+      }}
+    />
+  );
 };
 
 export default UserTable;

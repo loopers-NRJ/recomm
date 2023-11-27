@@ -24,6 +24,7 @@ export const roomRounter = createTRPCRouter({
           },
 
           take: limit,
+          skip: cursor ? 1 : undefined,
           cursor: cursor
             ? {
                 id: cursor,

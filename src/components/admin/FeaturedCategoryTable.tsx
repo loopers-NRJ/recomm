@@ -27,12 +27,19 @@ const FeaturedCategoryTable = () => {
   const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
   const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
 
-  const categoriesApi = api.category.getFeaturedCategories.useQuery({
-    limit,
-    search,
-    sortBy,
-    sortOrder,
-  });
+  const categoriesApi = api.category.getFeaturedCategories.useInfiniteQuery(
+    {
+      limit,
+      search,
+      sortBy,
+      sortOrder,
+    },
+    {
+      getNextPageParam: (lastPage) => {
+        return lastPage.nextCursor;
+      },
+    }
+  );
   const removeCategoryFeatured =
     api.category.removeCategoryFromFeaturedById.useMutation();
   // this state is to disable the featured button when the user clicks the featured button
@@ -133,7 +140,14 @@ const FeaturedCategoryTable = () => {
       {categoriesApi.isLoading ? (
         <div className="flex justify-center">Loading...</div>
       ) : (
-        <DataTable columns={columns} data={categoriesApi.data.categories} />
+        <DataTable
+          columns={columns}
+          data={categoriesApi.data.pages.flatMap((page) => page.categories)}
+          canViewMore={!!categoriesApi.hasNextPage}
+          viewMore={() => {
+            void categoriesApi.fetchNextPage();
+          }}
+        />
       )}
     </>
   );

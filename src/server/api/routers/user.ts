@@ -42,6 +42,7 @@ export const userRouter = createTRPCRouter({
                 [sortBy]: sortOrder,
               },
             ],
+            skip: cursor ? 1 : undefined,
             include: {
               role: {
                 include: {
@@ -54,7 +55,6 @@ export const userRouter = createTRPCRouter({
           return {
             users,
             nextCursor: users[limit - 1]?.id,
-            previusCursor: cursor,
           };
         } catch (error) {
           throw new Error("Something went wrong!");
@@ -140,7 +140,7 @@ export const userRouter = createTRPCRouter({
             },
           },
           take: limit,
-
+          skip: cursor ? 1 : undefined,
           cursor: cursor
             ? {
                 id: cursor,
@@ -164,7 +164,6 @@ export const userRouter = createTRPCRouter({
         return {
           bids,
           nextCursor: bids[limit - 1]?.id,
-          previousCursor: cursor,
         };
       }
     ),
@@ -210,7 +209,7 @@ export const userRouter = createTRPCRouter({
             },
           },
           take: limit,
-
+          skip: cursor ? 1 : undefined,
           cursor: cursor
             ? {
                 id: cursor,
@@ -239,7 +238,6 @@ export const userRouter = createTRPCRouter({
         return {
           favoritedProducts,
           nextCursor: favoritedProducts[limit - 1]?.id,
-          previousCursor: cursor,
         };
       }
     ),
@@ -280,7 +278,7 @@ export const userRouter = createTRPCRouter({
             },
           },
           take: limit,
-
+          skip: cursor ? 1 : undefined,
           cursor: cursor
             ? {
                 id: cursor,
@@ -307,7 +305,6 @@ export const userRouter = createTRPCRouter({
         return {
           listings,
           nextCursor: listings[limit - 1]?.id,
-          previousCursor: cursor,
         };
       }
     ),
@@ -349,7 +346,7 @@ export const userRouter = createTRPCRouter({
             },
           },
           take: limit,
-
+          skip: cursor ? 1 : undefined,
           cursor: cursor
             ? {
                 id: cursor,
@@ -369,7 +366,6 @@ export const userRouter = createTRPCRouter({
         return {
           purchases,
           nextCursor: purchases[limit - 1]?.id,
-          previousCursor: cursor,
         };
       }
     ),
@@ -411,7 +407,7 @@ export const userRouter = createTRPCRouter({
             },
           },
           take: limit,
-
+          skip: cursor ? 1 : undefined,
           cursor: cursor
             ? {
                 id: cursor,
@@ -436,7 +432,6 @@ export const userRouter = createTRPCRouter({
         return {
           wishes,
           nextCursor: wishes[limit - 1]?.id,
-          previousCursor: cursor,
         };
       }
     ),

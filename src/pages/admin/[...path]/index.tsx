@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/select";
 import RoleTable from "@/components/admin/RoleTable";
 import FeaturedCategoryTable from "@/components/admin/FeaturedCategoryTable";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import EmployeeTable from "@/components/admin/EmployeeTable";
 
@@ -103,19 +102,15 @@ const AdminPage = () => {
         </Select>
       </div>
       <div className="hidden md:block">
-        <div className="flex h-full flex-col gap-1">
+        <div className="flex h-full flex-col gap-2">
           {titles.map((title) => (
-            <Button
-              variant="ghost"
+            <Link
               key={title}
-              className={`rounded px-2 py-3 capitalize ${
-                title === path[0] ? "text-primary-500" : ""
-              }`}
+              href={`/admin/${title}`}
+              className="inline-flex h-9 items-center justify-center rounded-md px-3 py-2 text-center text-sm font-medium capitalize ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
             >
-              <Link href={`/admin/${title}`} className="hover:text-primary-500">
-                {title}
-              </Link>
-            </Button>
+              {title}
+            </Link>
           ))}
         </div>
       </div>

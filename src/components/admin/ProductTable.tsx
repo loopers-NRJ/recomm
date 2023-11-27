@@ -31,15 +31,22 @@ const ProductTable = () => {
   const brandId = params.get("brand") ?? undefined;
   const modelId = params.get("model") ?? undefined;
 
-  const productApi = api.product.getProducts.useQuery({
-    limit,
-    search,
-    sortBy,
-    sortOrder,
-    modelId,
-    categoryId,
-    brandId,
-  });
+  const productApi = api.product.getProducts.useInfiniteQuery(
+    {
+      limit,
+      search,
+      sortBy,
+      sortOrder,
+      modelId,
+      categoryId,
+      brandId,
+    },
+    {
+      getNextPageParam: (lastPage) => {
+        return lastPage.nextCursor;
+      },
+    }
+  );
   const deleteProduct = api.product.deleteProductById.useMutation();
   const [deleteId, setDeleteId] = useState<string>();
   const columns: ColumnDef<Omit<ProductsPayloadIncluded, "room">>[] = [
@@ -136,7 +143,16 @@ const ProductTable = () => {
     console.log(productApi.error);
     return <div>Error</div>;
   }
-  return <DataTable columns={columns} data={productApi.data.products} />;
+  return (
+    <DataTable
+      columns={columns}
+      data={productApi.data.pages.flatMap((page) => page.products)}
+      canViewMore={!!productApi.hasNextPage}
+      viewMore={() => {
+        void productApi.fetchNextPage();
+      }}
+    />
+  );
 };
 
 export default ProductTable;

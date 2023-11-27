@@ -88,6 +88,7 @@ export const productRouter = createTRPCRouter({
           },
 
           take: limit,
+          skip: cursor ? 1 : undefined,
           cursor: cursor
             ? {
                 id: cursor,
@@ -108,7 +109,6 @@ export const productRouter = createTRPCRouter({
         return {
           products,
           nextCursor: products[limit - 1]?.id,
-          previousCursor: cursor,
         };
       }
     ),

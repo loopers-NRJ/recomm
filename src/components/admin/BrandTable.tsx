@@ -38,13 +38,20 @@ const BrandTable = () => {
     brandId,
   });
 
-  const brandsApi = api.brand.getBrands.useQuery({
-    limit,
-    search,
-    sortBy,
-    sortOrder,
-    categoryId,
-  });
+  const brandsApi = api.brand.getBrands.useInfiniteQuery(
+    {
+      limit,
+      search,
+      sortBy,
+      sortOrder,
+      categoryId,
+    },
+    {
+      getNextPageParam: (lastPage) => {
+        return lastPage.nextCursor;
+      },
+    }
+  );
 
   const deleteBrandApi = api.brand.deleteBrandById.useMutation();
   // this state is to disable the delete button when admin clicks on it
@@ -183,7 +190,14 @@ const BrandTable = () => {
               <Button>New</Button>
             </Link>
           </div>
-          <DataTable columns={columns} data={brandsApi.data.brands} />
+          <DataTable
+            columns={columns}
+            data={brandsApi.data.pages.flatMap((page) => page.brands)}
+            canViewMore={!!brandsApi.hasNextPage}
+            viewMore={() => {
+              void brandsApi.fetchNextPage();
+            }}
+          />
         </>
       )}
     </>

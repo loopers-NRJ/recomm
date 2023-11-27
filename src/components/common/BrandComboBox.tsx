@@ -28,7 +28,7 @@ export default function BrandComboBox({
         onSelect={onSelect}
         value={search}
         onChange={setSearch}
-        items={brandsSearch.data?.brands}
+        items={brandsSearch.data}
         isLoading={brandsSearch.isLoading}
         isError={brandsSearch.isError}
         refetch={() => void brandsSearch.refetch()}

@@ -34,7 +34,7 @@ export default function ModelComboBox({
         onSelect={onSelect}
         value={search}
         onChange={setSearch}
-        items={modelsSearch.data?.models}
+        items={modelsSearch.data}
         isLoading={modelsSearch.isLoading}
         isError={modelsSearch.isError}
         refetch={() => void modelsSearch.refetch()}

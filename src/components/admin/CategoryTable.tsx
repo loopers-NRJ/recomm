@@ -36,13 +36,20 @@ const CategoryTable = () => {
   const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
   const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
 
-  const categoriesApi = api.category.getCategories.useQuery({
-    parentId,
-    limit,
-    search,
-    sortBy,
-    sortOrder,
-  });
+  const categoriesApi = api.category.getCategories.useInfiniteQuery(
+    {
+      parentId,
+      limit,
+      search,
+      sortBy,
+      sortOrder,
+    },
+    {
+      getNextPageParam: (lastPage) => {
+        return lastPage.nextCursor;
+      },
+    }
+  );
 
   const parentCategoryApi = api.category.getCategoryById.useQuery({
     categoryId: parentId,
@@ -253,7 +260,14 @@ const CategoryTable = () => {
       {categoriesApi.isLoading ? (
         <div className="flex justify-center">Loading...</div>
       ) : (
-        <DataTable columns={columns} data={categoriesApi.data.categories} />
+        <DataTable
+          columns={columns}
+          data={categoriesApi.data.pages.flatMap((page) => page.categories)}
+          canViewMore={!!categoriesApi.hasNextPage}
+          viewMore={() => {
+            void categoriesApi.fetchNextPage();
+          }}
+        />
       )}
     </>
   );

@@ -1,13 +1,15 @@
 import { AccessType } from "@prisma/client";
 import { createTRPCRouter, getProcedure } from "../trpc";
 import { z } from "zod";
-import { accessTypes } from "@/types/prisma";
+import { RolePayload, accessTypes } from "@/types/prisma";
 import { idSchema } from "@/utils/validation";
 
 export const RoleRouter = createTRPCRouter({
   getRoles: getProcedure(AccessType.readAccess).query(
     async ({ ctx: { prisma } }) => {
-      return prisma.role.findMany();
+      return prisma.role.findMany({
+        include: RolePayload.include,
+      });
     }
   ),
   getRole: getProcedure(AccessType.readAccess)

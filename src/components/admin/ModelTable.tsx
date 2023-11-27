@@ -31,14 +31,21 @@ const ModelTable = () => {
   const categoryId = params.get("category") ?? undefined;
   const brandId = params.get("brand") ?? undefined;
 
-  const modelApi = api.model.getModels.useQuery({
-    limit,
-    search,
-    sortBy,
-    sortOrder,
-    categoryId,
-    brandId,
-  });
+  const modelApi = api.model.getModels.useInfiniteQuery(
+    {
+      limit,
+      search,
+      sortBy,
+      sortOrder,
+      categoryId,
+      brandId,
+    },
+    {
+      getNextPageParam: (lastPage) => {
+        return lastPage.nextCursor;
+      },
+    }
+  );
 
   const deleteModelApi = api.model.deleteModelById.useMutation();
   const [deleteModelId, setDeleteModelId] = useState<string>();
@@ -139,7 +146,14 @@ const ModelTable = () => {
           <Button>New</Button>
         </Link>
       </div>
-      <DataTable columns={columns} data={modelApi.data.models} />
+      <DataTable
+        columns={columns}
+        data={modelApi.data.pages.flatMap((page) => page.models)}
+        canViewMore={!!modelApi.hasNextPage}
+        viewMore={() => {
+          void modelApi.fetchNextPage();
+        }}
+      />
     </>
   );
 };

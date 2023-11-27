@@ -26,13 +26,21 @@ const EmployeeTable = () => {
   const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
   const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
 
-  const usersApi = api.user.getUsers.useQuery({
-    limit,
-    search,
-    sortBy,
-    sortOrder,
-    role: "clp6lj2n90002eyzscr6xx213",
-  });
+  const usersApi = api.user.getUsers.useInfiniteQuery(
+    {
+      limit,
+      search,
+      sortBy,
+      sortOrder,
+      // filter by employee role id
+      role: "clp6lj2n90002eyzscr6xx213",
+    },
+    {
+      getNextPageParam: (lastPage) => {
+        return lastPage.nextCursor;
+      },
+    }
+  );
 
   const rolesApi = api.search.role.useQuery();
 
@@ -138,7 +146,16 @@ const EmployeeTable = () => {
     console.log(usersApi.error);
     return <div>Error</div>;
   }
-  return <DataTable columns={columns} data={usersApi.data.users} />;
+  return (
+    <DataTable
+      columns={columns}
+      data={usersApi.data.pages.flatMap((page) => page.users)}
+      canViewMore={!!usersApi.hasNextPage}
+      viewMore={() => {
+        void usersApi.fetchNextPage();
+      }}
+    />
+  );
 };
 
 export default EmployeeTable;
