@@ -1,4 +1,5 @@
 import Container from "@/components/Container";
+import { withAdminGuard } from "@/components/common/AdminGuard";
 import ImagePicker from "@/components/common/ImagePicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +9,8 @@ import { useImageUploader } from "@/utils/imageUpload";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
+
+export const getServerSideProps = withAdminGuard();
 
 const CreateCategoryPage = () => {
   const createCategoryApi = api.category.createCategory.useMutation();

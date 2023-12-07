@@ -14,6 +14,9 @@ import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
 import { Badge } from "@/components/ui/badge";
 import { useRouter } from "next/router";
+import { withAdminGuard } from "@/components/common/AdminGuard";
+
+export const getServerSideProps = withAdminGuard();
 
 const roleConfig = {
   readAccess: [

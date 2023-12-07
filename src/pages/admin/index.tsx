@@ -1,26 +1,14 @@
-import { authOptions } from "@/server/auth";
-import { AccessType } from "@prisma/client";
-import { GetServerSideProps } from "next";
-import { getServerSession } from "next-auth";
+import { withAdminGuard } from "@/components/common/AdminGuard";
 
-const AdminIndexPage = () => null;
-export default AdminIndexPage;
+export default function AdminIndexPage() {
+  return null;
+}
 
-export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-  const session = await getServerSession(req, res, authOptions);
-  const accesses = session?.user.role?.accesses.map((access) => access.type);
-  if (accesses?.includes(AccessType.readAccess)) {
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
-  }
+export const getServerSideProps = withAdminGuard(async () => {
   return {
     redirect: {
       destination: "/admin/category",
-      permanent: false,
+      permanent: true,
     },
   };
-};
+});

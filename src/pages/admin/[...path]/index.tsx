@@ -18,6 +18,7 @@ import RoleTable from "@/components/admin/RoleTable";
 import FeaturedCategoryTable from "@/components/admin/FeaturedCategoryTable";
 import Link from "next/link";
 import EmployeeTable from "@/components/admin/EmployeeTable";
+import { withAdminGuard } from "@/components/common/AdminGuard";
 
 const titles = [
   "category",
@@ -31,28 +32,27 @@ const titles = [
 ] as const;
 type Title = (typeof titles)[number];
 
-const AdminPage = () => {
-  const router = useRouter();
-  const path = router.query.path;
+export const getServerSideProps = withAdminGuard(async (context) => {
+  const path = context.params?.path as [Title, ...string[]];
 
-  // check if the path is valid title
-  if (
-    !path ||
-    !(path instanceof Array) ||
-    path.length === 0 ||
-    !titles.includes(path[0] as Title)
-  ) {
-    return (
-      <Container>
-        <div className="flex h-12 items-center text-lg font-bold">
-          Admin Page
-        </div>
-        <div className="my-4">Invalid path</div>
-      </Container>
-    );
+  if (path.length === 0 || !titles.includes(path[0])) {
+    return {
+      redirect: {
+        destination: "/admin/category",
+        permanent: true,
+      },
+    };
   }
 
-  const title = path[0] as Title;
+  return {
+    props: {
+      title: path[0],
+    },
+  };
+});
+
+export default function AdminPage({ title }: { title: Title }) {
+  const router = useRouter();
 
   let Table;
   switch (title) {
@@ -119,6 +119,4 @@ const AdminPage = () => {
       </div>
     </Container>
   );
-};
-
-export default AdminPage;
+}

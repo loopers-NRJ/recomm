@@ -21,6 +21,9 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
 import BrandComboBox from "@/components/common/BrandComboBox";
 import CategoryComboBox from "@/components/common/CategoryComboBox";
+import { withAdminGuard } from "@/components/common/AdminGuard";
+
+export const getServerSideProps = withAdminGuard();
 
 type Tab = "tab-1" | "tab-2";
 
