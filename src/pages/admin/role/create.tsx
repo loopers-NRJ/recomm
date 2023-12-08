@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
 import { Badge } from "@/components/ui/badge";
 import { useRouter } from "next/router";
-import { withAdminGuard } from "@/components/common/AdminGuard";
+import { withAdminGuard } from "@/components/hoc/AdminGuard";
 
 export const getServerSideProps = withAdminGuard();
 

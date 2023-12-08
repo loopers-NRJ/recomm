@@ -21,11 +21,20 @@ export const categoryRouter = createTRPCRouter({
     .input(
       functionalityOptions.extend({
         parentId: idSchema.nullish(),
+        parentSlug: z.string().min(1).max(255).nullish(),
       })
     )
     .query(
       async ({
-        input: { search, limit, sortBy, sortOrder, parentId, cursor },
+        input: {
+          search,
+          limit,
+          sortBy,
+          sortOrder,
+          parentId,
+          cursor,
+          parentSlug,
+        },
         ctx: { prisma, isAdmin },
       }) => {
         const categories = await prisma.category.findMany({
@@ -35,6 +44,11 @@ export const categoryRouter = createTRPCRouter({
             },
             active: isAdmin ? undefined : true,
             parentCategoryId: parentId,
+            parentCategory: parentSlug
+              ? {
+                  slug: parentSlug,
+                }
+              : undefined,
           },
           cursor: cursor
             ? {
@@ -66,6 +80,23 @@ export const categoryRouter = createTRPCRouter({
       const category = await prisma.category.findUnique({
         where: {
           id,
+        },
+        include: {
+          image: true,
+          featuredCategory: true,
+        },
+      });
+      if (category === null) {
+        throw new Error("Category does not exist");
+      }
+      return category;
+    }),
+  getCategoryBySlug: publicProcedure
+    .input(z.object({ categorySlug: z.string().min(1).max(255) }))
+    .query(async ({ input: { categorySlug: slug }, ctx: { prisma } }) => {
+      const category = await prisma.category.findUnique({
+        where: {
+          slug,
         },
         include: {
           image: true,

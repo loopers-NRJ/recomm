@@ -1,4 +1,4 @@
-import { withAdminGuard } from "@/components/common/AdminGuard";
+import { withAdminGuard } from "@/components/hoc/AdminGuard";
 
 export default function AdminIndexPage() {
   return null;

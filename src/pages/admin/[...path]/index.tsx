@@ -18,7 +18,7 @@ import RoleTable from "@/components/admin/RoleTable";
 import FeaturedCategoryTable from "@/components/admin/FeaturedCategoryTable";
 import Link from "next/link";
 import EmployeeTable from "@/components/admin/EmployeeTable";
-import { withAdminGuard } from "@/components/common/AdminGuard";
+import { withAdminGuard } from "@/components/hoc/AdminGuard";
 
 const titles = [
   "category",

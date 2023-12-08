@@ -21,7 +21,7 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
 import BrandComboBox from "@/components/common/BrandComboBox";
 import CategoryComboBox from "@/components/common/CategoryComboBox";
-import { withAdminGuard } from "@/components/common/AdminGuard";
+import { withAdminGuard } from "@/components/hoc/AdminGuard";
 
 export const getServerSideProps = withAdminGuard();
 

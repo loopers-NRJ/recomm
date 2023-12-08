@@ -125,7 +125,7 @@ model User {
 model Category {
     id               String            @id @default(cuid())
     name             String            @unique
-    slug             String
+    slug             String            @unique
     active           Boolean           @default(true)
     image            Image?            @relation(fields: [imageId], references: [id], onDelete: SetNull)
     imageId          String?           @unique
@@ -150,7 +150,7 @@ model FeaturedCategory {
 model Brand {
     id        String   @id @default(cuid())
     name      String   @unique
-    slug      String
+    slug      String   @unique
     active    Boolean  @default(true)
     image     Image?   @relation(fields: [imageId], references: [id], onDelete: SetNull)
     imageId   String?  @unique
@@ -163,7 +163,7 @@ model Brand {
 model Model {
     id                      String                   @id @default(cuid())
     name                    String                   @unique
-    slug                    String
+    slug                    String                   @unique
     active                  Boolean                  @default(true)
     image                   Image?                   @relation(fields: [imageId], references: [id], onDelete: SetNull)
     imageId                 String?                  @unique
@@ -262,7 +262,7 @@ model Product {
     id             String         @id @default(cuid())
     price          Float
     title          String
-    slug           String
+    slug           String         @unique
     active         Boolean        @default(true)
     description    String
     images         Image[]
