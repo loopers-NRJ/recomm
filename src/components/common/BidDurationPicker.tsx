@@ -22,15 +22,18 @@ const BidDurationPicker: FC<BidDurationPickerProps> = ({
         handleChange(new Date(d));
       }}
       options={plans}
-      styles={{
-        container: (provided) => ({
-          ...provided,
-          width: "100%",
-          border: "none",
-          outline: "none",
-          font: "inherit",
-        }),
-      }}
+      className="w-full"
+      // causing error in the production env
+      // deployement - https://vercel.com/loopers-nrj/recomm/CPXgTx9fWqkw8JuFhg9CnQXfkTPn
+      // styles={{
+      //   container: (provided) => ({
+      //     ...provided,
+      //     width: "100%",
+      //     border: "none",
+      //     outline: "none",
+      //     font: "inherit",
+      //   }),
+      // }}
     />
   );
 };
