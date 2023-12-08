@@ -2,20 +2,31 @@ import Container from "@/components/Container";
 import { withAdminGuard } from "@/components/hoc/AdminGuard";
 import ImagePicker from "@/components/common/ImagePicker";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { api } from "@/utils/api";
 import { useImageUploader } from "@/utils/imageUpload";
 import { Image } from "@/utils/validation";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import CategoryComboBox from "@/components/common/CategoryComboBox";
+import { OptionalItem } from "@/types/custom";
 
 export const getServerSideProps = withAdminGuard();
 
-const CreateBrandPage = () => {
-  const createBrandApi = api.brand.createBrand.useMutation();
-  const [brandName, setBrandName] = useState("");
+const CreateFeaturedCategoryPage = () => {
+  const router = useRouter();
+  const urlId = router.query.id as string | undefined;
+
+  const createFeaturedCategoryApi =
+    api.category.makeCategoryFeaturedById.useMutation();
+  const [selectedCategory, setSelectedCategory] = useState<OptionalItem>(
+    urlId
+      ? {
+          id: urlId,
+          name: "",
+        }
+      : undefined
+  );
   // file object to store the file to upload
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   // image object returned from server after uploading the image
@@ -23,7 +34,6 @@ const CreateBrandPage = () => {
 
   const uploader = useImageUploader();
   const [error, setError] = useState<string>();
-  const router = useRouter();
 
   const uploadImage = async () => {
     const result = await uploader.upload(imageFiles);
@@ -33,13 +43,19 @@ const CreateBrandPage = () => {
     setImage(result[0]);
   };
 
-  const createBrand = async () => {
+  const createFeaturedCategory = async () => {
     try {
-      await createBrandApi.mutateAsync({
-        name: brandName,
+      if (image === undefined) {
+        return setError("You must upload an image");
+      }
+      if (selectedCategory === undefined) {
+        return setError("You must select a category");
+      }
+      await createFeaturedCategoryApi.mutateAsync({
+        categoryId: selectedCategory.id,
         image,
       });
-      void router.push("/admin/brands");
+      void router.push("/admin/categorys");
     } catch (error) {
       if (error instanceof Error) {
         return setError(error.message);
@@ -50,14 +66,10 @@ const CreateBrandPage = () => {
   return (
     <Container className="flex justify-center">
       <section className="flex h-full w-full flex-col gap-4 p-4 md:h-fit md:w-4/6 lg:h-fit lg:w-3/6 xl:w-2/5">
-        <Label className="my-4">
-          Brand Name
-          <Input
-            className="my-2"
-            value={brandName}
-            onChange={(e) => setBrandName(e.target.value)}
-          />
-        </Label>
+        <CategoryComboBox
+          selected={selectedCategory}
+          onSelect={(selected) => setSelectedCategory(selected)}
+        />
 
         <div className="flex items-end justify-between gap-8">
           <ImagePicker
@@ -74,12 +86,14 @@ const CreateBrandPage = () => {
             </Button>
           ) : (
             <Button
-              onClick={() => void createBrand()}
-              disabled={brandName.trim() === "" || createBrandApi.isLoading}
+              onClick={() => void createFeaturedCategory()}
+              disabled={
+                selectedCategory === undefined ||
+                image === undefined ||
+                createFeaturedCategoryApi.isLoading
+              }
             >
-              {imageFiles.length > 0
-                ? "Create Brand"
-                : "Create Brand without image"}
+              Make it as Featured Category
             </Button>
           )}
         </div>
@@ -89,9 +103,9 @@ const CreateBrandPage = () => {
             <Loader2 className="animate-spin" />
           </div>
         )}
-        {createBrandApi.isLoading && (
+        {createFeaturedCategoryApi.isLoading && (
           <div className="flex flex-col items-center justify-center rounded-lg border p-2">
-            Creating Brand {brandName} ...
+            Making {selectedCategory?.name} as Featured Category ...
             <Loader2 className="animate-spin" />
           </div>
         )}
@@ -106,4 +120,4 @@ const CreateBrandPage = () => {
   );
 };
 
-export default CreateBrandPage;
+export default CreateFeaturedCategoryPage;

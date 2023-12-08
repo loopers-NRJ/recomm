@@ -83,11 +83,7 @@ export const modelPayload = Prisma.validator<Prisma.ModelDefaultArgs>()({
         image: true,
       },
     },
-    categories: {
-      include: {
-        image: true,
-      },
-    },
+    categories: true,
   },
 });
 
@@ -101,11 +97,7 @@ export const singleModelPayload = Prisma.validator<Prisma.ModelDefaultArgs>()({
         image: true,
       },
     },
-    categories: {
-      include: {
-        image: true,
-      },
-    },
+    categories: true,
     multipleChoiceQuestions: {
       include: {
         choices: true,
@@ -129,8 +121,11 @@ export type MultipleChoiceQuestionPayloadIncluded =
 
 export const CategoryPayload = Prisma.validator<Prisma.CategoryDefaultArgs>()({
   include: {
-    image: true,
-    featuredCategory: true,
+    featuredCategory: {
+      include: {
+        image: true,
+      },
+    },
   },
 });
 

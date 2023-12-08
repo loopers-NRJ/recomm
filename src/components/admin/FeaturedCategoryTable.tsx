@@ -140,14 +140,24 @@ const FeaturedCategoryTable = () => {
       {categoriesApi.isLoading ? (
         <div className="flex justify-center">Loading...</div>
       ) : (
-        <DataTable
-          columns={columns}
-          data={categoriesApi.data.pages.flatMap((page) => page.categories)}
-          canViewMore={!!categoriesApi.hasNextPage}
-          viewMore={() => {
-            void categoriesApi.fetchNextPage();
-          }}
-        />
+        <>
+          <div className="flex items-center justify-between rounded-lg px-2 py-2">
+            <div>
+              <span className="px-2 font-bold">Featured Categories</span>
+            </div>
+            <Link href="/admin/featured-category/create">
+              <Button>New</Button>
+            </Link>
+          </div>
+          <DataTable
+            columns={columns}
+            data={categoriesApi.data.pages.flatMap((page) => page.categories)}
+            canViewMore={!!categoriesApi.hasNextPage}
+            viewMore={() => {
+              void categoriesApi.fetchNextPage();
+            }}
+          />
+        </>
       )}
     </>
   );

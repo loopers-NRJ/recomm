@@ -20,8 +20,8 @@ export default function BrandComboBox({
   const [search, setSearch] = useState("");
   const brandsSearch = api.search.brands.useQuery({ categoryId, search });
   return (
-    <div className="flex items-center justify-between">
-      <Label>Brands</Label>
+    <Label className="flex items-center justify-between">
+      Brands
       <ComboBox
         label="Brands"
         selected={selected}
@@ -35,6 +35,6 @@ export default function BrandComboBox({
         requiredError={requiredError}
         disabled={disabled}
       />
-    </div>
+    </Label>
   );
 }

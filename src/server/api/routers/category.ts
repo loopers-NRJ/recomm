@@ -82,8 +82,11 @@ export const categoryRouter = createTRPCRouter({
           id,
         },
         include: {
-          image: true,
-          featuredCategory: true,
+          featuredCategory: {
+            include: {
+              image: true,
+            },
+          },
         },
       });
       if (category === null) {
@@ -99,8 +102,11 @@ export const categoryRouter = createTRPCRouter({
           slug,
         },
         include: {
-          image: true,
-          featuredCategory: true,
+          featuredCategory: {
+            include: {
+              image: true,
+            },
+          },
         },
       });
       if (category === null) {
@@ -113,12 +119,11 @@ export const categoryRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string().min(3).max(255),
-        image: imageInputs.optional(),
         parentCategoryId: idSchema.optional(),
       })
     )
     .mutation(
-      async ({ input: { name, image, parentCategoryId }, ctx: { prisma } }) => {
+      async ({ input: { name, parentCategoryId }, ctx: { prisma } }) => {
         // checking whether the category already exists
         const existingCategory = await prisma.category.findUnique({
           where: {
@@ -144,11 +149,6 @@ export const categoryRouter = createTRPCRouter({
                   },
                 }
               : undefined,
-            image: image
-              ? {
-                  create: image,
-                }
-              : undefined,
           },
           include: CategoryPayload.include,
         });
@@ -161,28 +161,18 @@ export const categoryRouter = createTRPCRouter({
         z.object({
           id: idSchema,
           name: z.string().min(1).max(255),
-          image: imageInputs.optional(),
           parentCategoryId: idSchema.optional(),
           active: z.boolean().optional(),
         }),
         z.object({
           id: idSchema,
           name: z.string().min(1).max(255).optional(),
-          image: imageInputs,
-          parentCategoryId: idSchema.optional(),
-          active: z.boolean().optional(),
-        }),
-        z.object({
-          id: idSchema,
-          name: z.string().min(1).max(255).optional(),
-          image: imageInputs.optional(),
           parentCategoryId: idSchema,
           active: z.boolean().optional(),
         }),
         z.object({
           id: idSchema,
           name: z.string().min(1).max(255).optional(),
-          image: imageInputs.optional(),
           parentCategoryId: idSchema.optional(),
           active: z.boolean(),
         }),
@@ -190,7 +180,7 @@ export const categoryRouter = createTRPCRouter({
     )
     .mutation(
       async ({
-        input: { id, name, image, parentCategoryId, active },
+        input: { id, name, parentCategoryId, active },
         ctx: { prisma },
       }) => {
         // checking whether the category exists
@@ -200,7 +190,6 @@ export const categoryRouter = createTRPCRouter({
           },
           select: {
             name: true,
-            image: true,
           },
         });
         if (existingCategory === null) {
@@ -230,9 +219,6 @@ export const categoryRouter = createTRPCRouter({
           data: {
             name,
             slug: name ? slugify(name) : undefined,
-            image: {
-              create: image,
-            },
             parentCategory: parentCategoryId
               ? {
                   connect: {
@@ -244,19 +230,6 @@ export const categoryRouter = createTRPCRouter({
           },
           include: CategoryPayload.include,
         });
-        // deleting the old image from cloudinary
-        if (image !== undefined && existingCategory.image !== null) {
-          const error = await deleteImage(existingCategory.image.publicId);
-          if (error) {
-            console.error({
-              procedure: "updateCategoryById",
-              message: "cannot able delete the old image in cloudinary",
-              existingCategory,
-              updatedCategory,
-              error,
-            });
-          }
-        }
         return updatedCategory;
       }
     ),
@@ -268,9 +241,6 @@ export const categoryRouter = createTRPCRouter({
         where: {
           id,
         },
-        select: {
-          image: true,
-        },
       });
       if (existingCategory === null) {
         throw new Error("Category does not exist");
@@ -281,41 +251,6 @@ export const categoryRouter = createTRPCRouter({
           id,
         },
       });
-      if (existingCategory.image !== null) {
-        // using void to not wait for the promise to resolve
-        void prisma.image
-          .delete({
-            where: {
-              id: existingCategory.image.id,
-            },
-          })
-          .catch((error) => {
-            console.error({
-              procedure: "deleteCategoryById",
-              message: "cannot able delete the old image in database",
-              error,
-            });
-          });
-
-        // using void to not wait for the promise to resolve
-        void deleteImage(existingCategory.image.publicId)
-          .then((error) => {
-            if (error instanceof Error) {
-              console.error({
-                procedure: "deleteCategoryById",
-                message: "cannot able delete the old image in database",
-                error,
-              });
-            }
-          })
-          .catch((error) => {
-            console.error({
-              procedure: "deleteCategoryById",
-              message: "cannot able delete the old image in database",
-              error,
-            });
-          });
-      }
       return category;
     }),
   getFeaturedCategories: publicProcedure
@@ -350,11 +285,8 @@ export const categoryRouter = createTRPCRouter({
             },
           ],
           include: {
-            category: {
-              include: {
-                image: true,
-              },
-            },
+            category: true,
+            image: true,
           },
         });
         return {
@@ -365,8 +297,8 @@ export const categoryRouter = createTRPCRouter({
     ),
 
   makeCategoryFeaturedById: getProcedure(AccessType.updateCategory)
-    .input(z.object({ categoryId: idSchema }))
-    .mutation(async ({ input: { categoryId: id }, ctx: { prisma } }) => {
+    .input(z.object({ categoryId: idSchema, image: imageInputs }))
+    .mutation(async ({ input: { categoryId: id, image }, ctx: { prisma } }) => {
       const totalFeaturedCategories = await prisma.featuredCategory.count();
       if (totalFeaturedCategories >= MaxFeaturedCategory) {
         throw new Error(
@@ -381,6 +313,9 @@ export const categoryRouter = createTRPCRouter({
               id,
             },
           },
+          image: {
+            create: image,
+          },
         },
         select: {
           category: true,
@@ -391,14 +326,32 @@ export const categoryRouter = createTRPCRouter({
   removeCategoryFromFeaturedById: getProcedure(AccessType.updateCategory)
     .input(z.object({ categoryId: idSchema }))
     .mutation(async ({ input: { categoryId: id }, ctx: { prisma } }) => {
-      const data = await prisma.featuredCategory.delete({
+      const existingCategory = await prisma.featuredCategory.findUnique({
         where: {
           categoryId: id,
         },
-        select: {
-          category: true,
+        include: {
+          image: true,
         },
       });
-      return data.category;
+      if (existingCategory === null) {
+        throw new Error("Category does not exist");
+      }
+      await prisma.featuredCategory.delete({
+        where: {
+          categoryId: id,
+        },
+      });
+
+      const error = await deleteImage(existingCategory.image.publicId);
+      if (error) {
+        console.error({
+          procedure: "removeCategoryFromFeaturedById",
+          message: "cannot able delete the old image in cloudinary",
+          existingCategory,
+          error,
+        });
+        throw new Error("Cannot able to delete the old image");
+      }
     }),
 });

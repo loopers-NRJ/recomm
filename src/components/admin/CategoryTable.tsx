@@ -57,8 +57,6 @@ const CategoryTable = () => {
 
   const deleteCategoryApi = api.category.deleteCategoryById.useMutation();
   const updateCategoryById = api.category.updateCategoryById.useMutation();
-  const makeCategoryFeatured =
-    api.category.makeCategoryFeaturedById.useMutation();
   const removeCategoryFeatured =
     api.category.removeCategoryFromFeaturedById.useMutation();
   // this state is to disable the update button when the user clicks the update button
@@ -176,20 +174,23 @@ const CategoryTable = () => {
           className="data-[state=checked]:bg-yellow-500"
           onCheckedChange={() => {
             setFeaturedCategoryState(row.original.id);
-            (row.original.featuredCategory !== null
-              ? removeCategoryFeatured
-              : makeCategoryFeatured
-            )
-              .mutateAsync({
-                categoryId: row.original.id,
-              })
-              .then(async () => {
-                await categoriesApi.refetch();
-                setFeaturedCategoryState("");
-              })
-              .catch((err) => {
-                console.log(err);
-              });
+            if (row.original.featuredCategory !== null) {
+              removeCategoryFeatured
+                .mutateAsync({
+                  categoryId: row.original.id,
+                })
+                .then(async () => {
+                  await categoriesApi.refetch();
+                  setFeaturedCategoryState("");
+                })
+                .catch((err) => {
+                  console.log(err);
+                });
+            } else {
+              void router.push(
+                `/admin/featured-category/create/?id=${row.original.id}`
+              );
+            }
           }}
         />
       ),

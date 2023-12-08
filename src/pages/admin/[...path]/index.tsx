@@ -22,7 +22,7 @@ import { withAdminGuard } from "@/components/hoc/AdminGuard";
 
 const titles = [
   "category",
-  "featured category",
+  "featured-category",
   "brands",
   "models",
   "products",
@@ -59,7 +59,7 @@ export default function AdminPage({ title }: { title: Title }) {
     case "category":
       Table = CategoryTable;
       break;
-    case "featured category":
+    case "featured-category":
       Table = FeaturedCategoryTable;
       break;
     case "brands":
@@ -83,7 +83,7 @@ export default function AdminPage({ title }: { title: Title }) {
   }
 
   return (
-    <Container className="md:flex md:gap-3">
+    <Container className="pt-3 md:flex md:gap-2">
       <div className="md:hidden">
         <Select
           onValueChange={(value) => void router.push(`/admin/${value}`)}

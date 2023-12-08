@@ -1,12 +1,9 @@
 import Container from "@/components/Container";
 import { withAdminGuard } from "@/components/hoc/AdminGuard";
-import ImagePicker from "@/components/common/ImagePicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api } from "@/utils/api";
-import { useImageUploader } from "@/utils/imageUpload";
-import { Image } from "@/utils/validation";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -22,24 +19,8 @@ const EditCategoryPage = () => {
   const updateCategoryApi = api.category.updateCategoryById.useMutation();
 
   const [categoryName, setCategoryName] = useState("");
-  // file object to store the file to upload
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
-  // image object returned from server after uploading the image
-  const [image, setImage] = useState<Image>();
 
-  const uploader = useImageUploader();
   const [error, setError] = useState<string>();
-
-  const uploadImage = async () => {
-    if (imageFiles.length === 0) {
-      return setError("select a image to create a image");
-    }
-    const result = await uploader.upload(imageFiles);
-    if (result instanceof Error) {
-      return setError(result.message);
-    }
-    setImage(result[0]);
-  };
 
   const updateCategory = async () => {
     if (
@@ -56,7 +37,6 @@ const EditCategoryPage = () => {
       await updateCategoryApi.mutateAsync({
         id: categoryApi.data.id,
         name: categoryName,
-        image,
       });
       void router.push("/admin/category");
     } catch (error) {
@@ -93,40 +73,18 @@ const EditCategoryPage = () => {
           />
         </Label>
 
-        <div className="flex items-end justify-between gap-8">
-          <ImagePicker
-            setImages={setImageFiles}
-            maxImages={1}
-            images={imageFiles}
-          />
-          {imageFiles.length > 0 && image === undefined ? (
-            <Button
-              onClick={() => void uploadImage()}
-              disabled={uploader.isLoading}
-            >
-              Upload Image
-            </Button>
-          ) : (
-            <Button
-              onClick={() => void updateCategory()}
-              disabled={
-                updateCategoryApi.isLoading ||
-                categoryName.trim() === "" ||
-                (categoryName === categoryApi.data?.name && image === undefined)
-              }
-            >
-              {image !== undefined && categoryName === categoryApi.data.name
-                ? "Update Category image"
-                : "Update category"}
-            </Button>
-          )}
+        <div className="flex items-end justify-end gap-8">
+          <Button
+            onClick={() => void updateCategory()}
+            disabled={
+              updateCategoryApi.isLoading ||
+              categoryName.trim() === "" ||
+              categoryName === categoryApi.data?.name
+            }
+          >
+            Update category
+          </Button>
         </div>
-        {uploader.isLoading && (
-          <div className="flex flex-col items-center justify-center rounded-lg border p-2">
-            Uploading image...
-            <Loader2 className="animate-spin" />
-          </div>
-        )}
         {updateCategoryApi.isLoading && (
           <div className="flex flex-col items-center justify-center rounded-lg border p-2">
             Updating Category {categoryName} ...

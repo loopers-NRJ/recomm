@@ -18,8 +18,8 @@ export default function CategoryComboBox({
   const [search, setSearch] = useState("");
   const categorySearch = api.search.category.useQuery({ search });
   return (
-    <div className="flex items-center justify-between">
-      <Label>Category</Label>
+    <Label className="flex cursor-pointer items-center justify-between">
+      Category
       <ComboBox
         label="Category"
         selected={selected}
@@ -33,6 +33,6 @@ export default function CategoryComboBox({
         requiredError={requiredError}
         disabled={disabled}
       />
-    </div>
+    </Label>
   );
 }

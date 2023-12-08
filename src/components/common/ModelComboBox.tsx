@@ -26,8 +26,8 @@ export default function ModelComboBox({
     search,
   });
   return (
-    <div className="flex items-center justify-between">
-      <Label>Category</Label>
+    <Label className="flex items-center justify-between">
+      Category
       <ComboBox
         label="Models"
         selected={selected}
@@ -41,6 +41,6 @@ export default function ModelComboBox({
         requiredError={requiredError}
         disabled={disabled}
       />
-    </div>
+    </Label>
   );
 }
