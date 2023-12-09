@@ -33,7 +33,7 @@ const EmployeeTable = () => {
       sortBy,
       sortOrder,
       // filter by employee role id
-      role: "clp6lj2n90002eyzscr6xx213",
+      role: "clpx1egqb0003eyvoequho8kg",
     },
     {
       getNextPageParam: (lastPage) => {

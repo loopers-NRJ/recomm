@@ -7,7 +7,8 @@ export default function SellitPage() {
   const [parentCategorySlug, setParentCaregorySlug] = useUrl("category");
   const categoryApi = api.category.getCategories.useInfiniteQuery(
     {
-      parentSlug: parentCategorySlug ?? null,
+      parentSlug: parentCategorySlug,
+      parentId: parentCategorySlug ? undefined : null,
     },
     {
       getNextPageParam: (page) => page.nextCursor,
