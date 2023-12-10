@@ -19,9 +19,10 @@ export default function BrandComboBox({
 }) {
   const [search, setSearch] = useState("");
   const brandsSearch = api.search.brands.useQuery({ categoryId, search });
+
   return (
     <Label className="flex items-center justify-between">
-      Brands
+      Brand
       <ComboBox
         label="Brands"
         selected={selected}
@@ -29,7 +30,7 @@ export default function BrandComboBox({
         value={search}
         onChange={setSearch}
         items={brandsSearch.data}
-        isLoading={brandsSearch.isLoading}
+        isLoading={brandsSearch.isLoading || !brandsSearch.data}
         isError={brandsSearch.isError}
         refetch={() => void brandsSearch.refetch()}
         requiredError={requiredError}

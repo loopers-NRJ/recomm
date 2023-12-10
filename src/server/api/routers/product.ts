@@ -151,8 +151,8 @@ export const productRouter = createTRPCRouter({
           images,
           modelId,
           closedAt,
-          multipleChoiceQuestionAnswers: providedChoices,
-          atomicQuestionAnswers: providedAnswers,
+          multipleChoiceAnswers: providedChoices,
+          atomicAnswers: providedAnswers,
         },
         ctx: { prisma, session },
       }) => {

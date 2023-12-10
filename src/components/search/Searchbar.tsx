@@ -6,8 +6,6 @@ import Suggestions from "./Suggestions";
 
 const Search = () => {
   const [searchKey, setSearchKey] = useState<string | undefined>(undefined);
-  const [open, setOpen] = useState(false);
-  console.log(open);
   const router = useRouter();
 
   return (
@@ -20,7 +18,6 @@ const Search = () => {
         onKeyDown={(e) => {
           if (e.nativeEvent.key === "Enter") {
             void router.push(`/?search=${searchKey}`);
-            setOpen(false);
             setSearchKey(undefined);
           }
         }}
@@ -28,7 +25,7 @@ const Search = () => {
       />
       {searchKey && (
         <CommandList className="absolute left-0 top-11 w-full border bg-white">
-          <Suggestions setOpen={setOpen} searchKey={searchKey} />
+          <Suggestions searchKey={searchKey} />
         </CommandList>
       )}
     </Command>

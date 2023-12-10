@@ -28,30 +28,3 @@ export interface MultipleChoiceQuestion {
   type: MultipleChoiceQuestionType;
   choices: string[];
 }
-
-// TODO: @naveen you may need this type to represent the answer
-export type Answer = { questionId: string } & (
-  | {
-      type: Extract<AtomicQuestionType, "Text" | "Paragraph">;
-      answer: string;
-    }
-  | {
-      type: Extract<AtomicQuestionType, "Number">;
-      answer: number;
-    }
-  | {
-      type: Extract<AtomicQuestionType, "Date">;
-      answer: Date;
-    }
-  | {
-      type: Extract<
-        MultipleChoiceQuestionType,
-        "Dropdown" | "Variant" | "RadioGroup"
-      >;
-      answerId: string;
-    }
-  | {
-      type: Extract<MultipleChoiceQuestionType, "Checkbox">;
-      answerId: [string, ...string[]];
-    }
-);

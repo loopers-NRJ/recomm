@@ -27,7 +27,7 @@ export default function ModelComboBox({
   });
   return (
     <Label className="flex items-center justify-between">
-      Category
+      Model
       <ComboBox
         label="Models"
         selected={selected}
@@ -35,7 +35,7 @@ export default function ModelComboBox({
         value={search}
         onChange={setSearch}
         items={modelsSearch.data}
-        isLoading={modelsSearch.isLoading}
+        isLoading={modelsSearch.isLoading || !modelsSearch.data}
         isError={modelsSearch.isError}
         refetch={() => void modelsSearch.refetch()}
         requiredError={requiredError}

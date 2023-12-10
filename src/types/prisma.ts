@@ -133,6 +133,18 @@ export type CategoryPayloadIncluded = Prisma.CategoryGetPayload<
   typeof CategoryPayload
 >;
 
+export const FeaturedCategoryPayload =
+  Prisma.validator<Prisma.FeaturedCategoryDefaultArgs>()({
+    include: {
+      category: true,
+      image: true,
+    },
+  });
+
+export type FeaturedCategoryPayloadIncluded = Prisma.FeaturedCategoryGetPayload<
+  typeof FeaturedCategoryPayload
+>;
+
 // export const MultipleChoiceQuestionTypeArray = Object.keys(
 //   MultipleChoiceQuestionType
 // ) as MultipleChoiceQuestionType[];

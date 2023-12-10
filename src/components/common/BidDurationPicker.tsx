@@ -1,11 +1,17 @@
 import { FC } from "react";
-import Select from "react-select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 const plans = [
-  { label: "7 Days", value: 7 },
-  { label: "14 Days", value: 14 },
-  { label: "30 Days", value: 30 },
-];
+  { label: "7 Days", value: "7" },
+  { label: "14 Days", value: "14" },
+  { label: "30 Days", value: "30" },
+] as const;
 
 interface BidDurationPickerProps {
   onChange: (date: Date | undefined) => void;
@@ -16,25 +22,24 @@ const BidDurationPicker: FC<BidDurationPickerProps> = ({
 }) => {
   return (
     <Select
-      placeholder="Select a duration"
-      onChange={(newValue) => {
-        const d = (newValue?.value ?? 7) + Date.now() * 60 * 60 * 24;
-        handleChange(new Date(d));
+      onValueChange={(value: (typeof plans)[number]["value"]) => {
+        const selected = value ?? plans[0].value;
+        const date = new Date();
+        date.setDate(date.getDate() + Number(selected));
+        handleChange(date);
       }}
-      options={plans}
-      className="w-full"
-      // causing error in the production env
-      // deployement - https://vercel.com/loopers-nrj/recomm/CPXgTx9fWqkw8JuFhg9CnQXfkTPn
-      // styles={{
-      //   container: (provided) => ({
-      //     ...provided,
-      //     width: "100%",
-      //     border: "none",
-      //     outline: "none",
-      //     font: "inherit",
-      //   }),
-      // }}
-    />
+    >
+      <SelectTrigger className="w-[180px]">
+        <SelectValue placeholder="Select the Duration" />
+      </SelectTrigger>
+      <SelectContent>
+        {plans.map((plan) => (
+          <SelectItem key={plan.value} value={plan.value}>
+            {plan.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 };
 

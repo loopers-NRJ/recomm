@@ -74,11 +74,11 @@ export const productSchema = z.object({
     .refine((date) => date.getTime() > Date.now(), {
       message: "Date must be in the future",
     }),
-  multipleChoiceQuestionAnswers: z
+  multipleChoiceAnswers: z
     .array(
       z.union([
         z.object({
-          optionId: idSchema,
+          questionId: idSchema,
           type: z.enum([
             MultipleChoiceQuestionType.Dropdown,
             MultipleChoiceQuestionType.Variant,
@@ -87,7 +87,7 @@ export const productSchema = z.object({
           valueId: idSchema.nonempty({ message: "Enter at least one value" }),
         }),
         z.object({
-          optionId: idSchema,
+          questionId: idSchema,
           type: z.enum([MultipleChoiceQuestionType.Checkbox]),
           valueIds: z
             .array(idSchema.nonempty({ message: "Enter at least one value" }))
@@ -96,7 +96,7 @@ export const productSchema = z.object({
       ])
     )
     .default([]),
-  atomicQuestionAnswers: z.array(
+  atomicAnswers: z.array(
     z.union([
       z.object({
         questionId: idSchema,
@@ -124,47 +124,6 @@ export const productSchema = z.object({
   ),
 });
 
-export const atomicQuestionInput = z.object({
-  questionContent: z
-    .string({
-      required_error: "Enter a question",
-    })
-    .trim()
-    .min(1, "Question cannot be empty")
-    .max(255, "Question must be less than 255 characters"),
-  type: z.enum(AtomicQuestionTypeArray, {
-    required_error: "Select a type for the question",
-    invalid_type_error: "Invalid Question type",
-  }),
-  required: z.boolean().default(true),
-});
-
-export const multipleChoiceQuestionInput = z.object({
-  questionContent: z
-    .string({
-      required_error: "Enter the question",
-    })
-    .trim()
-    .min(1, "Question cannot be empty")
-    .max(255, "Coice must be less than 255 characters"),
-  type: z.enum(MultipleChoiceQuestionTypeArray, {
-    required_error: "Type is required for a question",
-    invalid_type_error: "Invalid Question type",
-  }),
-  required: z.boolean().default(true),
-  choices: z
-    .array(
-      z
-        .string({
-          required_error: "Enter a value",
-        })
-        .trim()
-        .min(1, "Choice cannot be empty")
-        .max(255, "Choice must be less than 255 characters")
-    )
-    .nonempty({ message: "Enter at least one choice" }),
-});
-
 export const modelSchema = z.object({
   name: z
     .string({
@@ -175,14 +134,55 @@ export const modelSchema = z.object({
     .max(255, "Name must be less than 255 characters"),
   brandId: idSchema,
   categoryId: idSchema,
-  multipleChoiceQuestions: z.array(multipleChoiceQuestionInput),
-  atomicQuestions: z.array(atomicQuestionInput),
+  multipleChoiceQuestions: z.array(
+    z.object({
+      questionContent: z
+        .string({
+          required_error: "Enter the question",
+        })
+        .trim()
+        .min(1, "Question cannot be empty")
+        .max(255, "Coice must be less than 255 characters"),
+      type: z.enum(MultipleChoiceQuestionTypeArray, {
+        required_error: "Type is required for a question",
+        invalid_type_error: "Invalid Question type",
+      }),
+      required: z.boolean().default(true),
+      choices: z
+        .array(
+          z
+            .string({
+              required_error: "Enter a value",
+            })
+            .trim()
+            .min(1, "Choice cannot be empty")
+            .max(255, "Choice must be less than 255 characters")
+        )
+        .nonempty({ message: "Enter at least one choice" }),
+    })
+  ),
+  atomicQuestions: z.array(
+    z.object({
+      questionContent: z
+        .string({
+          required_error: "Enter a question",
+        })
+        .trim()
+        .min(1, "Question cannot be empty")
+        .max(255, "Question must be less than 255 characters"),
+      type: z.enum(AtomicQuestionTypeArray, {
+        required_error: "Select a type for the question",
+        invalid_type_error: "Invalid Question type",
+      }),
+      required: z.boolean().default(true),
+    })
+  ),
   image: imageInputs.optional(),
 });
 
 type ProvidedMultipleChoiceQuestionAnswer = z.infer<
   typeof productSchema
->["multipleChoiceQuestionAnswers"][0];
+>["multipleChoiceAnswers"][0];
 
 export const validateMultipleChoiceQuestionInput = (
   multipleChoiceQuestions: MultipleChoiceQuestionPayloadIncluded[],
@@ -191,7 +191,8 @@ export const validateMultipleChoiceQuestionInput = (
   for (const question of multipleChoiceQuestions) {
     // check if the model question is provided
     const providedChoice = providedChoices.find(
-      (providedVarientOption) => providedVarientOption.optionId === question.id
+      (providedVarientOption) =>
+        providedVarientOption.questionId === question.id
     );
     // if the model question is not provided and is required
     if (providedChoice === undefined && question.required) {
@@ -237,7 +238,7 @@ export const validateMultipleChoiceQuestionInput = (
 
 export const validateAtomicQuestionAnswers = (
   questions: AtomicQuestion[],
-  providedAnswers: z.infer<typeof productSchema>["atomicQuestionAnswers"]
+  providedAnswers: z.infer<typeof productSchema>["atomicAnswers"]
 ) => {
   for (const question of questions) {
     // check if the model question is provided

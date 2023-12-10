@@ -83,9 +83,11 @@ export const searchRouter = createTRPCRouter({
     .query(async ({ input: { search }, ctx: { prisma, isAdmin } }) => {
       const categories = await prisma.category.findMany({
         where: {
-          name: {
-            contains: search,
-          },
+          name: search
+            ? {
+                contains: search,
+              }
+            : undefined,
           active: isAdmin ? undefined : true,
         },
         take: DefaultLimit,
@@ -110,9 +112,11 @@ export const searchRouter = createTRPCRouter({
       async ({ input: { search, categoryId }, ctx: { prisma, isAdmin } }) => {
         const brands = await prisma.brand.findMany({
           where: {
-            name: {
-              contains: search,
-            },
+            name: search
+              ? {
+                  contains: search,
+                }
+              : undefined,
             active: isAdmin ? undefined : true,
             models: categoryId
               ? {
@@ -167,9 +171,11 @@ export const searchRouter = createTRPCRouter({
                   },
                 }
               : undefined,
-            name: {
-              contains: search,
-            },
+            name: search
+              ? {
+                  contains: search,
+                }
+              : undefined,
           },
           take: DefaultLimit,
           select: {

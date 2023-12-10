@@ -12,10 +12,9 @@ import { debounce } from "@/utils/helper";
 
 interface SuggestionProps {
   searchKey: string;
-  setOpen: (open: boolean) => void;
 }
 
-const Suggestions: FC<SuggestionProps> = ({ searchKey, setOpen }) => {
+const Suggestions: FC<SuggestionProps> = ({ searchKey }) => {
   const router = useRouter();
 
   const suggestionsApi = api.search.all.useQuery({ search: searchKey });
@@ -57,7 +56,6 @@ const Suggestions: FC<SuggestionProps> = ({ searchKey, setOpen }) => {
             key={category.id}
             onSelect={() => {
               void router.push(`/products/?category=${category.id}`);
-              setOpen(false);
             }}
             className="flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-200/50"
           >

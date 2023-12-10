@@ -14,7 +14,7 @@ import {
   imageInputs,
 } from "@/utils/validation";
 import { AccessType } from "@prisma/client";
-import { CategoryPayload } from "@/types/prisma";
+import { CategoryPayload, FeaturedCategoryPayload } from "@/types/prisma";
 
 export const categoryRouter = createTRPCRouter({
   getCategories: publicProcedure
@@ -64,6 +64,60 @@ export const categoryRouter = createTRPCRouter({
             },
           ],
           include: CategoryPayload.include,
+        });
+        return {
+          categories,
+          nextCursor: categories[limit - 1]?.id,
+        };
+      }
+    ),
+
+  getCategoriesWithoutPayload: publicProcedure
+    .input(
+      functionalityOptions.extend({
+        parentId: idSchema.nullish(),
+        parentSlug: z.string().min(1).max(255).nullish(),
+      })
+    )
+    .query(
+      async ({
+        input: {
+          search,
+          limit,
+          sortBy,
+          sortOrder,
+          parentId,
+          cursor,
+          parentSlug,
+        },
+        ctx: { prisma, isAdmin },
+      }) => {
+        const categories = await prisma.category.findMany({
+          where: {
+            name: {
+              contains: search,
+            },
+            active: isAdmin ? undefined : true,
+            parentCategoryId: parentId,
+            parentCategory: parentSlug
+              ? {
+                  slug: parentSlug,
+                }
+              : undefined,
+          },
+          cursor: cursor
+            ? {
+                id: cursor,
+              }
+            : undefined,
+
+          take: limit,
+          skip: cursor ? 1 : undefined,
+          orderBy: [
+            {
+              [sortBy]: sortOrder,
+            },
+          ],
         });
         return {
           categories,
@@ -284,13 +338,10 @@ export const categoryRouter = createTRPCRouter({
               },
             },
           ],
-          include: {
-            category: true,
-            image: true,
-          },
+          include: FeaturedCategoryPayload.include,
         });
         return {
-          categories: categories.map(({ category }) => category),
+          categories,
           nextCursor: categories[limit - 1]?.categoryId,
         };
       }

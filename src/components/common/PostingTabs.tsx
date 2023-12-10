@@ -24,7 +24,6 @@ import { Input } from "../ui/input";
 import { toast } from "../ui/use-toast";
 import BidDurationPicker from "./BidDurationPicker";
 import ImagePicker from "./ImagePicker";
-import { VariantSelector } from "./VariantSelector";
 import CategoryComboBox from "./CategoryComboBox";
 import BrandComboBox from "./BrandComboBox";
 import ModelComboBox from "./ModelComboBox";
@@ -297,22 +296,23 @@ export const PostingTabs: FC<PostingTabsProps> = ({
                   </div>
                 ) : (
                   modelApi.data.multipleChoiceQuestions.map((question) => (
-                    <VariantSelector
-                      key={question.id}
-                      question={question}
-                      selectedVariantId={selectedVariants[question.id]}
-                      setSelectedVariantId={(optionId, valueId) => {
-                        if (formError?.variantId?.[0] === question.id) {
-                          setFormError((prev) => {
-                            return { ...prev, variantId: undefined };
-                          });
-                        }
-                        setSelectedVariants((prev) => {
-                          return { ...prev, [optionId]: valueId };
-                        });
-                      }}
-                      requiredError={formError?.variantId?.[0] === question.id}
-                    />
+                    <div key={question.id}>{question.questionContent}</div>
+                    // <VariantSelector
+                    //   key={question.id}
+                    //   question={question}
+                    //   selectedVariantId={selectedVariants[question.id]}
+                    //   setSelectedVariantId={(optionId, valueId) => {
+                    //     if (formError?.variantId?.[0] === question.id) {
+                    //       setFormError((prev) => {
+                    //         return { ...prev, variantId: undefined };
+                    //       });
+                    //     }
+                    //     setSelectedVariants((prev) => {
+                    //       return { ...prev, [optionId]: valueId };
+                    //     });
+                    //   }}
+                    //   requiredError={formError?.variantId?.[0] === question.id}
+                    // />
                   ))
                 )}
               </div>

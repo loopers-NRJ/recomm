@@ -9,7 +9,7 @@ interface ImageFile {
   progress: number;
 }
 
-interface ImagePickerProps {
+export interface ImagePickerProps {
   maxImages?: number;
   maxImageSizeInMB?: number;
   setImages: (images: File[] | ((prev: File[]) => File[])) => void;
