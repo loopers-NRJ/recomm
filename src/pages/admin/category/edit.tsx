@@ -1,5 +1,5 @@
 import Container from "@/components/Container";
-import { withAdminGuard } from "@/components/hoc/AdminGuard";
+import { withAdminGuard } from "@/hoc/AdminGuard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

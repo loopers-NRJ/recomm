@@ -2,7 +2,6 @@
 
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
-import { useCallback } from "react";
 
 interface CategoryBoxProps {
   icon: JSX.Element;
@@ -15,15 +14,12 @@ const CategoryBox: React.FC<CategoryBoxProps> = ({ icon, label, id }) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const createQueryString = useCallback(
-    (name: string, value: string) => {
-      const params = new URLSearchParams(searchParams);
-      params.set(name, value);
+  const createQueryString = (name: string, value: string) => {
+    const params = new URLSearchParams(searchParams);
+    params.set(name, value);
 
-      return params.toString();
-    },
-    [searchParams]
-  );
+    return params.toString();
+  };
 
   const selected =
     searchParams.get("category") === null && label === "All"
@@ -40,7 +36,7 @@ const CategoryBox: React.FC<CategoryBoxProps> = ({ icon, label, id }) => {
           .catch((err) => console.log(err));
       }}
       className={`
-        flex cursor-pointer flex-col items-center justify-center gap-2 border-b-2 p-3 transition hover:text-neutral-800
+        flex cursor-pointer flex-col items-center justify-between gap-2 border-b-2 p-3 transition hover:text-neutral-800
         ${selected ? "border-b-neutral-800" : "border-transparent"}
         ${selected ? "text-neutral-800" : "text-neutral-500"}
       `}

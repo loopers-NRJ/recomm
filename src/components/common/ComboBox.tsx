@@ -1,10 +1,9 @@
-import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
+import { Check, ChevronsUpDown } from "lucide-react";
 import { FC, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
   Command,
-  CommandEmpty,
   CommandInput,
   CommandItem,
   CommandList,
@@ -17,6 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Item } from "@/types/custom";
 import { debounce } from "@/utils/helper";
+import Loading from "./Loading";
 
 interface ComboBoxProps {
   label?: string;
@@ -89,13 +89,7 @@ const ComboBox: FC<ComboBoxProps> = ({
               debounce(() => refetch?.())();
             }}
           />
-          <CommandEmpty>No {label} found.</CommandEmpty>
           <CommandList className="max-h-40">
-            {((isItems ? items : previousItemsRef.current).length === 0 &&
-              !isLoading) ||
-              (isError && (
-                <div className="flex justify-center">No {label} found.</div>
-              ))}
             {(isItems ? items : previousItemsRef.current).map((item) => (
               <CommandItem
                 key={item.id}
@@ -122,9 +116,17 @@ const ComboBox: FC<ComboBoxProps> = ({
                 {item.name}
               </CommandItem>
             ))}
+            {!isLoading && (items ?? previousItemsRef.current).length === 0 && (
+              <div className="p-6 text-center text-sm">No {label} found.</div>
+            )}
             {isLoading && (
-              <div className="flex justify-center">
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <div className="flex items-center justify-center p-6 text-sm">
+                <Loading size={28} />
+              </div>
+            )}
+            {isError && (
+              <div className="p-6 text-center text-sm">
+                Something went wrong.
               </div>
             )}
           </CommandList>

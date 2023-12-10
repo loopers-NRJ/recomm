@@ -11,6 +11,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { api, setUserLocation } from "@/utils/api";
 import { useEffect } from "react";
 import Head from "next/head";
+import TopLoader from "nextjs-progressbar";
 
 const ModalRenderer = dynamic(
   () => import("../components/modals/core/modal-renderer"),
@@ -49,6 +50,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
       </Head>
       <div>
         <SessionProvider session={session}>
+          <TopLoader color="black" />
           <Navbar />
           <Component {...pageProps} session={session} />
           <BottomBar />

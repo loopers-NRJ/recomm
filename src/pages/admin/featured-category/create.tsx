@@ -1,5 +1,5 @@
 import Container from "@/components/Container";
-import { withAdminGuard } from "@/components/hoc/AdminGuard";
+import { withAdminGuard } from "@/hoc/AdminGuard";
 import ImagePicker from "@/components/common/ImagePicker";
 import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";

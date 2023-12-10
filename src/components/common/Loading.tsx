@@ -2,7 +2,9 @@ import { Loader2 } from "lucide-react";
 import Container from "../Container";
 import { cn } from "@/lib/utils";
 
-const Loading = ({ className, ...props }: React.ComponentProps<"div">) => {
+type LoadingProps = React.ComponentProps<"div"> & { size?: number };
+
+const Loading = ({ className, size = 36, ...props }: LoadingProps) => {
   return (
     <Container
       className={cn(
@@ -11,7 +13,7 @@ const Loading = ({ className, ...props }: React.ComponentProps<"div">) => {
       )}
       {...props}
     >
-      <Loader2 className="animate-spin" size={36} color="#000" />
+      <Loader2 className="animate-spin" size={size} color="#000" />
     </Container>
   );
 };

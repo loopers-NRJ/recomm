@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { api } from "@/utils/api";
 import { useState } from "react";
 import { idSchema } from "@/utils/validation";
-import { withAdminGuard } from "@/components/hoc/AdminGuard";
+import { withAdminGuard } from "@/hoc/AdminGuard";
 
 interface Command {
   action: "add" | "remove";

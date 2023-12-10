@@ -11,11 +11,11 @@ interface BottomBarProps {
 }
 
 const BottomBar: FC<BottomBarProps> = () => {
-  const user = useSession().data?.user;
+  const { data: session } = useSession();
 
   return (
     <div className="fixed bottom-0 left-0 z-30 flex w-full border p-0 md:hidden">
-      <NavItems currentUser={user} />
+      <NavItems session={session} />
     </div>
   );
 };

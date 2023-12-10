@@ -4,6 +4,9 @@ import AddWish from "@/components/AddWish";
 import Container from "@/components/Container";
 import Heading from "@/components/Heading";
 import Wishes from "@/components/Wishes";
+import { withProtectedRoute } from "@/hoc/ProtectedRoute";
+
+export const getServerSideProps = withProtectedRoute();
 
 const WishList: NextPage = () => {
   return (

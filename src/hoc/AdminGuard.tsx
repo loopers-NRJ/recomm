@@ -1,4 +1,3 @@
-"use client";
 import { RoleRouter } from "@/server/api/routers/role";
 import { getServerAuthSession } from "@/server/auth";
 import { prisma } from "@/server/db";

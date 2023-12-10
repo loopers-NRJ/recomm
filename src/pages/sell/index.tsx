@@ -3,6 +3,9 @@ import CategoryPicker from "@/components/common/CategoryPicker";
 import Loading from "@/components/common/Loading";
 import useUrl from "@/hooks/useUrl";
 import { api } from "@/utils/api";
+import { withProtectedRoute } from "@/hoc/ProtectedRoute";
+
+export const getServerSideProps = withProtectedRoute();
 
 export default function SellitPage() {
   const [parentCategorySlug, setParentCaregorySlug] = useUrl("category");
