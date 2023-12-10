@@ -14,9 +14,10 @@ import { FC } from "react";
 interface DatePickerProps {
   date?: Date;
   setDate: (date?: Date) => void;
+  requiredError?: boolean;
 }
 
-const DatePicker: FC<DatePickerProps> = ({ date, setDate }) => {
+const DatePicker: FC<DatePickerProps> = ({ date, setDate, requiredError }) => {
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -24,7 +25,8 @@ const DatePicker: FC<DatePickerProps> = ({ date, setDate }) => {
           variant={"outline"}
           className={cn(
             "w-[280px] justify-start text-left font-normal",
-            !date && "text-muted-foreground"
+            !date && "text-muted-foreground",
+            requiredError && "border-red-500"
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />

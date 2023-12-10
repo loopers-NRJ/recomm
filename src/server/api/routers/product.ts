@@ -140,7 +140,8 @@ export const productRouter = createTRPCRouter({
       }
       return product as ProductWithIsFavorite;
     }),
-  createProduct: getProcedure(AccessType.subscriber)
+  // createProduct: getProcedure(AccessType.subscriber)
+  createProduct: protectedProcedure
     .input(productSchema)
     .mutation(
       async ({

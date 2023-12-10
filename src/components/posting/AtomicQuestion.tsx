@@ -3,7 +3,8 @@ import { Input } from "../ui/input";
 import DatePicker from "../common/DatePicker";
 import { type ReactNode } from "react";
 import { Label } from "../ui/label";
-import Textarea from "../ui/Textarea";
+import Textarea from "../ui/textarea";
+import { ZodIssue } from "zod";
 
 export type AtomicAnswer =
   | {
@@ -27,6 +28,7 @@ interface AtomicQuestionInputFieldProps {
   answer: AtomicAnswer;
   onChange: (value: AtomicAnswer) => void;
   index?: number;
+  error: ZodIssue | undefined;
 }
 
 export default function AtomicQuestionInputField({
@@ -34,6 +36,7 @@ export default function AtomicQuestionInputField({
   onChange,
   index,
   answer,
+  error,
 }: AtomicQuestionInputFieldProps) {
   let InputField: ReactNode;
   if (
@@ -46,6 +49,7 @@ export default function AtomicQuestionInputField({
         value={answer.answerContent}
         onChange={(e) => onChange({ ...answer, answerContent: e.target.value })}
         placeholder="Enter your answer"
+        className={error ? "border-red-500" : ""}
       />
     );
   }
@@ -59,6 +63,7 @@ export default function AtomicQuestionInputField({
         value={answer.answerContent}
         onChange={(e) => onChange({ ...answer, answerContent: e.target.value })}
         placeholder="Enter your answer"
+        className={error ? "border-red-500" : ""}
       />
     );
   }
@@ -69,13 +74,14 @@ export default function AtomicQuestionInputField({
   ) {
     InputField = (
       <Input
-        type="number"
-        value={answer.answerContent}
+        type="string"
+        value={`${answer.answerContent === 0 ? "" : answer.answerContent}`}
         onChange={(e) => {
           if (isNaN(+e.target.value)) return;
           onChange({ ...answer, answerContent: +e.target.value });
         }}
         placeholder="Enter your answer"
+        className={error ? "border-red-500" : ""}
       />
     );
   }
@@ -90,6 +96,7 @@ export default function AtomicQuestionInputField({
         setDate={(date) => {
           onChange({ ...answer, answerContent: date });
         }}
+        requiredError={!!error}
       />
     );
   }
@@ -100,6 +107,7 @@ export default function AtomicQuestionInputField({
         {index}.&nbsp;&nbsp;{question.questionContent}
       </span>
       {InputField}
+      {error && <span className="text-sm text-red-500">{error.message}</span>}
     </Label>
   );
 }

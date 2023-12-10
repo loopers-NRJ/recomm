@@ -95,8 +95,6 @@ function FeaturedCategoryList({
   onSelect,
   onViewMore,
 }: FeaturedCategoryListProps) {
-  console.log(featuredCategories);
-
   return (
     <div className="grid w-full max-w-sm grid-cols-2 justify-items-center gap-3 p-3 pb-20">
       {featuredCategories.map((fc, i) => (

@@ -12,8 +12,10 @@ import BasicInfoSection from "./BasicInfoSection";
 import AdditionalInfoSection from "./AdditionalInfoSection";
 import ImageUploadSection from "./ImageUploadSection";
 import PricingInfoSection from "./PricingInfoSection";
-import { productSchema } from "@/utils/validation";
-// import { useImageUploader } from "@/utils/imageUpload";
+import { ProductFormError, productSchema } from "@/utils/validation";
+import { ZodIssue } from "zod";
+import { useRouter } from "next/router";
+import { useImageUploader } from "@/utils/imageUpload";
 
 export default function PostingForm({
   selectedCategorySlug,
@@ -26,24 +28,42 @@ export default function PostingForm({
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
+  const [bidEndTime, setBidEndTime] = useState<Date>();
+  const [images, setImages] = useState<File[]>([]);
 
   const [selectedBrand, setSelectedBrand] = useState<OptionalItem>();
-
   const [selectedModel, setSelectedModel] = useState<OptionalItem>();
 
   const [atomicAnswers, setAtomicAnswers] = useState<AtomicAnswer[]>([]);
-
   const [multipleChoiceAnswers, setMultipleChoiceAnswers] = useState<
     MultipleChoiceAnswer[]
   >([]);
 
-  const [price, setPrice] = useState("");
+  const [formError, setFormError] = useState<
+    ProductFormError & {
+      serverError?: string;
+    }
+  >({
+    title: undefined,
+    description: undefined,
+    price: undefined,
+    categoryId: undefined,
+    brandId: undefined,
+    modelId: undefined,
+    closedAt: undefined,
+    atomicAnswers: undefined,
+    multipleChoiceAnswers: undefined,
+    images: undefined,
+  });
 
-  const [bidEndTime, setBidEndTime] = useState<Date>();
-
-  const [images, setImages] = useState<File[]>([]);
-
-  // const { isLoading, upload } = useImageUploader();
+  const { isLoading, upload } = useImageUploader();
+  const router = useRouter();
+  const productApi = api.product.createProduct.useMutation({
+    async onSuccess(data) {
+      await router.push(`/${data.sellerId}/listings`);
+    },
+  });
 
   const modelApi = api.model.getModelById.useQuery(
     {
@@ -100,11 +120,7 @@ export default function PostingForm({
   );
 
   const handleSubmit = async () => {
-    // const uploadedImage = await upload(images);
-    // if (uploadedImage instanceof Error) {
-    //   return console.error(uploadedImage.message);
-    // }
-    const result = productSchema.safeParse({
+    const result = productSchema.omit({ images: true }).safeParse({
       title,
       description,
       price: Number(price),
@@ -116,29 +132,47 @@ export default function PostingForm({
       multipleChoiceAnswers,
     });
     if (!result.success) {
-      const errors = result.error.flatten();
-      console.log(errors);
+      const errors = result.error.issues.reduceRight<
+        Record<string | number, ZodIssue>
+      >((acc, issue) => {
+        if (issue.path[0]) {
+          acc[issue.path[0] as string] = issue;
+        }
+        return acc;
+      }, {});
+      return setFormError(errors as ProductFormError);
     }
-    // console.log({
-    //   categoryId: selectedCategory?.id,
-    //   brandId: selectedBrand?.id,
-    //   modelId: selectedModel?.id,
-    //   atomicAnswers,
-    //   multipleChoiceAnswers,
-    //   price: Number(price),
-    //   bidDuration,
-    // });
+    const uploadedImages = await upload(images);
+    if (uploadedImages instanceof Error) {
+      return setFormError({
+        ...formError,
+        serverError: uploadedImages.message,
+      });
+    }
+
+    productApi.mutate({
+      ...result.data,
+      images: uploadedImages,
+    });
   };
 
-  if (categoryApi.isError) {
-    return <p className="text-red-500">Something went wrong!</p>;
+  if (
+    categoryApi.isError ||
+    modelApi.isError ||
+    productApi.isError ||
+    formError.serverError
+  ) {
+    return (
+      <Container className="py-20 text-center">
+        Oops, Something went wrong. Try again.
+      </Container>
+    );
   }
   if (categoryApi.isLoading || !categoryApi.data) {
-    return <Loading />;
+    return <Loading className="min-h-[12rem]" />;
   }
 
   const selectedCategory = categoryApi.data;
-
   return (
     <Container className="flex flex-col items-center justify-center pb-40">
       <h1 className="my-4 text-center text-2xl font-bold">
@@ -156,6 +190,7 @@ export default function PostingForm({
           setSelectedBrand={setSelectedBrand}
           selectedModel={selectedModel}
           setSelectedModel={setSelectedModel}
+          formError={formError}
         />
 
         {!selectedCategory?.id ||
@@ -165,7 +200,7 @@ export default function PostingForm({
           modelApi.data.atomicQuestions.length !== atomicAnswers.length ||
           modelApi.data.multipleChoiceQuestions.length !==
             multipleChoiceAnswers.length ? (
-          <div className="flex flex-col items-center gap-4">
+          <div className="flex flex-col items-center gap-4 py-4">
             <Loading />
             Loading Details...
           </div>
@@ -181,13 +216,15 @@ export default function PostingForm({
               setAtomicAnswers={setAtomicAnswers}
               multipleChoiceAnswers={multipleChoiceAnswers}
               setMultipleChoiceAnswers={setMultipleChoiceAnswers}
+              formError={formError}
             />
 
             <ImageUploadSection
               images={images}
               setImages={setImages}
-              maxImages={20}
+              maxImages={10}
               model={modelApi.data}
+              formError={formError}
             />
 
             <PricingInfoSection
@@ -199,7 +236,12 @@ export default function PostingForm({
           </>
         )}
 
-        <Button onClick={() => void handleSubmit()}>Post</Button>
+        <Button
+          onClick={() => void handleSubmit()}
+          disabled={productApi.isLoading || isLoading}
+        >
+          Post
+        </Button>
       </div>
     </Container>
   );

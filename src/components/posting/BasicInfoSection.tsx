@@ -5,7 +5,8 @@ import { OptionalItem } from "@/types/custom";
 import { Category } from "@prisma/client";
 import { Label } from "@radix-ui/react-label";
 import { Input } from "../ui/input";
-import Textarea from "../ui/Textarea";
+import Textarea from "../ui/textarea";
+import { ProductFormError } from "@/utils/validation";
 
 interface BasicInfoSectionProps {
   title: string;
@@ -17,6 +18,7 @@ interface BasicInfoSectionProps {
   setSelectedBrand: (value: OptionalItem) => void;
   selectedModel: OptionalItem;
   setSelectedModel: (value: OptionalItem) => void;
+  formError: ProductFormError;
 }
 
 export default function BasicInfoSection({
@@ -29,6 +31,7 @@ export default function BasicInfoSection({
   setSelectedBrand,
   selectedModel,
   setSelectedModel,
+  formError,
 }: BasicInfoSectionProps) {
   useEffect(() => {
     setSelectedModel(undefined);
@@ -49,7 +52,13 @@ export default function BasicInfoSection({
               placeholder="Enter a catchy title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              className={formError.title ? "border border-red-400" : ""}
             />
+            {formError.title && (
+              <span className="text-sm text-red-500">
+                {formError.title.message}
+              </span>
+            )}
           </Label>
 
           <Label className="flex cursor-pointer flex-col gap-2">
@@ -62,19 +71,26 @@ export default function BasicInfoSection({
               }
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              className={formError.description ? "border border-red-400" : ""}
             />
+            {formError.description && (
+              <span className="text-sm text-red-500">
+                {formError.description.message}
+              </span>
+            )}
           </Label>
           <BrandComboBox
             selected={selectedBrand}
             onSelect={setSelectedBrand}
             categoryId={selectedCategory.id}
+            requiredError={!!formError.brandId}
           />
           <ModelComboBox
             selected={selectedModel}
             onSelect={setSelectedModel}
             categoryId={selectedCategory.id}
             brandId={selectedBrand?.id}
-            //   requiredError={!!formError?.modelId}
+            requiredError={!!formError.modelId}
             disabled={!selectedBrand}
           />
         </div>

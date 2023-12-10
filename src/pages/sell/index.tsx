@@ -33,7 +33,7 @@ export default function SellitPage() {
     !categoryApi.data ||
     !featuredCategoryApi.data
   ) {
-    return <Loading />;
+    return <Loading className="min-h-[12rem]" />;
   }
 
   const categories = categoryApi.data.pages.flatMap((page) => page.categories);

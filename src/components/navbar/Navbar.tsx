@@ -33,7 +33,6 @@ const Navbar: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
   const { data: session } = useSession();
-  const currentUser = session?.user;
 
   return (
     <div className="sticky left-0 top-0 z-10 w-full bg-white">
@@ -44,7 +43,7 @@ const Navbar: React.FC = () => {
               <Logo />
               <div className="flex h-full w-fit items-center justify-center gap-2">
                 <div className="hidden md:inline">
-                  <NavItems currentUser={currentUser} />
+                  <NavItems session={session} />
                 </div>
                 <Profile />
                 <div

@@ -1,44 +1,37 @@
-import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/router";
-import { FC, useCallback } from "react";
+import { FC } from "react";
 
 import useLoginModal from "@/hooks/useLoginModal";
-import usePostingModal from "@/hooks/usePostingModal";
 
 import { Button } from "../ui/button";
+import { Session } from "next-auth";
 
 interface NavItemsProps {
-  currentUser?: {
-    id: string;
-    name?: string | null;
-    image?: string | null;
-    email?: string | null;
-  };
+  session: Session | null;
 }
 
-const NavItems: FC<NavItemsProps> = ({ currentUser }) => {
+const NavItems: FC<NavItemsProps> = ({ session }) => {
   const router = useRouter();
   const loginModal = useLoginModal();
-  const postingModal = usePostingModal();
-  const { data: session } = useSession();
   const path = usePathname();
+  const currentUser = session?.user;
 
-  const onPost = useCallback(() => {
+  const onPost = () => {
     if (!currentUser) {
       return loginModal.onOpen();
     } else {
-      return postingModal.onOpen();
+      return void router.push("/sell");
     }
-  }, [currentUser, loginModal, postingModal]);
+  };
 
-  const handleWishListClick = useCallback(() => {
+  const handleWishListClick = () => {
     if (!currentUser) {
       return loginModal.onOpen();
     } else {
       return router.push(`/wishlist`);
     }
-  }, [currentUser, loginModal, router]);
+  };
 
   const HomeIcon =
     path === "/" ? (
@@ -72,24 +65,6 @@ const NavItems: FC<NavItemsProps> = ({ currentUser }) => {
       </svg>
     );
 
-  const CoinIcon = (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth={1.5}
-      stroke="currentColor"
-      width={24}
-      height={24}
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M15 8.25H9m6 3H9m3 6l-3-3h1.5a3 3 0 100-6M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-      />
-    </svg>
-  );
-
   const HeartIcon = (
     <svg
       className="heart m-[2px]"
@@ -104,23 +79,6 @@ const NavItems: FC<NavItemsProps> = ({ currentUser }) => {
       xmlns="http://www.w3.org/2000/svg"
     >
       <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-    </svg>
-  );
-
-  const StarIcon = (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth="1.5"
-      stroke="currentColor"
-      className="h-6 w-6"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"
-      />
     </svg>
   );
 
@@ -181,3 +139,38 @@ const NavItems: FC<NavItemsProps> = ({ currentUser }) => {
   );
 };
 export default NavItems;
+
+const CoinIcon = (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    width={24}
+    height={24}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M15 8.25H9m6 3H9m3 6l-3-3h1.5a3 3 0 100-6M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+    />
+  </svg>
+);
+
+const StarIcon = (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth="1.5"
+    stroke="currentColor"
+    className="h-6 w-6"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"
+    />
+  </svg>
+);

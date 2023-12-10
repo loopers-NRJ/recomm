@@ -10,12 +10,12 @@ import {
   SortBy,
   SortOrder,
 } from "@/utils/constants";
-import { Category } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { DataTable } from "./Table";
 import { useState } from "react";
 import { Button } from "../ui/button";
+import { FeaturedCategoryPayloadIncluded } from "@/types/prisma";
 
 const FeaturedCategoryTable = () => {
   const searchParams = useSearchParams();
@@ -50,31 +50,31 @@ const FeaturedCategoryTable = () => {
     return <div>Something went wrong</div>;
   }
 
-  const columns: ColumnDef<Category>[] = [
+  const columns: ColumnDef<FeaturedCategoryPayloadIncluded>[] = [
     {
       id: "Name",
       header: "Name",
-      accessorFn: (row) => row.name,
+      accessorFn: (row) => row.category.name,
       cell: ({ row }) => {
-        return row.original.name;
+        return row.original.category.name;
       },
     },
     {
       id: "createdAt",
       header: "Created At",
-      accessorFn: (row) => row.createdAt.toLocaleString("en-US"),
+      accessorFn: (row) => row.category.createdAt.toLocaleString("en-US"),
     },
     {
       id: "updatedAt",
       header: "Updated At",
-      accessorFn: (row) => row.updatedAt.toLocaleString("en-US"),
+      accessorFn: (row) => row.category.updatedAt.toLocaleString("en-US"),
     },
     {
       id: "products",
       header: "Products",
       cell: ({ row }) => (
         <Link
-          href={`/admin/products?category=${row.original.id}`}
+          href={`/admin/products?category=${row.original.categoryId}`}
           className="text-blue-400 hover:text-blue-600"
         >
           Products
@@ -86,7 +86,7 @@ const FeaturedCategoryTable = () => {
       header: "Brands",
       cell: ({ row }) => (
         <Link
-          href={`/admin/brands?category=${row.original.id}`}
+          href={`/admin/brands?category=${row.original.categoryId}`}
           className="text-blue-400 hover:text-blue-600"
         >
           Brands
@@ -98,7 +98,7 @@ const FeaturedCategoryTable = () => {
       header: "Models",
       cell: ({ row }) => (
         <Link
-          href={`/admin/models?category=${row.original.id}`}
+          href={`/admin/models?category=${row.original.categoryId}`}
           className="text-blue-400 hover:text-blue-600"
         >
           Models
@@ -110,15 +110,15 @@ const FeaturedCategoryTable = () => {
       header: "Featured",
       cell: ({ row }) => (
         <Button
-          disabled={featuredCategoryState === row.original.id}
+          disabled={featuredCategoryState === row.original.categoryId}
           variant="outline"
           size="sm"
           className="border-red-400"
           onClick={() => {
-            setFeaturedCategoryState(row.original.id);
+            setFeaturedCategoryState(row.original.categoryId);
             removeCategoryFeatured
               .mutateAsync({
-                categoryId: row.original.id,
+                categoryId: row.original.categoryId,
               })
               .then(async () => {
                 await categoriesApi.refetch();

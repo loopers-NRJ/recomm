@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { ZodIssue, z } from "zod";
 
 import {
   MultipleChoiceQuestionPayloadIncluded,
@@ -23,7 +23,6 @@ export const idSchema = z
     required_error: "Enter an id",
   })
   .trim()
-  .min(1, "Enter an id")
   .cuid({ message: "Invalid Id" });
 
 export const functionalityOptions = z.object({
@@ -50,7 +49,7 @@ export const productSchema = z.object({
       required_error: "Enter a title",
     })
     .trim()
-    .min(1, "Please provide a title to your product"),
+    .min(1, "Enter a title"),
   price: z
     .number({
       required_error: "Enter a price",
@@ -63,11 +62,33 @@ export const productSchema = z.object({
       required_error: "Enter a description",
     })
     .trim()
-    .min(10, "Please provide a description to your product"),
-  images: z.array(imageInputs).nonempty("Upload at least one image"),
-  categoryId: idSchema,
-  brandId: idSchema,
-  modelId: idSchema,
+    .min(10, "Description must be at least 10 characters long"),
+  images: z
+    .array(imageInputs)
+    .min(1, {
+      message: "Oops! you need to upload at least 5 images",
+    })
+    .max(10, {
+      message: "Cannot upload more than 10 images",
+    }),
+  categoryId: z
+    .string({
+      required_error: "select a Category",
+    })
+    .trim()
+    .cuid({ message: "Something went wrong, try again." }),
+  brandId: z
+    .string({
+      required_error: "select a Brand",
+    })
+    .trim()
+    .cuid({ message: "Something went wrong, try again." }),
+  modelId: z
+    .string({
+      required_error: "select a Model",
+    })
+    .trim()
+    .cuid({ message: "Something went wrong, try again." }),
   closedAt: z
     .date()
     .default(() => new Date(Date.now() + 60 * 60 * 24 * 7))
@@ -84,14 +105,25 @@ export const productSchema = z.object({
             MultipleChoiceQuestionType.Variant,
             MultipleChoiceQuestionType.RadioGroup,
           ]),
-          valueId: idSchema.nonempty({ message: "Enter at least one value" }),
+          valueId: z
+            .string({
+              required_error: "Hold on! Please select an option.",
+            })
+            .trim()
+            .cuid({ message: "Hold on! Please select an option." }),
         }),
         z.object({
           questionId: idSchema,
           type: z.enum([MultipleChoiceQuestionType.Checkbox]),
           valueIds: z
-            .array(idSchema.nonempty({ message: "Enter at least one value" }))
-            .nonempty({ message: "Enter at least one value" }),
+            .array(
+              idSchema.nonempty({
+                message: "Hold on! Please check at least one option.",
+              })
+            )
+            .nonempty({
+              message: "Hold on! Please check at least one option.",
+            }),
         }),
       ])
     )
@@ -101,28 +133,37 @@ export const productSchema = z.object({
       z.object({
         questionId: idSchema,
         type: z.enum([AtomicQuestionType.Text, AtomicQuestionType.Paragraph]),
-        answerContent: z.string().trim().min(1, "Enter an answer"),
+        answerContent: z
+          .string()
+          .trim()
+          .min(1, "Oops! Please fill out this field."),
       }),
       z.object({
         questionId: idSchema,
         type: z.enum([AtomicQuestionType.Number]),
-        answerContent: z.number().min(1, "Enter an answer"),
+        answerContent: z.number().min(1, "Oops! Enter a number here."),
       }),
       z.object({
         questionId: idSchema,
         type: z.enum([AtomicQuestionType.Date]),
         answerContent: z
           .date({
-            required_error: "Enter an answer",
+            required_error: "Oops! Pick a date, please.",
             invalid_type_error: "Invalid date",
           })
           .refine((date) => date.getTime() > Date.now(), {
-            message: "Date must be in the future",
+            message: "Oops! Pick a date, please.",
           }),
       }),
     ])
   ),
 });
+
+type TransformType<T> = {
+  [K in keyof T]: ZodIssue | undefined;
+};
+
+export type ProductFormError = TransformType<(typeof productSchema)["_type"]>;
 
 export const modelSchema = z.object({
   name: z

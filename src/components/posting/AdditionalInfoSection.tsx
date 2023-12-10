@@ -1,3 +1,4 @@
+import { ProductFormError } from "@/utils/validation";
 import AtomicQuestionInputField, { AtomicAnswer } from "./AtomicQuestion";
 import MultipleChoiceQuestionInputField, {
   MultipleChoiceAnswer,
@@ -16,6 +17,7 @@ interface AdditionalInfoSectionProps {
       | MultipleChoiceAnswer[]
       | ((prev: MultipleChoiceAnswer[]) => MultipleChoiceAnswer[])
   ) => void;
+  formError: ProductFormError;
 }
 
 export default function AdditionalInfoSection({
@@ -24,6 +26,7 @@ export default function AdditionalInfoSection({
   setAtomicAnswers,
   multipleChoiceAnswers,
   setMultipleChoiceAnswers,
+  formError,
 }: AdditionalInfoSectionProps) {
   if (
     model.atomicQuestions.length === 0 &&
@@ -60,6 +63,11 @@ export default function AdditionalInfoSection({
                   });
                 });
               }}
+              error={
+                formError.atomicAnswers?.path[1] === i
+                  ? formError.atomicAnswers
+                  : undefined
+              }
             />
           ))}
 
@@ -83,6 +91,11 @@ export default function AdditionalInfoSection({
                   });
                 });
               }}
+              error={
+                formError.multipleChoiceAnswers?.path[1] === i
+                  ? formError.multipleChoiceAnswers
+                  : undefined
+              }
             />
           ))}
         </div>
