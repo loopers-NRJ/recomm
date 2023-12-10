@@ -13,6 +13,8 @@ import { useEffect } from "react";
 import Head from "next/head";
 import TopLoader from "nextjs-progressbar";
 
+import { SpeedInsights } from "@vercel/speed-insights/next";
+
 const ModalRenderer = dynamic(
   () => import("../components/modals/core/modal-renderer"),
   {
@@ -57,6 +59,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
           <Toaster />
           <ModalRenderer />
         </SessionProvider>
+        <SpeedInsights />
       </div>
     </>
   );

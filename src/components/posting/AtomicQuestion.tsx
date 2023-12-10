@@ -3,7 +3,7 @@ import { Input } from "../ui/input";
 import DatePicker from "../common/DatePicker";
 import { type ReactNode } from "react";
 import { Label } from "../ui/label";
-import Textarea from "../ui/textarea";
+import Textarea from "../common/Textarea";
 import { ZodIssue } from "zod";
 
 export type AtomicAnswer =

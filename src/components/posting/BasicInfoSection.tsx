@@ -5,7 +5,7 @@ import { OptionalItem } from "@/types/custom";
 import { Category } from "@prisma/client";
 import { Label } from "@radix-ui/react-label";
 import { Input } from "../ui/input";
-import Textarea from "../ui/textarea";
+import Textarea from "../common/Textarea";
 import { ProductFormError } from "@/utils/validation";
 
 interface BasicInfoSectionProps {
