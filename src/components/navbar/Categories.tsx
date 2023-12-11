@@ -27,6 +27,7 @@ const Categories: FC = () => {
                 alt="Category Icon"
                 width={45}
                 height={45}
+                priority
                 className="h-10 w-10"
               />
             }

@@ -63,11 +63,7 @@ export default function AdditionalInfoSection({
                   });
                 });
               }}
-              error={
-                formError.atomicAnswers?.path[1] === i
-                  ? formError.atomicAnswers
-                  : undefined
-              }
+              error={formError.atomicAnswers?.[i]}
             />
           ))}
 
@@ -91,11 +87,7 @@ export default function AdditionalInfoSection({
                   });
                 });
               }}
-              error={
-                formError.multipleChoiceAnswers?.path[1] === i
-                  ? formError.multipleChoiceAnswers
-                  : undefined
-              }
+              error={formError.multipleChoiceAnswers?.[i]}
             />
           ))}
         </div>

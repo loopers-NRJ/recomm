@@ -5,6 +5,7 @@ import { type ReactNode } from "react";
 import { Label } from "../ui/label";
 import Textarea from "../common/Textarea";
 import { ZodIssue } from "zod";
+import ErrorMessage from "../common/ErrorMessage";
 
 export type AtomicAnswer =
   | {
@@ -107,7 +108,7 @@ export default function AtomicQuestionInputField({
         {index}.&nbsp;&nbsp;{question.questionContent}
       </span>
       {InputField}
-      {error && <span className="text-sm text-red-500">{error.message}</span>}
+      {error && <ErrorMessage>{error.message}</ErrorMessage>}
     </Label>
   );
 }

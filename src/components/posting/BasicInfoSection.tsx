@@ -83,15 +83,15 @@ export default function BasicInfoSection({
             selected={selectedBrand}
             onSelect={setSelectedBrand}
             categoryId={selectedCategory.id}
-            requiredError={!!formError.brandId}
+            error={formError.brandId?.message}
           />
           <ModelComboBox
             selected={selectedModel}
             onSelect={setSelectedModel}
             categoryId={selectedCategory.id}
             brandId={selectedBrand?.id}
-            requiredError={!!formError.modelId}
             disabled={!selectedBrand}
+            error={formError.modelId?.message}
           />
         </div>
       </section>

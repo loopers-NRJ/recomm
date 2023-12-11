@@ -73,19 +73,19 @@ export const productSchema = z.object({
     }),
   categoryId: z
     .string({
-      required_error: "select a Category",
+      required_error: "select a category",
     })
     .trim()
     .cuid({ message: "Something went wrong, try again." }),
   brandId: z
     .string({
-      required_error: "select a Brand",
+      required_error: "select a brand",
     })
     .trim()
     .cuid({ message: "Something went wrong, try again." }),
   modelId: z
     .string({
-      required_error: "select a Model",
+      required_error: "select a model",
     })
     .trim()
     .cuid({ message: "Something went wrong, try again." }),
@@ -159,11 +159,17 @@ export const productSchema = z.object({
   ),
 });
 
-type TransformType<T> = {
-  [K in keyof T]: ZodIssue | undefined;
-};
+export type ProductSchemaKeys = keyof Omit<
+  typeof productSchema._type,
+  "atomicAnswers" | "multipleChoiceAnswers"
+>;
 
-export type ProductFormError = TransformType<(typeof productSchema)["_type"]>;
+export type ProductFormError = {
+  [key in ProductSchemaKeys]?: ZodIssue;
+} & {
+  atomicAnswers?: ZodIssue[];
+  multipleChoiceAnswers?: ZodIssue[];
+};
 
 export const modelSchema = z.object({
   name: z

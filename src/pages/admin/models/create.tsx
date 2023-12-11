@@ -183,7 +183,7 @@ const CreateModelPage = () => {
             <BrandComboBox
               selected={selectedBrand}
               onSelect={setSelectedBrand}
-              requiredError={!!formError?.find((e) => e.path[0] === "brandId")}
+              error={formError?.find((e) => e.path[0] === "brandId")?.message}
             />
             <CategoryComboBox
               selected={selectedCategory}

@@ -1,6 +1,5 @@
 import BiddingModal from "../BiddingModal";
 import LoginModal from "../LoginModal";
-import PostingModal from "../PostingModal";
 import RegisterModal from "../RegisterModal";
 
 const ModalRenderer = () => {
@@ -9,7 +8,6 @@ const ModalRenderer = () => {
       <LoginModal />
       <RegisterModal />
       <BiddingModal />
-      <PostingModal />
     </>
   );
 };

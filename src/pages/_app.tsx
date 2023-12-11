@@ -49,18 +49,24 @@ const MyApp: AppType<{ session: Session | null }> = ({
           href="recomm-favicon.png"
           type="image/x-icon"
         />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#ffffff" />
+        <meta
+          name="description"
+          content="RECOMM is a platform for sharing recommendations."
+        />
       </Head>
-      <div>
+      <SpeedInsights />
+      <>
         <SessionProvider session={session}>
-          <TopLoader color="black" />
+          <TopLoader />
           <Navbar />
           <Component {...pageProps} session={session} />
           <BottomBar />
           <Toaster />
           <ModalRenderer />
         </SessionProvider>
-        <SpeedInsights />
-      </div>
+      </>
     </>
   );
 };

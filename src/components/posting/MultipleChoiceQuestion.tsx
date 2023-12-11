@@ -12,6 +12,7 @@ import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { MultipleChoiceQuestionType } from "@prisma/client";
 import { Button } from "../ui/button";
 import { ZodIssue } from "zod";
+import ErrorMessage from "../common/ErrorMessage";
 
 export type MultipleChoiceAnswer =
   | {
@@ -80,7 +81,7 @@ export default function MultipleChoiceQuestionInputField({
             </Label>
           ))}
         </div>
-        {error && <span className="text-sm text-red-500">{error.message}</span>}
+        {error && <ErrorMessage>{error.message}</ErrorMessage>}
       </div>
     );
   }
@@ -114,7 +115,7 @@ export default function MultipleChoiceQuestionInputField({
             ))}
           </SelectContent>
         </Select>
-        {error && <span className="text-sm text-red-500">{error.message}</span>}
+        {error && <ErrorMessage>{error.message}</ErrorMessage>}
       </Label>
     );
   }
@@ -153,7 +154,7 @@ export default function MultipleChoiceQuestionInputField({
             </Label>
           ))}
         </RadioGroup>
-        {error && <span className="text-sm text-red-500">{error.message}</span>}
+        {error && <ErrorMessage>{error.message}</ErrorMessage>}
       </div>
     );
   }
@@ -196,7 +197,7 @@ export default function MultipleChoiceQuestionInputField({
             </Button>
           ))}
         </div>
-        {error && <span className="text-sm text-red-500">{error.message}</span>}
+        {error && <ErrorMessage>{error.message}</ErrorMessage>}
       </Label>
     );
   }

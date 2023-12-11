@@ -12,8 +12,11 @@ import BasicInfoSection from "./BasicInfoSection";
 import AdditionalInfoSection from "./AdditionalInfoSection";
 import ImageUploadSection from "./ImageUploadSection";
 import PricingInfoSection from "./PricingInfoSection";
-import { ProductFormError, productSchema } from "@/utils/validation";
-import { ZodIssue } from "zod";
+import {
+  ProductFormError,
+  ProductSchemaKeys,
+  productSchema,
+} from "@/utils/validation";
 import { useRouter } from "next/router";
 import { useImageUploader } from "@/utils/imageUpload";
 
@@ -132,15 +135,27 @@ export default function PostingForm({
       multipleChoiceAnswers,
     });
     if (!result.success) {
-      const errors = result.error.issues.reduceRight<
-        Record<string | number, ZodIssue>
-      >((acc, issue) => {
-        if (issue.path[0]) {
-          acc[issue.path[0] as string] = issue;
-        }
-        return acc;
-      }, {});
-      return setFormError(errors as ProductFormError);
+      const errors = result.error.issues.reduceRight<ProductFormError>(
+        (acc, issue) => {
+          if (
+            issue.path[0] === "atomicAnswers" ||
+            issue.path[0] === "multipleChoiceAnswers"
+          ) {
+            const atomicAnswerErrors = acc[issue.path[0]];
+            if (atomicAnswerErrors) {
+              atomicAnswerErrors[issue.path[1] as number] = issue;
+            } else {
+              acc[issue.path[0]] = [];
+              acc[issue.path[0]]![issue.path[1] as number] = issue;
+            }
+          } else if (issue.path[0]) {
+            acc[issue.path[0] as ProductSchemaKeys] = issue;
+          }
+          return acc;
+        },
+        {}
+      );
+      return setFormError(errors as unknown as ProductFormError);
     }
     const uploadedImages = await upload(images);
     if (uploadedImages instanceof Error) {
