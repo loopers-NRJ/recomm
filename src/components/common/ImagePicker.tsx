@@ -1,6 +1,6 @@
 import { Loader2 as Spinner, Plus } from "lucide-react";
 import Image from "next/image";
-import { FC, useState } from "react";
+import React, { FC, useState } from "react";
 import { v4 as uuid } from "uuid";
 
 interface ImageFile {
@@ -216,4 +216,4 @@ const ImagePicker: FC<ImagePickerProps> = ({
   );
 };
 
-export default ImagePicker;
+export default React.memo(ImagePicker);

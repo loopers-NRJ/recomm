@@ -140,6 +140,34 @@ export const productRouter = createTRPCRouter({
       }
       return product as ProductWithIsFavorite;
     }),
+  getProductBySlug: publicProcedure
+    .input(z.object({ productSlug: z.string() }))
+    .query(async ({ input: { productSlug }, ctx: { prisma, session } }) => {
+      const product = await prisma.product.findUnique({
+        where: {
+          slug: productSlug,
+        },
+        include: singleProductPayload.include,
+      });
+      type ProductWithIsFavorite = typeof product & { isFavorite?: true };
+      if (session?.user !== undefined) {
+        const favorited = await prisma.product.findUnique({
+          where: {
+            slug: productSlug,
+            favoritedUsers: {
+              some: {
+                id: session.user.id,
+              },
+            },
+          },
+        });
+
+        if (favorited !== null) {
+          (product as ProductWithIsFavorite).isFavorite = true;
+        }
+      }
+      return product as ProductWithIsFavorite;
+    }),
   // createProduct: getProcedure(AccessType.subscriber)
   createProduct: protectedProcedure
     .input(productSchema)
@@ -206,7 +234,7 @@ export const productRouter = createTRPCRouter({
         const product = await prisma.product.create({
           data: {
             title,
-            slug: slugify(title),
+            slug: slugify(title) + "-" + Date.now(),
             price,
             description,
             images: {

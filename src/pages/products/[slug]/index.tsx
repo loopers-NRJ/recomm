@@ -15,14 +15,14 @@ import { api } from "@/utils/api";
 
 const ProductPage: NextPage = () => {
   const router = useRouter();
-  const productId = router.query.productId! as string;
+  const productSlug = router.query.slug as string;
   const session = useSession();
   const user = session.data?.user;
 
   const biddingModal = useBiddingModal();
 
-  const { data: product, isLoading } = api.product.getProductById.useQuery({
-    productId,
+  const { data: product, isLoading } = api.product.getProductBySlug.useQuery({
+    productSlug,
   });
 
   const [isFavorited, setIsFavorited] = useState<true | undefined>();

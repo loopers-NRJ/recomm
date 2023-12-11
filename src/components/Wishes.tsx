@@ -7,35 +7,76 @@ import { api } from "@/utils/api";
 
 import LoadingWishes from "./loading/LoadingWishes";
 import WishCard from "./WishCard";
+import ServerError from "./common/ServerError";
+import {
+  DefaultSearch,
+  SortBy,
+  DefaultSortBy,
+  SortOrder,
+  DefaultSortOrder,
+} from "@/utils/constants";
+import { useSearchParams } from "next/navigation";
+import { Button } from "./ui/button";
+import Loading from "./common/Loading";
 
 function Wishes() {
   const session = useSession();
 
-  const { data, isLoading, refetch } = api.user.getMywishes.useQuery({});
+  const searchParams = useSearchParams();
+  const params = new URLSearchParams(searchParams);
+
+  const search = params.get("search") ?? DefaultSearch;
+  const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
+  const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
+  const wishesApi = api.user.getMywishes.useInfiniteQuery(
+    {
+      search,
+      sortBy,
+      sortOrder,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    }
+  );
 
   useEffect(() => {
-    void refetch();
-  }, [refetch, session.status]);
+    void wishesApi.refetch();
+  }, [wishesApi, session.status]);
 
-  useEffect(() => {
-    void refetch();
-  }, [refetch]);
+  if (wishesApi.isLoading) {
+    return <LoadingWishes />;
+  }
+  if (wishesApi.isError) {
+    return <ServerError message={wishesApi.error.message} />;
+  }
 
-  if (isLoading) return <LoadingWishes />;
-  if (!data || data.wishes.length === 0)
+  const wishes = wishesApi.data.pages.flatMap((page) => page.wishes);
+  if (wishes.length === 0) {
     return (
       <div className="flex h-[300px] w-full items-center justify-center">
         No Data Available
       </div>
     );
+  }
 
   return (
     <div className="mt-10 flex w-full flex-col items-center gap-5">
       <div className="list w-full space-y-3">
-        {data.wishes.map((wish) => (
+        {wishes.map((wish) => (
           <WishCard wish={wish} key={wish.id} />
         ))}
       </div>
+      {!wishesApi.isLoading && wishesApi.isFetching && <Loading />}
+      <Button
+        className="mt-8 self-end"
+        onClick={() => {
+          void wishesApi.fetchNextPage();
+        }}
+        disabled={!wishesApi.hasNextPage}
+        variant="ghost"
+      >
+        View More
+      </Button>
     </div>
   );
 }

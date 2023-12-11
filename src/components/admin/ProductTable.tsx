@@ -1,7 +1,7 @@
 import { Trash } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { ProductsPayloadIncluded } from "@/types/prisma";
 import { api } from "@/utils/api";
@@ -17,6 +17,8 @@ import { ColumnDef } from "@tanstack/react-table";
 
 import { Button } from "../ui/button";
 import { DataTable } from "./Table";
+import Loading from "../common/Loading";
+import ServerError from "../common/ServerError";
 
 const ProductTable = () => {
   const searchParams = useSearchParams();
@@ -42,106 +44,106 @@ const ProductTable = () => {
       brandId,
     },
     {
-      getNextPageParam: (lastPage) => {
-        return lastPage.nextCursor;
-      },
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
     }
   );
   const deleteProduct = api.product.deleteProductById.useMutation();
   const [deleteId, setDeleteId] = useState<string>();
-  const columns: ColumnDef<Omit<ProductsPayloadIncluded, "room">>[] = [
-    {
-      id: "name",
-      header: "Name",
-      accessorFn: (row) => row.title,
-    },
-    {
-      id: "price",
-      header: "Price",
-      accessorFn: (row) => row.price,
-    },
-    {
-      id: "category",
-      header: "Cateegory",
-      cell: ({ row }) => (
-        <Link
-          href={`/admin/category/${row.original.model.categories[0]?.slug}=${row.original.model.categories[0]?.id}`}
-          className="text-blue-400 hover:text-blue-600"
-        >
-          {row.original.model.categories[0]?.name}
-        </Link>
-      ),
-    },
-    {
-      id: "model",
-      header: "Model",
-      cell: ({ row }) => (
-        <Link
-          href={`/admin/models/${row.original.model.id}`}
-          className="text-blue-400 hover:text-blue-600"
-        >
-          {row.original.model.name}
-        </Link>
-      ),
-    },
-    {
-      id: "brand",
-      header: "Brand",
-      cell: ({ row }) => (
-        <Link
-          href={`/admin/brands/${row.original.model.brand.id}`}
-          className="text-blue-400 hover:text-blue-600"
-        >
-          {row.original.model.brand.name}
-        </Link>
-      ),
-    },
-    {
-      id: "seller",
-      header: "Seller name",
-      cell: ({ row }) =>
-        // <Link
-        //   href={`/admin/users/${row.original.seller.id}`}
-        //   className="text-blue-400 hover:text-blue-600"
-        // >
-        row.original.seller.name,
-      // </Link>
-    },
-    {
-      id: "createdAt",
-      header: "Created At",
-      accessorFn: (row) => row.createdAt.toLocaleString("en-US"),
-    },
-    {
-      id: "delete",
-      header: "Delete",
-      cell: ({ row }) => (
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() => {
-            setDeleteId(row.original.id);
-            void deleteProduct
-              .mutateAsync({ productId: row.original.id })
-              .then(async () => {
-                await productApi.refetch();
-                setDeleteId(undefined);
-              });
-          }}
-          disabled={deleteId === row.original.id}
-        >
-          <Trash color="red" />
-        </Button>
-      ),
-    },
-  ];
+  const columns: ColumnDef<Omit<ProductsPayloadIncluded, "room">>[] = useMemo(
+    () => [
+      {
+        id: "name",
+        header: "Name",
+        accessorFn: (row) => row.title,
+      },
+      {
+        id: "price",
+        header: "Price",
+        accessorFn: (row) => row.price,
+      },
+      {
+        id: "category",
+        header: "Cateegory",
+        cell: ({ row }) => (
+          <Link
+            href={`/admin/category/${row.original.model.categories[0]?.slug}=${row.original.model.categories[0]?.id}`}
+            className="text-blue-400 hover:text-blue-600"
+          >
+            {row.original.model.categories[0]?.name}
+          </Link>
+        ),
+      },
+      {
+        id: "model",
+        header: "Model",
+        cell: ({ row }) => (
+          <Link
+            href={`/admin/models/${row.original.model.id}`}
+            className="text-blue-400 hover:text-blue-600"
+          >
+            {row.original.model.name}
+          </Link>
+        ),
+      },
+      {
+        id: "brand",
+        header: "Brand",
+        cell: ({ row }) => (
+          <Link
+            href={`/admin/brands/${row.original.model.brand.id}`}
+            className="text-blue-400 hover:text-blue-600"
+          >
+            {row.original.model.brand.name}
+          </Link>
+        ),
+      },
+      {
+        id: "seller",
+        header: "Seller name",
+        cell: ({ row }) =>
+          // <Link
+          //   href={`/admin/users/${row.original.seller.id}`}
+          //   className="text-blue-400 hover:text-blue-600"
+          // >
+          row.original.seller.name,
+        // </Link>
+      },
+      {
+        id: "createdAt",
+        header: "Created At",
+        accessorFn: (row) => row.createdAt.toLocaleString("en-US"),
+      },
+      {
+        id: "delete",
+        header: "Delete",
+        cell: ({ row }) => (
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => {
+              setDeleteId(row.original.id);
+              void deleteProduct
+                .mutateAsync({ productId: row.original.id })
+                .then(async () => {
+                  await productApi.refetch();
+                  setDeleteId(undefined);
+                });
+            }}
+            disabled={deleteId === row.original.id}
+          >
+            <Trash color="red" />
+          </Button>
+        ),
+      },
+    ],
+    [deleteId, deleteProduct, productApi]
+  );
 
   if (productApi.isLoading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
   if (productApi.isError) {
-    console.log(productApi.error);
-    return <div>Error</div>;
+    return <ServerError message={productApi.error.message} />;
   }
   return (
     <DataTable

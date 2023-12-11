@@ -23,7 +23,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
 }) => {
   return (
     <Link
-      href={`/products/${product.slug}/${product.id}`}
+      href={`/products/${product.slug}`}
       className="group col-span-1 cursor-pointer"
     >
       <div className="flex w-full flex-col gap-2">

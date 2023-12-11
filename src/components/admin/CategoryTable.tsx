@@ -2,7 +2,7 @@ import { Pen, Trash } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { api } from "@/utils/api";
 import {
@@ -19,6 +19,8 @@ import { Button } from "../ui/button";
 import { DataTable } from "./Table";
 import { Switch } from "@/components/ui/switch";
 import { CategoryPayloadIncluded } from "@/types/prisma";
+import ServerError from "../common/ServerError";
+import Loading from "../common/Loading";
 
 const CategoryTable = () => {
   const router = useRouter();
@@ -45,9 +47,7 @@ const CategoryTable = () => {
       sortOrder,
     },
     {
-      getNextPageParam: (lastPage) => {
-        return lastPage.nextCursor;
-      },
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
     }
   );
 
@@ -66,175 +66,192 @@ const CategoryTable = () => {
   // this state is to disable the featured button when the user clicks the featured button
   const [featuredCategoryState, setFeaturedCategoryState] = useState("");
 
-  if (categoriesApi.isError) {
-    console.log(categoriesApi.error);
-    return <div>Something went wrong</div>;
-  }
-  if (deleteCategoryApi.isError) {
-    console.log(deleteCategoryApi.error);
-    return <div>Something went wrong</div>;
-  }
-
-  const columns: ColumnDef<CategoryPayloadIncluded>[] = [
-    {
-      id: "Name",
-      header: "Name",
-      accessorFn: (row) => row.name,
-      cell: ({ row }) => {
-        return (
+  const columns: ColumnDef<CategoryPayloadIncluded>[] = useMemo(
+    () => [
+      {
+        id: "Name",
+        header: "Name",
+        accessorFn: (row) => row.name,
+        cell: ({ row }) => {
+          return (
+            <Link
+              href={`${router.asPath}/${row.original.slug}=${row.original.id}`}
+              className="text-blue-400 hover:text-blue-600"
+            >
+              {row.original.name}
+            </Link>
+          );
+        },
+      },
+      {
+        id: "createdAt",
+        header: "Created At",
+        accessorFn: (row) => row.createdAt.toLocaleString("en-US"),
+      },
+      {
+        id: "updatedAt",
+        header: "Updated At",
+        accessorFn: (row) => row.updatedAt.toLocaleString("en-US"),
+      },
+      {
+        id: "products",
+        header: "Products",
+        cell: ({ row }) => (
           <Link
-            href={`${router.asPath}/${row.original.slug}=${row.original.id}`}
+            href={`/admin/products?category=${row.original.id}`}
             className="text-blue-400 hover:text-blue-600"
           >
-            {row.original.name}
+            Products
           </Link>
-        );
+        ),
       },
-    },
-    {
-      id: "createdAt",
-      header: "Created At",
-      accessorFn: (row) => row.createdAt.toLocaleString("en-US"),
-    },
-    {
-      id: "updatedAt",
-      header: "Updated At",
-      accessorFn: (row) => row.updatedAt.toLocaleString("en-US"),
-    },
-    {
-      id: "products",
-      header: "Products",
-      cell: ({ row }) => (
-        <Link
-          href={`/admin/products?category=${row.original.id}`}
-          className="text-blue-400 hover:text-blue-600"
-        >
-          Products
-        </Link>
-      ),
-    },
-    {
-      id: "brands",
-      header: "Brands",
-      cell: ({ row }) => (
-        <Link
-          href={`/admin/brands?category=${row.original.id}`}
-          className="text-blue-400 hover:text-blue-600"
-        >
-          Brands
-        </Link>
-      ),
-    },
-    {
-      id: "models",
-      header: "Models",
-      cell: ({ row }) => (
-        <Link
-          href={`/admin/models?category=${row.original.id}`}
-          className="text-blue-400 hover:text-blue-600"
-        >
-          Models
-        </Link>
-      ),
-    },
-    {
-      id: "active",
-      header: "Active",
-      cell: ({ row }) => (
-        <Switch
-          disabled={updatingCategoryId === row.original.id}
-          checked={row.original.active}
-          // make the switch blue when active and black when inactive
-          className="data-[state=checked]:bg-blue-500"
-          onCheckedChange={() => {
-            setUpdatingCategoryId(row.original.id);
-            updateCategoryById
-              .mutateAsync({
-                id: row.original.id,
-                active: !row.original.active,
-              })
-              .then(async () => {
-                await categoriesApi.refetch();
-                setUpdatingCategoryId("");
-              })
-              .catch((err) => {
-                console.log(err);
-              });
-          }}
-        />
-      ),
-    },
-    {
-      id: "is-Featured",
-      header: "Featured",
-      cell: ({ row }) => (
-        <Switch
-          disabled={featuredCategoryState === row.original.id}
-          checked={row.original.featuredCategory !== null}
-          className="data-[state=checked]:bg-yellow-500"
-          onCheckedChange={() => {
-            setFeaturedCategoryState(row.original.id);
-            if (row.original.featuredCategory !== null) {
-              removeCategoryFeatured
+      {
+        id: "brands",
+        header: "Brands",
+        cell: ({ row }) => (
+          <Link
+            href={`/admin/brands?category=${row.original.id}`}
+            className="text-blue-400 hover:text-blue-600"
+          >
+            Brands
+          </Link>
+        ),
+      },
+      {
+        id: "models",
+        header: "Models",
+        cell: ({ row }) => (
+          <Link
+            href={`/admin/models?category=${row.original.id}`}
+            className="text-blue-400 hover:text-blue-600"
+          >
+            Models
+          </Link>
+        ),
+      },
+      {
+        id: "active",
+        header: "Active",
+        cell: ({ row }) => (
+          <Switch
+            disabled={updatingCategoryId === row.original.id}
+            checked={row.original.active}
+            // make the switch blue when active and black when inactive
+            className="data-[state=checked]:bg-blue-500"
+            onCheckedChange={() => {
+              setUpdatingCategoryId(row.original.id);
+              updateCategoryById
                 .mutateAsync({
-                  categoryId: row.original.id,
+                  id: row.original.id,
+                  active: !row.original.active,
                 })
                 .then(async () => {
                   await categoriesApi.refetch();
-                  setFeaturedCategoryState("");
+                  setUpdatingCategoryId("");
                 })
                 .catch((err) => {
                   console.log(err);
                 });
-            } else {
-              void router.push(
-                `/admin/featured-category/create/?id=${row.original.id}`
-              );
-            }
-          }}
-        />
-      ),
-    },
-    {
-      id: "edit",
-      header: "",
-      accessorFn: (row) => row.id,
-      cell: ({ row }) => (
-        <Button
-          onClick={() => {
-            void router.push(`/admin/category/edit/?id=${row.original.id}`);
-          }}
-          variant="ghost"
-          size="sm"
-        >
-          <Pen />
-        </Button>
-      ),
-    },
-    {
-      id: "delete",
-      header: "",
-      accessorFn: (row) => row.id,
-      cell: ({ row }) => (
-        <Button
-          onClick={() => {
-            setDeletingCategoryId(row.original.id);
-            void deleteCategoryApi
-              .mutateAsync({ categoryId: row.original.id })
-              .then(async () => {
-                await categoriesApi.refetch();
-                setDeletingCategoryId("");
-              });
-          }}
-          disabled={deletingCategoryId === row.original.id}
-          size="sm"
-          variant="ghost"
-        >
-          <Trash color="red" />
-        </Button>
-      ),
-    },
-  ];
+            }}
+          />
+        ),
+      },
+      {
+        id: "is-Featured",
+        header: "Featured",
+        cell: ({ row }) => (
+          <Switch
+            disabled={featuredCategoryState === row.original.id}
+            checked={row.original.featuredCategory !== null}
+            className="data-[state=checked]:bg-yellow-500"
+            onCheckedChange={() => {
+              setFeaturedCategoryState(row.original.id);
+              if (row.original.featuredCategory !== null) {
+                removeCategoryFeatured
+                  .mutateAsync({
+                    categoryId: row.original.id,
+                  })
+                  .then(async () => {
+                    await categoriesApi.refetch();
+                    setFeaturedCategoryState("");
+                  })
+                  .catch((err) => {
+                    console.log(err);
+                  });
+              } else {
+                void router.push(
+                  `/admin/featured-category/create/?id=${row.original.id}`
+                );
+              }
+            }}
+          />
+        ),
+      },
+      {
+        id: "edit",
+        header: "",
+        accessorFn: (row) => row.id,
+        cell: ({ row }) => (
+          <Button
+            onClick={() => {
+              void router.push(`/admin/category/edit/?id=${row.original.id}`);
+            }}
+            variant="ghost"
+            size="sm"
+          >
+            <Pen />
+          </Button>
+        ),
+      },
+      {
+        id: "delete",
+        header: "",
+        accessorFn: (row) => row.id,
+        cell: ({ row }) => (
+          <Button
+            onClick={() => {
+              setDeletingCategoryId(row.original.id);
+              void deleteCategoryApi
+                .mutateAsync({ categoryId: row.original.id })
+                .then(async () => {
+                  await categoriesApi.refetch();
+                  setDeletingCategoryId("");
+                });
+            }}
+            disabled={deletingCategoryId === row.original.id}
+            size="sm"
+            variant="ghost"
+          >
+            <Trash color="red" />
+          </Button>
+        ),
+      },
+    ],
+    [
+      categoriesApi,
+      deleteCategoryApi,
+      deletingCategoryId,
+      featuredCategoryState,
+      removeCategoryFeatured,
+      router,
+      updateCategoryById,
+      updatingCategoryId,
+    ]
+  );
+
+  if (categoriesApi.isLoading || parentCategoryApi.isLoading) {
+    return <Loading />;
+  }
+
+  if (categoriesApi.isError || parentCategoryApi.isError) {
+    return (
+      <ServerError
+        message={
+          categoriesApi.error?.message ?? parentCategoryApi.error?.message ?? ""
+        }
+      />
+    );
+  }
 
   return (
     <>
@@ -258,18 +275,14 @@ const CategoryTable = () => {
           </Link>
         </div>
       </div>
-      {categoriesApi.isLoading ? (
-        <div className="flex justify-center">Loading...</div>
-      ) : (
-        <DataTable
-          columns={columns}
-          data={categoriesApi.data.pages.flatMap((page) => page.categories)}
-          canViewMore={!!categoriesApi.hasNextPage}
-          viewMore={() => {
-            void categoriesApi.fetchNextPage();
-          }}
-        />
-      )}
+      <DataTable
+        columns={columns}
+        data={categoriesApi.data.pages.flatMap((page) => page.categories)}
+        canViewMore={!!categoriesApi.hasNextPage}
+        viewMore={() => {
+          void categoriesApi.fetchNextPage();
+        }}
+      />
     </>
   );
 };

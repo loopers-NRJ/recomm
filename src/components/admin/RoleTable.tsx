@@ -6,41 +6,46 @@ import { RolePayloadIncluded } from "@/types/prisma";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useMemo } from "react";
+import Loading from "../common/Loading";
+import ServerError from "../common/ServerError";
 
 const RoleTable = () => {
   const rolesApi = api.role.getRoles.useQuery();
   const router = useRouter();
-  const columns: ColumnDef<RolePayloadIncluded>[] = [
-    {
-      id: "name",
-      header: "Name",
-      accessorFn: (row) => row.name,
-    },
-    {
-      id: "accesses",
-      header: "Accesses",
-      cell: ({ row: { original: role } }) => {
-        return (
-          <Button
-            variant="ghost"
-            className="border"
-            onClick={() => {
-              void router.push(`/admin/role/${role.id}`);
-            }}
-          >
-            {role.accesses.length} Accesses
-          </Button>
-        );
+  const columns: ColumnDef<RolePayloadIncluded>[] = useMemo(
+    () => [
+      {
+        id: "name",
+        header: "Name",
+        accessorFn: (row) => row.name,
       },
-    },
-  ];
+      {
+        id: "accesses",
+        header: "Accesses",
+        cell: ({ row: { original: role } }) => {
+          return (
+            <Button
+              variant="ghost"
+              className="border"
+              onClick={() => {
+                void router.push(`/admin/role/${role.id}`);
+              }}
+            >
+              {role.accesses.length} Accesses
+            </Button>
+          );
+        },
+      },
+    ],
+    [router]
+  );
 
   if (rolesApi.isLoading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
   if (rolesApi.isError) {
-    console.log(rolesApi.error);
-    return <div>Error</div>;
+    return <ServerError message={rolesApi.error.message} />;
   }
   return (
     <>

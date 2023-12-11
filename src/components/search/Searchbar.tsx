@@ -21,6 +21,7 @@ const Search = () => {
             setSearchKey(undefined);
           }
         }}
+        role="search"
         placeholder="Search"
       />
       {searchKey && (

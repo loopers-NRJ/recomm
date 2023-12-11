@@ -4,6 +4,7 @@ import MultipleChoiceQuestionInputField, {
   MultipleChoiceAnswer,
 } from "./MultipleChoiceQuestion";
 import { SingleModelPayloadIncluded } from "@/types/prisma";
+import React from "react";
 
 interface AdditionalInfoSectionProps {
   model: SingleModelPayloadIncluded;
@@ -20,7 +21,7 @@ interface AdditionalInfoSectionProps {
   formError: ProductFormError;
 }
 
-export default function AdditionalInfoSection({
+function AdditionalInfoSection({
   model,
   atomicAnswers,
   setAtomicAnswers,
@@ -96,3 +97,5 @@ export default function AdditionalInfoSection({
     </>
   );
 }
+
+export default React.memo(AdditionalInfoSection);

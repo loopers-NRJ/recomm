@@ -7,36 +7,54 @@ import { useEffect } from "react";
 import Container from "@/components/Container";
 import ListingCard from "@/components/ListingCard";
 import LoadingProducts from "@/components/loading/LoadingProducts";
-import { ProductsPayloadIncluded } from "@/types/prisma";
 import { api } from "@/utils/api";
+import {
+  DefaultSearch,
+  SortBy,
+  DefaultSortBy,
+  SortOrder,
+  DefaultSortOrder,
+} from "@/utils/constants";
+import { useSearchParams } from "next/navigation";
+import ServerError from "@/components/common/ServerError";
+import { Button } from "@/components/ui/button";
+import Loading from "@/components/common/Loading";
 
 const Favourites: NextPage = () => {
   const session = useSession();
+  const searchParams = useSearchParams();
+  const params = new URLSearchParams(searchParams);
 
-  const {
-    data,
-    isLoading,
-    isError,
-    // error,
-    refetch,
-  } = api.user.getMyFavorites.useQuery({});
+  const search = params.get("search") ?? DefaultSearch;
+  const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
+  const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
+
+  const favoritesApi = api.user.getMyFavorites.useInfiniteQuery(
+    {
+      search,
+      sortBy,
+      sortOrder,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    }
+  );
 
   useEffect(() => {
-    void refetch();
-  }, [session.status, refetch]);
+    void favoritesApi.refetch();
+  }, [favoritesApi, session.status]);
 
-  if (isLoading) return <LoadingProducts />;
+  if (favoritesApi.isLoading) {
+    return <LoadingProducts />;
+  }
 
-  // if (isError) return <div>{error.message}</div>;
-  if (isError)
-    return (
-      <Container>
-        <div className="flex h-screen w-full items-center justify-center">
-          Something Went Wrong
-        </div>
-      </Container>
-    );
-  else if (data === undefined || data.favoritedProducts.length === 0)
+  if (favoritesApi.isError) {
+    return <ServerError message={favoritesApi.error.message} />;
+  }
+  const favoritedProducts = favoritesApi.data.pages.flatMap(
+    (page) => page.favoritedProducts
+  );
+  if (favoritedProducts.length === 0) {
     return (
       <Container>
         <div className="flex h-[500px] items-center justify-center font-semibold">
@@ -44,19 +62,31 @@ const Favourites: NextPage = () => {
         </div>
       </Container>
     );
+  }
 
   return (
     <Container>
       <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-6">
-        {data.favoritedProducts.map((product) => (
+        {favoritedProducts.map((product) => (
           <ListingCard
             key={product.id}
-            product={product as unknown as ProductsPayloadIncluded}
+            product={product}
             isFavourite
-            onFavoriteStateChange={() => void refetch()}
+            onFavoriteStateChange={() => void favoritesApi.refetch()}
           />
         ))}
       </div>
+      {!favoritesApi.isLoading && favoritesApi.isFetching && <Loading />}
+      <Button
+        className="mt-8 self-end"
+        onClick={() => {
+          void favoritesApi.fetchNextPage();
+        }}
+        disabled={!favoritesApi.hasNextPage}
+        variant="ghost"
+      >
+        View More
+      </Button>
     </Container>
   );
 };

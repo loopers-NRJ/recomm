@@ -1,11 +1,11 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Label } from "../ui/label";
 import ComboBox from "./ComboBox";
 import { api } from "@/utils/api";
 import { Item } from "@/types/custom";
 import ErrorMessage from "./ErrorMessage";
 
-export default function BrandComboBox({
+function BrandComboBox({
   onSelect,
   selected,
   categoryId,
@@ -43,3 +43,5 @@ export default function BrandComboBox({
     </div>
   );
 }
+
+export default React.memo(BrandComboBox);

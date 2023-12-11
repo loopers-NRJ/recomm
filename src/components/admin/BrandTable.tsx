@@ -2,7 +2,7 @@ import { Pen, Trash } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { api } from "@/utils/api";
 import {
@@ -18,6 +18,8 @@ import { ColumnDef } from "@tanstack/react-table";
 
 import { Button } from "../ui/button";
 import { DataTable } from "./Table";
+import Loading from "../common/Loading";
+import ServerError from "../common/ServerError";
 
 const BrandTable = () => {
   const searchParams = useSearchParams();
@@ -47,9 +49,7 @@ const BrandTable = () => {
       categoryId,
     },
     {
-      getNextPageParam: (lastPage) => {
-        return lastPage.nextCursor;
-      },
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
     }
   );
 
@@ -57,96 +57,102 @@ const BrandTable = () => {
   // this state is to disable the delete button when admin clicks on it
   const [deleteBrandId, setDeleteBrandId] = useState<string>();
 
-  if (brandsApi.isLoading) {
-    return <div>Loading...</div>;
+  const columns: ColumnDef<Brand>[] = useMemo(
+    () => [
+      {
+        id: "Name",
+        header: "Name",
+        accessorFn: (row) => row.name,
+      },
+      {
+        id: "createdAt",
+        header: "Created At",
+        accessorFn: (row) => row.createdAt.toLocaleString("en-US"),
+      },
+      {
+        id: "updatedAt",
+        header: "Updated At",
+        accessorFn: (row) => row.updatedAt.toLocaleString("en-US"),
+      },
+      {
+        id: "models",
+        header: "Models",
+        cell: ({ row }) => (
+          <Link
+            href={`/admin/models?brand=${row.original.id}`}
+            className="text-blue-400 hover:text-blue-600"
+          >
+            Models
+          </Link>
+        ),
+      },
+      {
+        id: "products",
+        header: "Products",
+        cell: ({ row }) => (
+          <Link
+            href={`/admin/products?brand=${row.original.id}`}
+            className="text-blue-400 hover:text-blue-600"
+          >
+            Products
+          </Link>
+        ),
+      },
+      {
+        id: "edit",
+        header: "",
+        accessorFn: (row) => row.id,
+        cell: ({ row }) => (
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => {
+              void router.push(`/admin/brands/edit/?id=${row.original.id}`);
+            }}
+          >
+            <Pen />
+          </Button>
+        ),
+      },
+      {
+        id: "delete",
+        header: "",
+        accessorFn: (row) => row.id,
+        cell: ({ row }) => (
+          <Button
+            onClick={() => {
+              setDeleteBrandId(row.original.id);
+              void deleteBrandApi
+                .mutateAsync({
+                  brandId: row.original.id,
+                })
+                .then(async () => {
+                  await brandsApi.refetch();
+                  setDeleteBrandId(undefined);
+                });
+            }}
+            disabled={deleteBrandId === row.original.id}
+            size="sm"
+            variant="ghost"
+          >
+            <Trash color="red" />
+          </Button>
+        ),
+      },
+    ],
+    [brandsApi, deleteBrandApi, deleteBrandId, router]
+  );
+
+  if (brandsApi.isLoading || brandApi.isLoading) {
+    return <Loading />;
   }
   if (brandsApi.isError || brandApi.isError) {
-    console.log(brandsApi.error ?? brandApi.error);
-    return <div>Something went wrong</div>;
+    return (
+      <ServerError
+        message={brandApi.error?.message ?? brandsApi.error?.message ?? ""}
+      />
+    );
   }
-
-  const columns: ColumnDef<Brand>[] = [
-    {
-      id: "Name",
-      header: "Name",
-      accessorFn: (row) => row.name,
-    },
-    {
-      id: "createdAt",
-      header: "Created At",
-      accessorFn: (row) => row.createdAt.toLocaleString("en-US"),
-    },
-    {
-      id: "updatedAt",
-      header: "Updated At",
-      accessorFn: (row) => row.updatedAt.toLocaleString("en-US"),
-    },
-    {
-      id: "models",
-      header: "Models",
-      cell: ({ row }) => (
-        <Link
-          href={`/admin/models?brand=${row.original.id}`}
-          className="text-blue-400 hover:text-blue-600"
-        >
-          Models
-        </Link>
-      ),
-    },
-    {
-      id: "products",
-      header: "Products",
-      cell: ({ row }) => (
-        <Link
-          href={`/admin/products?brand=${row.original.id}`}
-          className="text-blue-400 hover:text-blue-600"
-        >
-          Products
-        </Link>
-      ),
-    },
-    {
-      id: "edit",
-      header: "",
-      accessorFn: (row) => row.id,
-      cell: ({ row }) => (
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() => {
-            void router.push(`/admin/brands/edit/?id=${row.original.id}`);
-          }}
-        >
-          <Pen />
-        </Button>
-      ),
-    },
-    {
-      id: "delete",
-      header: "",
-      accessorFn: (row) => row.id,
-      cell: ({ row }) => (
-        <Button
-          onClick={() => {
-            setDeleteBrandId(row.original.id);
-            void deleteBrandApi
-              .mutateAsync({
-                brandId: row.original.id,
-              })
-              .then(async () => {
-                await brandsApi.refetch();
-                setDeleteBrandId(undefined);
-              });
-          }}
-          disabled={deleteBrandId === row.original.id}
-          size="sm"
-          variant="ghost"
-        >
-          <Trash color="red" />
-        </Button>
-      ),
-    },
-  ];
 
   return (
     <>

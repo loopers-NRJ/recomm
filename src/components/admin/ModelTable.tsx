@@ -1,7 +1,7 @@
 import { Pen, Trash } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { ModelPayloadIncluded } from "@/types/prisma";
 import { api } from "@/utils/api";
@@ -18,6 +18,8 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "../ui/button";
 import { DataTable } from "./Table";
 import { useRouter } from "next/router";
+import Loading from "../common/Loading";
+import ServerError from "../common/ServerError";
 
 const ModelTable = () => {
   const searchParams = useSearchParams();
@@ -41,102 +43,102 @@ const ModelTable = () => {
       brandId,
     },
     {
-      getNextPageParam: (lastPage) => {
-        return lastPage.nextCursor;
-      },
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
     }
   );
 
   const deleteModelApi = api.model.deleteModelById.useMutation();
   const [deleteModelId, setDeleteModelId] = useState<string>();
 
+  const columns: ColumnDef<ModelPayloadIncluded>[] = useMemo(
+    () => [
+      {
+        id: "Name",
+        header: "Name",
+        accessorFn: (row) => row.name,
+      },
+      {
+        id: "Brand",
+        header: "Brand",
+        accessorFn: (row) => row.brand.name,
+      },
+      {
+        id: "Category",
+        header: "Category",
+        // TODO: display the array of categories instead of first one
+        accessorFn: (row) => row.categories[0]?.name,
+      },
+      {
+        id: "createdAt",
+        header: "Created At",
+        accessorFn: (row) => row.createdAt.toLocaleString("en-US"),
+      },
+      {
+        id: "updatedAt",
+        header: "Updated At",
+        accessorFn: (row) => row.updatedAt.toLocaleString("en-US"),
+      },
+      {
+        id: "products",
+        header: "Products",
+        cell: ({ row }) => (
+          <Link
+            href={`/admin/products?model=${row.original.id}`}
+            className="text-blue-400 hover:text-blue-600"
+          >
+            Products
+          </Link>
+        ),
+      },
+      {
+        id: "edit",
+        header: "",
+        accessorFn: (row) => row.id,
+        cell: ({ row }) => (
+          <Button
+            onClick={() => {
+              void router.push(`/admin/models/edit/?id=${row.original.id}`);
+            }}
+            size="sm"
+            variant="ghost"
+          >
+            <Pen />
+          </Button>
+        ),
+      },
+      {
+        id: "delete",
+        header: "",
+        accessorFn: (row) => row.id,
+        cell: ({ row }) => (
+          <Button
+            onClick={() => {
+              setDeleteModelId(row.id);
+              void deleteModelApi
+                .mutateAsync({ modelId: row.original.id })
+                .then(async () => {
+                  await modelApi.refetch();
+                  setDeleteModelId(undefined);
+                });
+            }}
+            disabled={deleteModelId === row.id}
+            size="sm"
+            variant="ghost"
+          >
+            <Trash color="red" />
+          </Button>
+        ),
+      },
+    ],
+    [deleteModelApi, deleteModelId, modelApi, router]
+  );
+
   if (modelApi.isLoading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
   if (modelApi.isError) {
-    console.log(modelApi.error);
-    return <div>Error</div>;
+    return <ServerError message={modelApi.error.message} />;
   }
-
-  const columns: ColumnDef<ModelPayloadIncluded>[] = [
-    {
-      id: "Name",
-      header: "Name",
-      accessorFn: (row) => row.name,
-    },
-    {
-      id: "Brand",
-      header: "Brand",
-      accessorFn: (row) => row.brand.name,
-    },
-    {
-      id: "Category",
-      header: "Category",
-      // TODO: display the array of categories instead of first one
-      accessorFn: (row) => row.categories[0]?.name,
-    },
-    {
-      id: "createdAt",
-      header: "Created At",
-      accessorFn: (row) => row.createdAt.toLocaleString("en-US"),
-    },
-    {
-      id: "updatedAt",
-      header: "Updated At",
-      accessorFn: (row) => row.updatedAt.toLocaleString("en-US"),
-    },
-    {
-      id: "products",
-      header: "Products",
-      cell: ({ row }) => (
-        <Link
-          href={`/admin/products?model=${row.original.id}`}
-          className="text-blue-400 hover:text-blue-600"
-        >
-          Products
-        </Link>
-      ),
-    },
-    {
-      id: "edit",
-      header: "",
-      accessorFn: (row) => row.id,
-      cell: ({ row }) => (
-        <Button
-          onClick={() => {
-            void router.push(`/admin/models/edit/?id=${row.original.id}`);
-          }}
-          size="sm"
-          variant="ghost"
-        >
-          <Pen />
-        </Button>
-      ),
-    },
-    {
-      id: "delete",
-      header: "",
-      accessorFn: (row) => row.id,
-      cell: ({ row }) => (
-        <Button
-          onClick={() => {
-            setDeleteModelId(row.id);
-            void deleteModelApi
-              .mutateAsync({ modelId: row.original.id })
-              .then(async () => {
-                await modelApi.refetch();
-                setDeleteModelId(undefined);
-              });
-          }}
-          disabled={deleteModelId === row.id}
-          size="sm"
-          variant="ghost"
-        >
-          <Trash color="red" />
-        </Button>
-      ),
-    },
-  ];
 
   return (
     <>

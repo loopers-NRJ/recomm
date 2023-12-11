@@ -253,7 +253,7 @@ export default function PostingForm({
 
         <Button
           onClick={() => void handleSubmit()}
-          disabled={productApi.isLoading || isLoading}
+          disabled={productApi.isLoading || isLoading || modelApi.isLoading}
         >
           Post
         </Button>

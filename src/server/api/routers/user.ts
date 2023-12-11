@@ -9,6 +9,7 @@ import {
   publicProcedure,
 } from "../trpc";
 import { AccessType } from "@prisma/client";
+import { productsPayload, wishPayload } from "@/types/prisma";
 
 export const userRouter = createTRPCRouter({
   getUsers: publicProcedure
@@ -225,15 +226,7 @@ export const userRouter = createTRPCRouter({
               createdAt: sortBy === "createdAt" ? sortOrder : undefined,
             },
           ],
-          include: {
-            model: true,
-            room: {
-              include: {
-                bids: true,
-              },
-            },
-            images: true,
-          },
+          include: productsPayload.include,
         });
         return {
           favoritedProducts,
@@ -294,13 +287,7 @@ export const userRouter = createTRPCRouter({
               createdAt: sortBy === "createdAt" ? sortOrder : undefined,
             },
           ],
-          include: {
-            buyer: true,
-            seller: true,
-            model: true,
-            room: true,
-            images: true,
-          },
+          include: productsPayload.include,
         });
         return {
           listings,
@@ -362,6 +349,7 @@ export const userRouter = createTRPCRouter({
               createdAt: sortBy === "createdAt" ? sortOrder : undefined,
             },
           ],
+          include: productsPayload.include,
         });
         return {
           purchases,
@@ -423,11 +411,7 @@ export const userRouter = createTRPCRouter({
               createdAt: sortBy === "createdAt" ? sortOrder : undefined,
             },
           ],
-          include: {
-            category: true,
-            brand: true,
-            model: true,
-          },
+          include: wishPayload.include,
         });
         return {
           wishes,

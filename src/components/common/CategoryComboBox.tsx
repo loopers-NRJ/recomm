@@ -1,10 +1,10 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Label } from "../ui/label";
 import ComboBox from "./ComboBox";
 import { api } from "@/utils/api";
 import { Item } from "@/types/custom";
 
-export default function CategoryComboBox({
+function CategoryComboBox({
   onSelect,
   selected,
   requiredError,
@@ -36,3 +36,5 @@ export default function CategoryComboBox({
     </Label>
   );
 }
+
+export default React.memo(CategoryComboBox);
