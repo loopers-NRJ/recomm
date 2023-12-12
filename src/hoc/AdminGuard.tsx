@@ -2,7 +2,24 @@ import { RoleRouter } from "@/server/api/routers/role";
 import { getServerAuthSession } from "@/server/auth";
 import { prisma } from "@/server/db";
 import { AccessType } from "@prisma/client";
-import { type GetServerSideProps } from "next";
+import type {
+  PreviewData,
+  GetServerSideProps,
+  GetServerSidePropsContext,
+  GetServerSidePropsResult,
+} from "next";
+import type { Session } from "next-auth";
+import { ParsedUrlQuery } from "querystring";
+
+export type CustomGetServerSideProps<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Props extends Record<string, any> = Record<string, any>,
+  Params extends ParsedUrlQuery = ParsedUrlQuery,
+  Preview extends PreviewData = PreviewData
+> = (
+  context: GetServerSidePropsContext<Params, Preview>,
+  session: Session
+) => Promise<GetServerSidePropsResult<Props>>;
 
 /**
  * Wrapper for getServerSideProps
@@ -10,12 +27,21 @@ import { type GetServerSideProps } from "next";
  * @returns GetServerSideProps
  */
 export const withAdminGuard = (
-  func?: GetServerSideProps
+  func?: CustomGetServerSideProps
 ): GetServerSideProps => {
   return async (context) => {
     const pathname = context.resolvedUrl;
     const isAdminPage = pathname.match(/admin/g) !== null;
-    const success = () => (func ? func(context) : { props: {} });
+    const session = await getServerAuthSession(context);
+    if (session === null) {
+      return {
+        redirect: {
+          destination: "/admin/login",
+          permanent: false,
+        },
+      };
+    }
+    const success = () => (func ? func(context, session) : { props: {} });
     const failure = () => ({
       redirect: {
         destination: "/404",
@@ -25,7 +51,6 @@ export const withAdminGuard = (
     if (!isAdminPage) {
       return success();
     }
-    const session = await getServerAuthSession(context);
     const roleId = session?.user.roleId;
 
     if (!roleId) {

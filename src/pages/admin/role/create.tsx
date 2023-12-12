@@ -32,6 +32,7 @@ const roleConfig = {
     AccessType.updateProduct,
     AccessType.deleteProduct,
     AccessType.createRole,
+    AccessType.updateRole,
     AccessType.updateUsersRole,
     AccessType.deleteRole,
     AccessType.updateUser,

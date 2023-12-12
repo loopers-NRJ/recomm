@@ -42,4 +42,42 @@ export const RoleRouter = createTRPCRouter({
     .mutation(async ({ input: { id }, ctx: { prisma } }) => {
       return prisma.role.delete({ where: { id } });
     }),
+  addAccessToRole: getProcedure(AccessType.updateRole)
+    .input(
+      z.object({
+        roleId: idSchema,
+        accesses: z.array(z.enum(accessTypes)).nonempty(),
+      })
+    )
+    .mutation(
+      async ({ input: { roleId, accesses: access }, ctx: { prisma } }) => {
+        return prisma.role.update({
+          where: { id: roleId },
+          data: {
+            accesses: {
+              connect: access.map((access) => ({ type: access })),
+            },
+          },
+        });
+      }
+    ),
+  removeAccessFromRole: getProcedure(AccessType.updateRole)
+    .input(
+      z.object({
+        roleId: idSchema,
+        accesses: z.array(z.enum(accessTypes)).nonempty(),
+      })
+    )
+    .mutation(
+      async ({ input: { roleId, accesses: access }, ctx: { prisma } }) => {
+        return prisma.role.update({
+          where: { id: roleId },
+          data: {
+            accesses: {
+              disconnect: access.map((access) => ({ type: access })),
+            },
+          },
+        });
+      }
+    ),
 });

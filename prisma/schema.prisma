@@ -69,6 +69,7 @@ enum AccessType {
     deleteProduct // allow to delete product
 
     createRole // allow to create role
+    updateRole // allow to update role
     updateUsersRole // allow to update role of user
     deleteRole // allow to delete role
 

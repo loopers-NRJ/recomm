@@ -195,6 +195,7 @@ export const accessTypes = [
   AccessType.deleteProduct,
 
   AccessType.createRole,
+  AccessType.updateRole,
   AccessType.updateUsersRole,
   AccessType.deleteRole,
 
