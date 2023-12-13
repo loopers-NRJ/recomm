@@ -6,13 +6,16 @@ import { RolePayloadIncluded } from "@/types/prisma";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Loading from "../common/Loading";
 import ServerError from "../common/ServerError";
+import { Trash } from "lucide-react";
 
 const RoleTable = () => {
   const rolesApi = api.role.getRoles.useQuery();
   const router = useRouter();
+  const [deletingRoleId, setDeletingRoleId] = useState<string>();
+  const deleteRoleApi = api.role.deleteRole.useMutation();
   const columns: ColumnDef<RolePayloadIncluded>[] = useMemo(
     () => [
       {
@@ -37,8 +40,31 @@ const RoleTable = () => {
           );
         },
       },
+      {
+        id: "delete",
+        header: "",
+        accessorFn: (row) => row.id,
+        cell: ({ row }) => (
+          <Button
+            onClick={() => {
+              setDeletingRoleId(row.original.id);
+              void deleteRoleApi
+                .mutateAsync({ id: row.original.id })
+                .then(async () => {
+                  await rolesApi.refetch();
+                  setDeletingRoleId("");
+                });
+            }}
+            disabled={deletingRoleId === row.original.id}
+            size="sm"
+            variant="ghost"
+          >
+            <Trash color="red" />
+          </Button>
+        ),
+      },
     ],
-    [router]
+    [deleteRoleApi, deletingRoleId, rolesApi, router]
   );
 
   if (rolesApi.isLoading) {
