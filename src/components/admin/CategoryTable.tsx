@@ -1,4 +1,3 @@
-import { Pen, Trash } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
@@ -192,14 +191,13 @@ const CategoryTable = () => {
         header: "",
         accessorFn: (row) => row.id,
         cell: ({ row }) => (
-          <Button
-            onClick={() => {
-              void router.push(`/admin/category/edit/?id=${row.original.id}`);
-            }}
-            variant="ghost"
-            size="sm"
-          >
-            <Pen />
+          <Button variant="outline" size="sm" className="border-blue-400">
+            <Link
+              href={`/admin/category/edit/?id=${row.original.id}`}
+              className="flex h-full w-full items-center justify-center"
+            >
+              Edit
+            </Link>
           </Button>
         ),
       },
@@ -220,9 +218,10 @@ const CategoryTable = () => {
             }}
             disabled={deletingCategoryId === row.original.id}
             size="sm"
-            variant="ghost"
+            variant="outline"
+            className="border-red-400"
           >
-            <Trash color="red" />
+            Delete
           </Button>
         ),
       },

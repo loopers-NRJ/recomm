@@ -9,7 +9,6 @@ import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import Loading from "../common/Loading";
 import ServerError from "../common/ServerError";
-import { Trash } from "lucide-react";
 
 const RoleTable = () => {
   const rolesApi = api.role.getRoles.useQuery();
@@ -57,9 +56,10 @@ const RoleTable = () => {
             }}
             disabled={deletingRoleId === row.original.id}
             size="sm"
-            variant="ghost"
+            variant="outline"
+            className="border-red-400"
           >
-            <Trash color="red" />
+            Delete
           </Button>
         ),
       },

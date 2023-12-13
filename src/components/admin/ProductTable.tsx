@@ -1,4 +1,3 @@
-import { Trash } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -119,7 +118,7 @@ const ProductTable = () => {
         cell: ({ row }) => (
           <Button
             size="sm"
-            variant="ghost"
+            variant="outline"
             onClick={() => {
               setDeleteId(row.original.id);
               void deleteProduct
@@ -130,8 +129,9 @@ const ProductTable = () => {
                 });
             }}
             disabled={deleteId === row.original.id}
+            className="border-red-400"
           >
-            <Trash color="red" />
+            Delete
           </Button>
         ),
       },

@@ -11,6 +11,10 @@
 - [ ] parent category should show the brands and models of all of its sub category
 - [x] one should only be able to create model using the the last sub category (leaf category in the tree). parent and sub category should not be allowed
 - [ ] Pricing and bidding duration should be shown in the next page.
+- [ ] add Address model
+- [ ] add location to product
+- [ ] sort products based on their location
+- [ ] add reverse geocoding to get the location from the address in the admin page
 
 # notes
 

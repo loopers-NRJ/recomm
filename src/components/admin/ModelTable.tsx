@@ -1,4 +1,3 @@
-import { Pen, Trash } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -131,9 +130,15 @@ const ModelTable = () => {
               void router.push(`/admin/models/edit/?id=${row.original.id}`);
             }}
             size="sm"
-            variant="ghost"
+            variant="outline"
+            className="border-blue-400"
           >
-            <Pen />
+            <Link
+              href={`/admin/models/edit/?id=${row.original.id}`}
+              className="flex h-full w-full items-center justify-center"
+            >
+              Edit
+            </Link>
           </Button>
         ),
       },
@@ -154,9 +159,10 @@ const ModelTable = () => {
             }}
             disabled={deleteModelId === row.id}
             size="sm"
-            variant="ghost"
+            variant="outline"
+            className="border-red-400"
           >
-            <Trash color="red" />
+            Delete
           </Button>
         ),
       },

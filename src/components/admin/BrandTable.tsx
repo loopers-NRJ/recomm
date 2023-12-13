@@ -1,4 +1,3 @@
-import { Pen, Trash } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
@@ -134,14 +133,13 @@ const BrandTable = () => {
         header: "",
         accessorFn: (row) => row.id,
         cell: ({ row }) => (
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => {
-              void router.push(`/admin/brands/edit/?id=${row.original.id}`);
-            }}
-          >
-            <Pen />
+          <Button size="sm" variant="outline" className="border-blue-400">
+            <Link
+              href={`/admin/brands/edit/?id=${row.original.id}`}
+              className="flex h-full w-full items-center justify-center"
+            >
+              Edit
+            </Link>
           </Button>
         ),
       },
@@ -164,21 +162,15 @@ const BrandTable = () => {
             }}
             disabled={deleteBrandId === row.original.id}
             size="sm"
-            variant="ghost"
+            variant="outline"
+            className="border-red-400"
           >
-            <Trash color="red" />
+            Delete
           </Button>
         ),
       },
     ],
-    [
-      brandsApi,
-      deleteBrandApi,
-      deleteBrandId,
-      router,
-      updateBrandById,
-      updatingBrandId,
-    ]
+    [brandsApi, deleteBrandApi, deleteBrandId, updateBrandById, updatingBrandId]
   );
 
   if (brandsApi.isLoading || brandApi.isLoading) {
