@@ -23,6 +23,7 @@ import {
   UserLongitudeHeaderName,
 } from "@/utils/constants";
 import { userPayload } from "@/types/prisma";
+import { HTTPHeaders } from "@trpc/client";
 
 /**
  * 1. CONTEXT
@@ -34,7 +35,7 @@ import { userPayload } from "@/types/prisma";
 
 interface CreateContextOptions {
   session: Session | null;
-  headers: Record<string, string | undefined>;
+  headers: HTTPHeaders;
 }
 
 /**
@@ -138,7 +139,7 @@ export const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
   }
   const userAccesses =
     ctx.session?.user.role?.accesses.map((access) => access.type) ?? [];
-  const url = ctx.headers[RequestPathHeaderName];
+  const url = ctx.headers[RequestPathHeaderName] as string | undefined;
   const isAdminPage = url?.match(adminPageRegex) ?? false;
   return next({
     ctx: {

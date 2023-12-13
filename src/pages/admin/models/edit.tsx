@@ -9,6 +9,8 @@ import { useImageUploader } from "@/utils/imageUpload";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import Loading from "@/components/common/Loading";
+import ServerError from "@/components/common/ServerError";
 
 export const getServerSideProps = withAdminGuard();
 
@@ -54,11 +56,20 @@ const EditModelPage = () => {
   };
 
   if (modelApi.isLoading) {
-    return <h1>Loading</h1>;
+    return <Loading />;
   }
 
-  if (modelApi.isError || modelApi.data === null) {
-    return <h1>Something went wrong</h1>;
+  if (modelApi.isError) {
+    return (
+      <ServerError
+        message={modelApi.error?.message ?? "something went wrong"}
+      />
+    );
+  }
+  if (modelApi.data === null) {
+    return (
+      <ServerError message={"model not found"}>model not found</ServerError>
+    );
   }
 
   const { data: model } = modelApi;

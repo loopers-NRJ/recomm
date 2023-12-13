@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
 import { useImageUploader } from "@/utils/imageUpload";
 import { Image } from "@/utils/validation";
-import { Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import CategoryComboBox from "@/components/common/CategoryComboBox";
 import { OptionalItem } from "@/types/custom";
+import Loading from "@/components/common/Loading";
 
 export const getServerSideProps = withAdminGuard();
 
@@ -100,13 +100,13 @@ const CreateFeaturedCategoryPage = () => {
         {uploader.isLoading && (
           <div className="flex flex-col items-center justify-center rounded-lg border p-2">
             Uploading image...
-            <Loader2 className="animate-spin" />
+            <Loading />
           </div>
         )}
         {createFeaturedCategoryApi.isLoading && (
           <div className="flex flex-col items-center justify-center rounded-lg border p-2">
             Making {selectedCategory?.name} as Featured Category ...
-            <Loader2 className="animate-spin" />
+            <Loading />
           </div>
         )}
 

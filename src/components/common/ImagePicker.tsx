@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { Loader2 as Spinner, Plus } from "lucide-react";
 import Image from "next/image";
 import React, { FC, useState } from "react";
@@ -16,6 +17,8 @@ export interface ImagePickerProps {
   acceptedImageFormats?: string[];
   images: File[];
   requiredError?: boolean;
+  children?: React.ReactNode;
+  className?: string;
 }
 
 const ImagePicker: FC<ImagePickerProps> = ({
@@ -30,6 +33,8 @@ const ImagePicker: FC<ImagePickerProps> = ({
   setImages: setImagesToParent,
   images: parentImages,
   requiredError,
+  children,
+  className
 }) => {
   const [images, setImages] = useState<ImageFile[]>(
     parentImages.map((image) => ({
@@ -194,12 +199,14 @@ const ImagePicker: FC<ImagePickerProps> = ({
 
         {maxImages - images.length > 0 && (
           <label
-            className={`flex h-24 w-24 shrink-0 cursor-pointer items-center justify-center rounded-xl border object-cover ${
-              requiredError ? "border-red-500" : ""
-            }`}
+            className={cn(
+              "flex h-24 w-24 shrink-0 cursor-pointer items-center justify-center rounded-xl border object-cover",
+              requiredError ? "border-red-500" : "",
+              className
+            )}
             htmlFor="image-picker"
           >
-            <Plus />
+            {children ?? <Plus />}
           </label>
         )}
         <input

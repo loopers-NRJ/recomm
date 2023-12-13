@@ -102,8 +102,22 @@ const FeaturedCategoryTable = () => {
         ),
       },
       {
-        id: "is-Featured",
-        header: "Featured",
+        id: "edit",
+        header: "Edit",
+        cell: ({ row }) => (
+          <Button size="sm" variant="outline" className="border-blue-400">
+            <Link
+              href={`/admin/featured-category/edit/?id=${row.original.categoryId}`}
+              className="flex h-full w-full items-center justify-center"
+            >
+              Edit
+            </Link>
+          </Button>
+        ),
+      },
+      {
+        id: "delete",
+        header: "Delete",
         cell: ({ row }) => (
           <Button
             disabled={featuredCategoryState === row.original.categoryId}

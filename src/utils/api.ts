@@ -36,6 +36,18 @@ export const setUserLocation = ({
   userLongitude = `${longitude}`;
 };
 
+export const getHeaders = () => {
+  const headers: HTTPHeaders = {};
+  if (typeof window !== "undefined") {
+    headers[RequestPathHeaderName] = window.location.pathname;
+  }
+  if (userLatitute !== undefined && userLongitude !== undefined) {
+    headers[UserLatitudeHeaderName] = userLatitute;
+    headers[UserLongitudeHeaderName] = userLongitude;
+  }
+  return headers;
+};
+
 /** A set of type-safe react-query hooks for your tRPC API. */
 export const api = createTRPCNext<AppRouter>({
   config() {
@@ -61,17 +73,7 @@ export const api = createTRPCNext<AppRouter>({
         ErrorLink,
         httpBatchLink({
           url: `${getBaseUrl()}/api/trpc`,
-          headers() {
-            const headers: HTTPHeaders = {};
-            if (typeof window !== "undefined") {
-              headers[RequestPathHeaderName] = window.location.pathname;
-            }
-            if (userLatitute !== undefined && userLongitude !== undefined) {
-              headers[UserLatitudeHeaderName] = userLatitute;
-              headers[UserLongitudeHeaderName] = userLongitude;
-            }
-            return headers;
-          },
+          headers: getHeaders(),
         }),
       ],
     };

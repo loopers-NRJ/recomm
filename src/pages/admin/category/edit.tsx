@@ -7,6 +7,8 @@ import { api } from "@/utils/api";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import Loading from "@/components/common/Loading";
+import ServerError from "@/components/common/ServerError";
 
 export const getServerSideProps = withAdminGuard();
 
@@ -47,10 +49,21 @@ const EditCategoryPage = () => {
   };
 
   if (categoryApi.isLoading) {
-    return <h1>Loading</h1>;
+    return <Loading />;
   }
-  if (categoryApi.isError || categoryApi.data === null) {
-    return <h1>Something went wrong</h1>;
+  if (categoryApi.isError) {
+    return (
+      <ServerError
+        message={categoryApi.error?.message ?? "Something went wrong"}
+      />
+    );
+  }
+  if (categoryApi.data === null) {
+    return (
+      <ServerError message={"Category not found"}>
+        Category not found
+      </ServerError>
+    );
   }
 
   return (

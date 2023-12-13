@@ -135,13 +135,7 @@ export const categoryRouter = createTRPCRouter({
         where: {
           id,
         },
-        include: {
-          featuredCategory: {
-            include: {
-              image: true,
-            },
-          },
-        },
+        include: CategoryPayload.include,
       });
       if (category === null) {
         throw new Error("Category does not exist");
@@ -398,6 +392,44 @@ export const categoryRouter = createTRPCRouter({
       if (error) {
         console.error({
           procedure: "removeCategoryFromFeaturedById",
+          message: "cannot able delete the old image in cloudinary",
+          existingCategory,
+          error,
+        });
+        throw new Error("Cannot able to delete the old image");
+      }
+    }),
+
+  updateFeaturedCategoryById: getProcedure(AccessType.updateCategory)
+    .input(z.object({ categoryId: idSchema, image: imageInputs }))
+    .mutation(async ({ input: { categoryId: id, image }, ctx: { prisma } }) => {
+      const existingCategory = await prisma.featuredCategory.findUnique({
+        where: {
+          categoryId: id,
+        },
+        include: {
+          image: true,
+        },
+      });
+      if (existingCategory === null) {
+        throw new Error("Category does not exist");
+      }
+
+      await prisma.featuredCategory.update({
+        where: {
+          categoryId: id,
+        },
+        data: {
+          image: {
+            update: image,
+          },
+        },
+      });
+
+      const error = await deleteImage(existingCategory.image.publicId);
+      if (error) {
+        console.error({
+          procedure: "updateFeaturedCategoryById",
           message: "cannot able delete the old image in cloudinary",
           existingCategory,
           error,

@@ -16,7 +16,6 @@ import { ColumnDef } from "@tanstack/react-table";
 
 import { Button } from "../ui/button";
 import { DataTable } from "./Table";
-import { useRouter } from "next/router";
 import Loading from "../common/Loading";
 import ServerError from "../common/ServerError";
 import { Switch } from "../ui/switch";
@@ -24,7 +23,6 @@ import { Switch } from "../ui/switch";
 const ModelTable = () => {
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
-  const router = useRouter();
   const limit = +(params.get("limit") ?? DefaultLimit);
 
   const search = params.get("search") ?? DefaultSearch;
@@ -123,16 +121,8 @@ const ModelTable = () => {
       {
         id: "edit",
         header: "",
-        accessorFn: (row) => row.id,
         cell: ({ row }) => (
-          <Button
-            onClick={() => {
-              void router.push(`/admin/models/edit/?id=${row.original.id}`);
-            }}
-            size="sm"
-            variant="outline"
-            className="border-blue-400"
-          >
+          <Button size="sm" variant="outline" className="border-blue-400">
             <Link
               href={`/admin/models/edit/?id=${row.original.id}`}
               className="flex h-full w-full items-center justify-center"
@@ -145,7 +135,6 @@ const ModelTable = () => {
       {
         id: "delete",
         header: "",
-        accessorFn: (row) => row.id,
         cell: ({ row }) => (
           <Button
             onClick={() => {
@@ -167,14 +156,7 @@ const ModelTable = () => {
         ),
       },
     ],
-    [
-      deleteModelApi,
-      deleteModelId,
-      modelsApi,
-      router,
-      updateModelById,
-      updatingModelId,
-    ]
+    [deleteModelApi, deleteModelId, modelsApi, updateModelById, updatingModelId]
   );
 
   if (modelsApi.isLoading) {
