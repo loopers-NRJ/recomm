@@ -19,6 +19,7 @@ import {
 } from "@/utils/validation";
 import { useRouter } from "next/router";
 import { useImageUploader } from "@/utils/imageUpload";
+import { makeIssue } from "zod";
 
 export default function PostingForm({
   selectedCategorySlug,
@@ -82,22 +83,51 @@ export default function PostingForm({
               question.type === AtomicQuestionType.Text ||
               question.type === AtomicQuestionType.Paragraph
             ) {
-              return {
-                questionId: question.id,
-                type: question.type,
-                answerContent: "",
-              };
+              if (question.required) {
+                return {
+                  questionId: question.id,
+                  type: question.type,
+                  required: question.required,
+                  answerContent: "",
+                };
+              } else {
+                return {
+                  questionId: question.id,
+                  type: question.type,
+                  required: question.required,
+                  answerContent: undefined,
+                };
+              }
             } else if (question.type === AtomicQuestionType.Number) {
+              if (question.required) {
+                return {
+                  questionId: question.id,
+                  type: question.type,
+                  required: question.required,
+                  answerContent: 0,
+                };
+              } else {
+                return {
+                  questionId: question.id,
+                  type: question.type,
+                  required: question.required,
+                  answerContent: undefined,
+                };
+              }
+            }
+            if (question.required) {
               return {
                 questionId: question.id,
                 type: question.type,
-                answerContent: 0,
+                required: question.required,
+                answerContent: new Date(),
               };
             }
             return {
               questionId: question.id,
+              required: question.required,
               type: question.type,
-              answerContent: new Date(),
+              answerContent: undefined,
             };
           })
         );
@@ -107,14 +137,24 @@ export default function PostingForm({
             if (question.type === MultipleChoiceQuestionType.Checkbox) {
               return {
                 questionId: question.id,
+                required: question.required,
                 type: MultipleChoiceQuestionType.Checkbox,
                 valueIds: [],
               };
             }
+            if (question.required) {
+              return {
+                questionId: question.id,
+                required: question.required,
+                type: question.type,
+                valueId: "",
+              };
+            }
             return {
               questionId: question.id,
+              required: question.required,
               type: question.type,
-              valueId: "",
+              valueId: undefined,
             };
           })
         );
@@ -123,6 +163,8 @@ export default function PostingForm({
   );
 
   const handleSubmit = async () => {
+    console.log(price, Number(price));
+
     const result = productSchema.omit({ images: true }).safeParse({
       title,
       description,
@@ -155,7 +197,21 @@ export default function PostingForm({
         },
         {}
       );
-      return setFormError(errors as unknown as ProductFormError);
+      if (images.length < 1) {
+        errors.images = makeIssue({
+          path: ["images"],
+          errorMaps: [],
+          issueData: {
+            code: "custom",
+            message: "Oops! you need to upload at least 5 images",
+          },
+          data: {
+            code: "custom",
+            message: "Oops! you need to upload at least 5 images",
+          },
+        });
+      }
+      return setFormError(errors);
     }
     const uploadedImages = await upload(images);
     if (uploadedImages instanceof Error) {
@@ -247,6 +303,7 @@ export default function PostingForm({
               setPrice={setPrice}
               onBidDurationChange={setBidEndTime}
               model={modelApi.data}
+              formError={formError}
             />
           </>
         )}

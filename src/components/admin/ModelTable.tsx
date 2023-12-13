@@ -20,6 +20,7 @@ import { DataTable } from "./Table";
 import { useRouter } from "next/router";
 import Loading from "../common/Loading";
 import ServerError from "../common/ServerError";
+import { Switch } from "../ui/switch";
 
 const ModelTable = () => {
   const searchParams = useSearchParams();
@@ -33,7 +34,10 @@ const ModelTable = () => {
   const categoryId = params.get("category") ?? undefined;
   const brandId = params.get("brand") ?? undefined;
 
-  const modelApi = api.model.getModels.useInfiniteQuery(
+  const [updatingModelId, setUpdatingModelId] = useState<string>();
+  const updateModelById = api.model.updateModelById.useMutation();
+
+  const modelsApi = api.model.getModels.useInfiniteQuery(
     {
       limit,
       search,
@@ -91,6 +95,33 @@ const ModelTable = () => {
         ),
       },
       {
+        id: "active",
+        header: "Active",
+        cell: ({ row }) => (
+          <Switch
+            disabled={updatingModelId === row.original.id}
+            checked={row.original.active}
+            // make the switch blue when active and black when inactive
+            className="data-[state=checked]:bg-blue-500"
+            onCheckedChange={() => {
+              setUpdatingModelId(row.original.id);
+              updateModelById
+                .mutateAsync({
+                  id: row.original.id,
+                  active: !row.original.active,
+                })
+                .then(async () => {
+                  await modelsApi.refetch();
+                  setUpdatingModelId(undefined);
+                })
+                .catch((err) => {
+                  console.log(err);
+                });
+            }}
+          />
+        ),
+      },
+      {
         id: "edit",
         header: "",
         accessorFn: (row) => row.id,
@@ -117,7 +148,7 @@ const ModelTable = () => {
               void deleteModelApi
                 .mutateAsync({ modelId: row.original.id })
                 .then(async () => {
-                  await modelApi.refetch();
+                  await modelsApi.refetch();
                   setDeleteModelId(undefined);
                 });
             }}
@@ -130,14 +161,21 @@ const ModelTable = () => {
         ),
       },
     ],
-    [deleteModelApi, deleteModelId, modelApi, router]
+    [
+      deleteModelApi,
+      deleteModelId,
+      modelsApi,
+      router,
+      updateModelById,
+      updatingModelId,
+    ]
   );
 
-  if (modelApi.isLoading) {
+  if (modelsApi.isLoading) {
     return <Loading />;
   }
-  if (modelApi.isError) {
-    return <ServerError message={modelApi.error.message} />;
+  if (modelsApi.isError) {
+    return <ServerError message={modelsApi.error.message} />;
   }
 
   return (
@@ -150,10 +188,10 @@ const ModelTable = () => {
       </div>
       <DataTable
         columns={columns}
-        data={modelApi.data.pages.flatMap((page) => page.models)}
-        canViewMore={!!modelApi.hasNextPage}
+        data={modelsApi.data.pages.flatMap((page) => page.models)}
+        canViewMore={!!modelsApi.hasNextPage}
         viewMore={() => {
-          void modelApi.fetchNextPage();
+          void modelsApi.fetchNextPage();
         }}
       />
     </>

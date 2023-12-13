@@ -60,9 +60,9 @@ const CategoryTable = () => {
   const removeCategoryFeatured =
     api.category.removeCategoryFromFeaturedById.useMutation();
   // this state is to disable the update button when the user clicks the update button
-  const [updatingCategoryId, setUpdatingCategoryId] = useState("");
+  const [updatingCategoryId, setUpdatingCategoryId] = useState<string>();
   // this state is to disable the delete button when the user clicks the delete button
-  const [deletingCategoryId, setDeletingCategoryId] = useState("");
+  const [deletingCategoryId, setDeletingCategoryId] = useState<string>();
   // this state is to disable the featured button when the user clicks the featured button
   const [featuredCategoryState, setFeaturedCategoryState] = useState("");
 
@@ -147,7 +147,7 @@ const CategoryTable = () => {
                 })
                 .then(async () => {
                   await categoriesApi.refetch();
-                  setUpdatingCategoryId("");
+                  setUpdatingCategoryId(undefined);
                 })
                 .catch((err) => {
                   console.log(err);
@@ -215,7 +215,7 @@ const CategoryTable = () => {
                 .mutateAsync({ categoryId: row.original.id })
                 .then(async () => {
                   await categoriesApi.refetch();
-                  setDeletingCategoryId("");
+                  setDeletingCategoryId(undefined);
                 });
             }}
             disabled={deletingCategoryId === row.original.id}

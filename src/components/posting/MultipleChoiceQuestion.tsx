@@ -14,17 +14,30 @@ import { Button } from "../ui/button";
 import { ZodIssue } from "zod";
 import ErrorMessage from "../common/ErrorMessage";
 
-export type MultipleChoiceAnswer =
+export type MultipleChoiceAnswer = {
+  questionId: string;
+} & (
   | {
+      required: true;
       type: "Dropdown" | "Variant" | "RadioGroup";
-      questionId: string;
       valueId: string;
     }
   | {
+      required: true;
       type: "Checkbox";
-      questionId: string;
       valueIds: string[];
-    };
+    }
+  | {
+      required: false;
+      type: "Dropdown" | "Variant" | "RadioGroup";
+      valueId: string | undefined;
+    }
+  | {
+      required: false;
+      type: "Checkbox";
+      valueIds: string[];
+    }
+);
 
 interface MultipleChoiceQuestionInputFieldProps {
   question: MultipleChoiceQuestionPayloadIncluded;
@@ -45,10 +58,11 @@ export default function MultipleChoiceQuestionInputField({
     answer.type === MultipleChoiceQuestionType.Checkbox
   ) {
     return (
-      <div>
-        <Label className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2">
+        <Label>
           <span className="text-base font-semibold">
             {index}.&nbsp;&nbsp;{question.questionContent}
+            {question.required && <span className="text-red-500">{" * "}</span>}
           </span>
         </Label>
 
@@ -93,6 +107,7 @@ export default function MultipleChoiceQuestionInputField({
       <Label className="flex flex-col gap-2">
         <span className="text-base font-semibold">
           {index}.&nbsp;&nbsp;{question.questionContent}
+          {question.required && <span className="text-red-500">{" * "}</span>}
         </span>
         <Select
           onValueChange={(value) => {
@@ -129,6 +144,7 @@ export default function MultipleChoiceQuestionInputField({
         <Label>
           <span className="text-base font-semibold">
             {index}.&nbsp;&nbsp;{question.questionContent}
+            {question.required && <span className="text-red-500">{" * "}</span>}
           </span>
         </Label>
 
@@ -167,6 +183,7 @@ export default function MultipleChoiceQuestionInputField({
       <Label className="flex flex-col gap-2">
         <span className="text-base font-semibold">
           {index}.&nbsp;&nbsp;{question.questionContent}
+          {question.required && <span className="text-red-500">{" * "}</span>}
         </span>
         <div className="flex flex-wrap gap-1 ps-4 sm:gap-3">
           {question.choices.map((choice) => (

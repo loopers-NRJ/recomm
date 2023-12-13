@@ -53,10 +53,10 @@ export const productSchema = z.object({
   price: z
     .number({
       required_error: "Enter a price",
-      invalid_type_error: "Price must be a number",
+      invalid_type_error: "Enter a valid price",
     })
     .int("Price cannot have decimal values")
-    .positive("Price must not be negative"),
+    .positive("Price should be greater than 0"),
   description: z
     .string({
       required_error: "Enter a description",
@@ -100,6 +100,7 @@ export const productSchema = z.object({
       z.union([
         z.object({
           questionId: idSchema,
+          required: z.literal(true),
           type: z.enum([
             MultipleChoiceQuestionType.Dropdown,
             MultipleChoiceQuestionType.Variant,
@@ -114,16 +115,49 @@ export const productSchema = z.object({
         }),
         z.object({
           questionId: idSchema,
+          required: z.literal(false),
+          type: z.enum([
+            MultipleChoiceQuestionType.Dropdown,
+            MultipleChoiceQuestionType.Variant,
+            MultipleChoiceQuestionType.RadioGroup,
+          ]),
+          valueId: z
+            .string({
+              required_error: "Hold on! Please select an option.",
+            })
+            .trim()
+            .cuid({ message: "Hold on! Please select an option." })
+            .optional(),
+        }),
+        z.object({
+          questionId: idSchema,
+          required: z.literal(true),
           type: z.enum([MultipleChoiceQuestionType.Checkbox]),
           valueIds: z
             .array(
-              idSchema.nonempty({
-                message: "Hold on! Please check at least one option.",
-              })
+              z
+                .string({
+                  required_error: "Hold on! Please check at least one option.",
+                })
+                .trim()
+                .cuid({ message: "Hold on! Please check at least one option." })
             )
             .nonempty({
               message: "Hold on! Please check at least one option.",
             }),
+        }),
+        z.object({
+          questionId: idSchema,
+          required: z.literal(false),
+          type: z.enum([MultipleChoiceQuestionType.Checkbox]),
+          valueIds: z.array(
+            z
+              .string({
+                required_error: "Hold on! Please check at least one option.",
+              })
+              .trim()
+              .cuid({ message: "Hold on! Please check at least one option." })
+          ),
         }),
       ])
     )
@@ -132,6 +166,7 @@ export const productSchema = z.object({
     z.union([
       z.object({
         questionId: idSchema,
+        required: z.literal(true),
         type: z.enum([AtomicQuestionType.Text, AtomicQuestionType.Paragraph]),
         answerContent: z
           .string()
@@ -140,11 +175,13 @@ export const productSchema = z.object({
       }),
       z.object({
         questionId: idSchema,
+        required: z.literal(true),
         type: z.enum([AtomicQuestionType.Number]),
         answerContent: z.number().min(1, "Oops! Enter a number here."),
       }),
       z.object({
         questionId: idSchema,
+        required: z.literal(true),
         type: z.enum([AtomicQuestionType.Date]),
         answerContent: z
           .date({
@@ -152,6 +189,32 @@ export const productSchema = z.object({
             invalid_type_error: "Invalid date",
           })
           .refine((date) => date.getTime() > Date.now(), {
+            message: "Oops! Pick a date, please.",
+          }),
+      }),
+      z.object({
+        questionId: idSchema,
+        required: z.literal(false),
+        type: z.enum([AtomicQuestionType.Text, AtomicQuestionType.Paragraph]),
+        answerContent: z.string().trim().optional(),
+      }),
+      z.object({
+        questionId: idSchema,
+        required: z.literal(false),
+        type: z.enum([AtomicQuestionType.Number]),
+        answerContent: z.number().optional(),
+      }),
+      z.object({
+        questionId: idSchema,
+        required: z.literal(false),
+        type: z.enum([AtomicQuestionType.Date]),
+        answerContent: z
+          .date({
+            required_error: "Oops! Pick a date, please.",
+            invalid_type_error: "Invalid date",
+          })
+          .optional()
+          .refine((date) => (!date ? true : date.getTime() > Date.now()), {
             message: "Oops! Pick a date, please.",
           }),
       }),

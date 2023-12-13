@@ -1,4 +1,3 @@
-import slugify from "slugify";
 import { z } from "zod";
 
 import { deleteImage } from "@/lib/cloudinary";
@@ -22,6 +21,7 @@ import {
   publicProcedure,
 } from "../trpc";
 import { productsPayload, singleProductPayload } from "@/types/prisma";
+import slugify from "@/lib/slugify";
 
 export const productRouter = createTRPCRouter({
   getProducts: publicProcedure
@@ -219,7 +219,7 @@ export const productRouter = createTRPCRouter({
         providedChoices.forEach((choice) =>
           choice.type === MultipleChoiceQuestionType.Checkbox
             ? choiceValueIds.push(...choice.valueIds)
-            : choiceValueIds.push(choice.valueId)
+            : choice.valueId && choiceValueIds.push(choice.valueId)
         );
 
         const isValidAnswers = validateAtomicQuestionAnswers(
@@ -234,7 +234,7 @@ export const productRouter = createTRPCRouter({
         const product = await prisma.product.create({
           data: {
             title,
-            slug: slugify(title) + "-" + Date.now(),
+            slug: slugify(title),
             price,
             description,
             images: {

@@ -7,22 +7,40 @@ import Textarea from "../common/Textarea";
 import { ZodIssue } from "zod";
 import ErrorMessage from "../common/ErrorMessage";
 
-export type AtomicAnswer =
+export type AtomicAnswer = {
+  questionId: string;
+} & (
   | {
+      required: true;
       type: "Text" | "Paragraph";
-      questionId: string;
       answerContent: string;
     }
   | {
+      required: false;
+      type: "Text" | "Paragraph";
+      answerContent: string | undefined;
+    }
+  | {
+      required: true;
       type: "Number";
-      questionId: string;
       answerContent: number;
     }
   | {
+      required: false;
+      type: "Number";
+      answerContent: number | undefined;
+    }
+  | {
+      required: true;
       type: "Date";
-      questionId: string;
+      answerContent: Date;
+    }
+  | {
+      required: false;
+      type: "Date";
       answerContent: Date | undefined;
-    };
+    }
+);
 
 interface AtomicQuestionInputFieldProps {
   question: AtomicQuestion;
@@ -47,7 +65,7 @@ export default function AtomicQuestionInputField({
     InputField = (
       <Input
         type="text"
-        value={answer.answerContent}
+        value={answer.answerContent ?? ""}
         onChange={(e) => onChange({ ...answer, answerContent: e.target.value })}
         placeholder="Enter your answer"
         className={error ? "border-red-500" : ""}
@@ -61,7 +79,7 @@ export default function AtomicQuestionInputField({
   ) {
     InputField = (
       <Textarea
-        value={answer.answerContent}
+        value={answer.answerContent ?? ""}
         onChange={(e) => onChange({ ...answer, answerContent: e.target.value })}
         placeholder="Enter your answer"
         className={error ? "border-red-500" : ""}
@@ -95,6 +113,7 @@ export default function AtomicQuestionInputField({
       <DatePicker
         date={answer.answerContent}
         setDate={(date) => {
+          if (!date) return;
           onChange({ ...answer, answerContent: date });
         }}
         requiredError={!!error}
@@ -106,6 +125,7 @@ export default function AtomicQuestionInputField({
     <Label className="flex cursor-pointer flex-col gap-2">
       <span className="text-base font-semibold">
         {index}.&nbsp;&nbsp;{question.questionContent}
+        {question.required && <span className="text-red-500">{" * "}</span>}
       </span>
       {InputField}
       {error && <ErrorMessage>{error.message}</ErrorMessage>}

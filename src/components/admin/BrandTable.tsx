@@ -20,6 +20,7 @@ import { Button } from "../ui/button";
 import { DataTable } from "./Table";
 import Loading from "../common/Loading";
 import ServerError from "../common/ServerError";
+import { Switch } from "../ui/switch";
 
 const BrandTable = () => {
   const searchParams = useSearchParams();
@@ -35,6 +36,9 @@ const BrandTable = () => {
   const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
   const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
   const categoryId = params.get("category") ?? undefined;
+
+  const [updatingBrandId, setUpdatingBrandId] = useState<string>();
+  const updateBrandById = api.brand.updateBrandById.useMutation();
 
   const brandApi = api.brand.getBrandById.useQuery({
     brandId,
@@ -99,6 +103,33 @@ const BrandTable = () => {
         ),
       },
       {
+        id: "active",
+        header: "Active",
+        cell: ({ row }) => (
+          <Switch
+            disabled={updatingBrandId === row.original.id}
+            checked={row.original.active}
+            // make the switch blue when active and black when inactive
+            className="data-[state=checked]:bg-blue-500"
+            onCheckedChange={() => {
+              setUpdatingBrandId(row.original.id);
+              updateBrandById
+                .mutateAsync({
+                  id: row.original.id,
+                  active: !row.original.active,
+                })
+                .then(async () => {
+                  await brandsApi.refetch();
+                  setUpdatingBrandId(undefined);
+                })
+                .catch((err) => {
+                  console.log(err);
+                });
+            }}
+          />
+        ),
+      },
+      {
         id: "edit",
         header: "",
         accessorFn: (row) => row.id,
@@ -140,7 +171,14 @@ const BrandTable = () => {
         ),
       },
     ],
-    [brandsApi, deleteBrandApi, deleteBrandId, router]
+    [
+      brandsApi,
+      deleteBrandApi,
+      deleteBrandId,
+      router,
+      updateBrandById,
+      updatingBrandId,
+    ]
   );
 
   if (brandsApi.isLoading || brandApi.isLoading) {

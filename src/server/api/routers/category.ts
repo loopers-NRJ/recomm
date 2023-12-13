@@ -1,4 +1,4 @@
-import slugify from "slugify";
+import slugify from "@/lib/slugify";
 import { z } from "zod";
 
 import { deleteImage } from "@/lib/cloudinary";

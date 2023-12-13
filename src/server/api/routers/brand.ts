@@ -1,4 +1,4 @@
-import slugify from "slugify";
+import slugify from "@/lib/slugify";
 import { z } from "zod";
 
 import { deleteImage } from "@/lib/cloudinary";
@@ -126,17 +126,25 @@ export const brandRouter = createTRPCRouter({
           id: idSchema,
           name: z.string().min(1).max(255),
           image: imageInputs.optional(),
+          active: z.boolean().optional(),
         }),
         z.object({
           id: idSchema,
           name: z.string().min(1).max(255).optional(),
           image: imageInputs,
+          active: z.boolean().optional(),
+        }),
+        z.object({
+          id: idSchema,
+          name: z.string().min(1).max(255).optional(),
+          image: imageInputs.optional(),
+          active: z.boolean(),
         }),
       ])
     )
     .mutation(
       async ({
-        input: { id, name: newName, image: newImage },
+        input: { id, name: newName, image: newImage, active },
         ctx: { prisma },
       }) => {
         // checking whether the brand exists
@@ -178,6 +186,7 @@ export const brandRouter = createTRPCRouter({
             image: {
               create: newImage,
             },
+            active,
           },
           include: {
             image: true,

@@ -1,4 +1,4 @@
-import slugify from "slugify";
+import slugify from "@/lib/slugify";
 import { z } from "zod";
 
 import { deleteImage } from "@/lib/cloudinary";
@@ -176,24 +176,34 @@ export const modelRouter = createTRPCRouter({
           name: z.string().min(1).max(255),
           categoryId: idSchema.optional(),
           image: imageInputs.optional(),
+          active: z.boolean().optional(),
         }),
         z.object({
           id: idSchema,
           name: z.string().min(1).max(255).optional(),
           categoryId: idSchema,
           image: imageInputs.optional(),
+          active: z.boolean().optional(),
         }),
         z.object({
           id: idSchema,
           name: z.string().min(1).max(255).optional(),
           categoryId: idSchema.optional(),
           image: imageInputs,
+          active: z.boolean().optional(),
+        }),
+        z.object({
+          id: idSchema,
+          name: z.string().min(1).max(255).optional(),
+          categoryId: idSchema.optional(),
+          image: imageInputs.optional(),
+          active: z.boolean(),
         }),
       ])
     )
     .mutation(
       async ({
-        input: { id, name: newName, categoryId, image: newImage },
+        input: { id, name: newName, categoryId, image: newImage, active },
         ctx: { prisma },
       }) => {
         // check whether the model exists
@@ -241,6 +251,7 @@ export const modelRouter = createTRPCRouter({
                     create: newImage,
                   }
                 : undefined,
+            active,
           },
           include: singleModelPayload.include,
         });
