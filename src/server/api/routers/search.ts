@@ -100,6 +100,33 @@ export const searchRouter = createTRPCRouter({
       });
       return categories;
     }),
+  leafCategory: publicProcedure
+    .input(
+      z.object({
+        search: z.string().trim().default(""),
+      })
+    )
+    .query(async ({ input: { search }, ctx: { prisma, isAdminPage } }) => {
+      const categories = await prisma.category.findMany({
+        where: {
+          name: search
+            ? {
+                contains: search,
+              }
+            : undefined,
+          active: isAdminPage ? undefined : true,
+          subCategories: {
+            none: {},
+          },
+        },
+        take: DefaultLimit,
+        select: {
+          id: true,
+          name: true,
+        },
+      });
+      return categories;
+    }),
 
   brands: publicProcedure
     .input(

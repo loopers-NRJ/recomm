@@ -16,7 +16,9 @@ function CategoryComboBox({
   disabled?: boolean;
 }) {
   const [search, setSearch] = useState("");
-  const categorySearch = api.search.category.useQuery({ search });
+  const categorySearch = api.search.leafCategory.useQuery({
+    search,
+  });
   return (
     <Label className="flex cursor-pointer items-center justify-between">
       Category
