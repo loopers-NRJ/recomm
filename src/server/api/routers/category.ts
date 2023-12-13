@@ -35,14 +35,14 @@ export const categoryRouter = createTRPCRouter({
           cursor,
           parentSlug,
         },
-        ctx: { prisma, isAdmin },
+        ctx: { prisma, isAdminPage },
       }) => {
         const categories = await prisma.category.findMany({
           where: {
             name: {
               contains: search,
             },
-            active: isAdmin ? undefined : true,
+            active: isAdminPage ? undefined : true,
             parentCategoryId: parentId,
             parentCategory: parentSlug
               ? {
@@ -90,14 +90,14 @@ export const categoryRouter = createTRPCRouter({
           cursor,
           parentSlug,
         },
-        ctx: { prisma, isAdmin },
+        ctx: { prisma, isAdminPage },
       }) => {
         const categories = await prisma.category.findMany({
           where: {
             name: {
               contains: search,
             },
-            active: isAdmin ? undefined : true,
+            active: isAdminPage ? undefined : true,
             parentCategoryId: parentId,
             parentCategory: parentSlug
               ? {
@@ -312,7 +312,7 @@ export const categoryRouter = createTRPCRouter({
     .query(
       async ({
         input: { search, limit, sortBy, sortOrder, cursor },
-        ctx: { prisma, isAdmin },
+        ctx: { prisma, isAdminPage },
       }) => {
         const categories = await prisma.featuredCategory.findMany({
           where: {
@@ -320,7 +320,7 @@ export const categoryRouter = createTRPCRouter({
               name: {
                 contains: search,
               },
-              active: isAdmin ? undefined : true,
+              active: isAdminPage ? undefined : true,
             },
           },
           cursor: cursor

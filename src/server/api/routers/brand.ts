@@ -21,7 +21,7 @@ export const brandRouter = createTRPCRouter({
     .query(
       async ({
         input: { limit, search, sortBy, sortOrder, categoryId, cursor },
-        ctx: { prisma, isAdmin },
+        ctx: { prisma, isAdminPage },
       }) => {
         const brands = await prisma.brand.findMany({
           where: {
@@ -34,13 +34,13 @@ export const brandRouter = createTRPCRouter({
                     categories: {
                       some: {
                         id: categoryId,
-                        active: isAdmin ? undefined : true,
+                        active: isAdminPage ? undefined : true,
                       },
                     },
                   },
                 }
               : undefined,
-            active: isAdmin ? undefined : true,
+            active: isAdminPage ? undefined : true,
           },
           take: limit,
           skip: cursor ? 1 : undefined,

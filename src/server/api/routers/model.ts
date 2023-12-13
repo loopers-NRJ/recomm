@@ -32,20 +32,20 @@ export const modelRouter = createTRPCRouter({
           categoryId,
           cursor,
         },
-        ctx: { prisma, isAdmin },
+        ctx: { prisma, isAdminPage },
       }) => {
         const models = await prisma.model.findMany({
           where: {
             categories: {
               some: {
                 id: categoryId,
-                active: isAdmin ? undefined : true,
+                active: isAdminPage ? undefined : true,
               },
             },
-            active: isAdmin ? undefined : true,
+            active: isAdminPage ? undefined : true,
             brandId,
             brand: {
-              active: isAdmin ? undefined : true,
+              active: isAdminPage ? undefined : true,
             },
             name: {
               contains: search,

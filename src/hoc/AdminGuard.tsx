@@ -1,6 +1,7 @@
 import { RoleRouter } from "@/server/api/routers/role";
 import { getServerAuthSession } from "@/server/auth";
 import { prisma } from "@/server/db";
+import { adminPageRegex } from "@/utils/constants";
 import { AccessType } from "@prisma/client";
 import type {
   PreviewData,
@@ -31,7 +32,7 @@ export const withAdminGuard = (
 ): GetServerSideProps => {
   return async (context) => {
     const pathname = context.resolvedUrl;
-    const isAdminPage = pathname.match(/admin/g) !== null;
+    const isAdminPage = pathname.match(adminPageRegex) !== null;
     const session = await getServerAuthSession(context);
     if (session === null) {
       return {

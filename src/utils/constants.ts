@@ -11,5 +11,7 @@ export type SortBy = "name" | "createdAt";
 export const MaxFeaturedCategory = 12;
 
 // user location headers
-export const UserLatitudeHeaderName = "user-latitude";
-export const UserLongitudeHeaderName = "user-longitude";
+export const UserLatitudeHeaderName = "x-user-latitude";
+export const UserLongitudeHeaderName = "x-user-longitude";
+export const RequestPathHeaderName = "x-forwarded-path";
+export const adminPageRegex = /\/admin\//g;

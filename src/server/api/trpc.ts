@@ -17,6 +17,8 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import { CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { AccessType } from "@prisma/client";
 import {
+  adminPageRegex,
+  RequestPathHeaderName,
   UserLatitudeHeaderName,
   UserLongitudeHeaderName,
 } from "@/utils/constants";
@@ -114,6 +116,7 @@ export const createTRPCRouter = t.router;
  * are logged in.
  */
 export const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
+  // Update user last active
   if (ctx.session?.user) {
     ctx.session.user = await prisma.user.update({
       where: {
@@ -135,7 +138,8 @@ export const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
   }
   const userAccesses =
     ctx.session?.user.role?.accesses.map((access) => access.type) ?? [];
-  const isAdmin = userAccesses.includes(AccessType.readAccess);
+  const url = ctx.headers[RequestPathHeaderName];
+  const isAdminPage = url?.match(adminPageRegex) ?? false;
   return next({
     ctx: {
       // infers the `session` as non-nullable
@@ -144,7 +148,7 @@ export const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
         user: ctx.session?.user,
         userAccesses,
       },
-      isAdmin,
+      isAdminPage,
     },
   });
 });

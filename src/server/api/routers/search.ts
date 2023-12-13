@@ -80,7 +80,7 @@ export const searchRouter = createTRPCRouter({
         search: z.string().trim().default(""),
       })
     )
-    .query(async ({ input: { search }, ctx: { prisma, isAdmin } }) => {
+    .query(async ({ input: { search }, ctx: { prisma, isAdminPage } }) => {
       const categories = await prisma.category.findMany({
         where: {
           name: search
@@ -88,7 +88,7 @@ export const searchRouter = createTRPCRouter({
                 contains: search,
               }
             : undefined,
-          active: isAdmin ? undefined : true,
+          active: isAdminPage ? undefined : true,
         },
         take: DefaultLimit,
         select: {
@@ -109,7 +109,10 @@ export const searchRouter = createTRPCRouter({
       })
     )
     .query(
-      async ({ input: { search, categoryId }, ctx: { prisma, isAdmin } }) => {
+      async ({
+        input: { search, categoryId },
+        ctx: { prisma, isAdminPage },
+      }) => {
         const brands = await prisma.brand.findMany({
           where: {
             name: search
@@ -117,14 +120,14 @@ export const searchRouter = createTRPCRouter({
                   contains: search,
                 }
               : undefined,
-            active: isAdmin ? undefined : true,
+            active: isAdminPage ? undefined : true,
             models: categoryId
               ? {
                   some: {
                     categories: {
                       some: {
                         id: categoryId,
-                        active: isAdmin ? undefined : true,
+                        active: isAdminPage ? undefined : true,
                       },
                     },
                   },
@@ -154,20 +157,20 @@ export const searchRouter = createTRPCRouter({
     .query(
       async ({
         input: { search, brandId, categoryId },
-        ctx: { prisma, isAdmin },
+        ctx: { prisma, isAdminPage },
       }) => {
         const models = await prisma.model.findMany({
           where: {
-            active: isAdmin ? undefined : true,
+            active: isAdminPage ? undefined : true,
             brand: {
-              active: isAdmin ? undefined : true,
+              active: isAdminPage ? undefined : true,
             },
             brandId,
             categories: categoryId
               ? {
                   some: {
                     id: categoryId,
-                    active: isAdmin ? undefined : true,
+                    active: isAdminPage ? undefined : true,
                   },
                 }
               : undefined,

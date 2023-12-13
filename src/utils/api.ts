@@ -4,12 +4,16 @@
  *
  * We also create a few inference helpers for input and output types.
  */
-import { httpBatchLink } from "@trpc/client";
+import { HTTPHeaders, httpBatchLink } from "@trpc/client";
 import { createTRPCNext } from "@trpc/next";
 import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
 import superjson from "superjson";
 import { type AppRouter } from "@/server/api/root";
-import { UserLatitudeHeaderName, UserLongitudeHeaderName } from "./constants";
+import {
+  RequestPathHeaderName,
+  UserLatitudeHeaderName,
+  UserLongitudeHeaderName,
+} from "./constants";
 import { ErrorLink } from "./ErrorLink";
 
 const getBaseUrl = () => {
@@ -58,12 +62,15 @@ export const api = createTRPCNext<AppRouter>({
         httpBatchLink({
           url: `${getBaseUrl()}/api/trpc`,
           headers() {
-            return userLatitute !== undefined && userLongitude !== undefined
-              ? {
-                  [UserLatitudeHeaderName]: userLatitute,
-                  [UserLongitudeHeaderName]: userLongitude,
-                }
-              : {};
+            const headers: HTTPHeaders = {};
+            if (typeof window !== "undefined") {
+              headers[RequestPathHeaderName] = window.location.pathname;
+            }
+            if (userLatitute !== undefined && userLongitude !== undefined) {
+              headers[UserLatitudeHeaderName] = userLatitute;
+              headers[UserLongitudeHeaderName] = userLongitude;
+            }
+            return headers;
           },
         }),
       ],
