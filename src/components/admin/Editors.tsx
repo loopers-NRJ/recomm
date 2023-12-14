@@ -56,7 +56,7 @@ export const VariantEditor: FC<EditorProps> = ({
         className={error?.path[2] === "questionContent" ? "border-red-500" : ""}
       />
       <div
-        className={`flex w-full flex-grow flex-wrap items-center gap-1 rounded-md border border-input bg-background p-1
+        className={`flex w-full flex-grow flex-wrap items-center gap-1 rounded-lg border border-input bg-background p-1
       ${
         error?.path[2] === "choices" && question.choices.length === 0
           ? "border-red-500"

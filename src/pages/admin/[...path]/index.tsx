@@ -16,9 +16,14 @@ import {
 } from "@/components/ui/select";
 import RoleTable from "@/components/admin/RoleTable";
 import FeaturedCategoryTable from "@/components/admin/FeaturedCategoryTable";
-import Link from "next/link";
-import EmployeeTable from "@/components/admin/EmployeeTable";
 import { withAdminGuard } from "@/hoc/AdminGuard";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
+import useUrl from "@/hooks/useUrl";
+import { DefaultSearch } from "@/utils/constants";
+import { debounce } from "@/utils/helper";
+import { Button } from "@/components/ui/button";
+import { useRef } from "react";
 
 const titles = [
   "category",
@@ -27,10 +32,13 @@ const titles = [
   "models",
   "products",
   "users",
-  "employees",
   "roles",
 ] as const;
 type Title = (typeof titles)[number];
+
+export interface TableProps {
+  search?: string;
+}
 
 export const getServerSideProps = withAdminGuard(async (context) => {
   const path = context.params?.path as [Title, ...string[]];
@@ -53,8 +61,7 @@ export const getServerSideProps = withAdminGuard(async (context) => {
 
 export default function AdminPage({ title }: { title: Title }) {
   const router = useRouter();
-
-  let Table;
+  let Table: React.FC<TableProps>;
   switch (title) {
     case "category":
       Table = CategoryTable;
@@ -74,14 +81,14 @@ export default function AdminPage({ title }: { title: Title }) {
     case "users":
       Table = UserTable;
       break;
-    case "employees":
-      Table = EmployeeTable;
       break;
     case "roles":
       Table = RoleTable;
       break;
   }
 
+  const [search, setSearch] = useUrl("search", DefaultSearch);
+  const ref = useRef<HTMLInputElement>(null);
   return (
     <Container className="pt-3 md:flex md:gap-2">
       <div className="md:hidden">
@@ -101,21 +108,47 @@ export default function AdminPage({ title }: { title: Title }) {
           </SelectContent>
         </Select>
       </div>
-      <div className="hidden md:block">
-        <div className="flex h-full flex-col gap-2">
+      <div className="hidden h-fit w-40 shrink-0 rounded-lg border md:block">
+        <div className="flex h-full flex-col">
           {titles.map((title) => (
-            <Link
+            <Button
               key={title}
-              href={`/admin/${title}`}
-              className="inline-flex h-9 items-center justify-center rounded-md px-3 py-2 text-center text-sm font-medium capitalize ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+              className={`
+                justify-start rounded-none
+                ${
+                  new RegExp(`^/admin/${title}`).test(router.asPath)
+                    ? "bg-accent text-accent-foreground"
+                    : ""
+                }
+              `}
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                if (ref.current !== null) {
+                  ref.current.value = "";
+                }
+                void router.push(`/admin/${title}`);
+              }}
             >
               {title}
-            </Link>
+            </Button>
           ))}
         </div>
       </div>
-      <div className="my-4 grow md:m-0">
-        <Table />
+      <div className="my-4 flex grow flex-col gap-3 md:m-0">
+        <div className="flex items-center gap-1 rounded-lg border ps-3">
+          <Search className="h-4 w-4 shrink-0 opacity-50" />
+          <Input
+            ref={ref}
+            placeholder="Search"
+            role="search"
+            type="search"
+            defaultValue={search}
+            onChange={debounce((e) => setSearch(e.target.value), 300)}
+            className="border-none focus:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
+          />
+        </div>
+        <Table search={search} />
       </div>
     </Container>
   );

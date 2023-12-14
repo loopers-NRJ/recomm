@@ -3,8 +3,6 @@ import { useSearchParams } from "next/navigation";
 
 import { api } from "@/utils/api";
 import {
-  DefaultLimit,
-  DefaultSearch,
   DefaultSortBy,
   DefaultSortOrder,
   SortBy,
@@ -13,25 +11,22 @@ import {
 import { ColumnDef } from "@tanstack/react-table";
 
 import { DataTable } from "./Table";
-import { useMemo, useState } from "react";
+import { type FC, useMemo, useState } from "react";
 import { Button } from "../ui/button";
 import { FeaturedCategoryPayloadIncluded } from "@/types/prisma";
 import ServerError from "../common/ServerError";
 import Loading from "../common/Loading";
+import { TableProps } from "@/pages/admin/[...path]";
 
-const FeaturedCategoryTable = () => {
+const FeaturedCategoryTable: FC<TableProps> = ({ search }) => {
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
 
-  const limit = +(params.get("limit") ?? DefaultLimit);
-
-  const search = params.get("search") ?? DefaultSearch;
   const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
   const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
 
   const categoriesApi = api.category.getFeaturedCategories.useInfiniteQuery(
     {
-      limit,
       search,
       sortBy,
       sortOrder,
@@ -156,7 +151,7 @@ const FeaturedCategoryTable = () => {
 
   return (
     <>
-      <div className="flex items-center justify-between rounded-lg px-2 py-2">
+      <div className="flex items-center justify-between rounded-lg">
         <div>
           <span className="px-2 font-bold">Featured Categories</span>
         </div>

@@ -4,42 +4,46 @@ import { ColumnDef } from "@tanstack/react-table";
 
 import { DataTable } from "./Table";
 import {
-  DefaultSearch,
   SortBy,
   DefaultSortBy,
   SortOrder,
   DefaultSortOrder,
-  DefaultLimit,
 } from "@/utils/constants";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "../ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import { UserPayloadIncluded } from "@/types/prisma";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import Loading from "../common/Loading";
 import ServerError from "../common/ServerError";
-import { useMemo } from "react";
+import { type FC, useMemo, useState } from "react";
+import { Label } from "../ui/label";
+import { TableProps } from "@/pages/admin/[...path]";
 
-const UserTable = () => {
+const UserTable: FC<TableProps> = ({ search }) => {
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
-
-  const limit = +(params.get("limit") ?? DefaultLimit);
-  const search = params.get("search") ?? DefaultSearch;
   const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
   const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
+  const rolesApi = api.search.role.useQuery();
+
+  const [selectedRole, setSelectedRole] = useState<string>();
   const usersApi = api.user.getUsers.useInfiniteQuery(
     {
-      limit,
       search,
       sortBy,
       sortOrder,
+      role: selectedRole,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     }
   );
-
-  const rolesApi = api.search.role.useQuery();
 
   const updateUserRole = api.user.updateUserRole.useMutation();
 
@@ -146,22 +150,59 @@ const UserTable = () => {
     ]
   );
 
-  if (usersApi.isLoading) {
+  if (usersApi.isLoading || rolesApi.isLoading) {
     return <Loading />;
   }
-  if (usersApi.isError) {
-    return <ServerError message={usersApi.error.message} />;
+  if (usersApi.isError || rolesApi.isError) {
+    return (
+      <ServerError
+        message={
+          usersApi.error?.message ??
+          rolesApi.error?.message ??
+          "Something went wrong"
+        }
+      />
+    );
   }
 
   return (
-    <DataTable
-      columns={columns}
-      data={usersApi.data.pages.flatMap((page) => page.users)}
-      canViewMore={!!usersApi.hasNextPage}
-      viewMore={() => {
-        void usersApi.fetchNextPage();
-      }}
-    />
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-end">
+        <Label className="flex items-center gap-3">
+          Filter
+          <Select
+            onValueChange={(value) => {
+              setSelectedRole(value === "" ? undefined : value);
+            }}
+            value={selectedRole ?? ""}
+          >
+            <SelectTrigger className="w-[180px] capitalize">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Users</SelectItem>
+              {rolesApi.data.map((role) => (
+                <SelectItem
+                  value={role.id}
+                  key={role.id}
+                  className="capitalize"
+                >
+                  {role.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Label>
+      </div>
+      <DataTable
+        columns={columns}
+        data={usersApi.data.pages.flatMap((page) => page.users)}
+        canViewMore={!!usersApi.hasNextPage}
+        viewMore={() => {
+          void usersApi.fetchNextPage();
+        }}
+      />
+    </div>
   );
 };
 

@@ -5,8 +5,6 @@ import { useMemo, useState } from "react";
 
 import { api } from "@/utils/api";
 import {
-  DefaultLimit,
-  DefaultSearch,
   DefaultSortBy,
   DefaultSortOrder,
   SortBy,
@@ -20,8 +18,9 @@ import { Switch } from "@/components/ui/switch";
 import { CategoryPayloadIncluded } from "@/types/prisma";
 import ServerError from "../common/ServerError";
 import Loading from "../common/Loading";
+import { TableProps } from "@/pages/admin/[...path]";
 
-const CategoryTable = () => {
+const CategoryTable: React.FC<TableProps> = ({ search }) => {
   const router = useRouter();
   const path = (router.query.path as ["brands", ...string[]]).slice(1);
 
@@ -31,16 +30,12 @@ const CategoryTable = () => {
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
 
-  const limit = +(params.get("limit") ?? DefaultLimit);
-
-  const search = params.get("search") ?? DefaultSearch;
   const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
   const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
 
   const categoriesApi = api.category.getCategories.useInfiniteQuery(
     {
       parentId,
-      limit,
       search,
       sortBy,
       sortOrder,
@@ -254,7 +249,7 @@ const CategoryTable = () => {
 
   return (
     <>
-      <div className="flex items-center justify-between rounded-lg px-2 py-2">
+      <div className="flex items-center justify-between rounded-lg">
         <div>
           <span className="px-2 font-bold">
             {parentId === null ? "All Categories" : "Sub Category of"}

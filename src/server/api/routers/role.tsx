@@ -2,16 +2,24 @@ import { AccessType } from "@prisma/client";
 import { createTRPCRouter, getProcedure } from "../trpc";
 import { z } from "zod";
 import { RolePayload, accessTypes } from "@/types/prisma";
-import { idSchema } from "@/utils/validation";
+import { functionalityOptions, idSchema } from "@/utils/validation";
 
 export const RoleRouter = createTRPCRouter({
-  getRoles: getProcedure(AccessType.readAccess).query(
-    async ({ ctx: { prisma } }) => {
+  getRoles: getProcedure(AccessType.readAccess)
+    .input(functionalityOptions.pick({ search: true, sortOrder: true }))
+    .query(async ({ input, ctx: { prisma } }) => {
       return prisma.role.findMany({
         include: RolePayload.include,
+        where: {
+          name: {
+            contains: input.search,
+          },
+        },
+        orderBy: {
+          name: input.sortOrder,
+        },
       });
-    }
-  ),
+    }),
   getRole: getProcedure(AccessType.readAccess)
     .input(z.object({ id: idSchema }))
     .query(async ({ input: { id }, ctx: { prisma } }) => {

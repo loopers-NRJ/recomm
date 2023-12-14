@@ -29,9 +29,18 @@ export const userRouter = createTRPCRouter({
                 }
               : undefined,
             where: {
-              name: {
-                contains: search,
-              },
+              OR: [
+                {
+                  name: {
+                    contains: search,
+                  },
+                },
+                {
+                  email: {
+                    contains: search,
+                  },
+                },
+              ],
               role: role
                 ? {
                     id: role,

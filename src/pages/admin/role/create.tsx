@@ -194,6 +194,7 @@ export default function CreateRole() {
             title="role"
             types={[
               AccessType.createRole,
+              AccessType.updateRole,
               AccessType.updateUsersRole,
               AccessType.deleteRole,
             ]}

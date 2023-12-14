@@ -1,12 +1,10 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { FC, useMemo, useState } from "react";
 
 import { ModelPayloadIncluded } from "@/types/prisma";
 import { api } from "@/utils/api";
 import {
-  DefaultLimit,
-  DefaultSearch,
   DefaultSortBy,
   DefaultSortOrder,
   SortBy,
@@ -19,13 +17,11 @@ import { DataTable } from "./Table";
 import Loading from "../common/Loading";
 import ServerError from "../common/ServerError";
 import { Switch } from "../ui/switch";
+import { TableProps } from "@/pages/admin/[...path]";
 
-const ModelTable = () => {
+const ModelTable: FC<TableProps> = ({ search }) => {
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
-  const limit = +(params.get("limit") ?? DefaultLimit);
-
-  const search = params.get("search") ?? DefaultSearch;
   const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
   const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
   const categoryId = params.get("category") ?? undefined;
@@ -36,7 +32,6 @@ const ModelTable = () => {
 
   const modelsApi = api.model.getModels.useInfiniteQuery(
     {
-      limit,
       search,
       sortBy,
       sortOrder,
@@ -168,7 +163,7 @@ const ModelTable = () => {
 
   return (
     <>
-      <div className="flex items-center justify-between rounded-lg px-2 py-2">
+      <div className="flex items-center justify-between rounded-lg">
         <span className="px-2 font-bold">Models</span>
         <Link href="/admin/models/create">
           <Button>New</Button>

@@ -57,7 +57,7 @@ const Navbar: React.FC = () => {
             </div>
             <div className="flex w-full justify-between gap-3">
               <Search />
-              <p className="flex w-fit items-center rounded-md border px-3 py-2">
+              <p className="flex w-fit items-center rounded-lg border px-3 py-2">
                 Location
               </p>
             </div>

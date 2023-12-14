@@ -9,7 +9,7 @@ const Search = () => {
   const router = useRouter();
 
   return (
-    <Command className="relative overflow-visible rounded-md border">
+    <Command className="relative overflow-visible rounded-lg border">
       <CommandInput
         onValueChange={(key) => {
           setSearchKey(key);

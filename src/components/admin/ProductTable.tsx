@@ -1,12 +1,10 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { FC, useMemo, useState } from "react";
 
 import { ProductsPayloadIncluded } from "@/types/prisma";
 import { api } from "@/utils/api";
 import {
-  DefaultLimit,
-  DefaultSearch,
   DefaultSortBy,
   DefaultSortOrder,
   SortBy,
@@ -18,14 +16,12 @@ import { Button } from "../ui/button";
 import { DataTable } from "./Table";
 import Loading from "../common/Loading";
 import ServerError from "../common/ServerError";
+import { TableProps } from "@/pages/admin/[...path]";
 
-const ProductTable = () => {
+const ProductTable: FC<TableProps> = ({ search }) => {
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
 
-  const limit = +(params.get("limit") ?? DefaultLimit);
-
-  const search = params.get("search") ?? DefaultSearch;
   const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
   const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
   const categoryId = params.get("category") ?? undefined;
@@ -34,7 +30,6 @@ const ProductTable = () => {
 
   const productApi = api.product.getProducts.useInfiniteQuery(
     {
-      limit,
       search,
       sortBy,
       sortOrder,

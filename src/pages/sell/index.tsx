@@ -4,6 +4,7 @@ import Loading from "@/components/common/Loading";
 import useUrl from "@/hooks/useUrl";
 import { api } from "@/utils/api";
 import { withProtectedRoute } from "@/hoc/ProtectedRoute";
+import ServerError from "@/components/common/ServerError";
 
 export const getServerSideProps = withProtectedRoute();
 
@@ -28,7 +29,13 @@ export default function SellitPage() {
 
   if (categoryApi.isError || featuredCategoryApi.isError) {
     console.log(categoryApi.error ?? featuredCategoryApi.error);
-    return <div>Something went wrong</div>;
+    return (
+      <ServerError
+        message={
+          categoryApi.error?.message ?? featuredCategoryApi.error?.message ?? ""
+        }
+      />
+    );
   }
   if (
     categoryApi.isLoading ||

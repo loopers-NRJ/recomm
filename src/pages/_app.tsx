@@ -8,12 +8,12 @@ import dynamic from "next/dynamic";
 import BottomBar from "@/components/navbar/BottomBar";
 import Navbar from "@/components/navbar/Navbar";
 import { Toaster } from "@/components/ui/toaster";
-import { api, setUserLocation } from "@/utils/api";
-import { useEffect } from "react";
+import { api } from "@/utils/api";
 import Head from "next/head";
 import TopLoader from "nextjs-progressbar";
 
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import LocationUpdater from "@/components/common/LocationUpdater";
 
 const ModalRenderer = dynamic(
   () => import("../components/modals/core/modal-renderer"),
@@ -27,19 +27,6 @@ const MyApp: AppType<{ session: Session | null }> = ({
   Component,
   pageProps: { session, ...pageProps },
 }) => {
-  useEffect(() => {
-    if (session?.user) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation(position.coords);
-        },
-        () => {
-          // TODO: handle error
-        }
-      );
-    }
-  }, [session]);
-
   return (
     <>
       <Head>
@@ -59,6 +46,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
       <SpeedInsights />
       <>
         <SessionProvider session={session}>
+          <LocationUpdater />
           <TopLoader />
           <Navbar />
           <Component {...pageProps} session={session} />

@@ -34,7 +34,7 @@ const NavItems: FC<NavItemsProps> = ({ session }) => {
           variant="ghost"
           className={`h-full  w-full min-w-max flex-col justify-between rounded-lg px-6 md:flex-row md:px-4 md:py-2 ${
             path === "/"
-              ? "rounded-b-none border-b-2 border-b-black md:rounded-md md:border-none md:bg-slate-200/50"
+              ? "rounded-b-none border-b-2 border-b-black md:rounded-lg md:border-none md:bg-slate-200/50"
               : ""
           }`}
         >
@@ -47,7 +47,7 @@ const NavItems: FC<NavItemsProps> = ({ session }) => {
           variant="ghost"
           className={`h-full w-full min-w-max flex-col justify-between rounded-lg px-4 md:flex-row md:px-4 md:py-2 ${
             path === `/favourites`
-              ? "rounded-b-none border-b-2 border-b-black md:rounded-md md:border-none md:bg-slate-200/50"
+              ? "rounded-b-none border-b-2 border-b-black md:rounded-lg md:border-none md:bg-slate-200/50"
               : ""
           }
         `}
@@ -62,7 +62,7 @@ const NavItems: FC<NavItemsProps> = ({ session }) => {
           variant="ghost"
           className={`h-full w-full min-w-max flex-col justify-between rounded-lg px-4 md:flex-row md:px-4 md:py-2 ${
             path === `/wishlist`
-              ? "rounded-b-none border-b-2 border-b-black md:rounded-md md:border-none md:bg-slate-200/50"
+              ? "rounded-b-none border-b-2 border-b-black md:rounded-lg md:border-none md:bg-slate-200/50"
               : ""
           }
         `}

@@ -1,12 +1,10 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
-import { useMemo, useState } from "react";
+import { type FC, useMemo, useState } from "react";
 
 import { api } from "@/utils/api";
 import {
-  DefaultLimit,
-  DefaultSearch,
   DefaultSortBy,
   DefaultSortOrder,
   SortBy,
@@ -20,8 +18,9 @@ import { DataTable } from "./Table";
 import Loading from "../common/Loading";
 import ServerError from "../common/ServerError";
 import { Switch } from "../ui/switch";
+import { TableProps } from "@/pages/admin/[...path]";
 
-const BrandTable = () => {
+const BrandTable: FC<TableProps> = ({ search }) => {
   const searchParams = useSearchParams();
 
   const router = useRouter();
@@ -29,9 +28,6 @@ const BrandTable = () => {
   const brandId = path[1];
   const params = new URLSearchParams(searchParams);
 
-  const limit = +(params.get("limit") ?? DefaultLimit);
-
-  const search = params.get("search") ?? DefaultSearch;
   const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
   const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
   const categoryId = params.get("category") ?? undefined;
@@ -45,7 +41,6 @@ const BrandTable = () => {
 
   const brandsApi = api.brand.getBrands.useInfiniteQuery(
     {
-      limit,
       search,
       sortBy,
       sortOrder,
@@ -218,7 +213,7 @@ const BrandTable = () => {
         </div>
       ) : (
         <>
-          <div className="flex items-center justify-between rounded-lg px-2 py-2">
+          <div className="flex items-center justify-between rounded-lg">
             <div>
               <span className="px-2 font-bold">Brands</span>
             </div>

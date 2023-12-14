@@ -6,13 +6,23 @@ import { RolePayloadIncluded } from "@/types/prisma";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useMemo, useState } from "react";
+import { type FC, useMemo, useState } from "react";
 import Loading from "../common/Loading";
 import ServerError from "../common/ServerError";
+import { DefaultSortOrder, SortOrder } from "@/utils/constants";
+import { useSearchParams } from "next/navigation";
+import { TableProps } from "@/pages/admin/[...path]";
 
-const RoleTable = () => {
-  const rolesApi = api.role.getRoles.useQuery();
+const RoleTable: FC<TableProps> = ({ search }) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const params = new URLSearchParams(searchParams);
+  const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
+
+  const rolesApi = api.role.getRoles.useQuery({
+    search,
+    sortOrder,
+  });
   const [deletingRoleId, setDeletingRoleId] = useState<string>();
   const deleteRoleApi = api.role.deleteRole.useMutation();
   const columns: ColumnDef<RolePayloadIncluded>[] = useMemo(
@@ -75,7 +85,7 @@ const RoleTable = () => {
   }
   return (
     <>
-      <div className="flex items-center justify-between rounded-lg px-2 py-2">
+      <div className="flex items-center justify-between rounded-lg">
         <span className="px-2 font-bold">Roles</span>
         <Link href="/admin/role/create">
           <Button>New</Button>
