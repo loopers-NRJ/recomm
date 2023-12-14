@@ -1,4 +1,7 @@
 import Container from "@/components/Container";
+import { withProtectedRoute } from "@/hoc/ProtectedRoute";
+
+export const getServerSideProps = withProtectedRoute();
 
 function NotificationPage() {
   return (

@@ -58,11 +58,7 @@ export const wishRouter = createTRPCRouter({
             model: {
               id: modelId,
               brandId,
-              categories: {
-                some: {
-                  id: categoryId,
-                },
-              },
+              categoryId,
             },
             buyerId: null,
             price: {

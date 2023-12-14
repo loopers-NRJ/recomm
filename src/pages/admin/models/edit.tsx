@@ -1,11 +1,9 @@
 import Container from "@/components/Container";
 import { withAdminGuard } from "@/hoc/AdminGuard";
-import ImagePicker from "@/components/common/ImagePicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api } from "@/utils/api";
-import { useImageUploader } from "@/utils/imageUpload";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -22,30 +20,18 @@ const EditModelPage = () => {
   const modelApi = api.model.getModelById.useQuery({ modelId });
 
   const [modelName, setModelName] = useState("");
-  // file object to store the file to upload
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
 
-  const uploader = useImageUploader();
   const [error, setError] = useState<string>();
 
   const updateModel = async () => {
     if (modelApi.data == null || modelApi.isError) {
       return;
     }
-    let image;
-    if (imageFiles.length > 0) {
-      const result = await uploader.upload(imageFiles);
-      if (result instanceof Error) {
-        return setError(result.message);
-      }
-      image = result[0];
-    }
 
     try {
       await updateModelApi.mutateAsync({
         id: modelApi.data.id,
         name: modelName,
-        image,
       });
       void router.push("/admin/models");
     } catch (error) {
@@ -90,30 +76,18 @@ const EditModelPage = () => {
           />
         </Label>
 
-        <div className="flex items-end justify-between gap-8">
-          <ImagePicker
-            setImages={setImageFiles}
-            maxImages={1}
-            images={imageFiles}
-          />
+        <div className="flex items-end justify-end gap-8">
           <Button
             onClick={() => void updateModel()}
             disabled={
-              uploader.isLoading ||
               updateModelApi.isLoading ||
-              ((modelName.trim() === "" || modelName === model.name) &&
-                imageFiles.length === 0)
+              modelName.trim() === "" ||
+              modelName === model.name
             }
           >
-            {imageFiles.length > 0 ? "Update Model Image" : "Update Model"}
+            Update Model
           </Button>
         </div>
-        {uploader.isLoading && (
-          <div className="flex flex-col items-center justify-center rounded-lg border p-2">
-            Uploading image...
-            <Loader2 className="animate-spin" />
-          </div>
-        )}
         {updateModelApi.isLoading && (
           <div className="flex flex-col items-center justify-center rounded-lg border p-2">
             Updating Model {modelName} ...

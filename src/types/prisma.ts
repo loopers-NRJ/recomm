@@ -22,7 +22,7 @@ export const productsPayload = Prisma.validator<Prisma.ProductDefaultArgs>()({
     model: {
       include: {
         brand: true,
-        categories: true,
+        category: true,
       },
     },
     seller: true,
@@ -41,12 +41,8 @@ export const singleProductPayload =
       seller: true,
       model: {
         include: {
-          image: true,
-          brand: {
-            include: {
-              image: true,
-            },
-          },
+          brand: true,
+          category: true,
         },
       },
       room: {
@@ -59,7 +55,7 @@ export const singleProductPayload =
         },
       },
       images: true,
-      choices: {
+      selectedChoices: {
         include: {
           question: true,
         },
@@ -75,29 +71,19 @@ export type SingleProductPayloadIncluded = Prisma.ProductGetPayload<
   typeof singleProductPayload
 >;
 
-export const modelPayload = Prisma.validator<Prisma.ModelDefaultArgs>()({
+export const modelsPayload = Prisma.validator<Prisma.ModelDefaultArgs>()({
   include: {
-    image: true,
-    brand: {
-      include: {
-        image: true,
-      },
-    },
-    categories: true,
+    brand: true,
+    category: true,
   },
 });
 
-export type ModelPayloadIncluded = Prisma.ModelGetPayload<typeof modelPayload>;
+export type ModelPayloadIncluded = Prisma.ModelGetPayload<typeof modelsPayload>;
 
 export const singleModelPayload = Prisma.validator<Prisma.ModelDefaultArgs>()({
   include: {
-    image: true,
-    brand: {
-      include: {
-        image: true,
-      },
-    },
-    categories: true,
+    brand: true,
+    category: true,
     multipleChoiceQuestions: {
       include: {
         choices: true,
@@ -145,19 +131,12 @@ export type FeaturedCategoryPayloadIncluded = Prisma.FeaturedCategoryGetPayload<
   typeof FeaturedCategoryPayload
 >;
 
-// export const MultipleChoiceQuestionTypeArray = Object.keys(
-//   MultipleChoiceQuestionType
-// ) as MultipleChoiceQuestionType[];
 export const MultipleChoiceQuestionTypeArray = [
   MultipleChoiceQuestionType.Checkbox,
   MultipleChoiceQuestionType.Dropdown,
   MultipleChoiceQuestionType.RadioGroup,
   MultipleChoiceQuestionType.Variant,
 ] as const;
-
-// export const AtomicQuestionTypeArray = Object.keys(
-//   AtomicQuestionType
-// ) as AtomicQuestionType[];
 
 export const AtomicQuestionTypeArray = [
   AtomicQuestionType.Text,

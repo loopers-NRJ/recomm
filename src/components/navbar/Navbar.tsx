@@ -1,16 +1,14 @@
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
 
 import Container from "@/components/Container";
 import Search from "@/components/search/Searchbar";
 
 import Logo from "./Logo";
 import NavItems from "./NavItems";
-import useLoginModal from "@/hooks/useLoginModal";
-import { useCallback } from "react";
 import { Button } from "../ui/button";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 
 const Bell = ({ className }: { className: string }) => (
   <svg
@@ -30,7 +28,6 @@ const Bell = ({ className }: { className: string }) => (
 );
 
 const Navbar: React.FC = () => {
-  const router = useRouter();
   const pathname = usePathname();
   const { data: session } = useSession();
 
@@ -46,18 +43,16 @@ const Navbar: React.FC = () => {
                   <NavItems session={session} />
                 </div>
                 <Profile />
-                <div
+                <Link
                   className={
-                    pathname === `/${session?.user.id}/notifications`
+                    pathname === "/notifications"
                       ? "rounded-full bg-slate-100 p-2"
                       : "rounded-full p-2"
                   }
-                  onClick={() => {
-                    void router.push(`/${session?.user.id}/notifications`);
-                  }}
+                  href={session ? "/notifications" : "/login"}
                 >
                   <Bell className="h-6 w-6" />
-                </div>
+                </Link>
               </div>
             </div>
             <div className="flex w-full justify-between gap-3">
@@ -74,32 +69,25 @@ const Navbar: React.FC = () => {
 };
 
 const Profile = () => {
-  const router = useRouter();
-  const loginModal = useLoginModal();
   const { data: session } = useSession();
-
-  const handleProfileClick = useCallback(() => {
-    if (!session?.user) {
-      return loginModal.onOpen();
-    } else {
-      return router.push(`/${session?.user.id}/profile`);
-    }
-  }, [session?.user, loginModal, router]);
-
   return (
-    <Button
-      variant={"ghost"}
-      className="w-fit rounded-full p-2"
-      onClick={() => void handleProfileClick()}
+    <Link
+      href={session ? `/users/${session.user.id}/profile` : "/login"}
+      className="rounded-full"
     >
-      <Image
-        className="rounded-full"
-        height={30}
-        width={30}
-        alt="Avatar"
-        src={session?.user.image ?? "/placeholder.jpg"}
-      />
-    </Button>
+      <Button
+        variant="ghost"
+        className="h-fit w-fit overflow-hidden rounded-full p-1.5 "
+      >
+        <Image
+          className="rounded-full"
+          height={30}
+          width={30}
+          alt="Avatar"
+          src={session?.user.image ?? "/placeholder.jpg"}
+        />
+      </Button>
+    </Link>
   );
 };
 

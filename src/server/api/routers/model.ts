@@ -1,12 +1,10 @@
 import slugify from "@/lib/slugify";
 import { z } from "zod";
 
-import { deleteImage } from "@/lib/cloudinary";
-import { modelPayload, singleModelPayload } from "@/types/prisma";
+import { modelsPayload, singleModelPayload } from "@/types/prisma";
 import {
   functionalityOptions,
   idSchema,
-  imageInputs,
   modelSchema,
 } from "@/utils/validation";
 
@@ -36,11 +34,9 @@ export const modelRouter = createTRPCRouter({
       }) => {
         const models = await prisma.model.findMany({
           where: {
-            categories: {
-              some: {
-                id: categoryId,
-                active: isAdminPage ? undefined : true,
-              },
+            category: {
+              id: categoryId,
+              active: isAdminPage ? undefined : true,
             },
             active: isAdminPage ? undefined : true,
             brandId,
@@ -63,7 +59,7 @@ export const modelRouter = createTRPCRouter({
               [sortBy]: sortOrder,
             },
           ],
-          include: modelPayload.include,
+          include: modelsPayload.include,
         });
         return {
           models,
@@ -97,7 +93,6 @@ export const modelRouter = createTRPCRouter({
           name,
           brandId,
           categoryId,
-          image,
           multipleChoiceQuestions,
           atomicQuestions,
         },
@@ -117,7 +112,7 @@ export const modelRouter = createTRPCRouter({
             data: {
               name,
               slug: slugify(name),
-              categories: {
+              category: {
                 connect: {
                   id: categoryId,
                 },
@@ -127,18 +122,13 @@ export const modelRouter = createTRPCRouter({
                   id: brandId,
                 },
               },
-              image: image
-                ? {
-                    create: image,
-                  }
-                : undefined,
               atomicQuestions: {
                 createMany: {
                   data: atomicQuestions,
                 },
               },
             },
-            include: modelPayload.include,
+            include: modelsPayload.include,
           });
 
           for (const multipleChoiceQuestion of multipleChoiceQuestions) {
@@ -175,44 +165,31 @@ export const modelRouter = createTRPCRouter({
           id: idSchema,
           name: z.string().min(1).max(255),
           categoryId: idSchema.optional(),
-          image: imageInputs.optional(),
           active: z.boolean().optional(),
         }),
         z.object({
           id: idSchema,
           name: z.string().min(1).max(255).optional(),
           categoryId: idSchema,
-          image: imageInputs.optional(),
           active: z.boolean().optional(),
         }),
         z.object({
           id: idSchema,
           name: z.string().min(1).max(255).optional(),
           categoryId: idSchema.optional(),
-          image: imageInputs,
-          active: z.boolean().optional(),
-        }),
-        z.object({
-          id: idSchema,
-          name: z.string().min(1).max(255).optional(),
-          categoryId: idSchema.optional(),
-          image: imageInputs.optional(),
           active: z.boolean(),
         }),
       ])
     )
     .mutation(
       async ({
-        input: { id, name: newName, categoryId, image: newImage, active },
+        input: { id, name: newName, categoryId, active },
         ctx: { prisma },
       }) => {
         // check whether the model exists
         const existingModel = await prisma.model.findUnique({
           where: {
             id,
-          },
-          select: {
-            image: true,
           },
         });
         if (existingModel === null) {
@@ -237,7 +214,7 @@ export const modelRouter = createTRPCRouter({
           data: {
             name: newName,
             slug: newName ? slugify(newName) : undefined,
-            categories:
+            category:
               categoryId !== undefined
                 ? {
                     connect: {
@@ -245,27 +222,11 @@ export const modelRouter = createTRPCRouter({
                     },
                   }
                 : undefined,
-            image:
-              newImage !== undefined
-                ? {
-                    create: newImage,
-                  }
-                : undefined,
             active,
           },
           include: singleModelPayload.include,
         });
-        // delete the old image
-        if (newImage !== undefined && existingModel.image !== null) {
-          const error = await deleteImage(existingModel.image.publicId);
-          if (error instanceof Error) {
-            console.error({
-              procedure: "updateBrandById",
-              message: "cannot able delete the old image in cloudinary",
-              error,
-            });
-          }
-        }
+
         return model;
       }
     ),
@@ -276,9 +237,6 @@ export const modelRouter = createTRPCRouter({
         where: {
           id,
         },
-        select: {
-          image: true,
-        },
       });
       if (existingModel === null) {
         throw new Error("Model not found");
@@ -288,39 +246,7 @@ export const modelRouter = createTRPCRouter({
           id,
         },
       });
-      if (existingModel.image !== null) {
-        // using void to not wait for the promise to resolve
-        void prisma.image
-          .delete({
-            where: {
-              id: existingModel.image.id,
-            },
-          })
-          .catch((error) => {
-            console.error({
-              procedure: "deleteBrandById",
-              message: "cannot able delete the old image in database",
-              error,
-            });
-          });
 
-        // using void to not wait for the promise to resolve
-        void deleteImage(existingModel.image.publicId)
-          .then((error) => {
-            if (error instanceof Error) {
-              console.error({
-                procedure: "deleteModelById",
-                error,
-              });
-            }
-          })
-          .catch((error) => {
-            console.error({
-              procedure: "deleteModelById",
-              error,
-            });
-          });
-      }
       return model;
     }),
 });

@@ -1,11 +1,9 @@
 import Container from "@/components/Container";
 import { withAdminGuard } from "@/hoc/AdminGuard";
-import ImagePicker from "@/components/common/ImagePicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api } from "@/utils/api";
-import { useImageUploader } from "@/utils/imageUpload";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -23,29 +21,17 @@ const EditBrandPage = () => {
   const brandApi = api.brand.getBrandById.useQuery({ brandId });
 
   const [brandName, setBrandName] = useState("");
-  // file object to store the file to upload
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
 
-  const uploader = useImageUploader();
   const [error, setError] = useState<string>();
 
   const updateBrand = async () => {
     if (brandApi.data == null) {
       return;
     }
-    let image;
-    if (imageFiles.length > 0) {
-      const result = await uploader.upload(imageFiles);
-      if (result instanceof Error) {
-        return setError(result.message);
-      }
-      image = result[0];
-    }
     try {
       await updateBrandApi.mutateAsync({
         id: brandApi.data.id,
         name: brandName,
-        image,
       });
       void router.push("/admin/brands");
     } catch (error) {
@@ -87,30 +73,18 @@ const EditBrandPage = () => {
           />
         </Label>
 
-        <div className="flex items-end justify-between gap-8">
-          <ImagePicker
-            setImages={setImageFiles}
-            maxImages={1}
-            images={imageFiles}
-          />
+        <div className="flex items-end justify-end gap-8">
           <Button
             onClick={() => void updateBrand()}
             disabled={
-              uploader.isLoading ||
               updateBrandApi.isLoading ||
               brandName.trim() === "" ||
               brandName === brand.name
             }
           >
-            {imageFiles.length > 0 ? "Upload Image" : "Update Brand"}
+            Update Brand
           </Button>
         </div>
-        {uploader.isLoading && (
-          <div className="flex flex-col items-center justify-center rounded-lg border p-2">
-            Uploading image...
-            <Loader2 className="animate-spin" />
-          </div>
-        )}
         {updateBrandApi.isLoading && (
           <div className="flex flex-col items-center justify-center rounded-lg border p-2">
             Updating Brand {brandName} ...

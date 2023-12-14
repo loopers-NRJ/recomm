@@ -65,10 +65,10 @@ const ProductTable = () => {
         header: "Cateegory",
         cell: ({ row }) => (
           <Link
-            href={`/admin/category/${row.original.model.categories[0]?.slug}=${row.original.model.categories[0]?.id}`}
+            href={`/admin/category/${row.original.model.category.slug}=${row.original.model.category.id}`}
             className="text-blue-400 hover:text-blue-600"
           >
-            {row.original.model.categories[0]?.name}
+            {row.original.model.category.name}
           </Link>
         ),
       },

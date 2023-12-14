@@ -51,11 +51,9 @@ export const productRouter = createTRPCRouter({
             modelId,
             model: {
               active: isAdminPage ? undefined : true,
-              categories: {
-                some: {
-                  id: categoryId,
-                  active: isAdminPage ? undefined : true,
-                },
+              category: {
+                id: categoryId,
+                active: isAdminPage ? undefined : true,
               },
               brandId,
               brand: {
@@ -68,11 +66,9 @@ export const productRouter = createTRPCRouter({
                   },
                 },
                 {
-                  categories: {
-                    some: {
-                      name: {
-                        contains: search,
-                      },
+                  category: {
+                    name: {
+                      contains: search,
                     },
                   },
                 },
@@ -199,7 +195,7 @@ export const productRouter = createTRPCRouter({
                 choices: true,
               },
             },
-            categories: true,
+            category: true,
             atomicQuestions: true,
           },
         });
@@ -257,7 +253,7 @@ export const productRouter = createTRPCRouter({
                 closedAt,
               },
             },
-            choices: {
+            selectedChoices: {
               connect: choiceValueIds.map((id) => ({ id })),
             },
             answers: {
@@ -296,9 +292,7 @@ export const productRouter = createTRPCRouter({
           // Updating all the wishes with the brandId to available
           await prisma.wish.updateMany({
             where: {
-              categoryId: {
-                in: model.categories.map((category) => category.id),
-              },
+              categoryId: model.categoryId,
               status: WishStatus.pending,
               lowerBound: {
                 lte: price,
@@ -512,14 +506,6 @@ export const productRouter = createTRPCRouter({
     .mutation(
       async ({ input: { productId: id }, ctx: { prisma, session } }) => {
         const user = session.user;
-        // const existingProduct = await prisma.product.findUnique({
-        //   where: {
-        //     id,
-        //   },
-        // });
-        // if (existingProduct === null) {
-        //   throw new Error("Product does not exist");
-        // }
         const productInFavorites = await prisma.product.findUnique({
           where: {
             id,

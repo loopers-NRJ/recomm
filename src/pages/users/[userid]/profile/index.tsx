@@ -7,6 +7,9 @@ import Container from "@/components/Container";
 import { Button } from "@/components/ui/button";
 import useLoginModal from "@/hooks/useLoginModal";
 import { api } from "@/utils/api";
+import { withProtectedRoute } from "@/hoc/ProtectedRoute";
+
+export const getServerSideProps = withProtectedRoute();
 
 const ProfilePage: NextPage = () => {
   const router = useRouter();
@@ -96,7 +99,7 @@ const ProfilePage: NextPage = () => {
             )}
 
             <a
-              onClick={() => void router.push(`/${userId}/listings`)}
+              onClick={() => void router.push(`/users/${userId}/listings`)}
               className=" block w-full border-t border-gray-100 py-4 pl-6 pr-3 text-gray-600 transition duration-150 hover:bg-gray-100"
             >
               Product Listings

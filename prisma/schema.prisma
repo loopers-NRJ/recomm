@@ -144,7 +144,7 @@ model Category {
 model FeaturedCategory {
     category   Category @relation(fields: [categoryId], references: [id])
     categoryId String   @unique
-    image      Image    @relation(fields: [imageId], references: [id])
+    image      Image    @relation(fields: [imageId], references: [publicId])
     imageId    String   @unique
 }
 
@@ -153,8 +153,6 @@ model Brand {
     name      String   @unique
     slug      String   @unique
     active    Boolean  @default(true)
-    image     Image?   @relation(fields: [imageId], references: [id], onDelete: SetNull)
-    imageId   String?  @unique
     models    Model[]
     wishes    Wish[]
     createdAt DateTime @default(now())
@@ -166,9 +164,8 @@ model Model {
     name                    String                   @unique
     slug                    String                   @unique
     active                  Boolean                  @default(true)
-    image                   Image?                   @relation(fields: [imageId], references: [id], onDelete: SetNull)
-    imageId                 String?                  @unique
-    categories              Category[]
+    category                Category                 @relation(fields: [categoryId], references: [id])
+    categoryId              String
     brand                   Brand                    @relation(fields: [brandId], references: [id], onDelete: Restrict)
     brandId                 String
     products                Product[]
@@ -181,6 +178,7 @@ model Model {
     updatedAt               DateTime                 @updatedAt
 
     @@index([brandId])
+    @@index([categoryId])
 }
 
 enum MultipleChoiceQuestionType {
@@ -260,26 +258,26 @@ model AtomicAnswer {
 }
 
 model Product {
-    id             String         @id @default(cuid())
-    price          Float
-    title          String
-    slug           String         @unique
-    active         Boolean        @default(true)
-    description    String
-    images         Image[]
-    choices        Choice[]
-    answers        AtomicAnswer[]
-    model          Model          @relation(fields: [modelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-    modelId        String
-    seller         User           @relation("listedProducts", fields: [sellerId], references: [id], onDelete: Cascade)
-    sellerId       String
-    buyer          User?          @relation("purchasedProducts", fields: [buyerId], references: [id], onDelete: SetNull)
-    buyerId        String?
-    favoritedUsers User[]         @relation("favoriteProducts")
-    room           Room           @relation(fields: [roomId], references: [id], onDelete: Restrict)
-    roomId         String         @unique
-    createdAt      DateTime       @default(now())
-    updatedAt      DateTime       @updatedAt
+    id              String         @id @default(cuid())
+    price           Float
+    title           String
+    slug            String         @unique
+    active          Boolean        @default(true)
+    description     String
+    images          Image[]
+    selectedChoices Choice[]
+    answers         AtomicAnswer[]
+    model           Model          @relation(fields: [modelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    modelId         String
+    seller          User           @relation("listedProducts", fields: [sellerId], references: [id], onDelete: Cascade)
+    sellerId        String
+    buyer           User?          @relation("purchasedProducts", fields: [buyerId], references: [id], onDelete: SetNull)
+    buyerId         String?
+    favoritedUsers  User[]         @relation("favoriteProducts")
+    room            Room           @relation(fields: [roomId], references: [id], onDelete: Restrict)
+    roomId          String         @unique
+    createdAt       DateTime       @default(now())
+    updatedAt       DateTime       @updatedAt
 
     @@index([sellerId])
     @@index([modelId])
@@ -336,19 +334,17 @@ model Wish {
 }
 
 model Image {
-    id        String            @id @default(cuid())
-    publicId  String
-    url       String
-    fileType  String
-    width     Int
-    height    Int
-    category  FeaturedCategory?
-    model     Model?
-    brand     Brand?
-    product   Product?          @relation(fields: [productId], references: [id], onDelete: Cascade)
-    productId String?
-    createdAt DateTime          @default(now())
-    updatedAt DateTime          @updatedAt
+    publicId         String            @id
+    url              String
+    secureUrl        String
+    originalFilename String
+    format           String
+    width            Int
+    height           Int
+    resource_type    String // "image" | "video" | "raw" | "auto"
+    category         FeaturedCategory?
+    product          Product?          @relation(fields: [productId], references: [id], onDelete: Cascade)
+    productId        String?
 
     @@index([productId])
 }

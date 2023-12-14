@@ -19,6 +19,9 @@ import { useSearchParams } from "next/navigation";
 import ServerError from "@/components/common/ServerError";
 import { Button } from "@/components/ui/button";
 import Loading from "@/components/common/Loading";
+import { withProtectedRoute } from "@/hoc/ProtectedRoute";
+
+export const getServerSideProps = withProtectedRoute();
 
 const Favourites: NextPage = () => {
   const session = useSession();

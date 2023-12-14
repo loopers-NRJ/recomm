@@ -1,6 +1,7 @@
 import { v2 as cloudinary } from "cloudinary";
 
 import { env } from "@/env.mjs";
+import { Image } from "@/utils/validation";
 
 cloudinary.config({
   cloud_name: env.CLOUDINARY_CLOUD_NAME,
@@ -12,12 +13,16 @@ cloudinary.config({
 export const uploadImage = async (localPath: string) => {
   try {
     const response = await cloudinary.uploader.upload(localPath);
-    const image = {
+    const image: Image = {
+      url: response.url,
       publicId: response.public_id,
-      url: response.secure_url,
+      secureUrl: response.secure_url,
+      originalFilename: response.original_filename,
+      format: response.format,
+      createdAt: response.created_at,
       width: response.width,
       height: response.height,
-      fileType: response.format,
+      resource_type: response.resource_type,
     };
     return image;
   } catch (error) {

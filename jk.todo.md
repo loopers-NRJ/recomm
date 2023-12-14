@@ -15,6 +15,8 @@
 - [ ] add location to product
 - [ ] sort products based on their location
 - [ ] add reverse geocoding to get the location from the address in the admin page
+- [ ] search option in admin page
+- [ ] location based admin panel
 
 # notes
 

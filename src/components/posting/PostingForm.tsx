@@ -65,7 +65,7 @@ export default function PostingForm({
   const router = useRouter();
   const productApi = api.product.createProduct.useMutation({
     async onSuccess(data) {
-      await router.push(`/${data.sellerId}/listings`);
+      await router.push(`/users/${data.sellerId}/listings`);
     },
   });
 

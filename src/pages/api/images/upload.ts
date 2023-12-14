@@ -3,6 +3,7 @@ import { NextApiResponse } from "next";
 
 import { uploadImage } from "@/lib/cloudinary";
 import { MulterRequest, uploads } from "@/lib/multer";
+import { Image } from "@/utils/validation";
 
 const MAX_IMAGE_COUNT = 10;
 
@@ -25,7 +26,7 @@ const POST = (request: MulterRequest, response: NextApiResponse) => {
         return response.status(500).json({ error: "cannot upload images" });
       }
 
-      const pictureUrls = [];
+      const images: Image[] = [];
       // uploading images to cloudinary
       for (const file of request.files) {
         try {
@@ -34,7 +35,7 @@ const POST = (request: MulterRequest, response: NextApiResponse) => {
             console.error("cannot upload images to cloudinary", picture);
             return response.status(500).json({ error: "cannot upload images" });
           }
-          pictureUrls.push(picture);
+          images.push(picture);
         } catch (error) {
           console.error("cannot upload images to cloudinary", error);
           return response.status(500).json({ error: "cannot upload images" });
@@ -46,7 +47,7 @@ const POST = (request: MulterRequest, response: NextApiResponse) => {
         fs.unlinkSync(file.path);
       });
 
-      return response.status(200).json(pictureUrls);
+      return response.status(200).json(images);
     });
   } catch (error) {
     return response.status(500).json({ message: "third error", error });

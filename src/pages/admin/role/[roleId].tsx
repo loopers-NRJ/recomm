@@ -184,6 +184,7 @@ function AccordionSection({
             onCheckedChange={(checked) => {
               void handleCheckedChange(!!checked, types);
             }}
+            disabled={processing !== false}
           />
           {title}
           <Badge>

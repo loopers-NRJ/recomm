@@ -34,11 +34,15 @@ export const functionalityOptions = z.object({
 });
 
 export const imageInputs = z.object({
-  publicId: z.string().trim(),
   url: z.string().url(),
-  fileType: z.string().trim(),
+  publicId: z.string(),
+  secureUrl: z.string().url(),
+  originalFilename: z.string(),
+  format: z.string(),
+  createdAt: z.string(),
   width: z.number().int(),
   height: z.number().int(),
+  resource_type: z.enum(["image", "video", "raw", "auto"]),
 });
 
 export type Image = z.infer<typeof imageInputs>;
@@ -287,7 +291,6 @@ export const modelSchema = z.object({
       required: z.boolean().default(true),
     })
   ),
-  image: imageInputs.optional(),
 });
 
 type ProvidedMultipleChoiceQuestionAnswer = z.infer<

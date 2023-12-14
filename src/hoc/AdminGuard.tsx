@@ -37,7 +37,7 @@ export const withAdminGuard = (
     if (session === null) {
       return {
         redirect: {
-          destination: "/admin/login",
+          destination: "/login",
           permanent: false,
         },
       };

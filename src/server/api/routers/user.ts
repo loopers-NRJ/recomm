@@ -127,11 +127,9 @@ export const userRouter = createTRPCRouter({
                       },
                     },
                     {
-                      categories: {
-                        some: {
-                          name: {
-                            contains: search,
-                          },
+                      category: {
+                        name: {
+                          contains: search,
                         },
                       },
                     },
@@ -198,11 +196,9 @@ export const userRouter = createTRPCRouter({
                   },
                 },
                 {
-                  categories: {
-                    some: {
-                      name: {
-                        contains: search,
-                      },
+                  category: {
+                    name: {
+                      contains: search,
                     },
                   },
                 },
@@ -259,11 +255,9 @@ export const userRouter = createTRPCRouter({
                   },
                 },
                 {
-                  categories: {
-                    some: {
-                      name: {
-                        contains: search,
-                      },
+                  category: {
+                    name: {
+                      contains: search,
                     },
                   },
                 },
@@ -321,11 +315,9 @@ export const userRouter = createTRPCRouter({
                   },
                 },
                 {
-                  categories: {
-                    some: {
-                      name: {
-                        contains: search,
-                      },
+                  category: {
+                    name: {
+                      contains: search,
                     },
                   },
                 },
@@ -383,11 +375,9 @@ export const userRouter = createTRPCRouter({
                   },
                 },
                 {
-                  categories: {
-                    some: {
-                      name: {
-                        contains: search,
-                      },
+                  category: {
+                    name: {
+                      contains: search,
                     },
                   },
                 },

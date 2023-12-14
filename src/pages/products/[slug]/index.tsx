@@ -67,7 +67,7 @@ const ProductPage: NextPage = () => {
               <hr />
 
               {/* TODO: @naveen design the variants */}
-              {product.choices.map((choice) => (
+              {product.selectedChoices.map((choice) => (
                 <div
                   key={choice.id}
                   className="flex flex-row items-center gap-4"

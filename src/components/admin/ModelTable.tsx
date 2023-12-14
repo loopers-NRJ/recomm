@@ -67,7 +67,7 @@ const ModelTable = () => {
         id: "Category",
         header: "Category",
         // TODO: display the array of categories instead of first one
-        accessorFn: (row) => row.categories[0]?.name,
+        accessorFn: (row) => row.category.name,
       },
       {
         id: "createdAt",

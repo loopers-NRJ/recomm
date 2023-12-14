@@ -6,25 +6,28 @@ import { withAdminGuard } from "@/hoc/AdminGuard";
 import { prisma } from "@/server/db";
 import { api } from "@/utils/api";
 import { useImageUploader } from "@/utils/imageUpload";
+import { Prisma } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
-interface Category {
-  featuredCategory: {
-    image: {
-      id: string;
-      publicId: string;
-      url: string;
-      fileType: string;
-      width: number;
-      height: number;
-    };
-  };
-  id: string;
-  name: string;
-}
+const CustomCategoryPayload =
+  Prisma.validator<Prisma.FeaturedCategoryDefaultArgs>()({
+    select: {
+      category: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      image: true,
+    },
+  });
+
+type CustomCategoryType = Prisma.FeaturedCategoryGetPayload<
+  typeof CustomCategoryPayload
+>;
 
 export const getServerSideProps = withAdminGuard(async (context) => {
   const id = context.query.id as string | undefined;
@@ -33,27 +36,18 @@ export const getServerSideProps = withAdminGuard(async (context) => {
       notFound: true,
     };
   }
-  const category = await prisma.category.findUnique({
+  const category = await prisma.featuredCategory.findUnique({
     where: {
-      id,
+      categoryId: id,
     },
     select: {
-      id: true,
-      name: true,
-      featuredCategory: {
+      category: {
         select: {
-          image: {
-            select: {
-              id: true,
-              publicId: true,
-              url: true,
-              fileType: true,
-              width: true,
-              height: true,
-            },
-          },
+          id: true,
+          name: true,
         },
       },
+      image: true,
     },
   });
   if (!category) {
@@ -69,9 +63,9 @@ export const getServerSideProps = withAdminGuard(async (context) => {
 });
 
 export default function EditFeaturedCategoryPage({
-  category,
+  category: featuredCategory,
 }: {
-  category: Category;
+  category: CustomCategoryType;
 }) {
   const router = useRouter();
   // file object to store the file to upload
@@ -103,7 +97,7 @@ export default function EditFeaturedCategoryPage({
         return setError("You must upload an image");
       }
       await updateFeaturedCategoryApi.mutateAsync({
-        categoryId: category.id,
+        categoryId: featuredCategory.category.id,
         image: images[0]!,
       });
       void router.push("/admin/featured-category");
@@ -117,11 +111,11 @@ export default function EditFeaturedCategoryPage({
     <Container className="flex justify-center">
       <section className="flex h-full w-full flex-col gap-4 p-4 md:h-fit md:w-4/6 lg:h-fit lg:w-3/6 xl:w-2/5">
         <div className="flex items-center justify-center rounded-lg border p-2">
-          <Link href={category.featuredCategory.image.url} download>
+          <Link href={featuredCategory.image.secureUrl} download>
             <Image
-              src={category.featuredCategory.image.url}
-              width={category.featuredCategory.image.width}
-              height={category.featuredCategory.image.height}
+              src={featuredCategory.image.secureUrl}
+              width={featuredCategory.image.width}
+              height={featuredCategory.image.height}
               alt="previous Image"
               className="cursor-pointer"
               title="Click to download image"

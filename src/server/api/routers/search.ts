@@ -151,11 +151,9 @@ export const searchRouter = createTRPCRouter({
             models: categoryId
               ? {
                   some: {
-                    categories: {
-                      some: {
-                        id: categoryId,
-                        active: isAdminPage ? undefined : true,
-                      },
+                    category: {
+                      id: categoryId,
+                      active: isAdminPage ? undefined : true,
                     },
                   },
                 }
@@ -193,12 +191,10 @@ export const searchRouter = createTRPCRouter({
               active: isAdminPage ? undefined : true,
             },
             brandId,
-            categories: categoryId
+            category: categoryId
               ? {
-                  some: {
-                    id: categoryId,
-                    active: isAdminPage ? undefined : true,
-                  },
+                  id: categoryId,
+                  active: isAdminPage ? undefined : true,
                 }
               : undefined,
             name: search
