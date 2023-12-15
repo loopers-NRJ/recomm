@@ -1,17 +1,21 @@
 import { z } from "zod";
 
-import { functionalityOptions, idSchema } from "@/utils/validation";
+import { idSchema } from "@/utils/validation";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 import type { PrismaClient } from "@prisma/client";
+import { DefaultLimit, DefaultSortOrder, MaxLimit } from "@/utils/constants";
 
 export const roomRounter = createTRPCRouter({
   getBidsByRoomId: publicProcedure
     .input(
-      functionalityOptions
-        .pick({ limit: true, page: true, sortOrder: true, cursor: true })
-        .extend({ roomId: idSchema })
+      z.object({
+        limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
+        sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
+        cursor: idSchema.optional(),
+        roomId: idSchema,
+      })
     )
     .query(
       async ({

@@ -11,6 +11,7 @@ import {
   DefaultSortOrder,
   MaxLimit,
 } from "@/utils/constants";
+import { BrandPayload, BrandPayloadIncluded, states } from "@/types/prisma";
 
 export const brandRouter = createTRPCRouter({
   getBrands: publicProcedure
@@ -24,11 +25,12 @@ export const brandRouter = createTRPCRouter({
           .default(DefaultSortBy),
         cursor: idSchema.optional(),
         categoryId: idSchema.optional(),
+        state: z.enum(states).optional(),
       })
     )
     .query(
       async ({
-        input: { limit, search, sortBy, sortOrder, categoryId, cursor },
+        input: { limit, search, sortBy, sortOrder, categoryId, cursor, state },
         ctx: { prisma, isAdminPage },
       }) => {
         const brands = await prisma.brand.findMany({
@@ -47,6 +49,7 @@ export const brandRouter = createTRPCRouter({
                 }
               : undefined,
             active: isAdminPage ? undefined : true,
+            createdState: state,
           },
           take: limit,
           skip: cursor ? 1 : undefined,
@@ -68,78 +71,77 @@ export const brandRouter = createTRPCRouter({
         };
       }
     ),
-  // getAllSubBrandsByCategoryId: publicProcedure
-  //   .input(
-  //     functionalityOptions.extend({
-  //       categoryId: idSchema.optional(),
-  //     })
-  //   )
-  //   .query(
-  //     async ({
-  //       input: { limit, search, sortBy, sortOrder, categoryId, cursor },
-  //       ctx: { prisma, isAdminPage },
-  //     }) => {
-  //       const fetchRecursiveBrandsByCateegoryId = (categoryId: string | undefined) => {
-  //         const brands = await prisma.brand.findMany({
-  //           where: {
-  //             name: {
-  //               contains: search,
-  //             },
-  //             models: categoryId
-  //               ? {
-  //                   some: {
-  //                     categories: {
-  //                       some: {
-  //                         id: categoryId,
-  //                         active: isAdminPage ? undefined : true,
-  //                       },
-  //                     },
-  //                   },
-  //                 }
-  //               : undefined,
-  //             active: isAdminPage ? undefined : true,
-  //           },
-  //           take: limit,
-  //           skip: cursor ? 1 : undefined,
-  //           cursor: cursor
-  //             ? {
-  //                 id: cursor,
-  //               }
-  //             : undefined,
-  //           orderBy: [
-  //             {
-  //               [sortBy]: sortOrder,
-  //             },
-  //           ],
-  //           include: {
-  //             image: true,
-  //             models: {
-  //               include: {
-  //                 categories: {
-  //                   where: {
-  //                     id: categoryId,
-  //                     active: isAdminPage ? undefined : true,
-  //                   }
-  //                 }
-  //               }
-  //             }
-  //           },
-  //         });
-  //         if (categoryId === undefined) {
-  //           return brands;
-  //         }
-  //         // const subBrands = await Promise.all(
-  //         //   brands.map((brand) => fetchRecursiveBrandsByCateegoryId(brand.id))
-  //         // );
-  //       }
-  //       const brands =
+  getAllSubBrandsByCategoryId: publicProcedure
+    .input(
+      z.object({
+        search: z.string().trim().default(""),
+        sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
+        sortBy: z
+          .enum(["name", "createdAt", "updatedAt", "active"])
+          .default(DefaultSortBy),
+        categoryId: idSchema,
+      })
+    )
+    .query(
+      async ({
+        input: { search, sortBy, sortOrder, categoryId },
+        ctx: { prisma, isAdminPage },
+      }) => {
+        const fetchRecursiveBrandsByCategoryId = async (categoryId: string) => {
+          const subCategories = await prisma.category.findMany({
+            where: {
+              parentCategoryId: categoryId,
+            },
+            select: {
+              id: true,
+            },
+          });
 
-  //       return {
-  //         brands,
-  //         nextCursor: brands[limit - 1]?.id,
-  //       };
-  //     }
-  //   ),
+          if (subCategories.length !== 0) {
+            // this is not the leaf category
+            const subBrands: BrandPayloadIncluded[] = (
+              await Promise.all(
+                subCategories.map((category) =>
+                  fetchRecursiveBrandsByCategoryId(category.id)
+                )
+              )
+            ).flat();
+            return subBrands;
+          }
+
+          // this is the leaf category
+          const brands = await prisma.brand.findMany({
+            where: {
+              name: {
+                contains: search,
+              },
+              models: categoryId
+                ? {
+                    some: {
+                      category: {
+                        id: categoryId,
+                        active: isAdminPage ? undefined : true,
+                      },
+                    },
+                  }
+                : undefined,
+              active: isAdminPage ? undefined : true,
+            },
+            orderBy: [
+              {
+                [sortBy]: sortOrder,
+              },
+            ],
+            include: BrandPayload.include,
+          });
+          return brands;
+        };
+
+        const brands = await fetchRecursiveBrandsByCategoryId(categoryId);
+
+        return brands;
+      }
+    ),
   getBrandById: publicProcedure
     .input(z.object({ brandId: idSchema.nullish() }))
     .query(async ({ input: { brandId: id }, ctx: { prisma } }) => {
@@ -161,9 +163,10 @@ export const brandRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string(),
+        state: z.enum(states),
       })
     )
-    .mutation(async ({ input: { name }, ctx: { prisma } }) => {
+    .mutation(async ({ input: { name, state }, ctx: { prisma, session } }) => {
       // checking whether the brand exists
       const existingBrand = await prisma.brand.findUnique({
         where: {
@@ -178,6 +181,12 @@ export const brandRouter = createTRPCRouter({
         data: {
           name,
           slug: slugify(name),
+          createdState: state,
+          createdBy: {
+            connect: {
+              id: session.user.id,
+            },
+          },
         },
       });
       return brand;

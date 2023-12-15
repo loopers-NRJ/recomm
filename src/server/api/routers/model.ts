@@ -1,7 +1,7 @@
 import slugify from "@/lib/slugify";
 import { z } from "zod";
 
-import { modelsPayload, singleModelPayload } from "@/types/prisma";
+import { modelsPayload, singleModelPayload, states } from "@/types/prisma";
 import { idSchema, modelSchema } from "@/utils/validation";
 
 import { createTRPCRouter, getProcedure, publicProcedure } from "../trpc";
@@ -33,6 +33,7 @@ export const modelRouter = createTRPCRouter({
         cursor: idSchema.optional(),
         categoryId: idSchema.optional(),
         brandId: idSchema.optional(),
+        state: z.enum(states).optional(),
       })
     )
     .query(
@@ -45,6 +46,7 @@ export const modelRouter = createTRPCRouter({
           brandId,
           categoryId,
           cursor,
+          state,
         },
         ctx: { prisma, isAdminPage },
       }) => {
@@ -62,6 +64,7 @@ export const modelRouter = createTRPCRouter({
             name: {
               contains: search,
             },
+            createdState: state,
           },
           take: limit,
           skip: cursor ? 1 : undefined,
@@ -123,8 +126,9 @@ export const modelRouter = createTRPCRouter({
           categoryId,
           multipleChoiceQuestions,
           atomicQuestions,
+          state,
         },
-        ctx: { prisma },
+        ctx: { prisma, session },
       }) => {
         return prisma.$transaction(async (prisma) => {
           const existingModel = await prisma.model.findFirst({
@@ -140,6 +144,12 @@ export const modelRouter = createTRPCRouter({
             data: {
               name,
               slug: slugify(name),
+              createdBy: {
+                connect: {
+                  id: session.user.id,
+                },
+              },
+              createdState: state,
               category: {
                 connect: {
                   id: categoryId,

@@ -8,13 +8,7 @@ import { api } from "@/utils/api";
 import LoadingWishes from "./loading/LoadingWishes";
 import WishCard from "./WishCard";
 import ServerError from "./common/ServerError";
-import {
-  DefaultSearch,
-  SortBy,
-  DefaultSortBy,
-  SortOrder,
-  DefaultSortOrder,
-} from "@/utils/constants";
+import { DefaultSearch, SortOrder, DefaultSortOrder } from "@/utils/constants";
 import { useSearchParams } from "next/navigation";
 import { Button } from "./ui/button";
 import Loading from "./common/Loading";
@@ -26,12 +20,10 @@ function Wishes() {
   const params = new URLSearchParams(searchParams);
 
   const search = params.get("search") ?? DefaultSearch;
-  const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
   const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
   const wishesApi = api.user.getMywishes.useInfiniteQuery(
     {
       search,
-      sortBy,
       sortOrder,
     },
     {

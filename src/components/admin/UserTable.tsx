@@ -30,7 +30,7 @@ const UserTable: FC<TableProps> = ({ search }) => {
     "sortOrder",
     DefaultSortOrder
   );
-  const rolesApi = api.search.role.useQuery();
+  const rolesApi = api.role.getRoles.useQuery({});
 
   const [selectedRole, setSelectedRole] = useState<string>();
   const usersApi = api.user.getUsers.useInfiniteQuery(

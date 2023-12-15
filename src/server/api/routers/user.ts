@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { functionalityOptions, idSchema } from "@/utils/validation";
+import { idSchema } from "@/utils/validation";
 
 import {
   createTRPCRouter,
@@ -139,10 +139,17 @@ export const userRouter = createTRPCRouter({
       });
     }),
   getMyBids: protectedProcedure
-    .input(functionalityOptions)
+    .input(
+      z.object({
+        search: z.string().trim().default(""),
+        limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
+        sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
+        cursor: idSchema.optional(),
+      })
+    )
     .query(
       async ({
-        input: { limit, search, sortBy, sortOrder, cursor },
+        input: { limit, search, sortOrder, cursor },
         ctx: { prisma, session },
       }) => {
         const user = session.user;
@@ -186,16 +193,7 @@ export const userRouter = createTRPCRouter({
             : undefined,
           orderBy: [
             {
-              room: {
-                product: {
-                  model: {
-                    name: sortBy === "name" ? sortOrder : undefined,
-                  },
-                },
-              },
-            },
-            {
-              createdAt: sortBy === "createdAt" ? sortOrder : undefined,
+              createdAt: sortOrder,
             },
           ],
         });
@@ -206,7 +204,20 @@ export const userRouter = createTRPCRouter({
       }
     ),
   getMyFavorites: protectedProcedure
-    .input(functionalityOptions)
+    .input(
+      z.object({
+        search: z.string().trim().default(""),
+        limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
+        sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
+        sortBy: z
+          .enum(["name", "createdAt", "updatedAt", "price", "sellerName"])
+          .default(DefaultSortBy),
+        cursor: idSchema.optional(),
+        categoryId: idSchema.optional(),
+        brandId: idSchema.optional(),
+        modelId: idSchema.optional(),
+      })
+    )
     .query(
       async ({
         input: { limit, search, sortBy, sortOrder, cursor },
@@ -252,14 +263,21 @@ export const userRouter = createTRPCRouter({
               }
             : undefined,
           orderBy: [
-            {
-              model: {
-                name: sortBy === "name" ? sortOrder : undefined,
-              },
-            },
-            {
-              createdAt: sortBy === "createdAt" ? sortOrder : undefined,
-            },
+            sortBy === "name"
+              ? {
+                  model: {
+                    name: sortOrder,
+                  },
+                }
+              : sortBy === "sellerName"
+              ? {
+                  seller: {
+                    name: sortOrder,
+                  },
+                }
+              : {
+                  [sortBy]: sortOrder,
+                },
           ],
           include: productsPayload.include,
         });
@@ -270,7 +288,21 @@ export const userRouter = createTRPCRouter({
       }
     ),
   getUserListingsById: publicProcedure
-    .input(functionalityOptions.extend({ userId: idSchema }))
+    .input(
+      z.object({
+        search: z.string().trim().default(""),
+        limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
+        sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
+        sortBy: z
+          .enum(["name", "createdAt", "updatedAt", "price", "sellerName"])
+          .default(DefaultSortBy),
+        cursor: idSchema.optional(),
+        categoryId: idSchema.optional(),
+        brandId: idSchema.optional(),
+        modelId: idSchema.optional(),
+        userId: idSchema,
+      })
+    )
     .query(
       async ({
         input: { search, userId: id, limit, sortBy, sortOrder, cursor },
@@ -311,14 +343,21 @@ export const userRouter = createTRPCRouter({
               }
             : undefined,
           orderBy: [
-            {
-              model: {
-                name: sortBy === "name" ? sortOrder : undefined,
-              },
-            },
-            {
-              createdAt: sortBy === "createdAt" ? sortOrder : undefined,
-            },
+            sortBy === "name"
+              ? {
+                  model: {
+                    name: sortOrder,
+                  },
+                }
+              : sortBy === "sellerName"
+              ? {
+                  seller: {
+                    name: sortOrder,
+                  },
+                }
+              : {
+                  [sortBy]: sortOrder,
+                },
           ],
           include: productsPayload.include,
         });
@@ -329,7 +368,20 @@ export const userRouter = createTRPCRouter({
       }
     ),
   getMyPurchases: protectedProcedure
-    .input(functionalityOptions)
+    .input(
+      z.object({
+        search: z.string().trim().default(""),
+        limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
+        sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
+        sortBy: z
+          .enum(["name", "createdAt", "updatedAt", "price", "sellerName"])
+          .default(DefaultSortBy),
+        cursor: idSchema.optional(),
+        categoryId: idSchema.optional(),
+        brandId: idSchema.optional(),
+        modelId: idSchema.optional(),
+      })
+    )
     .query(
       async ({
         input: { limit, search, sortBy, sortOrder, cursor },
@@ -371,14 +423,21 @@ export const userRouter = createTRPCRouter({
               }
             : undefined,
           orderBy: [
-            {
-              model: {
-                name: sortBy === "name" ? sortOrder : undefined,
-              },
-            },
-            {
-              createdAt: sortBy === "createdAt" ? sortOrder : undefined,
-            },
+            sortBy === "name"
+              ? {
+                  model: {
+                    name: sortOrder,
+                  },
+                }
+              : sortBy === "sellerName"
+              ? {
+                  seller: {
+                    name: sortOrder,
+                  },
+                }
+              : {
+                  [sortBy]: sortOrder,
+                },
           ],
           include: productsPayload.include,
         });
@@ -389,7 +448,27 @@ export const userRouter = createTRPCRouter({
       }
     ),
   getMywishes: protectedProcedure
-    .input(functionalityOptions)
+    .input(
+      z.object({
+        search: z.string().trim().default(""),
+        limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
+        sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
+        sortBy: z
+          .enum([
+            "status",
+            "createdAt",
+            "updatedAt",
+            "categoryName",
+            "brandName",
+            "modelName",
+          ])
+          .default(DefaultSortBy),
+        cursor: idSchema.optional(),
+        categoryId: idSchema.optional(),
+        brandId: idSchema.optional(),
+        modelId: idSchema.optional(),
+      })
+    )
     .query(
       async ({
         input: { limit, search, sortBy, sortOrder, cursor },
@@ -431,14 +510,27 @@ export const userRouter = createTRPCRouter({
               }
             : undefined,
           orderBy: [
-            {
-              model: {
-                name: sortBy === "name" ? sortOrder : undefined,
-              },
-            },
-            {
-              createdAt: sortBy === "createdAt" ? sortOrder : undefined,
-            },
+            sortBy === "brandName"
+              ? {
+                  brand: {
+                    name: sortOrder,
+                  },
+                }
+              : sortBy === "categoryName"
+              ? {
+                  category: {
+                    name: sortOrder,
+                  },
+                }
+              : sortBy === "modelName"
+              ? {
+                  model: {
+                    name: sortOrder,
+                  },
+                }
+              : {
+                  [sortBy]: sortOrder,
+                },
           ],
           include: wishPayload.include,
         });

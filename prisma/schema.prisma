@@ -79,7 +79,7 @@ enum AccessType {
 
 model Access {
     type AccessType @id
-    Role Role[] // many to many relation 
+    Role Role[]
 }
 
 model Role {
@@ -90,12 +90,6 @@ model Role {
 
     @@index([name])
 }
-
-// User - [public]
-// Subscriber - [public, subscribed]
-// Retailer - [public, subscribed, retailer]
-// Customer Service - [public, readAccess]
-// Super Admin - [public, updateRole]
 
 model User {
     id                String    @id @default(cuid())
@@ -120,7 +114,44 @@ model User {
     createdAt         DateTime  @default(now())
     updatedAt         DateTime  @updatedAt
 
+    // admin level
+    createdCategories  Category[]
+    FeaturedCategories FeaturedCategory[]
+    createdBrands      Brand[]
+    createdModels      Model[]
+
     @@index([roleId])
+}
+
+enum State {
+    Andhra_Pradesh
+    Arunachal_Pradesh
+    Assam
+    Bihar
+    Chhattisgarh
+    Goa
+    Gujarat
+    Haryana
+    Himachal_Pradesh
+    Jharkhand
+    Karnataka
+    Kerala
+    Madhya_Pradesh
+    Maharashtra
+    Manipur
+    Meghalaya
+    Mizoram
+    Nagaland
+    Odisha
+    Punjab
+    Rajasthan
+    Sikkim
+    Tamil_Nadu
+    Telangana
+    Tripura
+    Uttar_Pradesh
+    Uttarakhand
+    West_Bengal
 }
 
 model Category {
@@ -133,12 +164,18 @@ model Category {
     parentCategoryId String?
     wishes           Wish[]
     models           Model[]
-    createdAt        DateTime          @default(now())
-    updatedAt        DateTime          @updatedAt
     featuredCategory FeaturedCategory?
+
+    // Meta
+    createdBy    User     @relation(fields: [createdById], references: [id])
+    createdById  String
+    createdState State
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
 
     @@unique([name, parentCategoryId])
     @@index([parentCategoryId])
+    @@index([createdById])
 }
 
 model FeaturedCategory {
@@ -146,17 +183,32 @@ model FeaturedCategory {
     categoryId String   @unique
     image      Image    @relation(fields: [imageId], references: [publicId])
     imageId    String   @unique
+
+    // Meta
+    featuredBy   User     @relation(fields: [featuredById], references: [id])
+    featuredById String
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    @@index([featuredById])
 }
 
 model Brand {
-    id        String   @id @default(cuid())
-    name      String   @unique
-    slug      String   @unique
-    active    Boolean  @default(true)
-    models    Model[]
-    wishes    Wish[]
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    id     String  @id @default(cuid())
+    name   String  @unique
+    slug   String  @unique
+    active Boolean @default(true)
+    models Model[]
+    wishes Wish[]
+
+    // Meta
+    createdBy    User     @relation(fields: [createdById], references: [id])
+    createdById  String
+    createdState State
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    @@index([createdById])
 }
 
 model Model {
@@ -174,9 +226,15 @@ model Model {
     choices                 Choice[]
     atomicQuestions         AtomicQuestion[]
     answers                 AtomicAnswer[]
-    createdAt               DateTime                 @default(now())
-    updatedAt               DateTime                 @updatedAt
 
+    // Meta
+    createdBy    User     @relation(fields: [createdById], references: [id])
+    createdById  String
+    createdState State
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    @@unique([createdById])
     @@index([brandId])
     @@index([categoryId])
 }
@@ -196,8 +254,9 @@ model MultipleChoiceQuestion {
     required        Boolean                    @default(true)
     model           Model                      @relation(fields: [modelId], references: [id], onDelete: Cascade)
     modelId         String
-    createdAt       DateTime                   @default(now())
-    updatedAt       DateTime                   @updatedAt
+
+    // Meta
+    updatedAt DateTime @updatedAt
 
     @@unique([questionContent, modelId])
     @@index([modelId])
@@ -211,8 +270,9 @@ model Choice {
     model      Model                  @relation(fields: [modelId], references: [id], onDelete: Cascade)
     modelId    String
     products   Product[]
-    createdAt  DateTime               @default(now())
-    updatedAt  DateTime               @updatedAt
+
+    // Meta
+    updatedAt DateTime @updatedAt
 
     @@unique([value, questionId, modelId])
     @@index([questionId])
@@ -234,8 +294,9 @@ model AtomicQuestion {
     answers         AtomicAnswer[]
     model           Model              @relation(fields: [modelId], references: [id], onDelete: Cascade)
     modelId         String
-    createdAt       DateTime           @default(now())
-    updatedAt       DateTime           @updatedAt
+
+    // Meta
+    updatedAt DateTime @updatedAt
 
     @@index([modelId])
 }
@@ -249,8 +310,9 @@ model AtomicAnswer {
     productId     String
     model         Model          @relation(fields: [modelId], references: [id], onDelete: Cascade)
     modelId       String
-    createdAt     DateTime       @default(now())
-    updatedAt     DateTime       @updatedAt
+
+    // Meta
+    updatedAt DateTime @updatedAt
 
     @@index([productId])
     @@index([questionId])
@@ -276,8 +338,10 @@ model Product {
     favoritedUsers  User[]         @relation("favoriteProducts")
     room            Room           @relation(fields: [roomId], references: [id], onDelete: Restrict)
     roomId          String         @unique
-    createdAt       DateTime       @default(now())
-    updatedAt       DateTime       @updatedAt
+
+    // Meta
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
     @@index([sellerId])
     @@index([modelId])
@@ -285,21 +349,25 @@ model Product {
 }
 
 model Room {
-    id        String   @id @default(cuid())
-    bids      Bid[]
-    product   Product?
+    id      String   @id @default(cuid())
+    bids    Bid[]
+    product Product?
+
+    // Meta
     closedAt  DateTime
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 }
 
 model Bid {
-    id        String   @id @default(cuid())
-    price     Float
-    user      User     @relation(fields: [userId], references: [id], onDelete: Restrict)
-    userId    String
-    room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
-    roomId    String
+    id     String @id @default(cuid())
+    price  Float
+    user   User   @relation(fields: [userId], references: [id], onDelete: Restrict)
+    userId String
+    room   Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+    roomId String
+
+    // Meta
     createdAt DateTime @default(now())
 
     @@index([userId])
@@ -324,8 +392,10 @@ model Wish {
     status     WishStatus @default(pending)
     user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
     userId     String
-    createdAt  DateTime   @default(now())
-    updatedAt  DateTime   @updatedAt
+
+    // Meta
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
     @@index([userId])
     @@index([categoryId])

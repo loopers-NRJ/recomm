@@ -2,11 +2,17 @@ import { AccessType } from "@prisma/client";
 import { createTRPCRouter, getProcedure } from "../trpc";
 import { z } from "zod";
 import { RolePayload, accessTypes } from "@/types/prisma";
-import { functionalityOptions, idSchema } from "@/utils/validation";
+import { idSchema } from "@/utils/validation";
+import { DefaultSortOrder } from "@/utils/constants";
 
 export const RoleRouter = createTRPCRouter({
   getRoles: getProcedure(AccessType.readAccess)
-    .input(functionalityOptions.pick({ search: true, sortOrder: true }))
+    .input(
+      z.object({
+        search: z.string().trim().default(""),
+        sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
+      })
+    )
     .query(async ({ input, ctx: { prisma } }) => {
       return prisma.role.findMany({
         include: RolePayload.include,

@@ -14,13 +14,13 @@ import {
   MaxFeaturedCategory,
   MaxLimit,
 } from "@/utils/constants";
-import {
-  functionalityOptions,
-  idSchema,
-  imageInputs,
-} from "@/utils/validation";
+import { idSchema, imageInputs } from "@/utils/validation";
 import { AccessType } from "@prisma/client";
-import { CategoryPayload, FeaturedCategoryPayload } from "@/types/prisma";
+import {
+  CategoryPayload,
+  FeaturedCategoryPayload,
+  states,
+} from "@/types/prisma";
 
 export const categoryRouter = createTRPCRouter({
   getCategories: publicProcedure
@@ -35,6 +35,7 @@ export const categoryRouter = createTRPCRouter({
         cursor: idSchema.optional(),
         parentId: idSchema.nullish(),
         parentSlug: z.string().min(1).max(255).nullish(),
+        state: z.enum(states).optional(),
       })
     )
     .query(
@@ -47,6 +48,7 @@ export const categoryRouter = createTRPCRouter({
           parentId,
           cursor,
           parentSlug,
+          state,
         },
         ctx: { prisma, isAdminPage },
       }) => {
@@ -62,6 +64,7 @@ export const categoryRouter = createTRPCRouter({
                   slug: parentSlug,
                 }
               : undefined,
+            createdState: state,
           },
           cursor: cursor
             ? {
@@ -95,9 +98,17 @@ export const categoryRouter = createTRPCRouter({
 
   getCategoriesWithoutPayload: publicProcedure
     .input(
-      functionalityOptions.extend({
+      z.object({
+        search: z.string().trim().default(""),
+        limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
+        sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
+        sortBy: z
+          .enum(["name", "createdAt", "updatedAt", "active", "featured"])
+          .default(DefaultSortBy),
+        cursor: idSchema.optional(),
         parentId: idSchema.nullish(),
         parentSlug: z.string().min(1).max(255).nullish(),
+        state: z.enum(states).optional(),
       })
     )
     .query(
@@ -110,6 +121,7 @@ export const categoryRouter = createTRPCRouter({
           parentId,
           cursor,
           parentSlug,
+          state,
         },
         ctx: { prisma, isAdminPage },
       }) => {
@@ -125,6 +137,7 @@ export const categoryRouter = createTRPCRouter({
                   slug: parentSlug,
                 }
               : undefined,
+            createdState: state,
           },
           cursor: cursor
             ? {
@@ -189,10 +202,14 @@ export const categoryRouter = createTRPCRouter({
       z.object({
         name: z.string().min(3).max(255),
         parentCategoryId: idSchema.optional(),
+        state: z.enum(states),
       })
     )
     .mutation(
-      async ({ input: { name, parentCategoryId }, ctx: { prisma } }) => {
+      async ({
+        input: { name, parentCategoryId, state },
+        ctx: { prisma, session },
+      }) => {
         // checking whether the category already exists
         const existingCategory = await prisma.category.findUnique({
           where: {
@@ -211,6 +228,12 @@ export const categoryRouter = createTRPCRouter({
           data: {
             name,
             slug: slugify(name),
+            createdBy: {
+              connect: {
+                id: session.user.id,
+              },
+            },
+            createdState: state,
             parentCategory: parentCategoryId
               ? {
                   connect: {
@@ -332,11 +355,12 @@ export const categoryRouter = createTRPCRouter({
           .enum(["name", "createdAt", "updatedAt", "active"])
           .default(DefaultSortBy),
         cursor: idSchema.optional(),
+        state: z.enum(states).optional(),
       })
     )
     .query(
       async ({
-        input: { search, limit, sortBy, sortOrder, cursor },
+        input: { search, limit, sortBy, sortOrder, cursor, state },
         ctx: { prisma, isAdminPage },
       }) => {
         const categories = await prisma.featuredCategory.findMany({
@@ -346,6 +370,7 @@ export const categoryRouter = createTRPCRouter({
                 contains: search,
               },
               active: isAdminPage ? undefined : true,
+              createdState: state,
             },
           },
           cursor: cursor
@@ -374,31 +399,41 @@ export const categoryRouter = createTRPCRouter({
 
   makeCategoryFeaturedById: getProcedure(AccessType.updateCategory)
     .input(z.object({ categoryId: idSchema, image: imageInputs }))
-    .mutation(async ({ input: { categoryId: id, image }, ctx: { prisma } }) => {
-      const totalFeaturedCategories = await prisma.featuredCategory.count();
-      if (totalFeaturedCategories >= MaxFeaturedCategory) {
-        throw new Error(
-          `Cannot make the category as featured. Maximum featured category limit reached`
-        );
-      }
+    .mutation(
+      async ({
+        input: { categoryId: id, image },
+        ctx: { prisma, session },
+      }) => {
+        const totalFeaturedCategories = await prisma.featuredCategory.count();
+        if (totalFeaturedCategories >= MaxFeaturedCategory) {
+          throw new Error(
+            `Cannot make the category as featured. Maximum featured category limit reached`
+          );
+        }
 
-      const data = await prisma.featuredCategory.create({
-        data: {
-          category: {
-            connect: {
-              id,
+        const data = await prisma.featuredCategory.create({
+          data: {
+            category: {
+              connect: {
+                id,
+              },
+            },
+            image: {
+              create: image,
+            },
+            featuredBy: {
+              connect: {
+                id: session.user.id,
+              },
             },
           },
-          image: {
-            create: image,
+          select: {
+            category: true,
           },
-        },
-        select: {
-          category: true,
-        },
-      });
-      return data.category;
-    }),
+        });
+        return data.category;
+      }
+    ),
   removeCategoryFromFeaturedById: getProcedure(AccessType.updateCategory)
     .input(z.object({ categoryId: idSchema }))
     .mutation(async ({ input: { categoryId: id }, ctx: { prisma } }) => {

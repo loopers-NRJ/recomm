@@ -7,6 +7,7 @@ import { api } from "@/utils/api";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import { useSelectedState } from "@/components/admin/SelectedState";
 
 export const getServerSideProps = withAdminGuard();
 
@@ -17,10 +18,13 @@ const CreateBrandPage = () => {
   const [error, setError] = useState<string>();
   const router = useRouter();
 
+  const selectedState = useSelectedState((selected) => selected.state);
+
   const createBrand = async () => {
     try {
       await createBrandApi.mutateAsync({
         name: brandName,
+        state: selectedState,
       });
       void router.push("/admin/brands");
     } catch (error) {

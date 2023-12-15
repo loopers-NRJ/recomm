@@ -7,13 +7,14 @@ import { api } from "@/utils/api";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import { useSelectedState } from "@/components/admin/SelectedState";
 
 export const getServerSideProps = withAdminGuard();
 
 const CreateCategoryPage = () => {
   const createCategoryApi = api.category.createCategory.useMutation();
   const [categoryName, setCategoryName] = useState("");
-  // file object to store the file to upload
+  const selectedState = useSelectedState((selected) => selected.state);
 
   const router = useRouter();
   const parentName = router.query.parentName as string | undefined;
@@ -51,6 +52,7 @@ const CreateCategoryPage = () => {
               createCategoryApi.mutate({
                 name: categoryName,
                 parentCategoryId: parentId ?? undefined,
+                state: selectedState,
               })
             }
             disabled={categoryName.trim() === "" || createCategoryApi.isLoading}

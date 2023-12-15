@@ -4,6 +4,7 @@ import {
   MultipleChoiceQuestionPayloadIncluded,
   MultipleChoiceQuestionTypeArray,
   AtomicQuestionTypeArray,
+  states,
 } from "@/types/prisma";
 import {
   AtomicQuestion,
@@ -11,27 +12,12 @@ import {
   AtomicQuestionType,
 } from "@prisma/client";
 
-import {
-  DefaultLimit,
-  DefaultSortBy,
-  DefaultSortOrder,
-  MaxLimit,
-} from "./constants";
-
 export const idSchema = z
   .string({
     required_error: "Enter an id",
   })
   .trim()
   .cuid({ message: "Invalid Id" });
-
-export const functionalityOptions = z.object({
-  search: z.string().trim().default(""),
-  limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
-  sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
-  sortBy: z.enum(["name", "createdAt"]).default(DefaultSortBy),
-  cursor: idSchema.optional(),
-});
 
 export const imageInputs = z.object({
   url: z.string().url(),
@@ -290,6 +276,7 @@ export const modelSchema = z.object({
       required: z.boolean().default(true),
     })
   ),
+  state: z.enum(states),
 });
 
 type ProvidedMultipleChoiceQuestionAnswer = z.infer<

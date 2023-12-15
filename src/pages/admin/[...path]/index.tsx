@@ -24,6 +24,9 @@ import { DefaultSearch } from "@/utils/constants";
 import { debounce } from "@/utils/helper";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
+import { states } from "@/types/prisma";
+import { State } from "@prisma/client";
+import { useSelectedState } from "@/components/admin/SelectedState";
 
 const titles = [
   "category",
@@ -89,6 +92,8 @@ export default function AdminPage({ title }: { title: Title }) {
 
   const [search, setSearch] = useUrl<string>("search", DefaultSearch);
   const ref = useRef<HTMLInputElement>(null);
+  const selectedState = useSelectedState();
+
   return (
     <Container className="pt-3 md:flex md:gap-2">
       <div className="md:hidden">
@@ -136,17 +141,36 @@ export default function AdminPage({ title }: { title: Title }) {
         </div>
       </div>
       <div className="my-4 flex grow flex-col gap-3 md:m-0">
-        <div className="flex items-center gap-1 rounded-lg border ps-3">
-          <Search className="h-4 w-4 shrink-0 opacity-50" />
-          <Input
-            ref={ref}
-            placeholder="Search"
-            role="search"
-            type="search"
-            defaultValue={search}
-            onChange={debounce((e) => setSearch(e.target.value), 300)}
-            className="border-none focus:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
-          />
+        <div className="flex w-full justify-between gap-3">
+          <div className="flex w-full items-center gap-1 rounded-lg border ps-3">
+            <Search className="h-4 w-4 shrink-0 opacity-50" />
+            <Input
+              ref={ref}
+              placeholder="Search"
+              role="search"
+              type="search"
+              defaultValue={search}
+              onChange={debounce((e) => setSearch(e.target.value), 300)}
+              className="border-none focus:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
+            />
+          </div>
+          <Select
+            onValueChange={(value) => {
+              selectedState.onStateChange(value as State);
+            }}
+            value={selectedState.state}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="h-80">
+              {states.map((state) => (
+                <SelectItem value={state} key={state}>
+                  {state}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <Table search={search} />
       </div>

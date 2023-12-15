@@ -19,7 +19,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "../trpc";
-import { productsPayload, singleProductPayload } from "@/types/prisma";
+import { productsPayload, singleProductPayload, states } from "@/types/prisma";
 import slugify from "@/lib/slugify";
 import {
   DefaultLimit,
@@ -49,6 +49,7 @@ export const productRouter = createTRPCRouter({
         categoryId: idSchema.optional(),
         brandId: idSchema.optional(),
         modelId: idSchema.optional(),
+        state: z.enum(states).optional(),
       })
     )
     .query(
@@ -62,6 +63,7 @@ export const productRouter = createTRPCRouter({
           brandId,
           modelId,
           cursor,
+          state,
         },
         ctx: { prisma, isAdminPage },
       }) => {
@@ -99,6 +101,7 @@ export const productRouter = createTRPCRouter({
                   },
                 },
               ],
+              createdState: state,
             },
           },
 
@@ -362,68 +365,6 @@ export const productRouter = createTRPCRouter({
       }
     ),
 
-  // updateProductById: protectedProcedure
-  //   .input(
-  //     z.union([
-  //       z.object({
-  //         productId: id,
-  //         price: z.number().int().gt(0),
-  //         description: z.string().optional(),
-  //         // images: z.array(imageInputs).optional(),
-  //       }),
-  //       z.object({
-  //         productId: id,
-  //         price: z.number().int().gt(0).optional(),
-  //         description: z.string(),
-  //         // images: z.array(imageInputs).optional(),
-  //       }),
-  //       z.object({
-  //         productId: id,
-  //         price: z.number().int().gt(0).optional(),
-  //         description: z.string().optional(),
-  //         // images: z.array(imageInputs),
-  //       }),
-  //     ])
-  //   )
-  //   .mutation(async ({ input: { productId: id, description, price }, ctx }) => {
-  //     try {
-  //       const user = session.user;
-  //       const existingProduct = await prisma.product.findUnique({
-  //         where: {
-  //           id,
-  //         },
-  //       });
-  //       if (existingProduct === null) {
-  //         throw new Error("Product does not exist");
-  //       }
-  //       if (existingProduct.sellerId !== user.id) {
-  //         throw new Error("You are not the seller of this product");
-  //       }
-  //       const product = await prisma.product.update({
-  //         where: {
-  //           id,
-  //         },
-  //         data: {
-  //           description,
-  //           price,
-  //         },
-  //         include: {
-  //           buyer: true,
-  //           seller: true,
-  //           model: true,
-  //           room: true,
-  //         },
-  //       });
-  //       return product;
-  //     } catch (error) {
-  //       console.error({
-  //         procedure: "updateProductById",
-  //         error,
-  //       });
-
-  //       throw new Error("Something went wrong!");
-  //     }
-  //   }),
   deleteProductById: getProcedure([
     AccessType.subscriber,
     AccessType.deleteProduct,
