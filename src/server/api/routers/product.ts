@@ -2,7 +2,6 @@ import { z } from "zod";
 
 import { deleteImage } from "@/lib/cloudinary";
 import {
-  functionalityOptions,
   idSchema,
   productSchema,
   validateMultipleChoiceQuestionInput,
@@ -22,11 +21,31 @@ import {
 } from "../trpc";
 import { productsPayload, singleProductPayload } from "@/types/prisma";
 import slugify from "@/lib/slugify";
+import {
+  DefaultLimit,
+  DefaultSortBy,
+  DefaultSortOrder,
+  MaxLimit,
+} from "@/utils/constants";
 
 export const productRouter = createTRPCRouter({
   getProducts: publicProcedure
     .input(
-      functionalityOptions.extend({
+      z.object({
+        search: z.string().trim().default(""),
+        limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
+        sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
+        sortBy: z
+          .enum([
+            "name",
+            "createdAt",
+            "updatedAt",
+            "price",
+            "active",
+            "sellerName",
+          ])
+          .default(DefaultSortBy),
+        cursor: idSchema.optional(),
         categoryId: idSchema.optional(),
         brandId: idSchema.optional(),
         modelId: idSchema.optional(),
@@ -91,14 +110,21 @@ export const productRouter = createTRPCRouter({
               }
             : undefined,
           orderBy: [
-            {
-              model: {
-                name: sortBy === "name" ? sortOrder : undefined,
-              },
-            },
-            {
-              createdAt: sortBy === "createdAt" ? sortOrder : undefined,
-            },
+            sortBy === "name"
+              ? {
+                  model: {
+                    name: sortOrder,
+                  },
+                }
+              : sortBy === "sellerName"
+              ? {
+                  seller: {
+                    name: sortOrder,
+                  },
+                }
+              : {
+                  [sortBy]: sortOrder,
+                },
           ],
           include: productsPayload.include,
         });

@@ -3,13 +3,8 @@ import { useSearchParams } from "next/navigation";
 import { FC, useMemo, useState } from "react";
 
 import { ModelPayloadIncluded } from "@/types/prisma";
-import { api } from "@/utils/api";
-import {
-  DefaultSortBy,
-  DefaultSortOrder,
-  SortBy,
-  SortOrder,
-} from "@/utils/constants";
+import { RouterInputs, api } from "@/utils/api";
+import { DefaultSortBy, DefaultSortOrder, SortOrder } from "@/utils/constants";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { Button } from "../ui/button";
@@ -18,12 +13,20 @@ import Loading from "../common/Loading";
 import ServerError from "../common/ServerError";
 import { Switch } from "../ui/switch";
 import { TableProps } from "@/pages/admin/[...path]";
+import useUrl from "@/hooks/useUrl";
+import { OmitUndefined } from "@/types/custom";
+import TableHeader from "./TableHeader";
+
+type SortBy = OmitUndefined<RouterInputs["model"]["getModels"]["sortBy"]>;
 
 const ModelTable: FC<TableProps> = ({ search }) => {
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
-  const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
-  const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
+  const [sortBy, setSortBy] = useUrl<SortBy>("sortBy", DefaultSortBy);
+  const [sortOrder, setSortOrder] = useUrl<SortOrder>(
+    "sortOrder",
+    DefaultSortOrder
+  );
   const categoryId = params.get("category") ?? undefined;
   const brandId = params.get("brand") ?? undefined;
 
@@ -50,41 +53,16 @@ const ModelTable: FC<TableProps> = ({ search }) => {
     () => [
       {
         id: "Name",
-        header: "Name",
-        accessorFn: (row) => row.name,
-      },
-      {
-        id: "Brand",
-        header: "Brand",
-        accessorFn: (row) => row.brand.name,
-      },
-      {
-        id: "Category",
-        header: "Category",
-        // TODO: display the array of categories instead of first one
-        accessorFn: (row) => row.category.name,
-      },
-      {
-        id: "createdAt",
-        header: "Created At",
-        accessorFn: (row) => row.createdAt.toLocaleString("en-US"),
-      },
-      {
-        id: "updatedAt",
-        header: "Updated At",
-        accessorFn: (row) => row.updatedAt.toLocaleString("en-US"),
-      },
-      {
-        id: "products",
-        header: "Products",
-        cell: ({ row }) => (
-          <Link
-            href={`/admin/products?model=${row.original.id}`}
-            className="text-blue-400 hover:text-blue-600"
-          >
-            Products
-          </Link>
+        header: () => (
+          <TableHeader
+            title="name"
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            sortOrder={sortOrder}
+            setSortOrder={setSortOrder}
+          />
         ),
+        accessorFn: (row) => row.name,
       },
       {
         id: "active",
@@ -114,8 +92,72 @@ const ModelTable: FC<TableProps> = ({ search }) => {
         ),
       },
       {
+        id: "Brand",
+        header: () => (
+          <TableHeader
+            title="brand"
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            sortOrder={sortOrder}
+            setSortOrder={setSortOrder}
+          />
+        ),
+        accessorFn: (row) => row.brand.name,
+      },
+      {
+        id: "Category",
+        header: () => (
+          <TableHeader
+            title="category"
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            sortOrder={sortOrder}
+            setSortOrder={setSortOrder}
+          />
+        ),
+        accessorFn: (row) => row.category.name,
+      },
+      {
+        id: "products",
+        header: "Products",
+        cell: ({ row }) => (
+          <Link
+            href={`/admin/products?model=${row.original.id}`}
+            className="text-blue-400 hover:text-blue-600"
+          >
+            Products
+          </Link>
+        ),
+      },
+      {
+        id: "createdAt",
+        header: () => (
+          <TableHeader
+            title="createdAt"
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            sortOrder={sortOrder}
+            setSortOrder={setSortOrder}
+          />
+        ),
+        accessorFn: (row) => row.createdAt.toLocaleString("en-US"),
+      },
+      {
+        id: "updatedAt",
+        header: () => (
+          <TableHeader
+            title="updatedAt"
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            sortOrder={sortOrder}
+            setSortOrder={setSortOrder}
+          />
+        ),
+        accessorFn: (row) => row.updatedAt.toLocaleString("en-US"),
+      },
+      {
         id: "edit",
-        header: "",
+        header: "Edit",
         cell: ({ row }) => (
           <Button size="sm" variant="outline" className="border-blue-400">
             <Link
@@ -129,7 +171,7 @@ const ModelTable: FC<TableProps> = ({ search }) => {
       },
       {
         id: "delete",
-        header: "",
+        header: "Delete",
         cell: ({ row }) => (
           <Button
             onClick={() => {
@@ -151,7 +193,17 @@ const ModelTable: FC<TableProps> = ({ search }) => {
         ),
       },
     ],
-    [deleteModelApi, deleteModelId, modelsApi, updateModelById, updatingModelId]
+    [
+      deleteModelApi,
+      deleteModelId,
+      modelsApi,
+      setSortBy,
+      setSortOrder,
+      sortBy,
+      sortOrder,
+      updateModelById,
+      updatingModelId,
+    ]
   );
 
   if (modelsApi.isLoading) {

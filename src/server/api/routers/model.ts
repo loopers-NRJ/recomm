@@ -2,19 +2,35 @@ import slugify from "@/lib/slugify";
 import { z } from "zod";
 
 import { modelsPayload, singleModelPayload } from "@/types/prisma";
-import {
-  functionalityOptions,
-  idSchema,
-  modelSchema,
-} from "@/utils/validation";
+import { idSchema, modelSchema } from "@/utils/validation";
 
 import { createTRPCRouter, getProcedure, publicProcedure } from "../trpc";
 import { AccessType } from "@prisma/client";
+import {
+  DefaultLimit,
+  DefaultSortBy,
+  DefaultSortOrder,
+  MaxLimit,
+} from "@/utils/constants";
 
 export const modelRouter = createTRPCRouter({
   getModels: publicProcedure
     .input(
-      functionalityOptions.extend({
+      z.object({
+        search: z.string().trim().default(""),
+        limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
+        sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
+        sortBy: z
+          .enum([
+            "name",
+            "createdAt",
+            "updatedAt",
+            "brand",
+            "category",
+            "active",
+          ])
+          .default(DefaultSortBy),
+        cursor: idSchema.optional(),
         categoryId: idSchema.optional(),
         brandId: idSchema.optional(),
       })
@@ -55,9 +71,21 @@ export const modelRouter = createTRPCRouter({
               }
             : undefined,
           orderBy: [
-            {
-              [sortBy]: sortOrder,
-            },
+            sortBy === "brand"
+              ? {
+                  brand: {
+                    name: sortOrder,
+                  },
+                }
+              : sortBy === "category"
+              ? {
+                  category: {
+                    name: sortOrder,
+                  },
+                }
+              : {
+                  [sortBy]: sortOrder,
+                },
           ],
           include: modelsPayload.include,
         });

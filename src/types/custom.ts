@@ -28,3 +28,5 @@ export interface MultipleChoiceQuestion {
   type: MultipleChoiceQuestionType;
   choices: string[];
 }
+
+export type OmitUndefined<T> = T extends undefined ? never : T;

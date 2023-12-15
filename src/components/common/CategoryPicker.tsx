@@ -25,7 +25,9 @@ export default function CategoryPicker({
   fetchNextPage,
 }: CategoryPickerProps) {
   const router = useRouter();
-  const [viewMoreClicked, setViewMoreClicked] = useUrl("view_more");
+  const [viewMoreClicked, setViewMoreClicked] = useUrl<"true" | "false">(
+    "view_more"
+  );
   return (
     <Container className="flex flex-col items-center gap-3">
       <div className="relative flex h-11 w-full max-w-xl items-center justify-center">

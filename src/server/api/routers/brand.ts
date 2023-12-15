@@ -1,15 +1,28 @@
 import slugify from "@/lib/slugify";
 import { z } from "zod";
 
-import { functionalityOptions, idSchema } from "@/utils/validation";
+import { idSchema } from "@/utils/validation";
 
 import { createTRPCRouter, getProcedure, publicProcedure } from "../trpc";
 import { AccessType } from "@prisma/client";
+import {
+  DefaultLimit,
+  DefaultSortBy,
+  DefaultSortOrder,
+  MaxLimit,
+} from "@/utils/constants";
 
 export const brandRouter = createTRPCRouter({
   getBrands: publicProcedure
     .input(
-      functionalityOptions.extend({
+      z.object({
+        search: z.string().trim().default(""),
+        limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
+        sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
+        sortBy: z
+          .enum(["name", "createdAt", "updatedAt", "active"])
+          .default(DefaultSortBy),
+        cursor: idSchema.optional(),
         categoryId: idSchema.optional(),
       })
     )

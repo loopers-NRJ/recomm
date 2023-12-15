@@ -9,7 +9,8 @@ import ServerError from "@/components/common/ServerError";
 export const getServerSideProps = withProtectedRoute();
 
 export default function SellitPage() {
-  const [parentCategorySlug, setParentCaregorySlug] = useUrl("category");
+  const [parentCategorySlug, setParentCaregorySlug] =
+    useUrl<string>("category");
   const categoryApi = api.category.getCategoriesWithoutPayload.useInfiniteQuery(
     {
       parentSlug: parentCategorySlug,

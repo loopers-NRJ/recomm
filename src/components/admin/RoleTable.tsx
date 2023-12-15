@@ -10,14 +10,16 @@ import { type FC, useMemo, useState } from "react";
 import Loading from "../common/Loading";
 import ServerError from "../common/ServerError";
 import { DefaultSortOrder, SortOrder } from "@/utils/constants";
-import { useSearchParams } from "next/navigation";
 import { TableProps } from "@/pages/admin/[...path]";
+import useUrl from "@/hooks/useUrl";
+import TableHeader from "./TableHeader";
 
 const RoleTable: FC<TableProps> = ({ search }) => {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const params = new URLSearchParams(searchParams);
-  const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
+  const [sortOrder, setSortOrder] = useUrl<SortOrder>(
+    "sortOrder",
+    DefaultSortOrder
+  );
 
   const rolesApi = api.role.getRoles.useQuery({
     search,
@@ -29,7 +31,17 @@ const RoleTable: FC<TableProps> = ({ search }) => {
     () => [
       {
         id: "name",
-        header: "Name",
+        header: () => (
+          <TableHeader
+            title="name"
+            sortOrder={sortOrder}
+            setSortOrder={setSortOrder}
+            sortBy="name"
+            setSortBy={() => {
+              // do nothing
+            }}
+          />
+        ),
         accessorFn: (row) => row.name,
       },
       {
@@ -74,7 +86,7 @@ const RoleTable: FC<TableProps> = ({ search }) => {
         ),
       },
     ],
-    [deleteRoleApi, deletingRoleId, rolesApi, router]
+    [deleteRoleApi, deletingRoleId, rolesApi, router, setSortOrder, sortOrder]
   );
 
   if (rolesApi.isLoading) {

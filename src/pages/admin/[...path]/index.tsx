@@ -87,7 +87,7 @@ export default function AdminPage({ title }: { title: Title }) {
       break;
   }
 
-  const [search, setSearch] = useUrl("search", DefaultSearch);
+  const [search, setSearch] = useUrl<string>("search", DefaultSearch);
   const ref = useRef<HTMLInputElement>(null);
   return (
     <Container className="pt-3 md:flex md:gap-2">

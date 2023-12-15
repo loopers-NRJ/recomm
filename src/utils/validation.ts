@@ -39,7 +39,6 @@ export const imageInputs = z.object({
   secureUrl: z.string().url(),
   originalFilename: z.string(),
   format: z.string(),
-  createdAt: z.string(),
   width: z.number().int(),
   height: z.number().int(),
   resource_type: z.enum(["image", "video", "raw", "auto"]),

@@ -3,13 +3,8 @@ import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import { type FC, useMemo, useState } from "react";
 
-import { api } from "@/utils/api";
-import {
-  DefaultSortBy,
-  DefaultSortOrder,
-  SortBy,
-  SortOrder,
-} from "@/utils/constants";
+import { RouterInputs, api } from "@/utils/api";
+import { DefaultSortBy, DefaultSortOrder, SortOrder } from "@/utils/constants";
 import { Brand } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 
@@ -19,6 +14,11 @@ import Loading from "../common/Loading";
 import ServerError from "../common/ServerError";
 import { Switch } from "../ui/switch";
 import { TableProps } from "@/pages/admin/[...path]";
+import { OmitUndefined } from "@/types/custom";
+import useUrl from "@/hooks/useUrl";
+import TableHeader from "./TableHeader";
+
+type SortBy = OmitUndefined<RouterInputs["brand"]["getBrands"]["sortBy"]>;
 
 const BrandTable: FC<TableProps> = ({ search }) => {
   const searchParams = useSearchParams();
@@ -27,9 +27,11 @@ const BrandTable: FC<TableProps> = ({ search }) => {
   const path = router.query.path as ["brands", ...string[]];
   const brandId = path[1];
   const params = new URLSearchParams(searchParams);
-
-  const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
-  const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
+  const [sortBy, setSortBy] = useUrl<SortBy>("sortBy", DefaultSortBy);
+  const [sortOrder, setSortOrder] = useUrl<SortOrder>(
+    "sortOrder",
+    DefaultSortOrder
+  );
   const categoryId = params.get("category") ?? undefined;
 
   const [updatingBrandId, setUpdatingBrandId] = useState<string>();
@@ -59,42 +61,16 @@ const BrandTable: FC<TableProps> = ({ search }) => {
     () => [
       {
         id: "Name",
-        header: "Name",
+        header: () => (
+          <TableHeader
+            title="name"
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            sortOrder={sortOrder}
+            setSortOrder={setSortOrder}
+          />
+        ),
         accessorFn: (row) => row.name,
-      },
-      {
-        id: "createdAt",
-        header: "Created At",
-        accessorFn: (row) => row.createdAt.toLocaleString("en-US"),
-      },
-      {
-        id: "updatedAt",
-        header: "Updated At",
-        accessorFn: (row) => row.updatedAt.toLocaleString("en-US"),
-      },
-      {
-        id: "models",
-        header: "Models",
-        cell: ({ row }) => (
-          <Link
-            href={`/admin/models?brand=${row.original.id}`}
-            className="text-blue-400 hover:text-blue-600"
-          >
-            Models
-          </Link>
-        ),
-      },
-      {
-        id: "products",
-        header: "Products",
-        cell: ({ row }) => (
-          <Link
-            href={`/admin/products?brand=${row.original.id}`}
-            className="text-blue-400 hover:text-blue-600"
-          >
-            Products
-          </Link>
-        ),
       },
       {
         id: "active",
@@ -124,8 +100,58 @@ const BrandTable: FC<TableProps> = ({ search }) => {
         ),
       },
       {
+        id: "models",
+        header: "Models",
+        cell: ({ row }) => (
+          <Link
+            href={`/admin/models?brand=${row.original.id}`}
+            className="text-blue-400 hover:text-blue-600"
+          >
+            Models
+          </Link>
+        ),
+      },
+      {
+        id: "products",
+        header: "Products",
+        cell: ({ row }) => (
+          <Link
+            href={`/admin/products?brand=${row.original.id}`}
+            className="text-blue-400 hover:text-blue-600"
+          >
+            Products
+          </Link>
+        ),
+      },
+      {
+        id: "createdAt",
+        header: () => (
+          <TableHeader
+            title="createdAt"
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            sortOrder={sortOrder}
+            setSortOrder={setSortOrder}
+          />
+        ),
+        accessorFn: (row) => row.createdAt.toLocaleString("en-US"),
+      },
+      {
+        id: "updatedAt",
+        header: () => (
+          <TableHeader
+            title="updatedAt"
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            sortOrder={sortOrder}
+            setSortOrder={setSortOrder}
+          />
+        ),
+        accessorFn: (row) => row.updatedAt.toLocaleString("en-US"),
+      },
+      {
         id: "edit",
-        header: "",
+        header: "Edit",
         accessorFn: (row) => row.id,
         cell: ({ row }) => (
           <Button size="sm" variant="outline" className="border-blue-400">
@@ -140,7 +166,7 @@ const BrandTable: FC<TableProps> = ({ search }) => {
       },
       {
         id: "delete",
-        header: "",
+        header: "Delete",
         accessorFn: (row) => row.id,
         cell: ({ row }) => (
           <Button
@@ -165,7 +191,17 @@ const BrandTable: FC<TableProps> = ({ search }) => {
         ),
       },
     ],
-    [brandsApi, deleteBrandApi, deleteBrandId, updateBrandById, updatingBrandId]
+    [
+      brandsApi,
+      deleteBrandApi,
+      deleteBrandId,
+      setSortBy,
+      setSortOrder,
+      sortBy,
+      sortOrder,
+      updateBrandById,
+      updatingBrandId,
+    ]
   );
 
   if (brandsApi.isLoading || brandApi.isLoading) {

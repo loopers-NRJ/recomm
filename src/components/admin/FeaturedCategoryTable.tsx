@@ -1,13 +1,6 @@
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-
-import { api } from "@/utils/api";
-import {
-  DefaultSortBy,
-  DefaultSortOrder,
-  SortBy,
-  SortOrder,
-} from "@/utils/constants";
+import { RouterInputs, api } from "@/utils/api";
+import { DefaultSortBy, DefaultSortOrder, SortOrder } from "@/utils/constants";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { DataTable } from "./Table";
@@ -17,13 +10,20 @@ import { FeaturedCategoryPayloadIncluded } from "@/types/prisma";
 import ServerError from "../common/ServerError";
 import Loading from "../common/Loading";
 import { TableProps } from "@/pages/admin/[...path]";
+import useUrl from "@/hooks/useUrl";
+import { OmitUndefined } from "@/types/custom";
+import TableHeader from "./TableHeader";
+
+type SortBy = OmitUndefined<
+  RouterInputs["category"]["getFeaturedCategories"]["sortBy"]
+>;
 
 const FeaturedCategoryTable: FC<TableProps> = ({ search }) => {
-  const searchParams = useSearchParams();
-  const params = new URLSearchParams(searchParams);
-
-  const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
-  const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
+  const [sortBy, setSortBy] = useUrl<SortBy>("sortBy", DefaultSortBy);
+  const [sortOrder, setSortOrder] = useUrl<SortOrder>(
+    "sortOrder",
+    DefaultSortOrder
+  );
 
   const categoriesApi = api.category.getFeaturedCategories.useInfiniteQuery(
     {
@@ -44,21 +44,19 @@ const FeaturedCategoryTable: FC<TableProps> = ({ search }) => {
     () => [
       {
         id: "Name",
-        header: "Name",
+        header: () => (
+          <TableHeader
+            title="name"
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            sortOrder={sortOrder}
+            setSortOrder={setSortOrder}
+          />
+        ),
         accessorFn: (row) => row.category.name,
         cell: ({ row }) => {
           return row.original.category.name;
         },
-      },
-      {
-        id: "createdAt",
-        header: "Created At",
-        accessorFn: (row) => row.category.createdAt.toLocaleString("en-US"),
-      },
-      {
-        id: "updatedAt",
-        header: "Updated At",
-        accessorFn: (row) => row.category.updatedAt.toLocaleString("en-US"),
       },
       {
         id: "products",
@@ -95,6 +93,32 @@ const FeaturedCategoryTable: FC<TableProps> = ({ search }) => {
             Models
           </Link>
         ),
+      },
+      {
+        id: "createdAt",
+        header: () => (
+          <TableHeader
+            title="createdAt"
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            sortOrder={sortOrder}
+            setSortOrder={setSortOrder}
+          />
+        ),
+        accessorFn: (row) => row.category.createdAt.toLocaleString("en-US"),
+      },
+      {
+        id: "updatedAt",
+        header: () => (
+          <TableHeader
+            title="updatedAt"
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            sortOrder={sortOrder}
+            setSortOrder={setSortOrder}
+          />
+        ),
+        accessorFn: (row) => row.category.updatedAt.toLocaleString("en-US"),
       },
       {
         id: "edit",
@@ -139,7 +163,15 @@ const FeaturedCategoryTable: FC<TableProps> = ({ search }) => {
         ),
       },
     ],
-    [categoriesApi, featuredCategoryState, removeCategoryFeatured]
+    [
+      categoriesApi,
+      featuredCategoryState,
+      removeCategoryFeatured,
+      setSortBy,
+      setSortOrder,
+      sortBy,
+      sortOrder,
+    ]
   );
 
   if (categoriesApi.isLoading) {

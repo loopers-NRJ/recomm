@@ -14,12 +14,11 @@ export const uploadImage = async (localPath: string) => {
   try {
     const response = await cloudinary.uploader.upload(localPath);
     const image: Image = {
-      url: response.url,
       publicId: response.public_id,
+      url: response.url,
       secureUrl: response.secure_url,
       originalFilename: response.original_filename,
       format: response.format,
-      createdAt: response.created_at,
       width: response.width,
       height: response.height,
       resource_type: response.resource_type,

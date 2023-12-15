@@ -10,10 +10,34 @@ import {
 } from "../trpc";
 import { AccessType } from "@prisma/client";
 import { productsPayload, wishPayload } from "@/types/prisma";
+import {
+  DefaultLimit,
+  DefaultSortBy,
+  DefaultSortOrder,
+  MaxLimit,
+} from "@/utils/constants";
 
 export const userRouter = createTRPCRouter({
   getUsers: publicProcedure
-    .input(functionalityOptions.extend({ role: idSchema.optional() }))
+    .input(
+      z.object({
+        search: z.string().trim().default(""),
+        limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
+        sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
+        sortBy: z
+          .enum([
+            "name",
+            "email",
+            "createdAt",
+            "updatedAt",
+            "role",
+            "lastActive",
+          ])
+          .default(DefaultSortBy),
+        cursor: idSchema.optional(),
+        role: idSchema.optional(),
+      })
+    )
     .query(
       async ({
         input: { limit, search, sortBy, sortOrder, cursor, role },
@@ -48,9 +72,15 @@ export const userRouter = createTRPCRouter({
                 : undefined,
             },
             orderBy: [
-              {
-                [sortBy]: sortOrder,
-              },
+              sortBy === "role"
+                ? {
+                    role: {
+                      name: sortOrder,
+                    },
+                  }
+                : {
+                    [sortBy]: sortOrder,
+                  },
             ],
             skip: cursor ? 1 : undefined,
             include: {

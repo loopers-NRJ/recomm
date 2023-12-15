@@ -1,15 +1,9 @@
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 
-import { api } from "@/utils/api";
-import {
-  DefaultSortBy,
-  DefaultSortOrder,
-  SortBy,
-  SortOrder,
-} from "@/utils/constants";
+import { RouterInputs, api } from "@/utils/api";
+import { DefaultSortBy, DefaultSortOrder, SortOrder } from "@/utils/constants";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { Button } from "../ui/button";
@@ -19,6 +13,13 @@ import { CategoryPayloadIncluded } from "@/types/prisma";
 import ServerError from "../common/ServerError";
 import Loading from "../common/Loading";
 import { TableProps } from "@/pages/admin/[...path]";
+import useUrl from "@/hooks/useUrl";
+import TableHeader from "./TableHeader";
+import { OmitUndefined } from "@/types/custom";
+
+type SortBy = OmitUndefined<
+  RouterInputs["category"]["getCategories"]["sortBy"]
+>;
 
 const CategoryTable: React.FC<TableProps> = ({ search }) => {
   const router = useRouter();
@@ -27,11 +28,11 @@ const CategoryTable: React.FC<TableProps> = ({ search }) => {
   const parentId =
     path.length === 0 ? null : path[path.length - 1]!.split("=")[1] ?? null;
 
-  const searchParams = useSearchParams();
-  const params = new URLSearchParams(searchParams);
-
-  const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
-  const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
+  const [sortBy, setSortBy] = useUrl<SortBy>("sortBy", DefaultSortBy);
+  const [sortOrder, setSortOrder] = useUrl<SortOrder>(
+    "sortOrder",
+    DefaultSortOrder
+  );
 
   const categoriesApi = api.category.getCategories.useInfiniteQuery(
     {
@@ -64,7 +65,15 @@ const CategoryTable: React.FC<TableProps> = ({ search }) => {
     () => [
       {
         id: "Name",
-        header: "Name",
+        header: () => (
+          <TableHeader
+            title="name"
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            setSortBy={setSortBy}
+            setSortOrder={setSortOrder}
+          />
+        ),
         accessorFn: (row) => row.name,
         cell: ({ row }) => {
           return (
@@ -78,14 +87,78 @@ const CategoryTable: React.FC<TableProps> = ({ search }) => {
         },
       },
       {
-        id: "createdAt",
-        header: "Created At",
-        accessorFn: (row) => row.createdAt.toLocaleString("en-US"),
+        id: "active",
+        header: () => (
+          <TableHeader
+            title="active"
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            setSortBy={setSortBy}
+            setSortOrder={setSortOrder}
+          />
+        ),
+        cell: ({ row }) => (
+          <Switch
+            disabled={updatingCategoryId === row.original.id}
+            checked={row.original.active}
+            // make the switch blue when active and black when inactive
+            className="data-[state=checked]:bg-blue-500"
+            onCheckedChange={() => {
+              setUpdatingCategoryId(row.original.id);
+              updateCategoryById
+                .mutateAsync({
+                  id: row.original.id,
+                  active: !row.original.active,
+                })
+                .then(async () => {
+                  await categoriesApi.refetch();
+                  setUpdatingCategoryId(undefined);
+                })
+                .catch((err) => {
+                  console.log(err);
+                });
+            }}
+          />
+        ),
       },
       {
-        id: "updatedAt",
-        header: "Updated At",
-        accessorFn: (row) => row.updatedAt.toLocaleString("en-US"),
+        id: "is-Featured",
+        header: () => (
+          <TableHeader
+            title="featured"
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            setSortBy={setSortBy}
+            setSortOrder={setSortOrder}
+          />
+        ),
+        cell: ({ row }) => (
+          <Switch
+            disabled={featuredCategoryState === row.original.id}
+            checked={row.original.featuredCategory !== null}
+            className="data-[state=checked]:bg-yellow-500"
+            onCheckedChange={() => {
+              setFeaturedCategoryState(row.original.id);
+              if (row.original.featuredCategory !== null) {
+                removeCategoryFeatured
+                  .mutateAsync({
+                    categoryId: row.original.id,
+                  })
+                  .then(async () => {
+                    await categoriesApi.refetch();
+                    setFeaturedCategoryState("");
+                  })
+                  .catch((err) => {
+                    console.log(err);
+                  });
+              } else {
+                void router.push(
+                  `/admin/featured-category/create/?id=${row.original.id}`
+                );
+              }
+            }}
+          />
+        ),
       },
       {
         id: "products",
@@ -124,62 +197,30 @@ const CategoryTable: React.FC<TableProps> = ({ search }) => {
         ),
       },
       {
-        id: "active",
-        header: "Active",
-        cell: ({ row }) => (
-          <Switch
-            disabled={updatingCategoryId === row.original.id}
-            checked={row.original.active}
-            // make the switch blue when active and black when inactive
-            className="data-[state=checked]:bg-blue-500"
-            onCheckedChange={() => {
-              setUpdatingCategoryId(row.original.id);
-              updateCategoryById
-                .mutateAsync({
-                  id: row.original.id,
-                  active: !row.original.active,
-                })
-                .then(async () => {
-                  await categoriesApi.refetch();
-                  setUpdatingCategoryId(undefined);
-                })
-                .catch((err) => {
-                  console.log(err);
-                });
-            }}
+        id: "createdAt",
+        header: () => (
+          <TableHeader
+            title="createdAt"
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            setSortBy={setSortBy}
+            setSortOrder={setSortOrder}
           />
         ),
+        accessorFn: (row) => row.createdAt.toLocaleString("en-US"),
       },
       {
-        id: "is-Featured",
-        header: "Featured",
-        cell: ({ row }) => (
-          <Switch
-            disabled={featuredCategoryState === row.original.id}
-            checked={row.original.featuredCategory !== null}
-            className="data-[state=checked]:bg-yellow-500"
-            onCheckedChange={() => {
-              setFeaturedCategoryState(row.original.id);
-              if (row.original.featuredCategory !== null) {
-                removeCategoryFeatured
-                  .mutateAsync({
-                    categoryId: row.original.id,
-                  })
-                  .then(async () => {
-                    await categoriesApi.refetch();
-                    setFeaturedCategoryState("");
-                  })
-                  .catch((err) => {
-                    console.log(err);
-                  });
-              } else {
-                void router.push(
-                  `/admin/featured-category/create/?id=${row.original.id}`
-                );
-              }
-            }}
+        id: "updatedAt",
+        header: () => (
+          <TableHeader
+            title="updatedAt"
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            setSortBy={setSortBy}
+            setSortOrder={setSortOrder}
           />
         ),
+        accessorFn: (row) => row.updatedAt.toLocaleString("en-US"),
       },
       {
         id: "edit",
@@ -228,6 +269,10 @@ const CategoryTable: React.FC<TableProps> = ({ search }) => {
       featuredCategoryState,
       removeCategoryFeatured,
       router,
+      setSortBy,
+      setSortOrder,
+      sortBy,
+      sortOrder,
       updateCategoryById,
       updatingCategoryId,
     ]

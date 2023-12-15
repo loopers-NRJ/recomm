@@ -7,7 +7,13 @@ import {
   getProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
-import { MaxFeaturedCategory } from "@/utils/constants";
+import {
+  DefaultLimit,
+  DefaultSortBy,
+  DefaultSortOrder,
+  MaxFeaturedCategory,
+  MaxLimit,
+} from "@/utils/constants";
 import {
   functionalityOptions,
   idSchema,
@@ -19,7 +25,14 @@ import { CategoryPayload, FeaturedCategoryPayload } from "@/types/prisma";
 export const categoryRouter = createTRPCRouter({
   getCategories: publicProcedure
     .input(
-      functionalityOptions.extend({
+      z.object({
+        search: z.string().trim().default(""),
+        limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
+        sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
+        sortBy: z
+          .enum(["name", "createdAt", "updatedAt", "active", "featured"])
+          .default(DefaultSortBy),
+        cursor: idSchema.optional(),
         parentId: idSchema.nullish(),
         parentSlug: z.string().min(1).max(255).nullish(),
       })
@@ -59,9 +72,17 @@ export const categoryRouter = createTRPCRouter({
           take: limit,
           skip: cursor ? 1 : undefined,
           orderBy: [
-            {
-              [sortBy]: sortOrder,
-            },
+            sortBy === "featured"
+              ? {
+                  featuredCategory: {
+                    category: {
+                      name: sortOrder,
+                    },
+                  },
+                }
+              : {
+                  [sortBy]: sortOrder,
+                },
           ],
           include: CategoryPayload.include,
         });
@@ -302,7 +323,17 @@ export const categoryRouter = createTRPCRouter({
       return category;
     }),
   getFeaturedCategories: publicProcedure
-    .input(functionalityOptions)
+    .input(
+      z.object({
+        search: z.string().trim().default(""),
+        limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
+        sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
+        sortBy: z
+          .enum(["name", "createdAt", "updatedAt", "active"])
+          .default(DefaultSortBy),
+        cursor: idSchema.optional(),
+      })
+    )
     .query(
       async ({
         input: { search, limit, sortBy, sortOrder, cursor },
