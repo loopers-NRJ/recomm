@@ -156,7 +156,7 @@ enum State {
 
 model Category {
     id               String            @id @default(cuid())
-    name             String            @unique
+    name             String
     slug             String            @unique
     active           Boolean           @default(true)
     subCategories    Category[]        @relation("SubCategory")
@@ -173,7 +173,9 @@ model Category {
     createdAt    DateTime @default(now())
     updatedAt    DateTime @updatedAt
 
-    @@unique([name, parentCategoryId])
+    @@unique([name, createdState])
+    @@index([name])
+    @@index([name, parentCategoryId])
     @@index([parentCategoryId])
     @@index([createdById])
 }
@@ -190,12 +192,13 @@ model FeaturedCategory {
     createdAt    DateTime @default(now())
     updatedAt    DateTime @updatedAt
 
+    @@index([categoryId])
     @@index([featuredById])
 }
 
 model Brand {
     id     String  @id @default(cuid())
-    name   String  @unique
+    name   String
     slug   String  @unique
     active Boolean @default(true)
     models Model[]
@@ -208,12 +211,14 @@ model Brand {
     createdAt    DateTime @default(now())
     updatedAt    DateTime @updatedAt
 
+    @@unique([name, createdState])
+    @@index([name])
     @@index([createdById])
 }
 
 model Model {
     id                      String                   @id @default(cuid())
-    name                    String                   @unique
+    name                    String
     slug                    String                   @unique
     active                  Boolean                  @default(true)
     category                Category                 @relation(fields: [categoryId], references: [id])
@@ -234,9 +239,11 @@ model Model {
     createdAt    DateTime @default(now())
     updatedAt    DateTime @updatedAt
 
-    @@unique([createdById])
+    @@unique([name, categoryId, brandId, createdState])
+    @@index([name])
     @@index([brandId])
     @@index([categoryId])
+    @@index([createdById])
 }
 
 enum MultipleChoiceQuestionType {

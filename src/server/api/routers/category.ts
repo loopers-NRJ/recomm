@@ -211,10 +211,11 @@ export const categoryRouter = createTRPCRouter({
         ctx: { prisma, session },
       }) => {
         // checking whether the category already exists
-        const existingCategory = await prisma.category.findUnique({
+        const existingCategory = await prisma.category.findFirst({
           where: {
             name,
             parentCategoryId,
+            createdState: state,
           },
           select: {
             name: true,
@@ -282,6 +283,7 @@ export const categoryRouter = createTRPCRouter({
           },
           select: {
             name: true,
+            createdState: true,
           },
         });
         if (existingCategory === null) {
@@ -289,17 +291,18 @@ export const categoryRouter = createTRPCRouter({
         }
         // checking whether the new name already exists
         if (name !== undefined && name !== existingCategory.name) {
-          const existingCategory = await prisma.category.findFirst({
+          const existingName = await prisma.category.findFirst({
             where: {
               name: {
                 equals: name,
               },
+              createdState: existingCategory.createdState,
             },
             select: {
               id: true,
             },
           });
-          if (existingCategory !== null) {
+          if (existingName !== null) {
             throw new Error(`Category ${name} already exists`);
           }
         }

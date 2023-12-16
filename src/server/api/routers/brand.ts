@@ -168,9 +168,10 @@ export const brandRouter = createTRPCRouter({
     )
     .mutation(async ({ input: { name, state }, ctx: { prisma, session } }) => {
       // checking whether the brand exists
-      const existingBrand = await prisma.brand.findUnique({
+      const existingBrand = await prisma.brand.findFirst({
         where: {
           name,
+          createdState: state,
         },
       });
       if (existingBrand !== null) {
@@ -213,23 +214,28 @@ export const brandRouter = createTRPCRouter({
           where: {
             id,
           },
+          select: {
+            name: true,
+            createdState: true,
+          },
         });
         if (existingBrand === null) {
           throw new Error("Brand not found");
         }
         // checking whether the new brand name already exists
         if (newName !== undefined && newName !== existingBrand.name) {
-          const existingBrand = await prisma.brand.findFirst({
+          const existingName = await prisma.brand.findFirst({
             where: {
               name: {
                 equals: newName,
               },
+              createdState: existingBrand.createdState,
             },
             select: {
               id: true,
             },
           });
-          if (existingBrand !== null) {
+          if (existingName !== null) {
             throw new Error(`Brand ${newName} already exists`);
           }
         }

@@ -134,6 +134,7 @@ export const modelRouter = createTRPCRouter({
           const existingModel = await prisma.model.findFirst({
             where: {
               name,
+              createdState: state,
             },
           });
           if (existingModel !== null) {
@@ -229,18 +230,23 @@ export const modelRouter = createTRPCRouter({
           where: {
             id,
           },
+          select: {
+            name: true,
+            createdState: true,
+          },
         });
         if (existingModel === null) {
           throw new Error("Model not found");
         }
         // check whether the new name is unique
-        if (newName !== undefined) {
-          const existingModel = await prisma.model.findFirst({
+        if (newName !== undefined && newName !== existingModel.name) {
+          const existingName = await prisma.model.findFirst({
             where: {
               name: newName,
+              createdState: existingModel.createdState,
             },
           });
-          if (existingModel !== null) {
+          if (existingName !== null) {
             throw new Error(`Model ${newName} already exists`);
           }
         }

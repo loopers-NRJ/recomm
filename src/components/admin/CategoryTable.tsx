@@ -299,7 +299,6 @@ const CategoryTable: React.FC<TableProps> = ({ search }) => {
           <span className="px-2 font-bold">
             {parentId === null ? "All Categories" : "Sub Category of"}
           </span>
-          {/* TODO: display the category image */}
           {parentCategoryApi.data?.name && ` - ${parentCategoryApi.data?.name}`}
         </div>
         <div>
