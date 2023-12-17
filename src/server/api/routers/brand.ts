@@ -25,7 +25,7 @@ export const brandRouter = createTRPCRouter({
           .default(DefaultSortBy),
         cursor: idSchema.optional(),
         categoryId: idSchema.optional(),
-        state: z.enum(states).optional(),
+        state: z.enum(states),
       })
     )
     .query(
@@ -75,38 +75,45 @@ export const brandRouter = createTRPCRouter({
     .input(
       z.object({
         search: z.string().trim().default(""),
+        limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
         sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
         sortBy: z
           .enum(["name", "createdAt", "updatedAt", "active"])
           .default(DefaultSortBy),
-        categoryId: idSchema,
+        cursor: idSchema.optional(),
+        categoryId: idSchema.optional(),
+        state: z.enum(states),
       })
     )
     .query(
       async ({
-        input: { search, sortBy, sortOrder, categoryId },
+        input: { search, sortBy, sortOrder, categoryId, state, cursor, limit },
         ctx: { prisma, isAdminPage },
       }) => {
-        const fetchRecursiveBrandsByCategoryId = async (categoryId: string) => {
-          const subCategories = await prisma.category.findMany({
-            where: {
-              parentCategoryId: categoryId,
-            },
-            select: {
-              id: true,
-            },
-          });
+        const fetchRecursiveBrandsByCategoryId = async (
+          categoryId?: string
+        ) => {
+          if (categoryId) {
+            const subCategories = await prisma.category.findMany({
+              where: {
+                parentCategoryId: categoryId,
+              },
+              select: {
+                id: true,
+              },
+            });
 
-          if (subCategories.length !== 0) {
-            // this is not the leaf category
-            const subBrands: BrandPayloadIncluded[] = (
-              await Promise.all(
-                subCategories.map((category) =>
-                  fetchRecursiveBrandsByCategoryId(category.id)
+            if (subCategories.length !== 0) {
+              // this is not the leaf category
+              const subBrands: BrandPayloadIncluded[] = (
+                await Promise.all(
+                  subCategories.map((category) =>
+                    fetchRecursiveBrandsByCategoryId(category.id)
+                  )
                 )
-              )
-            ).flat();
-            return subBrands;
+              ).flat();
+              return subBrands;
+            }
           }
 
           // this is the leaf category
@@ -126,7 +133,15 @@ export const brandRouter = createTRPCRouter({
                   }
                 : undefined,
               active: isAdminPage ? undefined : true,
+              createdState: state,
             },
+            take: limit,
+            skip: cursor ? 1 : undefined,
+            cursor: cursor
+              ? {
+                  id: cursor,
+                }
+              : undefined,
             orderBy: [
               {
                 [sortBy]: sortOrder,
@@ -139,7 +154,10 @@ export const brandRouter = createTRPCRouter({
 
         const brands = await fetchRecursiveBrandsByCategoryId(categoryId);
 
-        return brands;
+        return {
+          brands,
+          nextCursor: brands[limit - 1]?.id,
+        };
       }
     ),
   getBrandById: publicProcedure

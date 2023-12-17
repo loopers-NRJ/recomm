@@ -9,16 +9,18 @@ import { useRouter } from "next/router";
 import { type FC, useMemo, useState } from "react";
 import Loading from "../common/Loading";
 import ServerError from "../common/ServerError";
-import { DefaultSortOrder, SortOrder } from "@/utils/constants";
+import { DefaultSortOrder } from "@/utils/constants";
 import { TableProps } from "@/pages/admin/[...path]";
-import useUrl from "@/hooks/useUrl";
+
+import { useQueryState, parseAsStringEnum } from "next-usequerystate";
 import TableHeader from "./TableHeader";
 
 const RoleTable: FC<TableProps> = ({ search }) => {
   const router = useRouter();
-  const [sortOrder, setSortOrder] = useUrl<SortOrder>(
+
+  const [sortOrder, setSortOrder] = useQueryState(
     "sortOrder",
-    DefaultSortOrder
+    parseAsStringEnum(["asc", "desc"]).withDefault(DefaultSortOrder)
   );
 
   const rolesApi = api.role.getRoles.useQuery({
@@ -35,7 +37,7 @@ const RoleTable: FC<TableProps> = ({ search }) => {
           <TableHeader
             title="name"
             sortOrder={sortOrder}
-            setSortOrder={setSortOrder}
+            setSortOrder={(order) => void setSortOrder(order)}
             sortBy="name"
             setSortBy={() => {
               // do nothing

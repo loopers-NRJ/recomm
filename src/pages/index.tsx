@@ -16,6 +16,7 @@ import {
 import Categories from "@/components/navbar/Categories";
 import { Button } from "@/components/ui/button";
 import Loading from "@/components/common/Loading";
+import { useClientSelectedState } from "@/store/SelectedState";
 
 export const metadata: Metadata = {
   title: "recomm - Home",
@@ -32,6 +33,9 @@ export const Home: NextPage = () => {
   const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
   const modelId = params.get("model") ?? undefined;
   const categoryId = params.get("category") ?? undefined;
+  const brandId = params.get("brand") ?? undefined;
+
+  const selectedState = useClientSelectedState((selected) => selected.state);
 
   const productsApi = api.product.getProducts.useInfiniteQuery(
     {
@@ -40,6 +44,8 @@ export const Home: NextPage = () => {
       sortOrder,
       modelId,
       categoryId,
+      brandId,
+      state: selectedState,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,

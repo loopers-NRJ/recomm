@@ -4,6 +4,7 @@ import ComboBox from "./ComboBox";
 import { api } from "@/utils/api";
 import { Item } from "@/types/custom";
 import ErrorMessage from "./ErrorMessage";
+import { useClientSelectedState } from "@/store/SelectedState";
 
 function BrandComboBox({
   onSelect,
@@ -19,7 +20,13 @@ function BrandComboBox({
   disabled?: boolean;
 }) {
   const [search, setSearch] = useState("");
-  const brandsSearch = api.search.brands.useQuery({ categoryId, search });
+
+  const selectedState = useClientSelectedState((selected) => selected.state);
+  const brandsSearch = api.search.brands.useQuery({
+    categoryId,
+    search,
+    state: selectedState,
+  });
 
   return (
     <div>

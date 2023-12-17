@@ -22,7 +22,7 @@ import { useRouter } from "next/router";
 import BrandComboBox from "@/components/common/BrandComboBox";
 import CategoryComboBox from "@/components/common/CategoryComboBox";
 import { withAdminGuard } from "@/hoc/AdminGuard";
-import { useSelectedState } from "@/components/admin/SelectedState";
+import { useAdminSelectedState } from "@/store/SelectedState";
 
 export const getServerSideProps = withAdminGuard();
 
@@ -61,7 +61,7 @@ const CreateModelPage = () => {
 
   const router = useRouter();
 
-  const selectedState = useSelectedState((selected) => selected.state);
+  const selectedState = useAdminSelectedState((selected) => selected.state);
 
   const getAtomicQuestionIndex = (id: string) => {
     let count = 0;

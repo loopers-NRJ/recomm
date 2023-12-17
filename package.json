@@ -49,6 +49,7 @@
     "next": "^13.4.2",
     "next-auth": "^4.22.4",
     "next-cloudinary": "^4.18.1",
+    "next-usequerystate": "^1.13.2",
     "nextjs-progressbar": "^0.0.16",
     "nodemailer": "^6.9.4",
     "react": "18.2.0",

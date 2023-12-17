@@ -33,7 +33,7 @@ export const modelRouter = createTRPCRouter({
         cursor: idSchema.optional(),
         categoryId: idSchema.optional(),
         brandId: idSchema.optional(),
-        state: z.enum(states).optional(),
+        state: z.enum(states),
       })
     )
     .query(

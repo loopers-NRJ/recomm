@@ -1,20 +1,28 @@
 import PostingForm from "@/components/posting/PostingForm";
 import CategoryPicker from "@/components/common/CategoryPicker";
 import Loading from "@/components/common/Loading";
-import useUrl from "@/hooks/useUrl";
+
 import { api } from "@/utils/api";
 import { withProtectedRoute } from "@/hoc/ProtectedRoute";
 import ServerError from "@/components/common/ServerError";
 
+import { useQueryState, parseAsString } from "next-usequerystate";
+import { useClientSelectedState } from "@/store/SelectedState";
+
 export const getServerSideProps = withProtectedRoute();
 
 export default function SellitPage() {
-  const [parentCategorySlug, setParentCaregorySlug] =
-    useUrl<string>("category");
+  const [parentCategorySlug, setParentCaregorySlug] = useQueryState(
+    "category",
+    parseAsString
+  );
+  const selectedState = useClientSelectedState((selected) => selected.state);
+
   const categoryApi = api.category.getCategoriesWithoutPayload.useInfiniteQuery(
     {
-      parentSlug: parentCategorySlug,
+      parentSlug: parentCategorySlug ?? undefined,
       parentId: parentCategorySlug ? undefined : null,
+      state: selectedState,
     },
     {
       getNextPageParam: (page) => page.nextCursor,
@@ -22,7 +30,9 @@ export default function SellitPage() {
   );
   const featuredCategoryApi =
     api.category.getFeaturedCategories.useInfiniteQuery(
-      {},
+      {
+        state: selectedState,
+      },
       {
         getNextPageParam: (page) => page.nextCursor,
       }
@@ -58,8 +68,8 @@ export default function SellitPage() {
       <CategoryPicker
         categories={categories}
         featuredCategories={featuredCategories}
-        selectedCategorySlug={parentCategorySlug}
-        onSelect={(category) => setParentCaregorySlug(category.slug)}
+        selectedCategorySlug={parentCategorySlug ?? undefined}
+        onSelect={(category) => void setParentCaregorySlug(category.slug)}
         hasNextPage={categoryApi.hasNextPage}
         fetchNextPage={() => void categoryApi.fetchNextPage()}
       />

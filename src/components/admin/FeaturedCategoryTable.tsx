@@ -10,26 +10,37 @@ import { FeaturedCategoryPayloadIncluded } from "@/types/prisma";
 import ServerError from "../common/ServerError";
 import Loading from "../common/Loading";
 import { TableProps } from "@/pages/admin/[...path]";
-import useUrl from "@/hooks/useUrl";
+import { useQueryState, parseAsStringEnum } from "next-usequerystate";
 import { OmitUndefined } from "@/types/custom";
 import TableHeader from "./TableHeader";
+import { useAdminSelectedState } from "../../store/SelectedState";
 
 type SortBy = OmitUndefined<
   RouterInputs["category"]["getFeaturedCategories"]["sortBy"]
 >;
 
 const FeaturedCategoryTable: FC<TableProps> = ({ search }) => {
-  const [sortBy, setSortBy] = useUrl<SortBy>("sortBy", DefaultSortBy);
-  const [sortOrder, setSortOrder] = useUrl<SortOrder>(
-    "sortOrder",
-    DefaultSortOrder
+  const [sortBy, setSortBy] = useQueryState(
+    "sortBy",
+    parseAsStringEnum<SortBy>([
+      "name",
+      "createdAt",
+      "updatedAt",
+      "active",
+    ]).withDefault(DefaultSortBy)
   );
+  const [sortOrder, setSortOrder] = useQueryState(
+    "sortOrder",
+    parseAsStringEnum<SortOrder>(["asc", "desc"]).withDefault(DefaultSortOrder)
+  );
+  const selectedState = useAdminSelectedState((selected) => selected.state);
 
   const categoriesApi = api.category.getFeaturedCategories.useInfiniteQuery(
     {
       search,
       sortBy,
       sortOrder,
+      state: selectedState,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -48,9 +59,9 @@ const FeaturedCategoryTable: FC<TableProps> = ({ search }) => {
           <TableHeader
             title="name"
             sortBy={sortBy}
-            setSortBy={setSortBy}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
             sortOrder={sortOrder}
-            setSortOrder={setSortOrder}
+            setSortOrder={(sortOrder) => void setSortOrder(sortOrder)}
           />
         ),
         accessorFn: (row) => row.category.name,
@@ -100,9 +111,9 @@ const FeaturedCategoryTable: FC<TableProps> = ({ search }) => {
           <TableHeader
             title="createdAt"
             sortBy={sortBy}
-            setSortBy={setSortBy}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
             sortOrder={sortOrder}
-            setSortOrder={setSortOrder}
+            setSortOrder={(sortOrder) => void setSortOrder(sortOrder)}
           />
         ),
         accessorFn: (row) => row.category.createdAt.toLocaleString("en-US"),
@@ -113,9 +124,9 @@ const FeaturedCategoryTable: FC<TableProps> = ({ search }) => {
           <TableHeader
             title="updatedAt"
             sortBy={sortBy}
-            setSortBy={setSortBy}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
             sortOrder={sortOrder}
-            setSortOrder={setSortOrder}
+            setSortOrder={(sortOrder) => void setSortOrder(sortOrder)}
           />
         ),
         accessorFn: (row) => row.category.updatedAt.toLocaleString("en-US"),

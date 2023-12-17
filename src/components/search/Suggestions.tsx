@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/command";
 import { api } from "@/utils/api";
 import { debounce } from "@/utils/helper";
+import { useClientSelectedState } from "@/store/SelectedState";
 
 interface SuggestionProps {
   searchKey: string;
@@ -16,8 +17,11 @@ interface SuggestionProps {
 
 const Suggestions: FC<SuggestionProps> = ({ searchKey }) => {
   const router = useRouter();
-
-  const suggestionsApi = api.search.all.useQuery({ search: searchKey });
+  const selectedState = useClientSelectedState((selected) => selected.state);
+  const suggestionsApi = api.search.all.useQuery({
+    search: searchKey,
+    state: selectedState,
+  });
 
   useEffect(() => {
     if (searchKey && searchKey.length > 2) {

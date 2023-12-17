@@ -15,6 +15,7 @@ import {
 import ServerError from "@/components/common/ServerError";
 import { Button } from "@/components/ui/button";
 import Loading from "@/components/common/Loading";
+import { useClientSelectedState } from "@/store/SelectedState";
 
 export const ProductsPages: NextPage = () => {
   const searchParams = useSearchParams();
@@ -26,6 +27,8 @@ export const ProductsPages: NextPage = () => {
   const categoryId = params.get("category") ?? undefined;
   const brandId = params.get("brand") ?? undefined;
   const modelId = params.get("model") ?? undefined;
+
+  const selectedState = useClientSelectedState((selected) => selected.state);
   const productsApi = api.product.getProducts.useInfiniteQuery(
     {
       search,
@@ -34,6 +37,7 @@ export const ProductsPages: NextPage = () => {
       modelId,
       categoryId,
       brandId,
+      state: selectedState,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,

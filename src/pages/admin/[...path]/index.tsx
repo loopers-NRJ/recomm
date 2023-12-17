@@ -19,14 +19,15 @@ import FeaturedCategoryTable from "@/components/admin/FeaturedCategoryTable";
 import { withAdminGuard } from "@/hoc/AdminGuard";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-import useUrl from "@/hooks/useUrl";
 import { DefaultSearch } from "@/utils/constants";
 import { debounce } from "@/utils/helper";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
 import { states } from "@/types/prisma";
 import { State } from "@prisma/client";
-import { useSelectedState } from "@/components/admin/SelectedState";
+import { useAdminSelectedState } from "@/store/SelectedState";
+
+import { useQueryState, parseAsString } from "next-usequerystate";
 
 const titles = [
   "category",
@@ -90,9 +91,12 @@ export default function AdminPage({ title }: { title: Title }) {
       break;
   }
 
-  const [search, setSearch] = useUrl<string>("search", DefaultSearch);
+  const [search, setSearch] = useQueryState(
+    "search",
+    parseAsString.withDefault(DefaultSearch)
+  );
   const ref = useRef<HTMLInputElement>(null);
-  const selectedState = useSelectedState();
+  const selectedState = useAdminSelectedState();
 
   return (
     <Container className="pt-3 md:flex md:gap-2">
@@ -150,7 +154,7 @@ export default function AdminPage({ title }: { title: Title }) {
               role="search"
               type="search"
               defaultValue={search}
-              onChange={debounce((e) => setSearch(e.target.value), 300)}
+              onChange={debounce((e) => void setSearch(e.target.value), 300)}
               className="border-none focus:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
             />
           </div>
@@ -166,7 +170,7 @@ export default function AdminPage({ title }: { title: Title }) {
             <SelectContent className="h-80">
               {states.map((state) => (
                 <SelectItem value={state} key={state}>
-                  {state}
+                  {state.replace("_", " ")}
                 </SelectItem>
               ))}
             </SelectContent>

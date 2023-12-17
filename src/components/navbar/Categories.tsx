@@ -7,9 +7,13 @@ import Container from "../Container";
 import CategoryBox from "./CategoryBox";
 import LoadingCategories from "./LoadingCategories";
 import Image from "next/image";
+import { useClientSelectedState } from "@/store/SelectedState";
 
 const Categories: FC = () => {
-  const categoriesApi = api.category.getFeaturedCategories.useQuery({});
+  const selectedState = useClientSelectedState((selected) => selected.state);
+  const categoriesApi = api.category.getFeaturedCategories.useQuery({
+    state: selectedState,
+  });
   if (categoriesApi.isLoading || categoriesApi.data === undefined) {
     return <LoadingCategories />;
   }

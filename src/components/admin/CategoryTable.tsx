@@ -13,9 +13,11 @@ import { CategoryPayloadIncluded } from "@/types/prisma";
 import ServerError from "../common/ServerError";
 import Loading from "../common/Loading";
 import { TableProps } from "@/pages/admin/[...path]";
-import useUrl from "@/hooks/useUrl";
 import TableHeader from "./TableHeader";
 import { OmitUndefined } from "@/types/custom";
+import { useAdminSelectedState } from "../../store/SelectedState";
+
+import { useQueryState, parseAsStringEnum } from "next-usequerystate";
 
 type SortBy = OmitUndefined<
   RouterInputs["category"]["getCategories"]["sortBy"]
@@ -28,11 +30,22 @@ const CategoryTable: React.FC<TableProps> = ({ search }) => {
   const parentId =
     path.length === 0 ? null : path[path.length - 1]!.split("=")[1] ?? null;
 
-  const [sortBy, setSortBy] = useUrl<SortBy>("sortBy", DefaultSortBy);
-  const [sortOrder, setSortOrder] = useUrl<SortOrder>(
-    "sortOrder",
-    DefaultSortOrder
+  const [sortBy, setSortBy] = useQueryState(
+    "sortBy",
+    parseAsStringEnum<SortBy>([
+      "name",
+      "createdAt",
+      "updatedAt",
+      "active",
+      "featured",
+    ]).withDefault(DefaultSortBy)
   );
+  const [sortOrder, setSortOrder] = useQueryState(
+    "sortOrder",
+    parseAsStringEnum<SortOrder>(["asc", "desc"]).withDefault(DefaultSortOrder)
+  );
+
+  const selectedState = useAdminSelectedState((selected) => selected.state);
 
   const categoriesApi = api.category.getCategories.useInfiniteQuery(
     {
@@ -40,6 +53,7 @@ const CategoryTable: React.FC<TableProps> = ({ search }) => {
       search,
       sortBy,
       sortOrder,
+      state: selectedState,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -70,8 +84,8 @@ const CategoryTable: React.FC<TableProps> = ({ search }) => {
             title="name"
             sortBy={sortBy}
             sortOrder={sortOrder}
-            setSortBy={setSortBy}
-            setSortOrder={setSortOrder}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
+            setSortOrder={(sortOrder) => void setSortOrder(sortOrder)}
           />
         ),
         accessorFn: (row) => row.name,
@@ -93,8 +107,8 @@ const CategoryTable: React.FC<TableProps> = ({ search }) => {
             title="active"
             sortBy={sortBy}
             sortOrder={sortOrder}
-            setSortBy={setSortBy}
-            setSortOrder={setSortOrder}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
+            setSortOrder={(sortOrder) => void setSortOrder(sortOrder)}
           />
         ),
         cell: ({ row }) => (
@@ -128,8 +142,8 @@ const CategoryTable: React.FC<TableProps> = ({ search }) => {
             title="featured"
             sortBy={sortBy}
             sortOrder={sortOrder}
-            setSortBy={setSortBy}
-            setSortOrder={setSortOrder}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
+            setSortOrder={(sortOrder) => void setSortOrder(sortOrder)}
           />
         ),
         cell: ({ row }) => (
@@ -203,8 +217,8 @@ const CategoryTable: React.FC<TableProps> = ({ search }) => {
             title="createdAt"
             sortBy={sortBy}
             sortOrder={sortOrder}
-            setSortBy={setSortBy}
-            setSortOrder={setSortOrder}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
+            setSortOrder={(sortOrder) => void setSortOrder(sortOrder)}
           />
         ),
         accessorFn: (row) => row.createdAt.toLocaleString("en-US"),
@@ -216,8 +230,8 @@ const CategoryTable: React.FC<TableProps> = ({ search }) => {
             title="updatedAt"
             sortBy={sortBy}
             sortOrder={sortOrder}
-            setSortBy={setSortBy}
-            setSortOrder={setSortOrder}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
+            setSortOrder={(sortOrder) => void setSortOrder(sortOrder)}
           />
         ),
         accessorFn: (row) => row.updatedAt.toLocaleString("en-US"),

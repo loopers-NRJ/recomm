@@ -35,7 +35,7 @@ export const categoryRouter = createTRPCRouter({
         cursor: idSchema.optional(),
         parentId: idSchema.nullish(),
         parentSlug: z.string().min(1).max(255).nullish(),
-        state: z.enum(states).optional(),
+        state: z.enum(states),
       })
     )
     .query(
@@ -108,7 +108,7 @@ export const categoryRouter = createTRPCRouter({
         cursor: idSchema.optional(),
         parentId: idSchema.nullish(),
         parentSlug: z.string().min(1).max(255).nullish(),
-        state: z.enum(states).optional(),
+        state: z.enum(states),
       })
     )
     .query(
@@ -358,7 +358,7 @@ export const categoryRouter = createTRPCRouter({
           .enum(["name", "createdAt", "updatedAt", "active"])
           .default(DefaultSortBy),
         cursor: idSchema.optional(),
-        state: z.enum(states).optional(),
+        state: z.enum(states),
       })
     )
     .query(

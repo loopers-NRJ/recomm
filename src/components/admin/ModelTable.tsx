@@ -13,25 +13,42 @@ import Loading from "../common/Loading";
 import ServerError from "../common/ServerError";
 import { Switch } from "../ui/switch";
 import { TableProps } from "@/pages/admin/[...path]";
-import useUrl from "@/hooks/useUrl";
+
 import { OmitUndefined } from "@/types/custom";
 import TableHeader from "./TableHeader";
+import { useAdminSelectedState } from "../../store/SelectedState";
+import { useQueryState, parseAsStringEnum } from "next-usequerystate";
 
 type SortBy = OmitUndefined<RouterInputs["model"]["getModels"]["sortBy"]>;
 
 const ModelTable: FC<TableProps> = ({ search }) => {
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
-  const [sortBy, setSortBy] = useUrl<SortBy>("sortBy", DefaultSortBy);
-  const [sortOrder, setSortOrder] = useUrl<SortOrder>(
-    "sortOrder",
-    DefaultSortOrder
-  );
+
   const categoryId = params.get("category") ?? undefined;
   const brandId = params.get("brand") ?? undefined;
 
+  const [sortBy, setSortBy] = useQueryState(
+    "sortBy",
+    parseAsStringEnum<SortBy>([
+      "category",
+      "brand",
+      "name",
+      "createdAt",
+      "updatedAt",
+      "active",
+    ]).withDefault(DefaultSortBy)
+  );
+
+  const [sortOrder, setSortOrder] = useQueryState(
+    "sortOrder",
+    parseAsStringEnum<SortOrder>(["asc", "desc"]).withDefault(DefaultSortOrder)
+  );
+
   const [updatingModelId, setUpdatingModelId] = useState<string>();
   const updateModelById = api.model.updateModelById.useMutation();
+
+  const selectedState = useAdminSelectedState((selected) => selected.state);
 
   const modelsApi = api.model.getModels.useInfiniteQuery(
     {
@@ -40,6 +57,7 @@ const ModelTable: FC<TableProps> = ({ search }) => {
       sortOrder,
       categoryId,
       brandId,
+      state: selectedState,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -57,9 +75,9 @@ const ModelTable: FC<TableProps> = ({ search }) => {
           <TableHeader
             title="name"
             sortBy={sortBy}
-            setSortBy={setSortBy}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
             sortOrder={sortOrder}
-            setSortOrder={setSortOrder}
+            setSortOrder={(sortOrder) => void setSortOrder(sortOrder)}
           />
         ),
         accessorFn: (row) => row.name,
@@ -97,9 +115,9 @@ const ModelTable: FC<TableProps> = ({ search }) => {
           <TableHeader
             title="brand"
             sortBy={sortBy}
-            setSortBy={setSortBy}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
             sortOrder={sortOrder}
-            setSortOrder={setSortOrder}
+            setSortOrder={(sortOrder) => void setSortOrder(sortOrder)}
           />
         ),
         accessorFn: (row) => row.brand.name,
@@ -110,9 +128,9 @@ const ModelTable: FC<TableProps> = ({ search }) => {
           <TableHeader
             title="category"
             sortBy={sortBy}
-            setSortBy={setSortBy}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
             sortOrder={sortOrder}
-            setSortOrder={setSortOrder}
+            setSortOrder={(sortOrder) => void setSortOrder(sortOrder)}
           />
         ),
         accessorFn: (row) => row.category.name,
@@ -135,9 +153,9 @@ const ModelTable: FC<TableProps> = ({ search }) => {
           <TableHeader
             title="createdAt"
             sortBy={sortBy}
-            setSortBy={setSortBy}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
             sortOrder={sortOrder}
-            setSortOrder={setSortOrder}
+            setSortOrder={(sortOrder) => void setSortOrder(sortOrder)}
           />
         ),
         accessorFn: (row) => row.createdAt.toLocaleString("en-US"),
@@ -148,9 +166,9 @@ const ModelTable: FC<TableProps> = ({ search }) => {
           <TableHeader
             title="updatedAt"
             sortBy={sortBy}
-            setSortBy={setSortBy}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
             sortOrder={sortOrder}
-            setSortOrder={setSortOrder}
+            setSortOrder={(sortOrder) => void setSortOrder(sortOrder)}
           />
         ),
         accessorFn: (row) => row.updatedAt.toLocaleString("en-US"),

@@ -2,7 +2,7 @@ import { RouterInputs, api } from "@/utils/api";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { DataTable } from "./Table";
-import { SortOrder, DefaultSortOrder } from "@/utils/constants";
+import { SortOrder, DefaultSortOrder, DefaultSortBy } from "@/utils/constants";
 import {
   Select,
   SelectContent,
@@ -18,18 +18,31 @@ import ServerError from "../common/ServerError";
 import { type FC, useMemo, useState } from "react";
 import { Label } from "../ui/label";
 import { TableProps } from "@/pages/admin/[...path]";
-import { ArrowDown, ArrowUp } from "lucide-react";
-import useUrl from "@/hooks/useUrl";
-import type { OmitUndefined } from "class-variance-authority/dist/types";
+
+import { useQueryState, parseAsStringEnum } from "next-usequerystate";
+
+import { OmitUndefined } from "@/types/custom";
+import TableHeader from "./TableHeader";
+
+type SortBy = OmitUndefined<RouterInputs["user"]["getUsers"]["sortBy"]>;
 
 const UserTable: FC<TableProps> = ({ search }) => {
-  const [sortBy, setSortBy] = useUrl<
-    OmitUndefined<RouterInputs["user"]["getUsers"]["sortBy"]>
-  >("sortBy", "name");
-  const [sortOrder, setSortOrder] = useUrl<SortOrder>(
+  const [sortOrder, setSortOrder] = useQueryState<SortOrder>(
     "sortOrder",
-    DefaultSortOrder
+    parseAsStringEnum(["asc", "desc"]).withDefault(DefaultSortOrder)
   );
+  const [sortBy, setSortBy] = useQueryState<SortBy>(
+    "sortBy",
+    parseAsStringEnum([
+      "role",
+      "name",
+      "createdAt",
+      "updatedAt",
+      "email",
+      "lastActive",
+    ]).withDefault(DefaultSortBy)
+  );
+
   const rolesApi = api.role.getRoles.useQuery({});
 
   const [selectedRole, setSelectedRole] = useState<string>();
@@ -52,87 +65,39 @@ const UserTable: FC<TableProps> = ({ search }) => {
       {
         id: "name",
         header: () => (
-          <Button
-            className="flex items-center gap-0"
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              if (sortBy !== "name") {
-                return setSortBy("name");
-              }
-              if (sortOrder === "asc") {
-                setSortOrder("desc");
-              } else {
-                setSortOrder("asc");
-              }
-            }}
-          >
-            Name
-            {sortBy === "name" &&
-              (sortOrder === "asc" ? (
-                <ArrowUp className="ml-2 h-4 w-4" />
-              ) : (
-                <ArrowDown className="ml-2 h-4 w-4" />
-              ))}
-          </Button>
+          <TableHeader
+            title="name"
+            sortOrder={sortOrder}
+            setSortOrder={(order) => void setSortOrder(order)}
+            sortBy={sortBy}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
+          />
         ),
         accessorFn: (row) => row.name,
       },
       {
         id: "email",
         header: () => (
-          <Button
-            className="flex items-center gap-0"
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              if (sortBy !== "email") {
-                return setSortBy("email");
-              }
-              if (sortOrder === "asc") {
-                setSortOrder("desc");
-              } else {
-                setSortOrder("asc");
-              }
-            }}
-          >
-            Email
-            {sortBy === "email" &&
-              (sortOrder === "asc" ? (
-                <ArrowUp className="ml-2 h-4 w-4" />
-              ) : (
-                <ArrowDown className="ml-2 h-4 w-4" />
-              ))}
-          </Button>
+          <TableHeader
+            title="email"
+            sortOrder={sortOrder}
+            setSortOrder={(order) => void setSortOrder(order)}
+            sortBy={sortBy}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
+          />
         ),
         accessorFn: (row) => row.email,
       },
       {
         id: "role",
         header: () => (
-          <Button
-            className="flex items-center gap-0"
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              if (sortBy !== "role") {
-                return setSortBy("role");
-              }
-              if (sortOrder === "asc") {
-                setSortOrder("desc");
-              } else {
-                setSortOrder("asc");
-              }
-            }}
-          >
-            Role
-            {sortBy === "role" &&
-              (sortOrder === "asc" ? (
-                <ArrowUp className="ml-2 h-4 w-4" />
-              ) : (
-                <ArrowDown className="ml-2 h-4 w-4" />
-              ))}
-          </Button>
+          <TableHeader
+            title="role"
+            sortOrder={sortOrder}
+            setSortOrder={(order) => void setSortOrder(order)}
+            sortBy={sortBy}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
+          />
         ),
         cell: ({ row: { original: user } }) => {
           if (rolesApi.isLoading) {
@@ -175,29 +140,13 @@ const UserTable: FC<TableProps> = ({ search }) => {
       {
         id: "lastactive",
         header: () => (
-          <Button
-            className="flex items-center gap-0"
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              if (sortBy !== "lastActive") {
-                return setSortBy("lastActive");
-              }
-              if (sortOrder === "asc") {
-                setSortOrder("desc");
-              } else {
-                setSortOrder("asc");
-              }
-            }}
-          >
-            Last Active
-            {sortBy === "lastActive" &&
-              (sortOrder === "asc" ? (
-                <ArrowUp className="ml-2 h-4 w-4" />
-              ) : (
-                <ArrowDown className="ml-2 h-4 w-4" />
-              ))}
-          </Button>
+          <TableHeader
+            title="lastActive"
+            sortOrder={sortOrder}
+            setSortOrder={(order) => void setSortOrder(order)}
+            sortBy={sortBy}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
+          />
         ),
         accessorFn: (row) => row.lastActive?.toLocaleString("en-US") ?? "N/A",
       },
@@ -233,29 +182,13 @@ const UserTable: FC<TableProps> = ({ search }) => {
       {
         id: "createdAt",
         header: () => (
-          <Button
-            className="flex items-center gap-0"
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              if (sortBy !== "createdAt") {
-                return setSortBy("createdAt");
-              }
-              if (sortOrder === "asc") {
-                setSortOrder("desc");
-              } else {
-                setSortOrder("asc");
-              }
-            }}
-          >
-            Created At
-            {sortBy === "createdAt" &&
-              (sortOrder === "asc" ? (
-                <ArrowUp className="ml-2 h-4 w-4" />
-              ) : (
-                <ArrowDown className="ml-2 h-4 w-4" />
-              ))}
-          </Button>
+          <TableHeader
+            title="createdAt"
+            sortOrder={sortOrder}
+            setSortOrder={(order) => void setSortOrder(order)}
+            sortBy={sortBy}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
+          />
         ),
         accessorFn: (row) => row.createdAt.toLocaleString("en-US"),
       },

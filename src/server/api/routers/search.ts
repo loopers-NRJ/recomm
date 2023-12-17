@@ -10,7 +10,7 @@ export const searchRouter = createTRPCRouter({
     .input(
       z.object({
         search: z.string().trim().default(""),
-        state: z.enum(states).optional(),
+        state: z.enum(states),
       })
     )
     .query(async ({ input: { search, state }, ctx: { prisma } }) => {
@@ -84,7 +84,7 @@ export const searchRouter = createTRPCRouter({
     .input(
       z.object({
         search: z.string().trim().default(""),
-        state: z.enum(states).optional(),
+        state: z.enum(states),
       })
     )
     .query(
@@ -114,7 +114,7 @@ export const searchRouter = createTRPCRouter({
     .input(
       z.object({
         search: z.string().trim().default(""),
-        state: z.enum(states).optional(),
+        state: z.enum(states),
       })
     )
     .query(
@@ -148,7 +148,7 @@ export const searchRouter = createTRPCRouter({
       z.object({
         search: z.string().trim().default(""),
         categoryId: idSchema.optional(),
-        state: z.enum(states).optional(),
+        state: z.enum(states),
       })
     )
     .query(
@@ -194,7 +194,7 @@ export const searchRouter = createTRPCRouter({
         search: z.string().trim().default(""),
         categoryId: idSchema.optional(),
         brandId: idSchema.optional(),
-        state: z.enum(states).optional(),
+        state: z.enum(states),
       })
     )
     .query(

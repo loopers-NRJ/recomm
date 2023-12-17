@@ -7,14 +7,14 @@ import { api } from "@/utils/api";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { useSelectedState } from "@/components/admin/SelectedState";
+import { useAdminSelectedState } from "@/store/SelectedState";
 
 export const getServerSideProps = withAdminGuard();
 
 const CreateCategoryPage = () => {
   const createCategoryApi = api.category.createCategory.useMutation();
   const [categoryName, setCategoryName] = useState("");
-  const selectedState = useSelectedState((selected) => selected.state);
+  const selectedState = useAdminSelectedState((selected) => selected.state);
 
   const router = useRouter();
   const parentName = router.query.parentName as string | undefined;

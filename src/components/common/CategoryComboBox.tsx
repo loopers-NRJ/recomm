@@ -3,6 +3,7 @@ import { Label } from "../ui/label";
 import ComboBox from "./ComboBox";
 import { api } from "@/utils/api";
 import { Item } from "@/types/custom";
+import { useClientSelectedState } from "@/store/SelectedState";
 
 function CategoryComboBox({
   onSelect,
@@ -16,8 +17,10 @@ function CategoryComboBox({
   disabled?: boolean;
 }) {
   const [search, setSearch] = useState("");
+  const selectedState = useClientSelectedState((selected) => selected.state);
   const categorySearch = api.search.leafCategory.useQuery({
     search,
+    state: selectedState,
   });
   return (
     <Label className="flex cursor-pointer items-center justify-between">

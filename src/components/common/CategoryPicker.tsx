@@ -1,6 +1,8 @@
 import Container from "@/components/Container";
 import { Button } from "@/components/ui/button";
-import useUrl from "@/hooks/useUrl";
+
+import { useQueryState, parseAsStringEnum } from "next-usequerystate";
+
 import { FeaturedCategoryPayloadIncluded } from "@/types/prisma";
 import { Category } from "@prisma/client";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
@@ -25,9 +27,11 @@ export default function CategoryPicker({
   fetchNextPage,
 }: CategoryPickerProps) {
   const router = useRouter();
-  const [viewMoreClicked, setViewMoreClicked] = useUrl<"true" | "false">(
-    "view_more"
+  const [viewMoreClicked, setViewMoreClicked] = useQueryState(
+    "view_more",
+    parseAsStringEnum(["true", "false"]).withDefault("false")
   );
+
   return (
     <Container className="flex flex-col items-center gap-3">
       <div className="relative flex h-11 w-full max-w-xl items-center justify-center">
@@ -37,7 +41,7 @@ export default function CategoryPicker({
             className="absolute left-0 top-1/2 flex -translate-y-1/2 items-center justify-center"
             onClick={() =>
               viewMoreClicked === "true" && !selectedCategory
-                ? setViewMoreClicked("false")
+                ? void setViewMoreClicked("false")
                 : router.back()
             }
           >
@@ -52,7 +56,7 @@ export default function CategoryPicker({
         <FeaturedCategoryList
           featuredCategories={featuredCategories}
           onSelect={onSelect}
-          onViewMore={() => setViewMoreClicked("true")}
+          onViewMore={() => void setViewMoreClicked("true")}
         />
       ) : (
         <CategoryList

@@ -5,9 +5,9 @@ import { ArrowDown, ArrowUp } from "lucide-react";
 interface Props<T extends string> {
   title: T;
   sortBy: T;
-  setSortBy: (sortBy?: T) => void;
+  setSortBy: (sortBy: T) => void;
   sortOrder: SortOrder;
-  setSortOrder: (sortOrder?: SortOrder) => void;
+  setSortOrder: (sortOrder: SortOrder) => void;
 }
 
 export default function TableHeader<T extends string>({

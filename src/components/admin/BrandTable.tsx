@@ -15,8 +15,9 @@ import ServerError from "../common/ServerError";
 import { Switch } from "../ui/switch";
 import { TableProps } from "@/pages/admin/[...path]";
 import { OmitUndefined } from "@/types/custom";
-import useUrl from "@/hooks/useUrl";
 import TableHeader from "./TableHeader";
+import { useAdminSelectedState } from "../../store/SelectedState";
+import { useQueryState, parseAsStringEnum } from "next-usequerystate";
 
 type SortBy = OmitUndefined<RouterInputs["brand"]["getBrands"]["sortBy"]>;
 
@@ -27,26 +28,37 @@ const BrandTable: FC<TableProps> = ({ search }) => {
   const path = router.query.path as ["brands", ...string[]];
   const brandId = path[1];
   const params = new URLSearchParams(searchParams);
-  const [sortBy, setSortBy] = useUrl<SortBy>("sortBy", DefaultSortBy);
-  const [sortOrder, setSortOrder] = useUrl<SortOrder>(
+  const [sortBy, setSortBy] = useQueryState(
+    "sortBy",
+    parseAsStringEnum<SortBy>([
+      "name",
+      "createdAt",
+      "updatedAt",
+      "active",
+    ]).withDefault(DefaultSortBy)
+  );
+  const [sortOrder, setSortOrder] = useQueryState(
     "sortOrder",
-    DefaultSortOrder
+    parseAsStringEnum<SortOrder>(["asc", "desc"]).withDefault(DefaultSortOrder)
   );
   const categoryId = params.get("category") ?? undefined;
 
   const [updatingBrandId, setUpdatingBrandId] = useState<string>();
   const updateBrandById = api.brand.updateBrandById.useMutation();
 
+  const selectedState = useAdminSelectedState((selected) => selected.state);
+
   const brandApi = api.brand.getBrandById.useQuery({
     brandId,
   });
 
-  const brandsApi = api.brand.getBrands.useInfiniteQuery(
+  const brandsApi = api.brand.getAllSubBrandsByCategoryId.useInfiniteQuery(
     {
       search,
       sortBy,
       sortOrder,
       categoryId,
+      state: selectedState,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -65,9 +77,9 @@ const BrandTable: FC<TableProps> = ({ search }) => {
           <TableHeader
             title="name"
             sortBy={sortBy}
-            setSortBy={setSortBy}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
             sortOrder={sortOrder}
-            setSortOrder={setSortOrder}
+            setSortOrder={(sortOrder) => void setSortOrder(sortOrder)}
           />
         ),
         accessorFn: (row) => row.name,
@@ -129,9 +141,9 @@ const BrandTable: FC<TableProps> = ({ search }) => {
           <TableHeader
             title="createdAt"
             sortBy={sortBy}
-            setSortBy={setSortBy}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
             sortOrder={sortOrder}
-            setSortOrder={setSortOrder}
+            setSortOrder={(sortOrder) => void setSortOrder(sortOrder)}
           />
         ),
         accessorFn: (row) => row.createdAt.toLocaleString("en-US"),
@@ -142,9 +154,9 @@ const BrandTable: FC<TableProps> = ({ search }) => {
           <TableHeader
             title="updatedAt"
             sortBy={sortBy}
-            setSortBy={setSortBy}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
             sortOrder={sortOrder}
-            setSortOrder={setSortOrder}
+            setSortOrder={(sortOrder) => void setSortOrder(sortOrder)}
           />
         ),
         accessorFn: (row) => row.updatedAt.toLocaleString("en-US"),
