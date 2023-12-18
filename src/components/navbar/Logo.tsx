@@ -9,8 +9,9 @@ const Logo = () => {
   return (
     <Image
       onClick={() => router.push("/")}
-      className="cursor-pointer"
+      className="h-auto w-auto cursor-pointer"
       src="/recomm.png"
+      priority
       height="130"
       width="130"
       alt="Logo"
