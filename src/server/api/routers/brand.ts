@@ -26,7 +26,7 @@ export const brandRouter = createTRPCRouter({
         cursor: idSchema.optional(),
         categoryId: idSchema.optional(),
         state: z.enum(states),
-      })
+      }),
     )
     .query(
       async ({
@@ -69,7 +69,7 @@ export const brandRouter = createTRPCRouter({
           brands,
           nextCursor: brands[limit - 1]?.id,
         };
-      }
+      },
     ),
   getAllSubBrandsByCategoryId: publicProcedure
     .input(
@@ -83,7 +83,7 @@ export const brandRouter = createTRPCRouter({
         cursor: idSchema.optional(),
         categoryId: idSchema.optional(),
         state: z.enum(states),
-      })
+      }),
     )
     .query(
       async ({
@@ -91,7 +91,7 @@ export const brandRouter = createTRPCRouter({
         ctx: { prisma, isAdminPage },
       }) => {
         const fetchRecursiveBrandsByCategoryId = async (
-          categoryId?: string
+          categoryId?: string,
         ) => {
           if (categoryId) {
             const subCategories = await prisma.category.findMany({
@@ -108,8 +108,8 @@ export const brandRouter = createTRPCRouter({
               const subBrands: BrandPayloadIncluded[] = (
                 await Promise.all(
                   subCategories.map((category) =>
-                    fetchRecursiveBrandsByCategoryId(category.id)
-                  )
+                    fetchRecursiveBrandsByCategoryId(category.id),
+                  ),
                 )
               ).flat();
               return subBrands;
@@ -158,7 +158,7 @@ export const brandRouter = createTRPCRouter({
           brands,
           nextCursor: brands[limit - 1]?.id,
         };
-      }
+      },
     ),
   getBrandById: publicProcedure
     .input(z.object({ brandId: idSchema.nullish() }))
@@ -170,6 +170,7 @@ export const brandRouter = createTRPCRouter({
         where: {
           id,
         },
+        include: BrandPayload.include,
       });
       if (brand === null) {
         throw new Error("Brand not found");
@@ -182,7 +183,7 @@ export const brandRouter = createTRPCRouter({
       z.object({
         name: z.string(),
         state: z.enum(states),
-      })
+      }),
     )
     .mutation(async ({ input: { name, state }, ctx: { prisma, session } }) => {
       // checking whether the brand exists
@@ -223,7 +224,7 @@ export const brandRouter = createTRPCRouter({
           name: z.string().min(1).max(255).optional(),
           active: z.boolean(),
         }),
-      ])
+      ]),
     )
     .mutation(
       async ({ input: { id, name: newName, active }, ctx: { prisma } }) => {
@@ -269,7 +270,7 @@ export const brandRouter = createTRPCRouter({
         });
 
         return brand;
-      }
+      },
     ),
   deleteBrandById: getProcedure(AccessType.deleteBrand)
     .input(z.object({ brandId: idSchema }))

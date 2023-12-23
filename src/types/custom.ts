@@ -1,4 +1,7 @@
-import { MultipleChoiceQuestionType, AtomicQuestionType } from "@prisma/client";
+import type {
+  MultipleChoiceQuestionType,
+  AtomicQuestionType,
+} from "@prisma/client";
 
 export interface Item {
   id: string;
@@ -30,3 +33,17 @@ export interface MultipleChoiceQuestion {
 }
 
 export type OmitUndefined<T> = T extends undefined ? never : T;
+
+export type DefaultParams = Record<string, string | string[]>;
+export type DefaultSearchParams = Record<string, string | string[] | undefined>;
+export interface PageProps<
+  Params = DefaultParams,
+  SearchParams = DefaultSearchParams,
+> {
+  params: Params;
+  searchParams: SearchParams;
+}
+
+export type Page<Params = DefaultParams, SearchParams = DefaultParams> = (
+  props: PageProps<Params, SearchParams>,
+) => JSX.Element | Promise<JSX.Element>;

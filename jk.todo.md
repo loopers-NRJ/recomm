@@ -18,6 +18,8 @@
 - [x] search option in admin page
 - [ ] location based admin panel
 
+- [ ] change model additional questions state
+
 # notes
 
 - If Bid.user is null. display to Product.user that the Bid.user deleted his account.

@@ -15,3 +15,5 @@ export const UserLatitudeHeaderName = "x-user-latitude";
 export const UserLongitudeHeaderName = "x-user-longitude";
 export const RequestPathHeaderName = "x-forwarded-path";
 export const adminPageRegex = /\/admin\//g;
+
+export const MaxImageCount = 10;

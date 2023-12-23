@@ -17,7 +17,7 @@ import {
   ProductSchemaKeys,
   productSchema,
 } from "@/utils/validation";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useImageUploader } from "@/utils/imageUpload";
 import { makeIssue } from "zod";
 
@@ -129,7 +129,7 @@ export default function PostingForm({
               type: question.type,
               answerContent: undefined,
             };
-          })
+          }),
         );
 
         setMultipleChoiceAnswers(
@@ -156,10 +156,10 @@ export default function PostingForm({
               type: question.type,
               valueId: undefined,
             };
-          })
+          }),
         );
       },
-    }
+    },
   );
 
   const handleSubmit = async () => {
@@ -195,7 +195,7 @@ export default function PostingForm({
           }
           return acc;
         },
-        {}
+        {},
       );
       if (images.length < 1) {
         errors.images = makeIssue({

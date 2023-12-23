@@ -1,5 +1,5 @@
 import { CommandList } from "cmdk";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Command, CommandInput } from "@/components/ui/command";
 import Suggestions from "./Suggestions";
@@ -17,7 +17,7 @@ const Search = () => {
         value={searchKey}
         onKeyDown={(e) => {
           if (e.nativeEvent.key === "Enter") {
-            void router.push(`/?search=${searchKey}`);
+            router.push(`/?search=${searchKey}`);
             setSearchKey(undefined);
           }
         }}
