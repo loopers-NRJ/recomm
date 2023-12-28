@@ -1,9 +1,9 @@
-import AuthenticatedPage from "@/hoc/AuthenticatedPage";
-
-export default AuthenticatedPage(async ({ session }) => {
+const HomePage = () => {
   return (
     <div>
-      <h1>Hello {session.user.name}</h1>
+      <h1>Hello world</h1>
     </div>
   );
-});
+};
+
+export default HomePage;

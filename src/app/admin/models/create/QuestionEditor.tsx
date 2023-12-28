@@ -3,7 +3,7 @@ import { allQuestionTypes, type AllQuestionType } from "@/types/prisma";
 import { AtomicQuestionType, MultipleChoiceQuestionType } from "@prisma/client";
 import { Cross1Icon } from "@radix-ui/react-icons";
 import { type FC } from "react";
-import { Button } from "../../../../components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   AtomicQuestionEditor,
   CheckBoxEditor,
