@@ -4,7 +4,7 @@ import Container from "@/components/Container";
 import ImagePicker from "@/components/common/ImagePicker";
 import Loading from "@/components/common/Loading";
 import { Button } from "@/components/ui/button";
-import { api } from "@/utils/api";
+import { api } from "@/trpc/react";
 import { useImageUploader } from "@/utils/imageUpload";
 import { Prisma } from "@prisma/client";
 import Image from "next/image";

@@ -8,11 +8,12 @@ import { Switch } from "@/components/ui/switch";
 import { useAdminSelectedState } from "@/store/SelectedState";
 import { type OmitUndefined } from "@/types/custom";
 import { type ModelPayloadIncluded } from "@/types/prisma";
-import { api, type RouterInputs } from "@/utils/api";
+import { api } from "@/trpc/react";
+import { type RouterInputs } from "@/trpc/react";
 import {
-  DefaultSearch,
-  DefaultSortBy,
-  DefaultSortOrder,
+  defaultSearch,
+  defaultSortBy,
+  defaultSortOrder,
   type SortOrder,
 } from "@/utils/constants";
 import { type ColumnDef } from "@tanstack/react-table";
@@ -45,12 +46,12 @@ export default function ModelTable() {
       "createdAt",
       "updatedAt",
       "active",
-    ]).withDefault(DefaultSortBy),
+    ]).withDefault(defaultSortBy),
   );
 
   const [sortOrder, setSortOrder] = useQueryState(
     "sortOrder",
-    parseAsStringEnum<SortOrder>(["asc", "desc"]).withDefault(DefaultSortOrder),
+    parseAsStringEnum<SortOrder>(["asc", "desc"]).withDefault(defaultSortOrder),
   );
 
   const [updatingModelId, setUpdatingModelId] = useState<string>();
@@ -59,7 +60,7 @@ export default function ModelTable() {
   const selectedState = useAdminSelectedState((selected) => selected.state);
   const [search, setSearch] = useQueryState(
     "search",
-    parseAsString.withDefault(DefaultSearch),
+    parseAsString.withDefault(defaultSearch),
   );
   const modelsApi = api.model.getModels.useInfiniteQuery(
     {

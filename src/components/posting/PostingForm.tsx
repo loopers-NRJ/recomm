@@ -1,20 +1,20 @@
-import { api } from "@/utils/api";
+import { api } from "@/trpc/react";
 import Container from "../Container";
 import { useState } from "react";
-import { OptionalItem } from "@/types/custom";
+import { type OptionalItem } from "@/types/custom";
 import Loading from "../common/Loading";
 import { AtomicQuestionType, MultipleChoiceQuestionType } from "@prisma/client";
 
 import { Button } from "../ui/button";
-import { AtomicAnswer } from "./AtomicQuestion";
-import { MultipleChoiceAnswer } from "./MultipleChoiceQuestion";
+import { type AtomicAnswer } from "./AtomicQuestion";
+import { type MultipleChoiceAnswer } from "./MultipleChoiceQuestion";
 import BasicInfoSection from "./BasicInfoSection";
 import AdditionalInfoSection from "./AdditionalInfoSection";
 import ImageUploadSection from "./ImageUploadSection";
 import PricingInfoSection from "./PricingInfoSection";
 import {
-  ProductFormError,
-  ProductSchemaKeys,
+  type ProductFormError,
+  type ProductSchemaKeys,
   productSchema,
 } from "@/utils/validation";
 import { useRouter } from "next/navigation";
@@ -64,9 +64,7 @@ export default function PostingForm({
   const { isLoading, upload } = useImageUploader();
   const router = useRouter();
   const productApi = api.product.createProduct.useMutation({
-    async onSuccess(data) {
-      await router.push(`/users/${data.sellerId}/listings`);
-    },
+    onSuccess: (data) => router.push(`/users/${data.sellerId}/listings`),
   });
 
   const modelApi = api.model.getModelById.useQuery(

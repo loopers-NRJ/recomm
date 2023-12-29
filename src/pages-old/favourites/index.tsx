@@ -7,13 +7,13 @@ import { useEffect } from "react";
 import Container from "@/components/Container";
 import ListingCard from "@/components/ListingCard";
 import LoadingProducts from "@/components/loading/LoadingProducts";
-import { api } from "@/utils/api";
+import { api } from "@/trpc/react";
 import {
-  DefaultSearch,
+  defaultSearch,
   SortBy,
-  DefaultSortBy,
+  defaultSortBy,
   SortOrder,
-  DefaultSortOrder,
+  defaultSortOrder,
 } from "@/utils/constants";
 import { useSearchParams } from "next/navigation";
 import ServerError from "@/components/common/ServerError";
@@ -28,9 +28,9 @@ const Favourites: NextPage = () => {
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
 
-  const search = params.get("search") ?? DefaultSearch;
-  const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
-  const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
+  const search = params.get("search") ?? defaultSearch;
+  const sortBy = (params.get("sortBy") as SortBy) ?? defaultSortBy;
+  const sortOrder = (params.get("sortOrder") as SortOrder) ?? defaultSortOrder;
 
   const favoritesApi = api.user.getMyFavorites.useInfiniteQuery(
     {
@@ -40,7 +40,7 @@ const Favourites: NextPage = () => {
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
-    }
+    },
   );
 
   useEffect(() => {
@@ -55,7 +55,7 @@ const Favourites: NextPage = () => {
     return <ServerError message={favoritesApi.error.message} />;
   }
   const favoritedProducts = favoritesApi.data.pages.flatMap(
-    (page) => page.favoritedProducts
+    (page) => page.favoritedProducts,
   );
   if (favoritedProducts.length === 0) {
     return (

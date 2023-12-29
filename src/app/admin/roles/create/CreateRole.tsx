@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { api } from "@/utils/api";
+import { api } from "@/trpc/react";
 import { AccessType } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";

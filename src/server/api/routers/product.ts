@@ -22,10 +22,10 @@ import {
 import { productsPayload, singleProductPayload, states } from "@/types/prisma";
 import slugify from "@/lib/slugify";
 import {
-  DefaultLimit,
-  DefaultSortBy,
-  DefaultSortOrder,
-  MaxLimit,
+  defaultLimit,
+  defaultSortBy,
+  defaultSortOrder,
+  maxLimit,
 } from "@/utils/constants";
 
 export const productRouter = createTRPCRouter({
@@ -33,8 +33,8 @@ export const productRouter = createTRPCRouter({
     .input(
       z.object({
         search: z.string().trim().default(""),
-        limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
-        sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
+        limit: z.number().int().positive().max(maxLimit).default(defaultLimit),
+        sortOrder: z.enum(["asc", "desc"]).default(defaultSortOrder),
         sortBy: z
           .enum([
             "name",
@@ -44,13 +44,13 @@ export const productRouter = createTRPCRouter({
             "active",
             "sellerName",
           ])
-          .default(DefaultSortBy),
+          .default(defaultSortBy),
         cursor: idSchema.optional(),
         categoryId: idSchema.optional(),
         brandId: idSchema.optional(),
         modelId: idSchema.optional(),
         state: z.enum(states),
-      })
+      }),
     )
     .query(
       async ({
@@ -120,14 +120,14 @@ export const productRouter = createTRPCRouter({
                   },
                 }
               : sortBy === "sellerName"
-              ? {
-                  seller: {
-                    name: sortOrder,
+                ? {
+                    seller: {
+                      name: sortOrder,
+                    },
+                  }
+                : {
+                    [sortBy]: sortOrder,
                   },
-                }
-              : {
-                  [sortBy]: sortOrder,
-                },
           ],
           include: productsPayload.include,
         });
@@ -135,7 +135,7 @@ export const productRouter = createTRPCRouter({
           products,
           nextCursor: products[limit - 1]?.id,
         };
-      }
+      },
     ),
   getProductById: publicProcedure
     .input(z.object({ productId: idSchema }))
@@ -234,7 +234,7 @@ export const productRouter = createTRPCRouter({
 
         const isValidValues = validateMultipleChoiceQuestionInput(
           model.multipleChoiceQuestions,
-          providedChoices
+          providedChoices,
         );
         if (isValidValues !== true) {
           throw new Error("Invalid option");
@@ -244,12 +244,12 @@ export const productRouter = createTRPCRouter({
         providedChoices.forEach((choice) =>
           choice.type === MultipleChoiceQuestionType.Checkbox
             ? choiceValueIds.push(...choice.valueIds)
-            : choice.valueId && choiceValueIds.push(choice.valueId)
+            : choice.valueId && choiceValueIds.push(choice.valueId),
         );
 
         const isValidAnswers = validateAtomicQuestionAnswers(
           model.atomicQuestions,
-          providedAnswers
+          providedAnswers,
         );
 
         if (isValidAnswers !== true) {
@@ -362,7 +362,7 @@ export const productRouter = createTRPCRouter({
         });
 
         return product;
-      }
+      },
     ),
 
   deleteProductById: getProcedure([
@@ -433,7 +433,7 @@ export const productRouter = createTRPCRouter({
         });
 
         return product;
-      }
+      },
     ),
   addProductToFavorites: protectedProcedure
     .input(z.object({ productId: idSchema }))
@@ -466,7 +466,7 @@ export const productRouter = createTRPCRouter({
             },
           },
         });
-      }
+      },
     ),
   removeProductFromFavorites: protectedProcedure
     .input(z.object({ productId: idSchema }))
@@ -498,6 +498,6 @@ export const productRouter = createTRPCRouter({
             },
           },
         });
-      }
+      },
     ),
 });

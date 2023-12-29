@@ -13,11 +13,11 @@ import {
   states,
 } from "@/types/prisma";
 import {
-  DefaultLimit,
-  DefaultSortBy,
-  DefaultSortOrder,
-  MaxFeaturedCategory,
-  MaxLimit,
+  defaultLimit,
+  defaultSortBy,
+  defaultSortOrder,
+  maxFeaturedCategory,
+  maxLimit,
 } from "@/utils/constants";
 import { idSchema, imageInputs } from "@/utils/validation";
 import { AccessType } from "@prisma/client";
@@ -27,11 +27,11 @@ export const categoryRouter = createTRPCRouter({
     .input(
       z.object({
         search: z.string().trim().default(""),
-        limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
-        sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
+        limit: z.number().int().positive().max(maxLimit).default(defaultLimit),
+        sortOrder: z.enum(["asc", "desc"]).default(defaultSortOrder),
         sortBy: z
           .enum(["name", "createdAt", "updatedAt", "active", "featured"])
-          .default(DefaultSortBy),
+          .default(defaultSortBy),
         cursor: idSchema.optional(),
         parentId: idSchema.nullish(),
         parentSlug: z.string().min(1).max(255).nullish(),
@@ -100,11 +100,11 @@ export const categoryRouter = createTRPCRouter({
     .input(
       z.object({
         search: z.string().trim().default(""),
-        limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
-        sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
+        limit: z.number().int().positive().max(maxLimit).default(defaultLimit),
+        sortOrder: z.enum(["asc", "desc"]).default(defaultSortOrder),
         sortBy: z
           .enum(["name", "createdAt", "updatedAt", "active", "featured"])
-          .default(DefaultSortBy),
+          .default(defaultSortBy),
         cursor: idSchema.optional(),
         parentId: idSchema.nullish(),
         parentSlug: z.string().min(1).max(255).nullish(),
@@ -355,11 +355,11 @@ export const categoryRouter = createTRPCRouter({
     .input(
       z.object({
         search: z.string().trim().default(""),
-        limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
-        sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
+        limit: z.number().int().positive().max(maxLimit).default(defaultLimit),
+        sortOrder: z.enum(["asc", "desc"]).default(defaultSortOrder),
         sortBy: z
           .enum(["name", "createdAt", "updatedAt", "active"])
-          .default(DefaultSortBy),
+          .default(defaultSortBy),
         cursor: idSchema.optional(),
         state: z.enum(states),
       }),
@@ -411,7 +411,7 @@ export const categoryRouter = createTRPCRouter({
         ctx: { prisma, session },
       }) => {
         const totalFeaturedCategories = await prisma.featuredCategory.count();
-        if (totalFeaturedCategories >= MaxFeaturedCategory) {
+        if (totalFeaturedCategories >= maxFeaturedCategory) {
           throw new Error(
             `Cannot make the category as featured. Maximum featured category limit reached`,
           );

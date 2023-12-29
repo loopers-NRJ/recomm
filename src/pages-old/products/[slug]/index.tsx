@@ -11,7 +11,7 @@ import Heading from "@/components/Heading";
 import HeartButton from "@/components/HeartButton";
 import Avatar from "@/components/navbar/Avatar";
 import useBiddingModal from "@/hooks/useBiddingModal";
-import { api } from "@/utils/api";
+import { api } from "@/trpc/react";
 
 const ProductPage: NextPage = () => {
   const router = useRouter();

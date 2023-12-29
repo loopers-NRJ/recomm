@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { Loader2 as Spinner, Plus } from "lucide-react";
 import Image from "next/image";
-import React, { FC, useState } from "react";
+import React, { type FC, useState } from "react";
 import { v4 as uuid } from "uuid";
 
 interface ImageFile {
@@ -34,18 +34,18 @@ const ImagePicker: FC<ImagePickerProps> = ({
   images: parentImages,
   requiredError,
   children,
-  className
+  className,
 }) => {
   const [images, setImages] = useState<ImageFile[]>(
     parentImages.map((image) => ({
       id: image.name,
       file: image,
       progress: 100,
-    }))
+    })),
   );
 
   const handleImageSelect = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const imageCompression = (await import("browser-image-compression"))
       .default;
@@ -88,7 +88,7 @@ const ImagePicker: FC<ImagePickerProps> = ({
             description: `${
               image.type.split("/")?.[1] ?? "Image"
             } format is not supported. Supported formats are ${acceptedImageFormats.join(
-              ", "
+              ", ",
             )}`,
             variant: "destructive",
           });
@@ -202,7 +202,7 @@ const ImagePicker: FC<ImagePickerProps> = ({
             className={cn(
               "flex h-24 w-24 shrink-0 cursor-pointer items-center justify-center rounded-xl border object-cover",
               requiredError ? "border-red-500" : "",
-              className
+              className,
             )}
             htmlFor="image-picker"
           >

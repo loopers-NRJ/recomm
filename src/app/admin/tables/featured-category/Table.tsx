@@ -7,11 +7,12 @@ import { Button } from "@/components/ui/button";
 import { useAdminSelectedState } from "@/store/SelectedState";
 import type { OmitUndefined } from "@/types/custom";
 import type { FeaturedCategoryPayloadIncluded } from "@/types/prisma";
-import { api, type RouterInputs } from "@/utils/api";
+import { api } from "@/trpc/react";
+import { type RouterInputs } from "@/trpc/shared";
 import {
-  DefaultSearch,
-  DefaultSortBy,
-  DefaultSortOrder,
+  defaultSearch,
+  defaultSortBy,
+  defaultSortOrder,
   type SortOrder,
 } from "@/utils/constants";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -37,15 +38,15 @@ export default function FeaturedCategoryTable() {
       "createdAt",
       "updatedAt",
       "active",
-    ]).withDefault(DefaultSortBy),
+    ]).withDefault(defaultSortBy),
   );
   const [sortOrder, setSortOrder] = useQueryState(
     "sortOrder",
-    parseAsStringEnum<SortOrder>(["asc", "desc"]).withDefault(DefaultSortOrder),
+    parseAsStringEnum<SortOrder>(["asc", "desc"]).withDefault(defaultSortOrder),
   );
   const [search, setSearch] = useQueryState(
     "search",
-    parseAsString.withDefault(DefaultSearch),
+    parseAsString.withDefault(defaultSearch),
   );
   const selectedState = useAdminSelectedState((selected) => selected.state);
   const categoriesApi = api.category.getFeaturedCategories.useInfiniteQuery(

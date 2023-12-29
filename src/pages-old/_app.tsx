@@ -6,9 +6,9 @@ import { type AppType } from "next/app";
 import dynamic from "next/dynamic";
 
 import BottomBar from "@/components/navbar/BottomBar";
-import Navbar from "@/components/navbar/Navbar";
+import Navbar from "@/components/navbar/NotificationLink";
 import { Toaster } from "@/components/ui/toaster";
-import { api } from "@/utils/api";
+import { api } from "@/trpc/react";
 import Head from "next/head";
 import TopLoader from "nextjs-progressbar";
 

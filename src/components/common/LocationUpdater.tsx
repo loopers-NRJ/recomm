@@ -1,4 +1,4 @@
-import { setUserLocation } from "@/utils/api";
+import { setUserLocation } from "@/trpc/react";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 
@@ -12,7 +12,7 @@ export default function LocationUpdater() {
         },
         () => {
           // TODO: handle error
-        }
+        },
       );
     }
   }, [session]);

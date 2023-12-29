@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import { FC, useEffect } from "react";
+import { type FC, useEffect } from "react";
 
 import {
   CommandEmpty,
@@ -7,7 +7,7 @@ import {
   CommandItem,
   CommandSeparator,
 } from "@/components/ui/command";
-import { api } from "@/utils/api";
+import { api } from "@/trpc/react";
 import { debounce } from "@/utils/helper";
 import { useClientSelectedState } from "@/store/SelectedState";
 

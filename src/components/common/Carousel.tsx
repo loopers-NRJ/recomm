@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { FC, useEffect, useRef, useState } from "react";
+import { type FC, useEffect, useRef, useState } from "react";
 
 interface CarouselProps {
   images: { url: string }[];
@@ -31,7 +31,7 @@ const Carousel: FC<CarouselProps> = ({ images }) => {
           }
         });
       },
-      { threshold: 0.25 }
+      { threshold: 0.25 },
     );
     refs.current.forEach((ref) => {
       if (ref != null) {

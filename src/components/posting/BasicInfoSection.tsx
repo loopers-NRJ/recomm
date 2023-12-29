@@ -1,12 +1,12 @@
 import BrandComboBox from "../common/BrandComboBox";
 import ModelComboBox from "../common/ModelComboBox";
 import { useEffect } from "react";
-import { OptionalItem } from "@/types/custom";
-import { Category } from "@prisma/client";
+import { type OptionalItem } from "@/types/custom";
+import { type Category } from "@prisma/client";
 import { Label } from "@radix-ui/react-label";
 import { Input } from "../ui/input";
 import Textarea from "../common/Textarea";
-import { ProductFormError } from "@/utils/validation";
+import { type ProductFormError } from "@/utils/validation";
 
 interface BasicInfoSectionProps {
   title: string;

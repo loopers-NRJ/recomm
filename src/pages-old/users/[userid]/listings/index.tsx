@@ -4,13 +4,13 @@ import { useRouter } from "next/navigation";
 import Container from "@/components/Container";
 import ListingCard from "@/components/ListingCard";
 import LoadingProducts from "@/components/loading/LoadingProducts";
-import { api } from "@/utils/api";
+import { api } from "@/trpc/react";
 import ServerError from "@/components/common/ServerError";
 import { useSearchParams } from "next/navigation";
 import {
-  DefaultSearch,
-  DefaultSortBy,
-  DefaultSortOrder,
+  defaultSearch,
+  defaultSortBy,
+  defaultSortOrder,
   SortBy,
   SortOrder,
 } from "@/utils/constants";
@@ -21,9 +21,9 @@ const Listings: NextPage = () => {
   const params = new URLSearchParams(searchParams);
   const userId = useRouter().query.userid as string;
 
-  const search = params.get("search") ?? DefaultSearch;
-  const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
-  const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
+  const search = params.get("search") ?? defaultSearch;
+  const sortBy = (params.get("sortBy") as SortBy) ?? defaultSortBy;
+  const sortOrder = (params.get("sortOrder") as SortOrder) ?? defaultSortOrder;
   // use the user ID to get the listings
   const listingApi = api.user.getUserListingsById.useInfiniteQuery(
     {

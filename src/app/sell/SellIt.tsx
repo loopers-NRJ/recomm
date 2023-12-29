@@ -5,7 +5,7 @@ import Loading from "@/components/common/Loading";
 import ServerError from "@/components/common/ServerError";
 import PostingForm from "@/components/posting/PostingForm";
 import { useClientSelectedState } from "@/store/SelectedState";
-import { api } from "@/utils/api";
+import { api } from "@/trpc/react";
 import { parseAsString, useQueryState } from "next-usequerystate";
 
 export default function Sellit() {

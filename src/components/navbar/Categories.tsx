@@ -1,8 +1,6 @@
 "use client";
-import { FC } from "react";
-
-import { api } from "@/utils/api";
-
+import { type FC } from "react";
+import { api } from "@/trpc/react";
 import Container from "../Container";
 import CategoryBox from "./CategoryBox";
 import LoadingCategories from "./LoadingCategories";

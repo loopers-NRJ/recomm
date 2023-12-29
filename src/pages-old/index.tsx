@@ -4,14 +4,14 @@ import { useSearchParams } from "next/navigation";
 import Container from "@/components/Container";
 import ListingCard from "@/components/ListingCard";
 import LoadingProducts from "@/components/loading/LoadingProducts";
-import { api } from "@/utils/api";
+import { api } from "@/trpc/react";
 import type { Metadata } from "next";
 import {
-  DefaultSearch,
+  defaultSearch,
   SortBy,
-  DefaultSortBy,
+  defaultSortBy,
   SortOrder,
-  DefaultSortOrder,
+  defaultSortOrder,
 } from "@/utils/constants";
 import Categories from "@/components/navbar/Categories";
 import { Button } from "@/components/ui/button";
@@ -28,9 +28,9 @@ export const Home: NextPage = () => {
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
 
-  const search = params.get("search") ?? DefaultSearch;
-  const sortBy = (params.get("sortBy") as SortBy) ?? DefaultSortBy;
-  const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
+  const search = params.get("search") ?? defaultSearch;
+  const sortBy = (params.get("sortBy") as SortBy) ?? defaultSortBy;
+  const sortOrder = (params.get("sortOrder") as SortOrder) ?? defaultSortOrder;
   const modelId = params.get("model") ?? undefined;
   const categoryId = params.get("category") ?? undefined;
   const brandId = params.get("brand") ?? undefined;
@@ -49,7 +49,7 @@ export const Home: NextPage = () => {
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
-    }
+    },
   );
 
   if (productsApi.isLoading) {

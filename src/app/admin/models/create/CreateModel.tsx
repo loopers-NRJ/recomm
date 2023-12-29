@@ -1,3 +1,5 @@
+"use client";
+
 import Container from "@/components/Container";
 import BrandComboBox from "@/components/common/BrandComboBox";
 import CategoryComboBox from "@/components/common/CategoryComboBox";
@@ -12,7 +14,7 @@ import {
   AtomicQuestionTypeArray,
   MultipleChoiceQuestionTypeArray,
 } from "@/types/prisma";
-import { api } from "@/utils/api";
+import { api } from "@/trpc/react";
 import { useImageUploader } from "@/utils/imageUpload";
 import { modelSchema, type Image } from "@/utils/validation";
 import type {

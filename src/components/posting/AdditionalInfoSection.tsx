@@ -1,22 +1,22 @@
-import { ProductFormError } from "@/utils/validation";
-import AtomicQuestionInputField, { AtomicAnswer } from "./AtomicQuestion";
+import { type ProductFormError } from "@/utils/validation";
+import AtomicQuestionInputField, { type AtomicAnswer } from "./AtomicQuestion";
 import MultipleChoiceQuestionInputField, {
-  MultipleChoiceAnswer,
+  type MultipleChoiceAnswer,
 } from "./MultipleChoiceQuestion";
-import { SingleModelPayloadIncluded } from "@/types/prisma";
+import { type SingleModelPayloadIncluded } from "@/types/prisma";
 import React from "react";
 
 interface AdditionalInfoSectionProps {
   model: SingleModelPayloadIncluded;
   atomicAnswers: AtomicAnswer[];
   setAtomicAnswers: (
-    value: AtomicAnswer[] | ((prev: AtomicAnswer[]) => AtomicAnswer[])
+    value: AtomicAnswer[] | ((prev: AtomicAnswer[]) => AtomicAnswer[]),
   ) => void;
   multipleChoiceAnswers: MultipleChoiceAnswer[];
   setMultipleChoiceAnswers: (
     value:
       | MultipleChoiceAnswer[]
-      | ((prev: MultipleChoiceAnswer[]) => MultipleChoiceAnswer[])
+      | ((prev: MultipleChoiceAnswer[]) => MultipleChoiceAnswer[]),
   ) => void;
   formError: ProductFormError;
 }
@@ -50,7 +50,7 @@ function AdditionalInfoSection({
               question={question}
               answer={
                 atomicAnswers.find(
-                  (answer) => answer.questionId === question.id
+                  (answer) => answer.questionId === question.id,
                 )!
               }
               index={i + 1}
@@ -75,7 +75,7 @@ function AdditionalInfoSection({
               index={model.atomicQuestions.length + i + 1}
               answer={
                 multipleChoiceAnswers.find(
-                  (answer) => answer.questionId === question.id
+                  (answer) => answer.questionId === question.id,
                 )!
               }
               onChange={(answer) => {

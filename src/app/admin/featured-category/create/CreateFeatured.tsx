@@ -6,7 +6,7 @@ import ImagePicker from "@/components/common/ImagePicker";
 import Loading from "@/components/common/Loading";
 import { Button } from "@/components/ui/button";
 import type { OptionalItem } from "@/types/custom";
-import { api } from "@/utils/api";
+import { api } from "@/trpc/react";
 import { useImageUploader } from "@/utils/imageUpload";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";

@@ -5,17 +5,17 @@ import { idSchema } from "@/utils/validation";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 import type { PrismaClient } from "@prisma/client";
-import { DefaultLimit, DefaultSortOrder, MaxLimit } from "@/utils/constants";
+import { defaultLimit, defaultSortOrder, maxLimit } from "@/utils/constants";
 
 export const roomRounter = createTRPCRouter({
   getBidsByRoomId: publicProcedure
     .input(
       z.object({
-        limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
-        sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
+        limit: z.number().int().positive().max(maxLimit).default(defaultLimit),
+        sortOrder: z.enum(["asc", "desc"]).default(defaultSortOrder),
         cursor: idSchema.optional(),
         roomId: idSchema,
-      })
+      }),
     )
     .query(
       async ({
@@ -47,7 +47,7 @@ export const roomRounter = createTRPCRouter({
           bids,
           nextCursor: bids[limit - 1]?.id,
         };
-      }
+      },
     ),
 
   getHighestBidByRoomId: publicProcedure
@@ -61,7 +61,7 @@ export const roomRounter = createTRPCRouter({
       z.object({
         roomId: idSchema,
         price: z.number().int().gt(0),
-      })
+      }),
     )
     .mutation(
       async ({ input: { price, roomId }, ctx: { prisma, session } }) => {
@@ -71,7 +71,7 @@ export const roomRounter = createTRPCRouter({
           userId: session.user.id,
           prisma,
         });
-      }
+      },
     ),
 
   deleteBid: protectedProcedure
@@ -122,7 +122,7 @@ export const roomRounter = createTRPCRouter({
 
 export const getHighestBidByRoomId = async (
   id: string,
-  prisma: PrismaClient
+  prisma: PrismaClient,
 ) => {
   const bid = await prisma.bid.findFirst({
     where: {
@@ -163,7 +163,7 @@ export const createABid = ({
     }
     if (room.product === null) {
       throw new Error(
-        "Product you are trying to bid was not found, try again later"
+        "Product you are trying to bid was not found, try again later",
       );
     }
     if (room.product.price >= price) {

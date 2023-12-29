@@ -29,11 +29,9 @@ const CategoryBox: React.FC<CategoryBoxProps> = ({ icon, label, id }) => {
   return (
     <div
       onClick={() => {
-        router
-          .push(
-            id ? `${pathname}?${createQueryString("category", id)}` : pathname,
-          )
-          .catch((err) => console.log(err));
+        router.push(
+          id ? `${pathname}?${createQueryString("category", id)}` : pathname,
+        );
       }}
       className={`
         flex cursor-pointer flex-col items-center justify-between gap-2 border-b-2 p-3 transition hover:text-neutral-800

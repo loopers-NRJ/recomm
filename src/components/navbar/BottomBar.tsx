@@ -1,9 +1,7 @@
-/* eslint-disable @typescript-eslint/no-misused-promises */
 "use client";
 
 import { useSession } from "next-auth/react";
-import { FC } from "react";
-
+import { type FC } from "react";
 import NavItems from "./NavItems";
 
 interface BottomBarProps {

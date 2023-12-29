@@ -3,15 +3,15 @@ import { createTRPCRouter, getProcedure } from "../trpc";
 import { z } from "zod";
 import { RolePayload, accessTypes } from "@/types/prisma";
 import { idSchema } from "@/utils/validation";
-import { DefaultSortOrder } from "@/utils/constants";
+import { defaultSortOrder } from "@/utils/constants";
 
 export const RoleRouter = createTRPCRouter({
   getRoles: getProcedure(AccessType.readAccess)
     .input(
       z.object({
         search: z.string().trim().default(""),
-        sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
-      })
+        sortOrder: z.enum(["asc", "desc"]).default(defaultSortOrder),
+      }),
     )
     .query(async ({ input, ctx: { prisma } }) => {
       return prisma.role.findMany({
@@ -39,7 +39,7 @@ export const RoleRouter = createTRPCRouter({
       z.object({
         name: z.string(),
         accesses: z.array(z.enum(accessTypes)),
-      })
+      }),
     )
     .mutation(async ({ input: { name, accesses }, ctx: { prisma } }) => {
       return prisma.role.create({
@@ -61,7 +61,7 @@ export const RoleRouter = createTRPCRouter({
       z.object({
         roleId: idSchema,
         accesses: z.array(z.enum(accessTypes)).nonempty(),
-      })
+      }),
     )
     .mutation(
       async ({ input: { roleId, accesses: access }, ctx: { prisma } }) => {
@@ -73,14 +73,14 @@ export const RoleRouter = createTRPCRouter({
             },
           },
         });
-      }
+      },
     ),
   removeAccessFromRole: getProcedure(AccessType.updateRole)
     .input(
       z.object({
         roleId: idSchema,
         accesses: z.array(z.enum(accessTypes)).nonempty(),
-      })
+      }),
     )
     .mutation(
       async ({ input: { roleId, accesses: access }, ctx: { prisma } }) => {
@@ -92,6 +92,6 @@ export const RoleRouter = createTRPCRouter({
             },
           },
         });
-      }
+      },
     ),
 });

@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { AccessType } from "@prisma/client";
 import { Accordion } from "@/components/ui/accordion";
 import Container from "@/components/Container";
-import { api } from "@/utils/api";
+import { api } from "@/trpc/react";
 import { useCallback, useState } from "react";
 import AccordionSection, { type Processing } from "./AccordionSection";
 import type { RolePayloadIncluded } from "@/types/prisma";

@@ -1,3 +1,5 @@
+import "server-only";
+
 import AdminPage from "@/hoc/AdminPage";
 import { permanentRedirect } from "next/navigation";
 

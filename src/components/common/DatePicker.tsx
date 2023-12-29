@@ -9,7 +9,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { FC } from "react";
+import { type FC } from "react";
 
 interface DatePickerProps {
   date?: Date;
@@ -26,7 +26,7 @@ const DatePicker: FC<DatePickerProps> = ({ date, setDate, requiredError }) => {
           className={cn(
             "w-[280px] justify-start text-left font-normal",
             !date && "text-muted-foreground",
-            requiredError && "border-red-500"
+            requiredError && "border-red-500",
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />

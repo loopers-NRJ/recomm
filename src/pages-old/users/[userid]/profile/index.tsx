@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Container from "@/components/Container";
 import { Button } from "@/components/ui/button";
 import useLoginModal from "@/hooks/useLoginModal";
-import { api } from "@/utils/api";
+import { api } from "@/trpc/react";
 import { withProtectedRoute } from "@/hoc/ProtectedRoute";
 
 export const getServerSideProps = withProtectedRoute();

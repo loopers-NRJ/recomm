@@ -1,8 +1,6 @@
-import React, { FC, useState } from "react";
+import React, { type FC, useState } from "react";
 import { z } from "zod";
-
-import { api } from "@/utils/api";
-
+import { api } from "@/trpc/react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { useToast } from "./ui/use-toast";

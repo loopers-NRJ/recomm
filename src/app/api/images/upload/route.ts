@@ -1,13 +1,13 @@
 import { uploadToCloudinary } from "@/lib/cloudinary";
-import { MaxImageCount } from "@/utils/constants";
+import { maxImageCount } from "@/utils/constants";
 import { type Image } from "@/utils/validation";
 
 export async function POST(request: Request) {
   try {
     const form = await request.formData();
     const files = form.getAll("files") as File[];
-    if (files.length > MaxImageCount) {
-      return new Response(`Cannot upload more than ${MaxImageCount} Images`, {
+    if (files.length > maxImageCount) {
+      return new Response(`Cannot upload more than ${maxImageCount} Images`, {
         status: 400,
       });
     }

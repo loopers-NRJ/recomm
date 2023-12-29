@@ -1,19 +1,20 @@
 // functionality
-export const DefaultLimit = 30;
-export const MaxLimit = 100;
-export const DefaultSortOrder = "desc";
-export const DefaultSearch = "";
-export const DefaultSortBy = "createdAt";
+export const defaultLimit = 30 as const;
+export const maxLimit = 100 as const;
+export const defaultSortOrder = "desc" as const;
+export const defaultSearch = "" as const;
+export const defaultSortBy = "createdAt" as const;
 export type SortOrder = "asc" | "desc";
 export type SortBy = "name" | "createdAt";
 
 // featured Category
-export const MaxFeaturedCategory = 12;
+export const maxFeaturedCategory = 12 as const;
 
-// user location headers
-export const UserLatitudeHeaderName = "x-user-latitude";
-export const UserLongitudeHeaderName = "x-user-longitude";
-export const RequestPathHeaderName = "x-forwarded-path";
+// headers labels
+export const userLatitudeHeaderName = "x-user-latitude" as const;
+export const userLongitudeHeaderName = "x-user-longitude" as const;
+export const requestPathHeaderName = "x-forwarded-path" as const;
 export const adminPageRegex = /\/admin\//g;
+export const pathHeaderName = "x-pathname" as const;
 
-export const MaxImageCount = 10;
+export const maxImageCount = 10 as const;

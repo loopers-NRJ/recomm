@@ -7,10 +7,10 @@ import { idSchema, modelSchema } from "@/utils/validation";
 import { createTRPCRouter, getProcedure, publicProcedure } from "../trpc";
 import { AccessType } from "@prisma/client";
 import {
-  DefaultLimit,
-  DefaultSortBy,
-  DefaultSortOrder,
-  MaxLimit,
+  defaultLimit,
+  defaultSortBy,
+  defaultSortOrder,
+  maxLimit,
 } from "@/utils/constants";
 
 export const modelRouter = createTRPCRouter({
@@ -18,8 +18,8 @@ export const modelRouter = createTRPCRouter({
     .input(
       z.object({
         search: z.string().trim().default(""),
-        limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
-        sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
+        limit: z.number().int().positive().max(maxLimit).default(defaultLimit),
+        sortOrder: z.enum(["asc", "desc"]).default(defaultSortOrder),
         sortBy: z
           .enum([
             "name",
@@ -29,12 +29,12 @@ export const modelRouter = createTRPCRouter({
             "category",
             "active",
           ])
-          .default(DefaultSortBy),
+          .default(defaultSortBy),
         cursor: idSchema.optional(),
         categoryId: idSchema.optional(),
         brandId: idSchema.optional(),
         state: z.enum(states),
-      })
+      }),
     )
     .query(
       async ({
@@ -81,14 +81,14 @@ export const modelRouter = createTRPCRouter({
                   },
                 }
               : sortBy === "category"
-              ? {
-                  category: {
-                    name: sortOrder,
+                ? {
+                    category: {
+                      name: sortOrder,
+                    },
+                  }
+                : {
+                    [sortBy]: sortOrder,
                   },
-                }
-              : {
-                  [sortBy]: sortOrder,
-                },
           ],
           include: modelsPayload.include,
         });
@@ -96,7 +96,7 @@ export const modelRouter = createTRPCRouter({
           models,
           nextCursor: models[limit - 1]?.id,
         };
-      }
+      },
     ),
   getModelById: publicProcedure
     .input(z.object({ modelId: idSchema.nullish() }))
@@ -194,7 +194,7 @@ export const modelRouter = createTRPCRouter({
 
           return model;
         });
-      }
+      },
     ),
   updateModelById: getProcedure(AccessType.updateModel)
     .input(
@@ -218,7 +218,7 @@ export const modelRouter = createTRPCRouter({
           categoryId: idSchema.optional(),
           active: z.boolean(),
         }),
-      ])
+      ]),
     )
     .mutation(
       async ({
@@ -272,7 +272,7 @@ export const modelRouter = createTRPCRouter({
         });
 
         return model;
-      }
+      },
     ),
   deleteModelById: getProcedure(AccessType.deleteModel)
     .input(z.object({ modelId: idSchema }))

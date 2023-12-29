@@ -16,9 +16,9 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import type { AccessType } from "@prisma/client";
 import {
   adminPageRegex,
-  RequestPathHeaderName,
-  UserLatitudeHeaderName,
-  UserLongitudeHeaderName,
+  requestPathHeaderName,
+  userLatitudeHeaderName,
+  userLongitudeHeaderName,
 } from "@/utils/constants";
 import { userPayload } from "@/types/prisma";
 
@@ -30,7 +30,6 @@ import { userPayload } from "@/types/prisma";
  * These allow you to access things when processing a request, like the database, the session, etc.
  */
 
-
 /**
  * This is the actual context you will use in your router. It will be used to process every request
  * that goes through your tRPC endpoint.
@@ -38,7 +37,6 @@ import { userPayload } from "@/types/prisma";
  * @see https://trpc.io/docs/context
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
-
   // Get the session from the server using the getServerSession wrapper function
   const session = await getServerAuthSession();
   return {
@@ -92,14 +90,13 @@ export const createTRPCRouter = t.router;
  * are logged in.
  */
 export const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
-
   let userAccesses: AccessType[] = [];
   // Update user last active, latitude and longitude
   if (ctx.session?.user) {
-    const lat = ctx.headers.get(UserLatitudeHeaderName)
-    const lon = ctx.headers.get(UserLongitudeHeaderName)
+    const lat = ctx.headers.get(userLatitudeHeaderName);
+    const lon = ctx.headers.get(userLongitudeHeaderName);
 
-     const user = await prisma.user.update({
+    const user = await prisma.user.update({
       where: {
         id: ctx.session.user.id,
       },
@@ -116,8 +113,8 @@ export const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
 
     ctx.session.user = user;
   }
-  
-  const url = ctx.headers.get(RequestPathHeaderName);
+
+  const url = ctx.headers.get(requestPathHeaderName);
   const isAdminPage = url?.match(adminPageRegex) ?? false;
 
   return next({

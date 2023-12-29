@@ -2,13 +2,15 @@
 
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
-
-import { api } from "@/utils/api";
-
+import { api } from "@/trpc/react";
 import LoadingWishes from "./loading/LoadingWishes";
 import WishCard from "./WishCard";
 import ServerError from "./common/ServerError";
-import { DefaultSearch, SortOrder, DefaultSortOrder } from "@/utils/constants";
+import {
+  defaultSearch,
+  type SortOrder,
+  defaultSortOrder,
+} from "@/utils/constants";
 import { useSearchParams } from "next/navigation";
 import { Button } from "./ui/button";
 import Loading from "./common/Loading";
@@ -19,8 +21,8 @@ function Wishes() {
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
 
-  const search = params.get("search") ?? DefaultSearch;
-  const sortOrder = (params.get("sortOrder") as SortOrder) ?? DefaultSortOrder;
+  const search = params.get("search") ?? defaultSearch;
+  const sortOrder = (params.get("sortOrder") as SortOrder) ?? defaultSortOrder;
   const wishesApi = api.user.getMywishes.useInfiniteQuery(
     {
       search,
@@ -28,7 +30,7 @@ function Wishes() {
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
-    }
+    },
   );
 
   useEffect(() => {

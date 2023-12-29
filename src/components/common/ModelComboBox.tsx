@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Label } from "../ui/label";
 import ComboBox from "./ComboBox";
-import { api } from "@/utils/api";
-import { Item } from "@/types/custom";
+import { api } from "@/trpc/react";
+import { type Item } from "@/types/custom";
 import ErrorMessage from "./ErrorMessage";
 import { useClientSelectedState } from "@/store/SelectedState";
 

@@ -1,7 +1,6 @@
 "use client";
 
-import { FC, useState } from "react";
-
+import { type FC, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,9 +11,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { OptionalItem } from "@/types/custom";
-import { api } from "@/utils/api";
-
+import { type OptionalItem } from "@/types/custom";
+import { api } from "@/trpc/react";
 import { toast } from "./ui/use-toast";
 import CategoryComboBox from "./common/CategoryComboBox";
 import BrandComboBox from "./common/BrandComboBox";

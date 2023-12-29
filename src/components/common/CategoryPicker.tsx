@@ -1,10 +1,8 @@
 import Container from "@/components/Container";
 import { Button } from "@/components/ui/button";
-
 import { useQueryState, parseAsStringEnum } from "next-usequerystate";
-
-import { FeaturedCategoryPayloadIncluded } from "@/types/prisma";
-import { Category } from "@prisma/client";
+import { type FeaturedCategoryPayloadIncluded } from "@/types/prisma";
+import { type Category } from "@prisma/client";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import Image from "next/image";
 import { useRouter } from "next/navigation";

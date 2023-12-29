@@ -1,9 +1,8 @@
 "use client";
 
-import { FC, useEffect } from "react";
-
-import { api } from "@/utils/api";
-import { Room } from "@prisma/client";
+import { type FC, useEffect } from "react";
+import { api } from "@/trpc/react";
+import { type Room } from "@prisma/client";
 import Avatar from "@/components/navbar/Avatar";
 import { Card, CardContent } from "./ui/card";
 
