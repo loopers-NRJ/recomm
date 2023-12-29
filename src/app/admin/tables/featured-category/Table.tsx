@@ -1,12 +1,12 @@
 "use client";
 
 import { DataTable } from "@/app/admin/tables/Table";
-import Loading from "@/components/common/Loading";
 import ServerError from "@/components/common/ServerError";
 import { Button } from "@/components/ui/button";
 import { useAdminSelectedState } from "@/store/SelectedState";
 import type { OmitUndefined } from "@/types/custom";
 import type { FeaturedCategoryPayloadIncluded } from "@/types/prisma";
+
 import { api } from "@/trpc/react";
 import { type RouterInputs } from "@/trpc/shared";
 import {
@@ -199,9 +199,6 @@ export default function FeaturedCategoryTable() {
     ],
   );
 
-  if (categoriesApi.isLoading) {
-    return <Loading />;
-  }
   if (categoriesApi.isError) {
     return <ServerError message={categoriesApi.error.message} />;
   }
@@ -216,11 +213,12 @@ export default function FeaturedCategoryTable() {
       </div>
       <DataTable
         columns={columns}
-        data={categoriesApi.data.pages.flatMap((page) => page.categories)}
+        data={categoriesApi.data?.pages.flatMap((page) => page.categories)}
         canViewMore={!!categoriesApi.hasNextPage}
         viewMore={() => {
           void categoriesApi.fetchNextPage();
         }}
+        isLoading={categoriesApi.isLoading}
       />
     </>
   );

@@ -1,7 +1,6 @@
 "use client";
 
 import { DataTable } from "@/app/admin/tables/Table";
-import Loading from "@/components/common/Loading";
 import ServerError from "@/components/common/ServerError";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -9,7 +8,7 @@ import { useAdminSelectedState } from "@/store/SelectedState";
 import { type OmitUndefined } from "@/types/custom";
 import { type ModelPayloadIncluded } from "@/types/prisma";
 import { api } from "@/trpc/react";
-import { type RouterInputs } from "@/trpc/react";
+import { type RouterInputs } from "@/trpc/shared";
 import {
   defaultSearch,
   defaultSortBy,
@@ -236,9 +235,6 @@ export default function ModelTable() {
     ],
   );
 
-  if (modelsApi.isLoading) {
-    return <Loading />;
-  }
   if (modelsApi.isError) {
     return <ServerError message={modelsApi.error.message} />;
   }
@@ -253,11 +249,12 @@ export default function ModelTable() {
       </div>
       <DataTable
         columns={columns}
-        data={modelsApi.data.pages.flatMap((page) => page.models)}
+        data={modelsApi.data?.pages.flatMap((page) => page.models)}
         canViewMore={!!modelsApi.hasNextPage}
         viewMore={() => {
           void modelsApi.fetchNextPage();
         }}
+        isLoading={modelsApi.isLoading}
       />
     </>
   );

@@ -1,7 +1,6 @@
 "use client";
 
 import { DataTable } from "@/app/admin/tables/Table";
-import Loading from "@/components/common/Loading";
 import ServerError from "@/components/common/ServerError";
 import { Button } from "@/components/ui/button";
 import { useAdminSelectedState } from "@/store/SelectedState";
@@ -215,9 +214,6 @@ export default function ProductTable() {
     ],
   );
 
-  if (productApi.isLoading) {
-    return <Loading />;
-  }
   if (productApi.isError) {
     return <ServerError message={productApi.error.message} />;
   }
@@ -226,11 +222,12 @@ export default function ProductTable() {
       <Searchbar search={search} setSearch={setSearch} />
       <DataTable
         columns={columns}
-        data={productApi.data.pages.flatMap((page) => page.products)}
+        data={productApi.data?.pages.flatMap((page) => page.products)}
         canViewMore={!!productApi.hasNextPage}
         viewMore={() => {
           void productApi.fetchNextPage();
         }}
+        isLoading={productApi.isLoading}
       />
     </>
   );

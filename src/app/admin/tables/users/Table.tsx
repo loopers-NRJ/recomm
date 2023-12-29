@@ -1,7 +1,6 @@
 "use client";
 
 import { DataTable } from "@/app/admin/tables/Table";
-import Loading from "@/components/common/Loading";
 import ServerError from "@/components/common/ServerError";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -221,9 +220,6 @@ export default function UserTable() {
     ],
   );
 
-  if (usersApi.isLoading || rolesApi.isLoading) {
-    return <Loading />;
-  }
   if (usersApi.isError || rolesApi.isError) {
     return (
       <ServerError
@@ -238,7 +234,7 @@ export default function UserTable() {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <Searchbar search={search} setSearch={setSearch} />
         <Label className="flex items-center gap-3">
           Filter
@@ -253,7 +249,7 @@ export default function UserTable() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="">Users</SelectItem>
-              {rolesApi.data.map((role) => (
+              {rolesApi.data?.map((role) => (
                 <SelectItem
                   value={role.id}
                   key={role.id}
@@ -268,11 +264,12 @@ export default function UserTable() {
       </div>
       <DataTable
         columns={columns}
-        data={usersApi.data.pages.flatMap((page) => page.users)}
+        data={usersApi.data?.pages.flatMap((page) => page.users)}
         canViewMore={!!usersApi.hasNextPage}
         viewMore={() => {
           void usersApi.fetchNextPage();
         }}
+        isLoading={usersApi.isLoading || rolesApi.isLoading}
       />
     </div>
   );

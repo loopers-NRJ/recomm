@@ -1,7 +1,6 @@
 "use client";
 
 import { DataTable } from "@/app/admin/tables/Table";
-import Loading from "@/components/common/Loading";
 import ServerError from "@/components/common/ServerError";
 import { Button } from "@/components/ui/button";
 import { type RolePayloadIncluded } from "@/types/prisma";
@@ -98,9 +97,6 @@ export default function RoleTable() {
     [deleteRoleApi, deletingRoleId, rolesApi, router, setSortOrder, sortOrder],
   );
 
-  if (rolesApi.isLoading) {
-    return <Loading />;
-  }
   if (rolesApi.isError) {
     return <ServerError message={rolesApi.error.message} />;
   }
@@ -112,7 +108,11 @@ export default function RoleTable() {
           <Button>New</Button>
         </Link>
       </div>
-      <DataTable columns={columns} data={rolesApi.data} />
+      <DataTable
+        columns={columns}
+        data={rolesApi.data}
+        isLoading={rolesApi.isLoading}
+      />
     </>
   );
 }

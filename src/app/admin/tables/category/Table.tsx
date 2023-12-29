@@ -308,10 +308,6 @@ export default function CategoryTable() {
     ],
   );
 
-  if (categoriesApi.isLoading || parentCategoryApi.isLoading) {
-    return <Loading />;
-  }
-
   if (categoriesApi.isError || parentCategoryApi.isError) {
     return (
       <ServerError
@@ -347,11 +343,12 @@ export default function CategoryTable() {
       </div>
       <DataTable
         columns={columns}
-        data={categoriesApi.data.pages.flatMap((page) => page.categories)}
+        data={categoriesApi.data?.pages.flatMap((page) => page.categories)}
         canViewMore={!!categoriesApi.hasNextPage}
         viewMore={() => {
           void categoriesApi.fetchNextPage();
         }}
+        isLoading={categoriesApi.isLoading || parentCategoryApi.isLoading}
       />
     </>
   );

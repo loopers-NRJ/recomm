@@ -11,30 +11,31 @@ import {
 import {
   flexRender,
   getCoreRowModel,
-  getSortedRowModel,
   useReactTable,
   type ColumnDef,
 } from "@tanstack/react-table";
 import { Button } from "../../../components/ui/button";
+import Loading from "@/components/common/Loading";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
-  data: TData[];
+  data?: TData[];
   canViewMore?: boolean;
   viewMore?: () => void;
+  isLoading?: boolean;
 }
 
 export function DataTable<TData, TValue>({
   columns,
-  data,
+  data = [],
   canViewMore,
   viewMore,
+  isLoading,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel<TData>(),
-    getSortedRowModel: getSortedRowModel<TData>(),
   });
 
   return (
@@ -60,7 +61,23 @@ export function DataTable<TData, TValue>({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="text-center">
+                  <span>Fetching your data</span>
+                  <Loading className="my-4" />
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows?.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  No results.
+                </TableCell>
+              </TableRow>
+            ) : (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -76,15 +93,6 @@ export function DataTable<TData, TValue>({
                   ))}
                 </TableRow>
               ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
             )}
           </TableBody>
         </Table>

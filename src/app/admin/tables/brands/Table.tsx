@@ -1,7 +1,6 @@
 "use client";
 
 import { DataTable } from "@/app/admin/tables/Table";
-import Loading from "@/components/common/Loading";
 import ServerError from "@/components/common/ServerError";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -221,9 +220,6 @@ export default function BrandTable() {
     ],
   );
 
-  if (brandsApi.isLoading) {
-    return <Loading />;
-  }
   if (brandsApi.isError) {
     return <ServerError message={brandsApi.error.message} />;
   }
@@ -239,11 +235,12 @@ export default function BrandTable() {
       </div>
       <DataTable
         columns={columns}
-        data={brandsApi.data.pages.flatMap((page) => page.brands)}
+        data={brandsApi.data?.pages.flatMap((page) => page.brands)}
         canViewMore={!!brandsApi.hasNextPage}
         viewMore={() => {
           void brandsApi.fetchNextPage();
         }}
+        isLoading={brandsApi.isLoading}
       />
     </>
   );
