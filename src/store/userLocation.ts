@@ -1,8 +1,8 @@
 import { create } from "zustand";
 
 interface Location {
-  latitute: string,
-  longitude: string
+  latitude: number;
+  longitude: number;
 }
 
 interface LocationState {

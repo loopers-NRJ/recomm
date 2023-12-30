@@ -1,10 +1,7 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import {
-  type HTTPHeaders,
-  unstable_httpBatchStreamLink,
-} from "@trpc/client";
+import { type HTTPHeaders, unstable_httpBatchStreamLink } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
 import { useCallback, useState } from "react";
 
@@ -37,8 +34,8 @@ export function TRPCReactProvider(props: {
       headers[requestPathHeaderName] = window.location.pathname;
     }
     if (userLocation) {
-      headers[userLatitudeHeaderName] = userLocation.latitute;
-      headers[userLongitudeHeaderName] = userLocation.longitude;
+      headers[userLatitudeHeaderName] = userLocation.latitude.toString();
+      headers[userLongitudeHeaderName] = userLocation.longitude.toString();
     }
     return headers;
   }, [userLocation, props.cookies]);

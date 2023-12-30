@@ -3,6 +3,7 @@ import "server-only";
 import type {
   DefaultParams,
   DefaultSearchParams,
+  Page,
   PageProps,
 } from "@/types/custom";
 
@@ -31,7 +32,7 @@ export default function AuthenticatedPage<
   SearchParams = DefaultSearchParams,
 >(
   Component: PageWithSession<Params, SearchParams>,
-): PageWithSession<Params, SearchParams> {
+): Page<Params, SearchParams> {
   return async (props) => {
     const session = await getServerAuthSession();
     if (!session?.user) {

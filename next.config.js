@@ -19,10 +19,16 @@ const config = {
   // },
 
   images: {
-    domains: [
-      "res.cloudinary.com",
-      "avatars.githubusercontent.com",
-      "lh3.googleusercontent.com",
+    remotePatterns: [
+      {
+        hostname: "res.cloudinary.com",
+      },
+      {
+        hostname: "avatars.githubusercontent.com",
+      },
+      {
+        hostname: "lh3.googleusercontent.com",
+      },
     ],
   },
 };

@@ -1,5 +1,5 @@
 import AdminPage from "@/hoc/AdminPage";
-import UserTable from "./Table";
+import UserTable from "./UserTable";
 
 const UserTablePage = AdminPage(UserTable);
 

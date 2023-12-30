@@ -1,5 +1,5 @@
 import AdminPage from "@/hoc/AdminPage";
-import ProductTable from "./Table";
+import ProductTable from "./ProductTable";
 
 const ProductTablePage = AdminPage(ProductTable);
 

@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { DefaultParams, DefaultSearchParams } from "@/types/custom";
+import type { DefaultParams, DefaultSearchParams, Page } from "@/types/custom";
 
 import AuthenticatedPage, {
   type PagePropsWithSession,
@@ -31,7 +31,7 @@ export default function AdminPage<
   SearchParams = DefaultSearchParams,
 >(
   Component: PageWithAccesses<Params, SearchParams>,
-): PageWithAccesses<Params, SearchParams> {
+): Page<Params, SearchParams> {
   return AuthenticatedPage(async (props) => {
     const roleId = props.session?.user.roleId;
     if (!roleId) {

@@ -1,4 +1,4 @@
-import BrandTable from "./Table";
+import BrandTable from "./BrandTable";
 import AdminPage from "@/hoc/AdminPage";
 
 const BrandTablePage = AdminPage(BrandTable);

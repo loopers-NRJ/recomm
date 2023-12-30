@@ -63,7 +63,7 @@ export default function layout({ children }: { children: React.ReactNode }) {
           ))}
         </div>
       </div>
-      <div className="my-4 flex grow flex-col gap-2 md:m-0">
+      <div className="my-4 flex grow flex-col gap-2 overflow-hidden md:m-0">
         <div className="flex w-full items-center justify-between">
           <h1 className="pl-2 font-bold capitalize">
             {selectedTitle.replace("-", " ")}

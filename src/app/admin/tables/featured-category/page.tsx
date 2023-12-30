@@ -1,5 +1,5 @@
 import AdminPage from "@/hoc/AdminPage";
-import FeaturedCategoryTable from "./Table";
+import FeaturedCategoryTable from "./FeaturedCategoryTable";
 
 const FeaturedCategoryTablePage = AdminPage(FeaturedCategoryTable);
 
