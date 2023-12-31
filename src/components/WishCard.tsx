@@ -1,8 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { FC } from "react";
-
+import { type FC } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,9 +11,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { api } from "@/utils/api";
+import { api } from "@/trpc/react";
 import { WishStatus } from "@prisma/client";
-import { WishPayloadIncluded } from "@/types/prisma";
+import { type WishPayloadIncluded } from "@/types/prisma";
 
 interface WishCardProps {
   wish: WishPayloadIncluded;

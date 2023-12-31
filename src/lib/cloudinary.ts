@@ -1,7 +1,8 @@
-import { v2 as cloudinary } from "cloudinary";
+import "server-only";
 
-import { env } from "@/env.mjs";
-import { Image } from "@/utils/validation";
+import { v2 as cloudinary } from "cloudinary";
+import { env } from "@/env";
+import type { Image } from "@/utils/validation";
 
 cloudinary.config({
   cloud_name: env.CLOUDINARY_CLOUD_NAME,
@@ -10,29 +11,32 @@ cloudinary.config({
   secure: true,
 });
 
-export const uploadImage = async (localPath: string) => {
-  try {
-    const response = await cloudinary.uploader.upload(localPath);
-    const image: Image = {
-      url: response.url,
-      publicId: response.public_id,
-      secureUrl: response.secure_url,
-      originalFilename: response.original_filename,
-      format: response.format,
-      createdAt: response.created_at,
-      width: response.width,
-      height: response.height,
-      resource_type: response.resource_type,
-    };
-    return image;
-  } catch (error) {
-    console.log(error);
-    return new Error("cannot upload the image");
-  }
+export const uploadToCloudinary = (fileArrayBuffer: ArrayBuffer) => {
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  return new Promise<Image>(async (resolve, reject) => {
+    cloudinary.uploader
+      .upload_stream({ resource_type: "image" }, (error, response) => {
+        if (error ?? !response) {
+          return reject(error);
+        }
+        const image: Image = {
+          publicId: response.public_id,
+          url: response.url,
+          secureUrl: response.secure_url,
+          originalFilename: response.original_filename,
+          format: response.format,
+          width: response.width,
+          height: response.height,
+          resource_type: response.resource_type,
+        };
+        return resolve(image);
+      })
+      .end(Buffer.from(fileArrayBuffer));
+  });
 };
 
 export const deleteImage: (publicId: string) => Promise<void | Error> = async (
-  publicId: string
+  publicId: string,
 ) => {
   try {
     await cloudinary.uploader.destroy(publicId);

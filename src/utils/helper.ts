@@ -2,11 +2,11 @@ const globalThisForTimer = globalThis as unknown as {
   timer: NodeJS.Timeout | undefined;
 };
 
-export const debounce = (func: () => void, timeout = 1000) => {
-  return () => {
+export const debounce = <T>(func: (...props: T[]) => void, timeout = 300) => {
+  return (...props: T[]) => {
     clearTimeout(globalThisForTimer.timer);
     globalThisForTimer.timer = setTimeout(() => {
-      func();
+      func(...props);
     }, timeout);
   };
 };

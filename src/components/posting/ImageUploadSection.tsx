@@ -1,6 +1,6 @@
-import { ModelPayloadIncluded } from "@/types/prisma";
-import ImagePicker, { ImagePickerProps } from "../common/ImagePicker";
-import { ProductFormError } from "@/utils/validation";
+import { type ModelPayloadIncluded } from "@/types/prisma";
+import ImagePicker, { type ImagePickerProps } from "../common/ImagePicker";
+import { type ProductFormError } from "@/utils/validation";
 
 interface ImageUploadSectionProps extends ImagePickerProps {
   model: ModelPayloadIncluded;

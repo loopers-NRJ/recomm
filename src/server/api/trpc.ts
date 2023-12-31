@@ -7,23 +7,20 @@
  * need to use are documented accordingly near the end.
  */
 
-import { Session } from "next-auth";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
 import { getServerAuthSession } from "@/server/auth";
 import { prisma } from "@/server/db";
 import { initTRPC, TRPCError } from "@trpc/server";
-import { CreateNextContextOptions } from "@trpc/server/adapters/next";
-import { AccessType } from "@prisma/client";
+import type { AccessType } from "@prisma/client";
 import {
   adminPageRegex,
-  RequestPathHeaderName,
-  UserLatitudeHeaderName,
-  UserLongitudeHeaderName,
+  requestPathHeaderName,
+  userLatitudeHeaderName,
+  userLongitudeHeaderName,
 } from "@/utils/constants";
 import { userPayload } from "@/types/prisma";
-import { HTTPHeaders } from "@trpc/client";
 
 /**
  * 1. CONTEXT
@@ -33,44 +30,20 @@ import { HTTPHeaders } from "@trpc/client";
  * These allow you to access things when processing a request, like the database, the session, etc.
  */
 
-interface CreateContextOptions {
-  session: Session | null;
-  headers: HTTPHeaders;
-}
-
-/**
- * This helper generates the "internals" for a tRPC context. If you need to use it, you can export
- * it from here.
- *
- * Examples of things you may need it for:
- * - testing, so we don't have to mock Next.js' req/res
- * - tRPC's `createSSGHelpers`, where we don't have req/res
- *
- * @see https://create.t3.gg/en/usage/trpc#-serverapitrpcts
- */
-const createInnerTRPCContext = async (opts: CreateContextOptions) => {
-  return {
-    session: opts.session,
-    prisma,
-    headers: opts.headers,
-  };
-};
-
 /**
  * This is the actual context you will use in your router. It will be used to process every request
  * that goes through your tRPC endpoint.
  *
  * @see https://trpc.io/docs/context
  */
-export const createTRPCContext = async (opts: CreateNextContextOptions) => {
-  const { req, res } = opts;
-
+export const createTRPCContext = async (opts: { headers: Headers }) => {
   // Get the session from the server using the getServerSession wrapper function
-  const session = await getServerAuthSession({ req, res });
-  return await createInnerTRPCContext({
+  const session = await getServerAuthSession();
+  return {
     session,
-    headers: req.headers as Record<string, string | undefined>,
-  });
+    prisma,
+    headers: opts.headers,
+  };
 };
 
 /**
@@ -117,43 +90,43 @@ export const createTRPCRouter = t.router;
  * are logged in.
  */
 export const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
-  // Update user last active
+  let userAccesses: AccessType[] = [];
+  // Update user last active, latitude and longitude
   if (ctx.session?.user) {
-    ctx.session.user = await prisma.user.update({
+    const lat = ctx.headers.get(userLatitudeHeaderName);
+    const lon = ctx.headers.get(userLongitudeHeaderName);
+
+    const user = await prisma.user.update({
       where: {
         id: ctx.session.user.id,
       },
       data: {
         lastActive: new Date(),
-        latitude:
-          typeof ctx.headers[UserLatitudeHeaderName] === "string"
-            ? parseFloat(ctx.headers[UserLatitudeHeaderName])
-            : undefined,
-        longitude:
-          typeof ctx.headers[UserLongitudeHeaderName] === "string"
-            ? parseFloat(ctx.headers[UserLongitudeHeaderName])
-            : undefined,
+        latitude: lat ? parseFloat(lat) : undefined,
+        longitude: lon ? parseFloat(lon) : undefined,
       },
       include: userPayload.include,
     });
+    if (user.role) {
+      userAccesses = user.role.accesses.map((access) => access.type);
+    }
+
+    ctx.session.user = user;
   }
-  const userAccesses =
-    ctx.session?.user.role?.accesses.map((access) => access.type) ?? [];
-  const url = ctx.headers[RequestPathHeaderName] as string | undefined;
+
+  const url = ctx.headers.get(requestPathHeaderName);
   const isAdminPage = url?.match(adminPageRegex) ?? false;
+
   return next({
     ctx: {
-      // infers the `session` as non-nullable
       session: {
         ...ctx.session,
-        user: ctx.session?.user,
         userAccesses,
       },
       isAdminPage,
     },
   });
 });
-// export const publicProcedure = t.procedure;
 
 /**
  * Protected (authenticated) procedure

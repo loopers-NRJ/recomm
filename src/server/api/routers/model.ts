@@ -1,23 +1,40 @@
 import slugify from "@/lib/slugify";
 import { z } from "zod";
 
-import { modelsPayload, singleModelPayload } from "@/types/prisma";
-import {
-  functionalityOptions,
-  idSchema,
-  modelSchema,
-} from "@/utils/validation";
+import { modelsPayload, singleModelPayload, states } from "@/types/prisma";
+import { idSchema, modelSchema } from "@/utils/validation";
 
 import { createTRPCRouter, getProcedure, publicProcedure } from "../trpc";
 import { AccessType } from "@prisma/client";
+import {
+  defaultLimit,
+  defaultSortBy,
+  defaultSortOrder,
+  maxLimit,
+} from "@/utils/constants";
 
 export const modelRouter = createTRPCRouter({
   getModels: publicProcedure
     .input(
-      functionalityOptions.extend({
+      z.object({
+        search: z.string().trim().default(""),
+        limit: z.number().int().positive().max(maxLimit).default(defaultLimit),
+        sortOrder: z.enum(["asc", "desc"]).default(defaultSortOrder),
+        sortBy: z
+          .enum([
+            "name",
+            "createdAt",
+            "updatedAt",
+            "brand",
+            "category",
+            "active",
+          ])
+          .default(defaultSortBy),
+        cursor: idSchema.optional(),
         categoryId: idSchema.optional(),
         brandId: idSchema.optional(),
-      })
+        state: z.enum(states),
+      }),
     )
     .query(
       async ({
@@ -29,6 +46,7 @@ export const modelRouter = createTRPCRouter({
           brandId,
           categoryId,
           cursor,
+          state,
         },
         ctx: { prisma, isAdminPage },
       }) => {
@@ -46,6 +64,7 @@ export const modelRouter = createTRPCRouter({
             name: {
               contains: search,
             },
+            createdState: state,
           },
           take: limit,
           skip: cursor ? 1 : undefined,
@@ -55,9 +74,21 @@ export const modelRouter = createTRPCRouter({
               }
             : undefined,
           orderBy: [
-            {
-              [sortBy]: sortOrder,
-            },
+            sortBy === "brand"
+              ? {
+                  brand: {
+                    name: sortOrder,
+                  },
+                }
+              : sortBy === "category"
+                ? {
+                    category: {
+                      name: sortOrder,
+                    },
+                  }
+                : {
+                    [sortBy]: sortOrder,
+                  },
           ],
           include: modelsPayload.include,
         });
@@ -65,7 +96,7 @@ export const modelRouter = createTRPCRouter({
           models,
           nextCursor: models[limit - 1]?.id,
         };
-      }
+      },
     ),
   getModelById: publicProcedure
     .input(z.object({ modelId: idSchema.nullish() }))
@@ -95,13 +126,15 @@ export const modelRouter = createTRPCRouter({
           categoryId,
           multipleChoiceQuestions,
           atomicQuestions,
+          state,
         },
-        ctx: { prisma },
+        ctx: { prisma, session },
       }) => {
         return prisma.$transaction(async (prisma) => {
           const existingModel = await prisma.model.findFirst({
             where: {
               name,
+              createdState: state,
             },
           });
           if (existingModel !== null) {
@@ -112,6 +145,12 @@ export const modelRouter = createTRPCRouter({
             data: {
               name,
               slug: slugify(name),
+              createdBy: {
+                connect: {
+                  id: session.user.id,
+                },
+              },
+              createdState: state,
               category: {
                 connect: {
                   id: categoryId,
@@ -155,7 +194,7 @@ export const modelRouter = createTRPCRouter({
 
           return model;
         });
-      }
+      },
     ),
   updateModelById: getProcedure(AccessType.updateModel)
     .input(
@@ -179,7 +218,7 @@ export const modelRouter = createTRPCRouter({
           categoryId: idSchema.optional(),
           active: z.boolean(),
         }),
-      ])
+      ]),
     )
     .mutation(
       async ({
@@ -191,18 +230,23 @@ export const modelRouter = createTRPCRouter({
           where: {
             id,
           },
+          select: {
+            name: true,
+            createdState: true,
+          },
         });
         if (existingModel === null) {
           throw new Error("Model not found");
         }
         // check whether the new name is unique
-        if (newName !== undefined) {
-          const existingModel = await prisma.model.findFirst({
+        if (newName !== undefined && newName !== existingModel.name) {
+          const existingName = await prisma.model.findFirst({
             where: {
               name: newName,
+              createdState: existingModel.createdState,
             },
           });
-          if (existingModel !== null) {
+          if (existingName !== null) {
             throw new Error(`Model ${newName} already exists`);
           }
         }
@@ -228,7 +272,7 @@ export const modelRouter = createTRPCRouter({
         });
 
         return model;
-      }
+      },
     ),
   deleteModelById: getProcedure(AccessType.deleteModel)
     .input(z.object({ modelId: idSchema }))

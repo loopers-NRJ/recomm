@@ -1,18 +1,19 @@
 import { idSchema } from "@/utils/validation";
 
-import { createTRPCRouter, getProcedure, publicProcedure } from "../trpc";
-import { AccessType } from "@prisma/client";
+import { createTRPCRouter, publicProcedure } from "../trpc";
 import { z } from "zod";
-import { DefaultLimit } from "@/utils/constants";
+import { defaultLimit } from "@/utils/constants";
+import { states } from "@/types/prisma";
 
 export const searchRouter = createTRPCRouter({
   all: publicProcedure
     .input(
       z.object({
         search: z.string().trim().default(""),
-      })
+        state: z.enum(states),
+      }),
     )
-    .query(async ({ input: { search }, ctx: { prisma } }) => {
+    .query(async ({ input: { search, state }, ctx: { prisma } }) => {
       if (search.trim() === "") {
         return {
           categories: [],
@@ -27,8 +28,9 @@ export const searchRouter = createTRPCRouter({
               contains: search,
             },
             active: true,
+            createdState: state,
           },
-          take: DefaultLimit,
+          take: defaultLimit,
           select: {
             id: true,
             name: true,
@@ -42,8 +44,10 @@ export const searchRouter = createTRPCRouter({
             name: {
               contains: search,
             },
+            active: true,
+            createdState: state,
           },
-          take: DefaultLimit,
+          take: defaultLimit,
           select: {
             id: true,
             name: true,
@@ -57,8 +61,10 @@ export const searchRouter = createTRPCRouter({
             name: {
               contains: search,
             },
+            active: true,
+            createdState: state,
           },
-          take: DefaultLimit,
+          take: defaultLimit,
           select: {
             id: true,
             name: true,
@@ -78,66 +84,76 @@ export const searchRouter = createTRPCRouter({
     .input(
       z.object({
         search: z.string().trim().default(""),
-      })
+        state: z.enum(states),
+      }),
     )
-    .query(async ({ input: { search }, ctx: { prisma, isAdminPage } }) => {
-      const categories = await prisma.category.findMany({
-        where: {
-          name: search
-            ? {
-                contains: search,
-              }
-            : undefined,
-          active: isAdminPage ? undefined : true,
-        },
-        take: DefaultLimit,
-        select: {
-          id: true,
-          name: true,
-          // add image if needed
-          // image: true,
-        },
-      });
-      return categories;
-    }),
+    .query(
+      async ({ input: { search, state }, ctx: { prisma, isAdminPage } }) => {
+        const categories = await prisma.category.findMany({
+          where: {
+            name: search
+              ? {
+                  contains: search,
+                }
+              : undefined,
+            active: isAdminPage ? undefined : true,
+            createdState: state,
+          },
+          take: defaultLimit,
+          select: {
+            id: true,
+            name: true,
+            // add image if needed
+            // image: true,
+          },
+        });
+        return categories;
+      },
+    ),
   leafCategory: publicProcedure
     .input(
       z.object({
         search: z.string().trim().default(""),
-      })
+        state: z.enum(states),
+      }),
     )
-    .query(async ({ input: { search }, ctx: { prisma, isAdminPage } }) => {
-      const categories = await prisma.category.findMany({
-        where: {
-          name: search
-            ? {
-                contains: search,
-              }
-            : undefined,
-          active: isAdminPage ? undefined : true,
-          subCategories: {
-            none: {},
+    .query(
+      async ({ input: { search, state }, ctx: { prisma, isAdminPage } }) => {
+        const categories = await prisma.category.findMany({
+          where: {
+            name: search
+              ? {
+                  contains: search,
+                }
+              : undefined,
+            active: isAdminPage ? undefined : true,
+            subCategories: {
+              none: {},
+            },
+
+            createdState: state,
           },
-        },
-        take: DefaultLimit,
-        select: {
-          id: true,
-          name: true,
-        },
-      });
-      return categories;
-    }),
+          take: defaultLimit,
+          select: {
+            id: true,
+            name: true,
+          },
+        });
+        return categories;
+      },
+    ),
 
   brands: publicProcedure
     .input(
       z.object({
         search: z.string().trim().default(""),
         categoryId: idSchema.optional(),
-      })
+        state: z.enum(states),
+      }),
     )
     .query(
       async ({
-        input: { search, categoryId },
+        input: { search, categoryId, state },
         ctx: { prisma, isAdminPage },
       }) => {
         const brands = await prisma.brand.findMany({
@@ -158,8 +174,9 @@ export const searchRouter = createTRPCRouter({
                   },
                 }
               : undefined,
+            createdState: state,
           },
-          take: DefaultLimit,
+          take: defaultLimit,
           select: {
             id: true,
             name: true,
@@ -168,7 +185,7 @@ export const searchRouter = createTRPCRouter({
           },
         });
         return brands;
-      }
+      },
     ),
 
   models: publicProcedure
@@ -177,11 +194,12 @@ export const searchRouter = createTRPCRouter({
         search: z.string().trim().default(""),
         categoryId: idSchema.optional(),
         brandId: idSchema.optional(),
-      })
+        state: z.enum(states),
+      }),
     )
     .query(
       async ({
-        input: { search, brandId, categoryId },
+        input: { search, brandId, categoryId, state },
         ctx: { prisma, isAdminPage },
       }) => {
         const models = await prisma.model.findMany({
@@ -202,8 +220,9 @@ export const searchRouter = createTRPCRouter({
                   contains: search,
                 }
               : undefined,
+            createdState: state,
           },
-          take: DefaultLimit,
+          take: defaultLimit,
           select: {
             id: true,
             name: true,
@@ -212,16 +231,6 @@ export const searchRouter = createTRPCRouter({
           },
         });
         return models;
-      }
+      },
     ),
-
-  role: getProcedure(AccessType.readAccess).query(
-    async ({ ctx: { prisma } }) => {
-      return await prisma.role.findMany({
-        include: {
-          accesses: true,
-        },
-      });
-    }
-  ),
 });

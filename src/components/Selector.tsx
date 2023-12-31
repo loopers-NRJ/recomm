@@ -1,7 +1,6 @@
 "use client";
 
-import { FC } from "react";
-
+import { type FC } from "react";
 import {
   Select,
   SelectContent,
@@ -9,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Brand, Category, Model } from "@prisma/client";
+import type { Brand, Category, Model } from "@prisma/client";
 
 interface Props {
   array: Category[] | Brand[] | Model[];

@@ -1,7 +1,8 @@
-import { usePathname } from "next/navigation";
-import { FC } from "react";
+"use client";
+
+import { type FC } from "react";
 import { Button } from "../ui/button";
-import { Session } from "next-auth";
+import { type Session } from "next-auth";
 import Link from "next/link";
 import {
   HomeSolid,
@@ -13,19 +14,21 @@ import {
   CoinSolid,
   CoinOutline,
 } from "./Icons";
+import { usePathname } from "next/navigation";
 
 interface NavItemsProps {
   session: Session | null;
 }
 
 const NavItems: FC<NavItemsProps> = ({ session }) => {
-  const path = usePathname();
   const currentUser = session?.user;
-
-  const HomeIcon = path === "/" ? <HomeSolid /> : <HomeOutline />;
-  const HeartIcon = path === "/favourites" ? <HeartSolid /> : <HeartOutline />;
-  const WishListIcon = path === "/wishlist" ? <StarSolid /> : <StarOutline />;
-  const SellIcon = path === "/sell" ? <CoinSolid /> : <CoinOutline />;
+  const pathname = usePathname();
+  const HomeIcon = pathname === "/" ? <HomeSolid /> : <HomeOutline />;
+  const HeartIcon =
+    pathname === "/favourites" ? <HeartSolid /> : <HeartOutline />;
+  const WishListIcon =
+    pathname === "/wishlist" ? <StarSolid /> : <StarOutline />;
+  const SellIcon = pathname === "/sell" ? <CoinSolid /> : <CoinOutline />;
 
   return (
     <div className="flex h-14 w-full flex-row items-center justify-evenly gap-0 rounded-lg bg-white md:h-fit md:w-fit md:gap-3">
@@ -33,8 +36,8 @@ const NavItems: FC<NavItemsProps> = ({ session }) => {
         <Button
           variant="ghost"
           className={`h-full  w-full min-w-max flex-col justify-between rounded-lg px-6 md:flex-row md:px-4 md:py-2 ${
-            path === "/"
-              ? "rounded-b-none border-b-2 border-b-black md:rounded-md md:border-none md:bg-slate-200/50"
+            pathname === "/"
+              ? "rounded-b-none border-b-2 border-b-black md:rounded-lg md:border-none md:bg-slate-200/50"
               : ""
           }`}
         >
@@ -46,8 +49,8 @@ const NavItems: FC<NavItemsProps> = ({ session }) => {
         <Button
           variant="ghost"
           className={`h-full w-full min-w-max flex-col justify-between rounded-lg px-4 md:flex-row md:px-4 md:py-2 ${
-            path === `/favourites`
-              ? "rounded-b-none border-b-2 border-b-black md:rounded-md md:border-none md:bg-slate-200/50"
+            pathname === `/favourites`
+              ? "rounded-b-none border-b-2 border-b-black md:rounded-lg md:border-none md:bg-slate-200/50"
               : ""
           }
         `}
@@ -61,8 +64,8 @@ const NavItems: FC<NavItemsProps> = ({ session }) => {
         <Button
           variant="ghost"
           className={`h-full w-full min-w-max flex-col justify-between rounded-lg px-4 md:flex-row md:px-4 md:py-2 ${
-            path === `/wishlist`
-              ? "rounded-b-none border-b-2 border-b-black md:rounded-md md:border-none md:bg-slate-200/50"
+            pathname === `/wishlist`
+              ? "rounded-b-none border-b-2 border-b-black md:rounded-lg md:border-none md:bg-slate-200/50"
               : ""
           }
         `}

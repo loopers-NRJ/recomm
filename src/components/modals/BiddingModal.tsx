@@ -1,8 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
-
-import { FC, useEffect, useState } from "react";
-
+import { type FC, useEffect, useState } from "react";
 import useBiddingModal from "@/hooks/useBiddingModal";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross1Icon } from "@radix-ui/react-icons";

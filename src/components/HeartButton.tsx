@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
 
 import useLoginModal from "@/hooks/useLoginModal";
-import { api } from "@/utils/api";
+import { api } from "@/trpc/react";
 
 interface HeartButtonProps {
   enabled?: boolean;
@@ -59,7 +59,7 @@ const HeartButton: React.FC<HeartButtonProps> = ({
       productId,
       removeFromFavourite,
       session?.data?.user,
-    ]
+    ],
   );
 
   return (

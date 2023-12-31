@@ -1,5 +1,5 @@
 import { CommandList } from "cmdk";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Command, CommandInput } from "@/components/ui/command";
 import Suggestions from "./Suggestions";
@@ -9,7 +9,7 @@ const Search = () => {
   const router = useRouter();
 
   return (
-    <Command className="relative overflow-visible rounded-md border">
+    <Command className="relative overflow-visible rounded-lg border">
       <CommandInput
         onValueChange={(key) => {
           setSearchKey(key);
@@ -17,7 +17,7 @@ const Search = () => {
         value={searchKey}
         onKeyDown={(e) => {
           if (e.nativeEvent.key === "Enter") {
-            void router.push(`/?search=${searchKey}`);
+            router.push(`/?search=${searchKey}`);
             setSearchKey(undefined);
           }
         }}

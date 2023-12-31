@@ -1,23 +1,23 @@
-import { api } from "@/utils/api";
+import { api } from "@/trpc/react";
 import Container from "../Container";
 import { useState } from "react";
-import { OptionalItem } from "@/types/custom";
+import { type OptionalItem } from "@/types/custom";
 import Loading from "../common/Loading";
 import { AtomicQuestionType, MultipleChoiceQuestionType } from "@prisma/client";
 
 import { Button } from "../ui/button";
-import { AtomicAnswer } from "./AtomicQuestion";
-import { MultipleChoiceAnswer } from "./MultipleChoiceQuestion";
+import { type AtomicAnswer } from "./AtomicQuestion";
+import { type MultipleChoiceAnswer } from "./MultipleChoiceQuestion";
 import BasicInfoSection from "./BasicInfoSection";
 import AdditionalInfoSection from "./AdditionalInfoSection";
 import ImageUploadSection from "./ImageUploadSection";
 import PricingInfoSection from "./PricingInfoSection";
 import {
-  ProductFormError,
-  ProductSchemaKeys,
+  type ProductFormError,
+  type ProductSchemaKeys,
   productSchema,
 } from "@/utils/validation";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useImageUploader } from "@/utils/imageUpload";
 import { makeIssue } from "zod";
 
@@ -64,9 +64,7 @@ export default function PostingForm({
   const { isLoading, upload } = useImageUploader();
   const router = useRouter();
   const productApi = api.product.createProduct.useMutation({
-    async onSuccess(data) {
-      await router.push(`/users/${data.sellerId}/listings`);
-    },
+    onSuccess: (data) => router.push(`/users/${data.sellerId}/listings`),
   });
 
   const modelApi = api.model.getModelById.useQuery(
@@ -129,7 +127,7 @@ export default function PostingForm({
               type: question.type,
               answerContent: undefined,
             };
-          })
+          }),
         );
 
         setMultipleChoiceAnswers(
@@ -156,10 +154,10 @@ export default function PostingForm({
               type: question.type,
               valueId: undefined,
             };
-          })
+          }),
         );
       },
-    }
+    },
   );
 
   const handleSubmit = async () => {
@@ -195,7 +193,7 @@ export default function PostingForm({
           }
           return acc;
         },
-        {}
+        {},
       );
       if (images.length < 1) {
         errors.images = makeIssue({

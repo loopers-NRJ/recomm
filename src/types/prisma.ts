@@ -3,6 +3,7 @@ import {
   Prisma,
   AtomicQuestionType,
   AccessType,
+  State,
 } from "@prisma/client";
 
 export const userPayload = Prisma.validator<Prisma.UserDefaultArgs>()({
@@ -119,6 +120,14 @@ export type CategoryPayloadIncluded = Prisma.CategoryGetPayload<
   typeof CategoryPayload
 >;
 
+export const BrandPayload = Prisma.validator<Prisma.BrandDefaultArgs>()({
+  include: {
+    createdBy: true,
+  },
+});
+
+export type BrandPayloadIncluded = Prisma.BrandGetPayload<typeof BrandPayload>;
+
 export const FeaturedCategoryPayload =
   Prisma.validator<Prisma.FeaturedCategoryDefaultArgs>()({
     include: {
@@ -130,6 +139,24 @@ export const FeaturedCategoryPayload =
 export type FeaturedCategoryPayloadIncluded = Prisma.FeaturedCategoryGetPayload<
   typeof FeaturedCategoryPayload
 >;
+
+export const RolePayload = Prisma.validator<Prisma.RoleDefaultArgs>()({
+  include: {
+    accesses: true,
+  },
+});
+
+export type RolePayloadIncluded = Prisma.RoleGetPayload<typeof RolePayload>;
+
+export const wishPayload = Prisma.validator<Prisma.WishDefaultArgs>()({
+  include: {
+    category: true,
+    brand: true,
+    model: true,
+  },
+});
+
+export type WishPayloadIncluded = Prisma.WishGetPayload<typeof wishPayload>;
 
 export const MultipleChoiceQuestionTypeArray = [
   MultipleChoiceQuestionType.Checkbox,
@@ -182,20 +209,33 @@ export const accessTypes = [
   AccessType.deleteUser,
 ] as const;
 
-export const RolePayload = Prisma.validator<Prisma.RoleDefaultArgs>()({
-  include: {
-    accesses: true,
-  },
-});
-
-export type RolePayloadIncluded = Prisma.RoleGetPayload<typeof RolePayload>;
-
-export const wishPayload = Prisma.validator<Prisma.WishDefaultArgs>()({
-  include: {
-    category: true,
-    brand: true,
-    model: true,
-  },
-});
-
-export type WishPayloadIncluded = Prisma.WishGetPayload<typeof wishPayload>;
+export const states = [
+  State.Andhra_Pradesh,
+  State.Arunachal_Pradesh,
+  State.Assam,
+  State.Bihar,
+  State.Chhattisgarh,
+  State.Goa,
+  State.Gujarat,
+  State.Haryana,
+  State.Himachal_Pradesh,
+  State.Jharkhand,
+  State.Karnataka,
+  State.Kerala,
+  State.Madhya_Pradesh,
+  State.Maharashtra,
+  State.Manipur,
+  State.Meghalaya,
+  State.Mizoram,
+  State.Nagaland,
+  State.Odisha,
+  State.Punjab,
+  State.Rajasthan,
+  State.Sikkim,
+  State.Tamil_Nadu,
+  State.Telangana,
+  State.Tripura,
+  State.Uttar_Pradesh,
+  State.Uttarakhand,
+  State.West_Bengal,
+] as const;

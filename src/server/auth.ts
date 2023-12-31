@@ -1,11 +1,10 @@
-import { GetServerSidePropsContext } from "next";
-import { DefaultSession, getServerSession, NextAuthOptions } from "next-auth";
+import { type DefaultSession, getServerSession, type NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
-import { env } from "@/env.mjs";
+import { env } from "@/env";
 import { prisma } from "@/server/db";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { UserPayloadIncluded } from "@/types/prisma";
+import type { User } from "@prisma/client";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -15,12 +14,7 @@ import { UserPayloadIncluded } from "@/types/prisma";
  */
 declare module "next-auth" {
   interface Session extends DefaultSession {
-    user: DefaultSession["user"] & UserPayloadIncluded;
-  }
-
-  interface User {
-    // ...other properties
-    lastActive: Date;
+    user: DefaultSession["user"] & User;
   }
 }
 
@@ -56,9 +50,4 @@ export const authOptions: NextAuthOptions = {
  *
  * @see https://next-auth.js.org/configuration/nextjs
  */
-export const getServerAuthSession = (ctx: {
-  req: GetServerSidePropsContext["req"];
-  res: GetServerSidePropsContext["res"];
-}) => {
-  return getServerSession(ctx.req, ctx.res, authOptions);
-};
+export const getServerAuthSession = () => getServerSession(authOptions);
