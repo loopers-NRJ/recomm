@@ -53,6 +53,7 @@ export const QuestionEditor: FC<QuestionEditorProps> = ({
       <Editor question={question} setQuestion={setQuestion} error={error} />
       <div className="flex items-center justify-center gap-2">
         <Switch
+          title="Required"
           checked={question.required}
           onCheckedChange={(checked) => {
             setQuestion({ ...question, required: checked });

@@ -26,6 +26,7 @@ import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import Searchbar from "../Searchbar";
 import TableHeader from "../TableHeader";
+import { ButtonLink } from "@/components/common/ButtonLink";
 
 type SortBy = OmitUndefined<RouterInputs["model"]["getModels"]["sortBy"]>;
 
@@ -188,14 +189,14 @@ export default function ModelTable() {
         id: "edit",
         header: "Edit",
         cell: ({ row }) => (
-          <Button size="sm" variant="outline" className="border-blue-400">
-            <Link
-              href={`/admin/models/edit/?id=${row.original.id}`}
-              className="flex h-full w-full items-center justify-center"
-            >
-              Edit
-            </Link>
-          </Button>
+          <ButtonLink
+            size="sm"
+            variant="outline"
+            className="border-blue-400"
+            href={`/admin/models/edit/${row.original.id}`}
+          >
+            Edit
+          </ButtonLink>
         ),
       },
       {

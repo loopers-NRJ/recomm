@@ -26,6 +26,7 @@ import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import Searchbar from "../Searchbar";
 import TableHeader from "../TableHeader";
+import { ButtonLink } from "@/components/common/ButtonLink";
 
 type SortBy = OmitUndefined<RouterInputs["brand"]["getBrands"]["sortBy"]>;
 
@@ -77,6 +78,7 @@ export default function BrandTable() {
     () => [
       {
         id: "Name",
+
         header: () => (
           <TableHeader
             title="name"
@@ -170,14 +172,14 @@ export default function BrandTable() {
         header: "Edit",
         accessorFn: (row) => row.id,
         cell: ({ row }) => (
-          <Button size="sm" variant="outline" className="border-blue-400">
-            <Link
-              href={`/admin/brands/edit/?id=${row.original.id}`}
-              className="flex h-full w-full items-center justify-center"
-            >
-              Edit
-            </Link>
-          </Button>
+          <ButtonLink
+            size="sm"
+            variant="outline"
+            className="border-blue-400"
+            href={`/admin/brands/edit/${row.original.id}`}
+          >
+            Edit
+          </ButtonLink>
         ),
       },
       {

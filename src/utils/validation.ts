@@ -2,8 +2,8 @@ import { type ZodIssue, z } from "zod";
 
 import {
   type MultipleChoiceQuestionPayloadIncluded,
-  MultipleChoiceQuestionTypeArray,
-  AtomicQuestionTypeArray,
+  multipleChoiceQuestionTypeArray,
+  atomicQuestionTypeArray,
   states,
 } from "@/types/prisma";
 import {
@@ -244,7 +244,7 @@ export const modelSchema = z.object({
         .trim()
         .min(1, "Question cannot be empty")
         .max(255, "Coice must be less than 255 characters"),
-      type: z.enum(MultipleChoiceQuestionTypeArray, {
+      type: z.enum(multipleChoiceQuestionTypeArray, {
         required_error: "Type is required for a question",
         invalid_type_error: "Invalid Question type",
       }),
@@ -271,7 +271,7 @@ export const modelSchema = z.object({
         .trim()
         .min(1, "Question cannot be empty")
         .max(255, "Question must be less than 255 characters"),
-      type: z.enum(AtomicQuestionTypeArray, {
+      type: z.enum(atomicQuestionTypeArray, {
         required_error: "Select a type for the question",
         invalid_type_error: "Invalid Question type",
       }),

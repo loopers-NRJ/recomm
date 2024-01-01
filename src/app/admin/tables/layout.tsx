@@ -1,7 +1,6 @@
 "use client";
 
 import Container from "@/components/Container";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -14,6 +13,7 @@ import { states } from "@/types/prisma";
 import type { State } from "@prisma/client";
 import { usePathname, useRouter } from "next/navigation";
 import { titles } from "./titles";
+import { ButtonLink } from "@/components/common/ButtonLink";
 
 export default function layout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -44,7 +44,7 @@ export default function layout({ children }: { children: React.ReactNode }) {
       <div className="hidden h-fit w-40 shrink-0 rounded-lg border md:block">
         <div className="flex h-full flex-col">
           {titles.map((title) => (
-            <Button
+            <ButtonLink
               key={title}
               className={`
                 justify-start rounded-none
@@ -56,10 +56,10 @@ export default function layout({ children }: { children: React.ReactNode }) {
               `}
               variant="ghost"
               size="sm"
-              onClick={() => router.push(`/admin/tables/${title}`)}
+              href={`/admin/tables/${title}`}
             >
               {title}
-            </Button>
+            </ButtonLink>
           ))}
         </div>
       </div>

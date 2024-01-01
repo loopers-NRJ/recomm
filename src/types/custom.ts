@@ -2,6 +2,7 @@ import type {
   MultipleChoiceQuestionType,
   AtomicQuestionType,
 } from "@prisma/client";
+import { MultipleChoiceQuestionPayloadIncluded } from "./prisma";
 
 export interface Item {
   id: string;

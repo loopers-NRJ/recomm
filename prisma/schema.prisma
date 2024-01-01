@@ -305,6 +305,7 @@ model AtomicQuestion {
     // Meta
     updatedAt DateTime @updatedAt
 
+    @@unique([modelId, questionContent])
     @@index([modelId])
 }
 

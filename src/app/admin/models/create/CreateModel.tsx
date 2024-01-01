@@ -11,8 +11,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAdminSelectedState } from "@/store/SelectedState";
 import type { Item, MultipleChoiceQuestion, Question } from "@/types/custom";
 import {
-  AtomicQuestionTypeArray,
-  MultipleChoiceQuestionTypeArray,
+  atomicQuestionTypeArray,
+  multipleChoiceQuestionTypeArray,
 } from "@/types/prisma";
 import { api } from "@/trpc/react";
 import { useImageUploader } from "@/utils/imageUpload";
@@ -23,7 +23,7 @@ import type {
 } from "@prisma/client";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { v4 as uuid } from "uuid";
 import { type ZodIssue } from "zod";
 import QuestionEditor from "./QuestionEditor";
@@ -72,13 +72,14 @@ export default function CreateModel() {
         return count;
       }
       if (
-        AtomicQuestionTypeArray.includes(question.type as AtomicQuestionType)
+        atomicQuestionTypeArray.includes(question.type as AtomicQuestionType)
       ) {
         count += 1;
       }
     }
     return -1;
   };
+
   const getMultipleChoiceQuestionIndex = (id: string) => {
     let count = 0;
     for (const question of additionalQuestions) {
@@ -86,7 +87,7 @@ export default function CreateModel() {
         return count;
       }
       if (
-        MultipleChoiceQuestionTypeArray.includes(
+        multipleChoiceQuestionTypeArray.includes(
           question.type as MultipleChoiceQuestionType,
         )
       ) {
@@ -107,10 +108,10 @@ export default function CreateModel() {
   const createModel = async () => {
     // split the the questions into atomic and multiple choice questions
     const atomicQuestions = additionalQuestions.filter((question) =>
-      AtomicQuestionTypeArray.includes(question.type as AtomicQuestionType),
+      atomicQuestionTypeArray.includes(question.type as AtomicQuestionType),
     );
     const multipleChoiceQuestions = additionalQuestions.filter((question) =>
-      MultipleChoiceQuestionTypeArray.includes(
+      multipleChoiceQuestionTypeArray.includes(
         question.type as MultipleChoiceQuestionType,
       ),
     ) as MultipleChoiceQuestion[];
@@ -155,6 +156,15 @@ export default function CreateModel() {
 
     changeTab(tab);
   };
+
+  const handleSetQuestion = useCallback(
+    (question: Question) => {
+      const index = additionalQuestions.findIndex((q) => q.id === question.id);
+      additionalQuestions[index] = question;
+      setAdditionalQuestions([...additionalQuestions]);
+    },
+    [additionalQuestions],
+  );
 
   return (
     <Container className="flex justify-center">
@@ -232,13 +242,7 @@ export default function CreateModel() {
               <QuestionEditor
                 key={question.id}
                 question={question}
-                setQuestion={(question) => {
-                  const index = additionalQuestions.findIndex(
-                    (q) => q.id === question.id,
-                  );
-                  additionalQuestions[index] = question;
-                  setAdditionalQuestions([...additionalQuestions]);
-                }}
+                setQuestion={handleSetQuestion}
                 deleteQuestion={() => {
                   const index = additionalQuestions.findIndex(
                     (q) => q.id === question.id,
@@ -251,7 +255,7 @@ export default function CreateModel() {
                     (q) => q.id === question.id,
                   );
                   if (
-                    MultipleChoiceQuestionTypeArray.includes(
+                    multipleChoiceQuestionTypeArray.includes(
                       newType as MultipleChoiceQuestionType,
                     )
                   ) {
@@ -263,7 +267,7 @@ export default function CreateModel() {
                   setAdditionalQuestions([...additionalQuestions]);
                 }}
                 error={formError?.find((e) =>
-                  AtomicQuestionTypeArray.includes(
+                  atomicQuestionTypeArray.includes(
                     question.type as AtomicQuestionType,
                   )
                     ? e.path[1] === getAtomicQuestionIndex(question.id)
@@ -271,7 +275,6 @@ export default function CreateModel() {
                 )}
               />
             ))}
-
             <Button
               variant="ghost"
               onClick={() =>

@@ -25,6 +25,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import Searchbar from "../Searchbar";
 import TableHeader from "../TableHeader";
+import { ButtonLink } from "@/components/common/ButtonLink";
 
 type SortBy = OmitUndefined<
   RouterInputs["category"]["getFeaturedCategories"]["sortBy"]
@@ -149,14 +150,14 @@ export default function FeaturedCategoryTable() {
         id: "edit",
         header: "Edit",
         cell: ({ row }) => (
-          <Button size="sm" variant="outline" className="border-blue-400">
-            <Link
-              href={`/admin/featured-category/edit/?id=${row.original.categoryId}`}
-              className="flex h-full w-full items-center justify-center"
-            >
-              Edit
-            </Link>
-          </Button>
+          <ButtonLink
+            size="sm"
+            variant="outline"
+            className="border-blue-400"
+            href={`/admin/featured-category/edit/?id=${row.original.categoryId}`}
+          >
+            Edit
+          </ButtonLink>
         ),
       },
       {

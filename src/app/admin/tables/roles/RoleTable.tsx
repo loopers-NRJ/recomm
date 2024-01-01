@@ -71,7 +71,7 @@ export default function RoleTable() {
       },
       {
         id: "delete",
-        header: "",
+        header: "Delete",
         accessorFn: (row) => row.id,
         cell: ({ row }) => (
           <Button

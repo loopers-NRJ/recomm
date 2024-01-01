@@ -23,7 +23,7 @@ function CategoryComboBox({
     state: selectedState,
   });
   return (
-    <Label className="flex cursor-pointer items-center justify-between">
+    <Label className="flex w-full cursor-pointer items-center justify-between">
       Category
       <ComboBox
         label="Category"

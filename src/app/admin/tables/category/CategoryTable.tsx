@@ -26,6 +26,7 @@ import Searchbar from "../Searchbar";
 import TableHeader from "../TableHeader";
 import { type RouterInputs } from "@/trpc/shared";
 import { api } from "@/trpc/react";
+import { ButtonLink } from "@/components/common/ButtonLink";
 
 type SortBy = OmitUndefined<
   RouterInputs["category"]["getCategories"]["sortBy"]
@@ -253,22 +254,22 @@ export default function CategoryTable() {
       },
       {
         id: "edit",
-        header: "",
+        header: "Edit",
         accessorFn: (row) => row.id,
         cell: ({ row }) => (
-          <Button variant="outline" size="sm" className="border-blue-400">
-            <Link
-              href={`/admin/category/edit/?id=${row.original.id}`}
-              className="flex h-full w-full items-center justify-center"
-            >
-              Edit
-            </Link>
-          </Button>
+          <ButtonLink
+            variant="outline"
+            size="sm"
+            className="border-blue-400"
+            href={`/admin/category/edit/?id=${row.original.id}`}
+          >
+            Edit
+          </ButtonLink>
         ),
       },
       {
         id: "delete",
-        header: "",
+        header: "Delete",
         accessorFn: (row) => row.id,
         cell: ({ row }) => (
           <Button

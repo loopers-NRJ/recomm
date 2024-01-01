@@ -29,8 +29,8 @@ function BrandComboBox({
   });
 
   return (
-    <div>
-      <Label className="flex items-center justify-between">
+    <>
+      <Label className="flex w-full cursor-pointer items-center justify-between">
         Brand
         <ComboBox
           label="Brands"
@@ -47,7 +47,7 @@ function BrandComboBox({
         />
       </Label>
       {error && <ErrorMessage>{error}</ErrorMessage>}
-    </div>
+    </>
   );
 }
 
