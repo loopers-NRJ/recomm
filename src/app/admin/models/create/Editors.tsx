@@ -3,7 +3,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { type Question } from "@/types/custom";
+import { type Question } from "./types";
 import { MultipleChoiceQuestionType } from "@prisma/client";
 import { Cross1Icon } from "@radix-ui/react-icons";
 import { useState, type FC } from "react";
@@ -45,70 +45,62 @@ export const VariantEditor: FC<EditorProps> = ({
   if (question.type !== MultipleChoiceQuestionType.Variant) {
     return null;
   }
-  return (
-    <div className="flex w-full flex-col gap-1">
-      <Input
-        value={question.questionContent}
-        onChange={(e) =>
-          setQuestion({ ...question, questionContent: e.target.value })
-        }
-        placeholder="Question"
-        className={error?.path[2] === "questionContent" ? "border-red-500" : ""}
-      />
-      <div
-        className={`flex w-full flex-grow flex-wrap items-center gap-1 rounded-lg border border-input bg-background p-1
-      ${
-        error?.path[2] === "choices" && question.choices.length === 0
-          ? "border-red-500"
-          : ""
-      }
-      `}
-      >
-        {question.choices.map((item, index) => (
-          <Button
-            key={item}
-            onClick={() => {
-              const newChoices = [...question.choices];
-              newChoices.splice(index, 1);
-              setQuestion({ ...question, choices: newChoices });
-            }}
-            variant="ghost"
-            className="h-8 w-fit border px-2"
-            size="default"
-          >
-            {item}
-          </Button>
-        ))}
-        <Input
-          type="text"
-          className="w-12 flex-grow border-none outline-none ring-0 focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0 focus-visible:ring-offset-transparent"
-          value={search}
-          placeholder="Enter the choice and press `Comma`"
-          onKeyUp={(e) => {
-            if (e.key === "Backspace" && search.length === 0) {
-              const newChoices = [...question.choices];
-              setSearch(newChoices.pop() ?? "");
-              setQuestion({ ...question, choices: newChoices });
-            }
-          }}
-          onChange={(e) => {
-            const text = e.target.value;
 
-            if (
-              text.endsWith(",") &&
-              search.trim().length > 0 &&
-              question.choices.includes(search.trim()) === false
-            ) {
-              setQuestion({
-                ...question,
-                choices: [...question.choices, search.trim()],
-              });
-              setSearch("");
-            } else {
-              setSearch(text);
-            }
-          }}
+  return (
+    <div className="w-full">
+      <Label>
+        <Input
+          value={question.questionContent}
+          onChange={(e) =>
+            setQuestion({ ...question, questionContent: e.target.value })
+          }
+          placeholder="Enter your Question"
+          className={
+            error?.path[2] === "questionContent" ? "border-red-500" : ""
+          }
         />
+      </Label>
+      <div>
+        <div className="flex flex-wrap gap-2 py-1">
+          {question.choices.map((item, index) => (
+            <Button
+              key={item}
+              onClick={() => {
+                const newChoices = [...question.choices];
+                newChoices.splice(index, 1);
+                setQuestion({ ...question, choices: newChoices });
+              }}
+              variant="ghost"
+              className="h-8 w-fit border px-2"
+              size="default"
+            >
+              {item}
+            </Button>
+          ))}
+        </div>
+        <Label className="flex items-center gap-2">
+          <Input
+            type="text"
+            // decrease the height of the input
+            placeholder="Enter the choice and press `Enter Key`"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && search.trim().length > 0) {
+                setQuestion({
+                  ...question,
+                  choices: [...question.choices, search.trim()],
+                });
+                setSearch("");
+              }
+            }}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className={
+              error?.path[2] === "choices" && question.choices.length === 0
+                ? "border-red-500"
+                : ""
+            }
+          />
+        </Label>
       </div>
     </div>
   );

@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAdminSelectedState } from "@/store/SelectedState";
-import type { Item, MultipleChoiceQuestion, Question } from "@/types/custom";
+import type { Item } from "@/types/custom";
 import {
   atomicQuestionTypeArray,
   multipleChoiceQuestionTypeArray,
@@ -27,6 +27,7 @@ import { useCallback, useState } from "react";
 import { v4 as uuid } from "uuid";
 import { type ZodIssue } from "zod";
 import QuestionEditor from "./QuestionEditor";
+import type { Question, MultipleChoiceQuestion } from "./types";
 
 type Tab = "tab-1" | "tab-2";
 
@@ -171,7 +172,7 @@ export default function CreateModel() {
       <Tabs
         defaultValue="tab-1"
         value={tab}
-        className="h-full w-full md:h-fit md:w-4/6 lg:h-fit lg:w-3/6 xl:w-3/6"
+        className="h-full w-full md:h-fit md:w-5/6 lg:h-fit lg:w-4/6 xl:w-4/6"
       >
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="tab-1" onClick={() => handleChangeTab("tab-1")}>

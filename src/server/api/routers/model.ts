@@ -1,8 +1,19 @@
 import slugify from "@/lib/slugify";
 import { z } from "zod";
 
-import { modelsPayload, singleModelPayload, states } from "@/types/prisma";
-import { idSchema, modelSchema } from "@/utils/validation";
+import {
+  atomicQuestionTypeArray,
+  modelsPayload,
+  multipleChoiceQuestionTypeArray,
+  singleModelPayload,
+  states,
+} from "@/types/prisma";
+import {
+  atomicQuestionSchema,
+  idSchema,
+  modelSchema,
+  multipleChoiceQuestionSchema,
+} from "@/utils/validation";
 
 import { createTRPCRouter, getProcedure, publicProcedure } from "../trpc";
 import { AccessType } from "@prisma/client";
@@ -202,27 +213,49 @@ export const modelRouter = createTRPCRouter({
         // TODO: enable updating options and questions
         z.object({
           id: idSchema,
+          categoryId: idSchema.optional(),
+          brandId: idSchema.optional(),
+          active: z.boolean().optional(),
+          createdState: z.enum(states).optional(),
           name: z.string().min(1).max(255),
-          categoryId: idSchema.optional(),
-          active: z.boolean().optional(),
         }),
         z.object({
           id: idSchema,
           name: z.string().min(1).max(255).optional(),
+          brandId: idSchema.optional(),
+          active: z.boolean().optional(),
+          createdState: z.enum(states).optional(),
           categoryId: idSchema,
-          active: z.boolean().optional(),
         }),
         z.object({
           id: idSchema,
           name: z.string().min(1).max(255).optional(),
           categoryId: idSchema.optional(),
+          active: z.boolean().optional(),
+          createdState: z.enum(states).optional(),
+          brandId: idSchema,
+        }),
+        z.object({
+          id: idSchema,
+          name: z.string().min(1).max(255).optional(),
+          categoryId: idSchema.optional(),
+          brandId: idSchema.optional(),
+          createdState: z.enum(states).optional(),
           active: z.boolean(),
+        }),
+        z.object({
+          id: idSchema,
+          name: z.string().min(1).max(255).optional(),
+          categoryId: idSchema.optional(),
+          brandId: idSchema.optional(),
+          active: z.boolean().optional(),
+          createdState: z.enum(states),
         }),
       ]),
     )
     .mutation(
       async ({
-        input: { id, name: newName, categoryId, active },
+        input: { id, name: newName, categoryId, active, brandId, createdState },
         ctx: { prisma },
       }) => {
         // check whether the model exists
@@ -266,7 +299,15 @@ export const modelRouter = createTRPCRouter({
                     },
                   }
                 : undefined,
+            brand: brandId
+              ? {
+                  connect: {
+                    id: brandId,
+                  },
+                }
+              : undefined,
             active,
+            createdState: createdState,
           },
           include: singleModelPayload.include,
         });
@@ -274,6 +315,154 @@ export const modelRouter = createTRPCRouter({
         return model;
       },
     ),
+  addAtomicQuestion: getProcedure(AccessType.updateModel)
+    .input(atomicQuestionSchema.extend({ modelId: idSchema }))
+    .mutation(async ({ input: data, ctx: { prisma } }) => {
+      return prisma.atomicQuestion.create({ data });
+    }),
+  addMultipleChoiceQuestion: getProcedure(AccessType.updateModel)
+    .input(multipleChoiceQuestionSchema.extend({ modelId: idSchema }))
+    .mutation(async ({ input: question, ctx: { prisma } }) => {
+      return await prisma.multipleChoiceQuestion.create({
+        data: {
+          questionContent: question.questionContent,
+          model: {
+            connect: {
+              id: question.modelId,
+            },
+          },
+          type: question.type,
+          choices: {
+            createMany: {
+              data: question.choices.map((value) => ({
+                value,
+                modelId: question.modelId,
+              })),
+            },
+          },
+        },
+        include: {
+          choices: true,
+        },
+      });
+    }),
+  deleteAtomicQuestion: getProcedure(AccessType.updateModel)
+    .input(
+      z.object({
+        questionId: idSchema,
+      }),
+    )
+    .mutation(async ({ input: { questionId }, ctx: { prisma } }) => {
+      await prisma.atomicQuestion.delete({
+        where: { id: questionId },
+      });
+    }),
+  deleteMultipleChoiceQuestion: getProcedure(AccessType.updateModel)
+    .input(
+      z.object({
+        questionId: idSchema,
+      }),
+    )
+    .mutation(async ({ input: { questionId }, ctx: { prisma } }) => {
+      await prisma.multipleChoiceQuestion.delete({
+        where: { id: questionId },
+      });
+    }),
+  updateAtomicQuestion: getProcedure(AccessType.updateModel)
+    .input(
+      z.union([
+        z.object({
+          questionId: idSchema,
+          required: z.boolean(),
+          questionContent: z.string().trim().min(0).optional(),
+          type: z.enum(atomicQuestionTypeArray).optional(),
+        }),
+        z.object({
+          questionId: idSchema,
+          required: z.boolean().optional(),
+          questionContent: z.string().trim().min(0),
+          type: z.enum(atomicQuestionTypeArray).optional(),
+        }),
+        z.object({
+          questionId: idSchema,
+          required: z.boolean().optional(),
+          questionContent: z.string().trim().min(0).optional(),
+          type: z.enum(atomicQuestionTypeArray),
+        }),
+      ]),
+    )
+    .mutation(async ({ input: { questionId, ...data }, ctx: { prisma } }) => {
+      return await prisma.atomicQuestion.update({
+        where: { id: questionId },
+        data,
+      });
+    }),
+  updateMultipleChoiceQuestion: getProcedure(AccessType.updateModel)
+    .input(
+      z.union([
+        z.object({
+          questionId: idSchema,
+          required: z.boolean(),
+          questionContent: z.string().trim().min(0).optional(),
+          type: z.enum(multipleChoiceQuestionTypeArray).optional(),
+        }),
+        z.object({
+          questionId: idSchema,
+          required: z.boolean().optional(),
+          questionContent: z.string().trim().min(0),
+          type: z.enum(multipleChoiceQuestionTypeArray).optional(),
+        }),
+        z.object({
+          questionId: idSchema,
+          required: z.boolean().optional(),
+          questionContent: z.string().trim().min(0).optional(),
+          type: z.enum(multipleChoiceQuestionTypeArray),
+        }),
+      ]),
+    )
+    .mutation(async ({ input: { questionId, ...data }, ctx: { prisma } }) => {
+      return await prisma.multipleChoiceQuestion.update({
+        where: { id: questionId },
+        data,
+        include: { choices: true },
+      });
+    }),
+  addChoice: getProcedure(AccessType.updateModel)
+    .input(
+      z.object({
+        value: z.string().trim().min(1),
+        modelId: idSchema,
+        questionId: idSchema,
+      }),
+    )
+    .mutation(async ({ input: data, ctx: { prisma } }) => {
+      const result = await prisma.choice.create({ data });
+      return result;
+    }),
+  deleteChoice: getProcedure(AccessType.updateModel)
+    .input(
+      z.object({
+        choiceId: idSchema,
+      }),
+    )
+    .mutation(async ({ input: { choiceId }, ctx: { prisma } }) => {
+      await prisma.choice.delete({
+        where: { id: choiceId },
+      });
+    }),
+  updateChoice: getProcedure(AccessType.updateModel)
+    .input(
+      z.object({
+        choiceId: idSchema,
+        value: z.string().trim().min(1),
+      }),
+    )
+    .mutation(async ({ input: { choiceId, value }, ctx: { prisma } }) => {
+      return await prisma.choice.update({
+        where: { id: choiceId },
+        data: { value },
+      });
+    }),
   deleteModelById: getProcedure(AccessType.deleteModel)
     .input(z.object({ modelId: idSchema }))
     .mutation(async ({ input: { modelId: id }, ctx: { prisma } }) => {

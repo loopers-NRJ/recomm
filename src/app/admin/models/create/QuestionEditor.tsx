@@ -1,7 +1,6 @@
 import { Switch } from "@/components/ui/switch";
 import { allQuestionTypes, type AllQuestionType } from "@/types/prisma";
 import { AtomicQuestionType, MultipleChoiceQuestionType } from "@prisma/client";
-import { Cross1Icon } from "@radix-ui/react-icons";
 import { type FC } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,10 +11,20 @@ import {
   VariantEditor,
   type EditorProps,
 } from "./Editors";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import { Cross1Icon } from "@radix-ui/react-icons";
 
 interface QuestionEditorProps extends EditorProps {
   changeQuestionType: (newType: AllQuestionType) => void;
   deleteQuestion: () => void;
+  className?: string;
 }
 
 export const QuestionEditor: FC<QuestionEditorProps> = ({
@@ -24,6 +33,7 @@ export const QuestionEditor: FC<QuestionEditorProps> = ({
   deleteQuestion,
   changeQuestionType,
   error,
+  className,
 }) => {
   // create UI based on the question type
   let Editor: FC<EditorProps>;
@@ -49,7 +59,7 @@ export const QuestionEditor: FC<QuestionEditorProps> = ({
   }
 
   return (
-    <div className="flex items-start gap-2">
+    <div className={cn("flex items-start gap-2", className)}>
       <Editor question={question} setQuestion={setQuestion} error={error} />
       <div className="flex items-center justify-center gap-2">
         <Switch
@@ -61,25 +71,30 @@ export const QuestionEditor: FC<QuestionEditorProps> = ({
           className="scale-90 data-[state=checked]:bg-red-400"
         />
 
-        <select
-          className="flex h-10 rounded-lg border border-input bg-background py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          onChange={(e) => {
-            changeQuestionType(e.target.value as AllQuestionType);
+        <Select
+          value={question.type}
+          onValueChange={(value) => {
+            changeQuestionType(value as AllQuestionType);
           }}
         >
-          {allQuestionTypes.map((questionType) => (
-            <option value={questionType} key={questionType}>
-              {questionType}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger className="w-[200px] shrink-0">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {allQuestionTypes.map((type) => (
+              <SelectItem value={type} key={type}>
+                {type}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Button
           size="sm"
           variant="ghost"
-          className="h-6 w-6 p-0"
           onClick={deleteQuestion}
+          className="h-6 w-6 p-0"
         >
-          <Cross1Icon className="text-red-400" />
+          <Cross1Icon className="text-red-600" />
         </Button>
       </div>
     </div>

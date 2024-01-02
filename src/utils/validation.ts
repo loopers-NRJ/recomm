@@ -225,6 +225,47 @@ export type ProductFormError = {
   multipleChoiceAnswers?: ZodIssue[];
 };
 
+export const multipleChoiceQuestionSchema = z.object({
+  questionContent: z
+    .string({
+      required_error: "Enter the question",
+    })
+    .trim()
+    .min(1, "Question cannot be empty")
+    .max(255, "Coice must be less than 255 characters"),
+  type: z.enum(multipleChoiceQuestionTypeArray, {
+    required_error: "Type is required for a question",
+    invalid_type_error: "Invalid Question type",
+  }),
+  required: z.boolean().default(true),
+  choices: z
+    .array(
+      z
+        .string({
+          required_error: "Enter a value",
+        })
+        .trim()
+        .min(1, "Choice cannot be empty")
+        .max(255, "Choice must be less than 255 characters"),
+    )
+    .nonempty({ message: "Enter at least one choice" }),
+});
+
+export const atomicQuestionSchema = z.object({
+  questionContent: z
+    .string({
+      required_error: "Enter a question",
+    })
+    .trim()
+    .min(1, "Question cannot be empty")
+    .max(255, "Question must be less than 255 characters"),
+  type: z.enum(atomicQuestionTypeArray, {
+    required_error: "Select a type for the question",
+    invalid_type_error: "Invalid Question type",
+  }),
+  required: z.boolean().default(true),
+});
+
 export const modelSchema = z.object({
   name: z
     .string({
@@ -235,49 +276,8 @@ export const modelSchema = z.object({
     .max(255, "Name must be less than 255 characters"),
   brandId: idSchema,
   categoryId: idSchema,
-  multipleChoiceQuestions: z.array(
-    z.object({
-      questionContent: z
-        .string({
-          required_error: "Enter the question",
-        })
-        .trim()
-        .min(1, "Question cannot be empty")
-        .max(255, "Coice must be less than 255 characters"),
-      type: z.enum(multipleChoiceQuestionTypeArray, {
-        required_error: "Type is required for a question",
-        invalid_type_error: "Invalid Question type",
-      }),
-      required: z.boolean().default(true),
-      choices: z
-        .array(
-          z
-            .string({
-              required_error: "Enter a value",
-            })
-            .trim()
-            .min(1, "Choice cannot be empty")
-            .max(255, "Choice must be less than 255 characters"),
-        )
-        .nonempty({ message: "Enter at least one choice" }),
-    }),
-  ),
-  atomicQuestions: z.array(
-    z.object({
-      questionContent: z
-        .string({
-          required_error: "Enter a question",
-        })
-        .trim()
-        .min(1, "Question cannot be empty")
-        .max(255, "Question must be less than 255 characters"),
-      type: z.enum(atomicQuestionTypeArray, {
-        required_error: "Select a type for the question",
-        invalid_type_error: "Invalid Question type",
-      }),
-      required: z.boolean().default(true),
-    }),
-  ),
+  multipleChoiceQuestions: z.array(multipleChoiceQuestionSchema),
+  atomicQuestions: z.array(atomicQuestionSchema),
   state: z.enum(states),
 });
 
