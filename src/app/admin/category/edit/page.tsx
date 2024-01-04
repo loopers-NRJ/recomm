@@ -5,7 +5,7 @@ import EditCategory from "./EditCategory";
 
 const EditCategoryPage = AdminPage<undefined, { id: string }>(async (props) => {
   const categoryId = props.searchParams.id;
-  const category = await api.category.getCategoryById.query({ categoryId });
+  const category = await api.category.byId.query({ categoryId });
 
   if (!category) {
     return notFound();

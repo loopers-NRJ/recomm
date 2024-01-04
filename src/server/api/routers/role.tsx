@@ -6,7 +6,7 @@ import { idSchema } from "@/utils/validation";
 import { defaultSortOrder } from "@/utils/constants";
 
 export const RoleRouter = createTRPCRouter({
-  getRoles: getProcedure(AccessType.readAccess)
+  all: getProcedure(AccessType.readAccess)
     .input(
       z.object({
         search: z.string().trim().default(""),
@@ -26,7 +26,7 @@ export const RoleRouter = createTRPCRouter({
         },
       });
     }),
-  getRole: getProcedure(AccessType.readAccess)
+  byId: getProcedure(AccessType.readAccess)
     .input(z.object({ id: idSchema }))
     .query(async ({ input: { id }, ctx: { prisma } }) => {
       return prisma.role.findUnique({
@@ -34,7 +34,7 @@ export const RoleRouter = createTRPCRouter({
         include: { accesses: true },
       });
     }),
-  createRole: getProcedure(AccessType.createRole)
+  create: getProcedure(AccessType.createRole)
     .input(
       z.object({
         name: z.string(),
@@ -51,12 +51,12 @@ export const RoleRouter = createTRPCRouter({
         },
       });
     }),
-  deleteRole: getProcedure(AccessType.deleteRole)
+  delete: getProcedure(AccessType.deleteRole)
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input: { id }, ctx: { prisma } }) => {
       return prisma.role.delete({ where: { id } });
     }),
-  addAccessToRole: getProcedure(AccessType.updateRole)
+  addAccess: getProcedure(AccessType.updateRole)
     .input(
       z.object({
         roleId: idSchema,
@@ -75,7 +75,7 @@ export const RoleRouter = createTRPCRouter({
         });
       },
     ),
-  removeAccessFromRole: getProcedure(AccessType.updateRole)
+  removeAccess: getProcedure(AccessType.updateRole)
     .input(
       z.object({
         roleId: idSchema,

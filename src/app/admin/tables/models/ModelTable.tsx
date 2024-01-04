@@ -28,7 +28,7 @@ import Searchbar from "../Searchbar";
 import TableHeader from "../TableHeader";
 import { ButtonLink } from "@/components/common/ButtonLink";
 
-type SortBy = OmitUndefined<RouterInputs["model"]["getModels"]["sortBy"]>;
+type SortBy = OmitUndefined<RouterInputs["model"]["all"]["sortBy"]>;
 
 export default function ModelTable() {
   const searchParams = useSearchParams();
@@ -55,14 +55,14 @@ export default function ModelTable() {
   );
 
   const [updatingModelId, setUpdatingModelId] = useState<string>();
-  const updateModelById = api.model.updateModelById.useMutation();
+  const updateModelById = api.model.update.useMutation();
 
   const selectedState = useAdminSelectedState((selected) => selected.state);
   const [search, setSearch] = useQueryState(
     "search",
     parseAsString.withDefault(defaultSearch),
   );
-  const modelsApi = api.model.getModels.useInfiniteQuery(
+  const modelsApi = api.model.all.useInfiniteQuery(
     {
       search,
       sortBy,
@@ -76,7 +76,7 @@ export default function ModelTable() {
     },
   );
 
-  const deleteModelApi = api.model.deleteModelById.useMutation();
+  const deleteModelApi = api.model.delete.useMutation();
   const [deleteModelId, setDeleteModelId] = useState<string>();
 
   const columns: ColumnDef<ModelPayloadIncluded>[] = useMemo(

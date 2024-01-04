@@ -25,9 +25,8 @@ const HeartButton: React.FC<HeartButtonProps> = ({
     setHasFavourited(enabled ?? false);
   }, [enabled]);
 
-  const addToFavourite = api.product.addProductToFavorites.useMutation();
-  const removeFromFavourite =
-    api.product.removeProductFromFavorites.useMutation();
+  const addToFavourite = api.product.addToFavorites.useMutation();
+  const removeFromFavourite = api.product.removeFromFavorites.useMutation();
 
   const toggleFavourite = useCallback(
     async (e: React.MouseEvent) => {

@@ -51,8 +51,7 @@ export default function EditFeaturedCategory({
     return result;
   };
 
-  const updateFeaturedCategoryApi =
-    api.category.updateFeaturedCategoryById.useMutation();
+  const updateFeaturedCategoryApi = api.category.updateFeatured.useMutation();
 
   const updateFeaturedCategory = async () => {
     try {

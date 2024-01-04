@@ -26,7 +26,7 @@ export default function PostingForm({
 }: {
   selectedCategorySlug: string;
 }) {
-  const categoryApi = api.category.getCategoryBySlug.useQuery({
+  const categoryApi = api.category.bySlug.useQuery({
     categorySlug: selectedCategorySlug,
   });
 
@@ -63,11 +63,11 @@ export default function PostingForm({
 
   const { isLoading, upload } = useImageUploader();
   const router = useRouter();
-  const productApi = api.product.createProduct.useMutation({
+  const productApi = api.product.create.useMutation({
     onSuccess: (data) => router.push(`/users/${data.sellerId}/listings`),
   });
 
-  const modelApi = api.model.getModelById.useQuery(
+  const modelApi = api.model.byId.useQuery(
     {
       modelId: selectedModel?.id,
     },

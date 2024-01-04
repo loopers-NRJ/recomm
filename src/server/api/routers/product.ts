@@ -29,7 +29,7 @@ import {
 } from "@/utils/constants";
 
 export const productRouter = createTRPCRouter({
-  getProducts: publicProcedure
+  all: publicProcedure
     .input(
       z.object({
         search: z.string().trim().default(""),
@@ -137,7 +137,7 @@ export const productRouter = createTRPCRouter({
         };
       },
     ),
-  getProductById: publicProcedure
+  byId: publicProcedure
     .input(z.object({ productId: idSchema }))
     .query(async ({ input: { productId: id }, ctx: { prisma, session } }) => {
       const product = await prisma.product.findUnique({
@@ -165,7 +165,7 @@ export const productRouter = createTRPCRouter({
       }
       return product as ProductWithIsFavorite;
     }),
-  getProductBySlug: publicProcedure
+  bySlug: publicProcedure
     .input(z.object({ productSlug: z.string() }))
     .query(async ({ input: { productSlug }, ctx: { prisma, session } }) => {
       const product = await prisma.product.findUnique({
@@ -194,7 +194,7 @@ export const productRouter = createTRPCRouter({
       return product as ProductWithIsFavorite;
     }),
   // createProduct: getProcedure(AccessType.subscriber)
-  createProduct: protectedProcedure
+  create: protectedProcedure
     .input(productSchema)
     .mutation(
       async ({
@@ -365,10 +365,7 @@ export const productRouter = createTRPCRouter({
       },
     ),
 
-  deleteProductById: getProcedure([
-    AccessType.subscriber,
-    AccessType.deleteProduct,
-  ])
+  delete: getProcedure([AccessType.subscriber, AccessType.deleteProduct])
     .input(z.object({ productId: idSchema }))
     .mutation(
       async ({ input: { productId: id }, ctx: { prisma, session } }) => {
@@ -435,7 +432,7 @@ export const productRouter = createTRPCRouter({
         return product;
       },
     ),
-  addProductToFavorites: protectedProcedure
+  addToFavorites: protectedProcedure
     .input(z.object({ productId: idSchema }))
     .mutation(
       async ({ input: { productId: id }, ctx: { prisma, session } }) => {
@@ -468,7 +465,7 @@ export const productRouter = createTRPCRouter({
         });
       },
     ),
-  removeProductFromFavorites: protectedProcedure
+  removeFromFavorites: protectedProcedure
     .input(z.object({ productId: idSchema }))
     .mutation(
       async ({ input: { productId: id }, ctx: { prisma, session } }) => {

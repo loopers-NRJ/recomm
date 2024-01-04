@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function CreateBrand() {
-  const createBrandApi = api.brand.createBrand.useMutation();
+  const createBrandApi = api.brand.create.useMutation();
   const [brandName, setBrandName] = useState("");
 
   const [error, setError] = useState<string>();

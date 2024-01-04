@@ -39,7 +39,7 @@ export default async function Navbar() {
   let isAdmin = false;
   if (roleId) {
     try {
-      const role = await api.role.getRole.query({ id: roleId });
+      const role = await api.role.byId.query({ id: roleId });
       const accesses = role?.accesses.map((access) => access.type);
       if (accesses?.includes(AccessType.readAccess)) {
         isAdmin = true;

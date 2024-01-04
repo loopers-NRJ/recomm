@@ -15,7 +15,7 @@ export default function Sellit() {
   );
   const selectedState = useClientSelectedState((selected) => selected.state);
 
-  const categoryApi = api.category.getCategoriesWithoutPayload.useInfiniteQuery(
+  const categoryApi = api.category.allWithoutPayload.useInfiniteQuery(
     {
       parentSlug: parentCategorySlug ?? undefined,
       parentId: parentCategorySlug ? undefined : null,
@@ -25,15 +25,14 @@ export default function Sellit() {
       getNextPageParam: (page) => page.nextCursor,
     },
   );
-  const featuredCategoryApi =
-    api.category.getFeaturedCategories.useInfiniteQuery(
-      {
-        state: selectedState,
-      },
-      {
-        getNextPageParam: (page) => page.nextCursor,
-      },
-    );
+  const featuredCategoryApi = api.category.featured.useInfiniteQuery(
+    {
+      state: selectedState,
+    },
+    {
+      getNextPageParam: (page) => page.nextCursor,
+    },
+  );
 
   if (categoryApi.isError || featuredCategoryApi.isError) {
     console.log(categoryApi.error ?? featuredCategoryApi.error);

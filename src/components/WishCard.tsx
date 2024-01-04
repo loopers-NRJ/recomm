@@ -24,7 +24,7 @@ const WishCard: FC<WishCardProps> = ({ wish }) => {
   const model = wish.model?.name;
   const brand = wish.brand?.name;
   const status = wish.status;
-  const deleteWish = api.wish.deleteWish.useMutation();
+  const deleteWish = api.wish.delete.useMutation();
   const handleDelete = (id: string) => {
     deleteWish.mutate({
       wishId: id,

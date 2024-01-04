@@ -29,12 +29,12 @@ export default function RoleTable() {
     "search",
     parseAsString.withDefault(defaultSearch),
   );
-  const rolesApi = api.role.getRoles.useQuery({
+  const rolesApi = api.role.all.useQuery({
     search,
     sortOrder,
   });
   const [deletingRoleId, setDeletingRoleId] = useState<string>();
-  const deleteRoleApi = api.role.deleteRole.useMutation();
+  const deleteRoleApi = api.role.delete.useMutation();
   const columns: ColumnDef<RolePayloadIncluded>[] = useMemo(
     () => [
       {

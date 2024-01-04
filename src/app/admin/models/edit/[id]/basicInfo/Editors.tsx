@@ -22,7 +22,7 @@ import { states } from "@/types/prisma";
 
 export function ModelBrandEdit({ model }: { model: Model }) {
   const [selectedBrand, setSelectedBrand] = useState<Item>(model.brand);
-  const updateModel = api.model.updateModelById.useMutation();
+  const updateModel = api.model.update.useMutation();
 
   return (
     <div className="flex w-full items-center justify-between gap-2">
@@ -57,7 +57,7 @@ export function ModelCategoryEdit({ model }: { model: Model }) {
   const [selectedCategory, setSelectedCategory] = useState<Item>(
     model.category,
   );
-  const updateModel = api.model.updateModelById.useMutation();
+  const updateModel = api.model.update.useMutation();
   return (
     <div className="flex w-full items-center justify-between gap-2">
       <CategoryComboBox
@@ -91,7 +91,7 @@ export function ModelNameEdit({ model }: { model: Model }) {
   const [value, setValue] = useState(model.name);
   const [modelNameEditEnabled, setModelNameEditEnabled] = useState(false);
 
-  const updateModel = api.model.updateModelById.useMutation();
+  const updateModel = api.model.update.useMutation();
   return (
     <div className="flex w-full items-center justify-between gap-2">
       <Label className="flex w-full items-center justify-between gap-2">
@@ -141,7 +141,7 @@ export function ModelNameEdit({ model }: { model: Model }) {
 
 export function ModelCreatedStateEdit({ model }: { model: Model }) {
   const [createdState, setCreatedState] = useState<State>(State.Tamil_Nadu);
-  const updateModel = api.model.updateModelById.useMutation();
+  const updateModel = api.model.update.useMutation();
 
   return (
     <div className="flex w-full items-center justify-between gap-2">

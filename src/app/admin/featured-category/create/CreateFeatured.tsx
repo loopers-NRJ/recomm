@@ -16,8 +16,7 @@ export default function CreateFeaturedCategory() {
   const searchParams = useSearchParams();
   const urlId = searchParams.get("id");
 
-  const createFeaturedCategoryApi =
-    api.category.makeCategoryFeaturedById.useMutation();
+  const createFeaturedCategoryApi = api.category.addToFeatured.useMutation();
   const [selectedCategory, setSelectedCategory] = useState<OptionalItem>(
     urlId
       ? {

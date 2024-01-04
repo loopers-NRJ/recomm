@@ -16,7 +16,7 @@ import {
 } from "@/types/prisma";
 
 export const brandRouter = createTRPCRouter({
-  getBrands: publicProcedure
+  all: publicProcedure
     .input(
       z.object({
         search: z.string().trim().default(""),
@@ -73,7 +73,7 @@ export const brandRouter = createTRPCRouter({
         };
       },
     ),
-  getAllSubBrandsByCategoryId: publicProcedure
+  byCategoryId: publicProcedure
     .input(
       z.object({
         search: z.string().trim().default(""),
@@ -162,7 +162,7 @@ export const brandRouter = createTRPCRouter({
         };
       },
     ),
-  getBrandById: publicProcedure
+  byId: publicProcedure
     .input(z.object({ brandId: idSchema.nullish() }))
     .query(async ({ input: { brandId: id }, ctx: { prisma } }) => {
       if (!id) {
@@ -180,7 +180,7 @@ export const brandRouter = createTRPCRouter({
       return brand;
     }),
 
-  createBrand: getProcedure(AccessType.createBrand)
+  create: getProcedure(AccessType.createBrand)
     .input(
       z.object({
         name: z.string(),
@@ -213,7 +213,7 @@ export const brandRouter = createTRPCRouter({
       });
       return brand;
     }),
-  updateBrandById: getProcedure(AccessType.updateBrand)
+  update: getProcedure(AccessType.updateBrand)
     .input(
       z.union([
         z.object({
@@ -274,7 +274,7 @@ export const brandRouter = createTRPCRouter({
         return brand;
       },
     ),
-  deleteBrandById: getProcedure(AccessType.deleteBrand)
+  delete: getProcedure(AccessType.deleteBrand)
     .input(z.object({ brandId: idSchema }))
     .mutation(async ({ input: { brandId: id }, ctx: { prisma } }) => {
       const existingBrand = await prisma.brand.findUnique({

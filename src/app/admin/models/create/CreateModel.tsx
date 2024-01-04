@@ -41,7 +41,7 @@ const tab1Schema = modelSchema.pick({
 export default function CreateModel() {
   const [tab, changeTab] = useState<Tab>("tab-1");
 
-  const createModelApi = api.model.createModel.useMutation();
+  const createModelApi = api.model.create.useMutation();
 
   const [modelName, setModelName] = useState("");
   // file object to store the file to upload

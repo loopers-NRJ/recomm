@@ -32,7 +32,7 @@ import { useMemo, useState } from "react";
 import Searchbar from "../Searchbar";
 import TableHeader from "../TableHeader";
 
-type SortBy = OmitUndefined<RouterInputs["user"]["getUsers"]["sortBy"]>;
+type SortBy = OmitUndefined<RouterInputs["user"]["all"]["sortBy"]>;
 
 export default function UserTable() {
   const [sortOrder, setSortOrder] = useQueryState<SortOrder>(
@@ -56,10 +56,10 @@ export default function UserTable() {
     parseAsString.withDefault(defaultSearch),
   );
 
-  const rolesApi = api.role.getRoles.useQuery({});
+  const rolesApi = api.role.all.useQuery({});
 
   const [selectedRole, setSelectedRole] = useState<string>();
-  const usersApi = api.user.getUsers.useInfiniteQuery(
+  const usersApi = api.user.all.useInfiniteQuery(
     {
       search,
       sortBy,
@@ -71,7 +71,7 @@ export default function UserTable() {
     },
   );
 
-  const updateUserRole = api.user.updateUserRole.useMutation();
+  const updateUserRole = api.user.updateRole.useMutation();
 
   const columns: ColumnDef<UserPayloadIncluded>[] = useMemo(
     () => [

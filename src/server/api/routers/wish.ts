@@ -6,7 +6,7 @@ import { WishStatus } from "@prisma/client";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const wishRouter = createTRPCRouter({
-  createWish: protectedProcedure
+  create: protectedProcedure
     .input(
       z
         .object({
@@ -30,8 +30,8 @@ export const wishRouter = createTRPCRouter({
               brandId: idSchema.optional(),
               modelId: idSchema,
             }),
-          ])
-        )
+          ]),
+        ),
     )
     .mutation(
       async ({
@@ -104,9 +104,9 @@ export const wishRouter = createTRPCRouter({
           },
         });
         return wish;
-      }
+      },
     ),
-  deleteWish: protectedProcedure
+  delete: protectedProcedure
     .input(z.object({ wishId: idSchema }))
     .mutation(async ({ input: { wishId: id }, ctx: { prisma, session } }) => {
       const user = session.user;

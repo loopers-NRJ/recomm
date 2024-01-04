@@ -23,7 +23,7 @@ import { idSchema, imageInputs } from "@/utils/validation";
 import { AccessType } from "@prisma/client";
 
 export const categoryRouter = createTRPCRouter({
-  getCategories: publicProcedure
+  all: publicProcedure
     .input(
       z.object({
         search: z.string().trim().default(""),
@@ -96,7 +96,7 @@ export const categoryRouter = createTRPCRouter({
       },
     ),
 
-  getCategoriesWithoutPayload: publicProcedure
+  allWithoutPayload: publicProcedure
     .input(
       z.object({
         search: z.string().trim().default(""),
@@ -159,7 +159,7 @@ export const categoryRouter = createTRPCRouter({
         };
       },
     ),
-  getCategoryById: publicProcedure
+  byId: publicProcedure
     .input(z.object({ categoryId: idSchema.nullish() }))
     .query(async ({ input: { categoryId: id }, ctx: { prisma } }) => {
       if (!id) {
@@ -176,7 +176,7 @@ export const categoryRouter = createTRPCRouter({
       }
       return category;
     }),
-  getCategoryBySlug: publicProcedure
+  bySlug: publicProcedure
     .input(z.object({ categorySlug: z.string().min(1).max(255).nullish() }))
     .query(async ({ input: { categorySlug: slug }, ctx: { prisma } }) => {
       if (!slug) {
@@ -200,7 +200,7 @@ export const categoryRouter = createTRPCRouter({
       return category;
     }),
 
-  createCategory: getProcedure(AccessType.createCategory)
+  create: getProcedure(AccessType.createCategory)
     .input(
       z.object({
         name: z.string().min(3).max(255),
@@ -251,7 +251,7 @@ export const categoryRouter = createTRPCRouter({
         return category;
       },
     ),
-  updateCategoryById: getProcedure(AccessType.updateCategory)
+  update: getProcedure(AccessType.updateCategory)
     .input(
       z.union([
         z.object({
@@ -331,7 +331,7 @@ export const categoryRouter = createTRPCRouter({
         return updatedCategory;
       },
     ),
-  deleteCategoryById: getProcedure(AccessType.deleteCategory)
+  delete: getProcedure(AccessType.deleteCategory)
     .input(z.object({ categoryId: idSchema }))
     .mutation(async ({ input: { categoryId: id }, ctx: { prisma } }) => {
       // checking whether the category exists
@@ -351,7 +351,7 @@ export const categoryRouter = createTRPCRouter({
       });
       return category;
     }),
-  getFeaturedCategories: publicProcedure
+  featured: publicProcedure
     .input(
       z.object({
         search: z.string().trim().default(""),
@@ -403,7 +403,7 @@ export const categoryRouter = createTRPCRouter({
       },
     ),
 
-  makeCategoryFeaturedById: getProcedure(AccessType.updateCategory)
+  addToFeatured: getProcedure(AccessType.updateCategory)
     .input(z.object({ categoryId: idSchema, image: imageInputs }))
     .mutation(
       async ({
@@ -440,7 +440,7 @@ export const categoryRouter = createTRPCRouter({
         return data.category;
       },
     ),
-  removeCategoryFromFeaturedById: getProcedure(AccessType.updateCategory)
+  removeFromFeatured: getProcedure(AccessType.updateCategory)
     .input(z.object({ categoryId: idSchema }))
     .mutation(async ({ input: { categoryId: id }, ctx: { prisma } }) => {
       const existingCategory = await prisma.featuredCategory.findUnique({
@@ -472,7 +472,7 @@ export const categoryRouter = createTRPCRouter({
       }
     }),
 
-  updateFeaturedCategoryById: getProcedure(AccessType.updateCategory)
+  updateFeatured: getProcedure(AccessType.updateCategory)
     .input(z.object({ categoryId: idSchema, image: imageInputs }))
     .mutation(async ({ input: { categoryId: id, image }, ctx: { prisma } }) => {
       const existingCategory = await prisma.featuredCategory.findUnique({

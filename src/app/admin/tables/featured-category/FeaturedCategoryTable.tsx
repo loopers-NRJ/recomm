@@ -27,9 +27,7 @@ import Searchbar from "../Searchbar";
 import TableHeader from "../TableHeader";
 import { ButtonLink } from "@/components/common/ButtonLink";
 
-type SortBy = OmitUndefined<
-  RouterInputs["category"]["getFeaturedCategories"]["sortBy"]
->;
+type SortBy = OmitUndefined<RouterInputs["category"]["featured"]["sortBy"]>;
 
 export default function FeaturedCategoryTable() {
   const [sortBy, setSortBy] = useQueryState(
@@ -50,7 +48,7 @@ export default function FeaturedCategoryTable() {
     parseAsString.withDefault(defaultSearch),
   );
   const selectedState = useAdminSelectedState((selected) => selected.state);
-  const categoriesApi = api.category.getFeaturedCategories.useInfiniteQuery(
+  const categoriesApi = api.category.featured.useInfiniteQuery(
     {
       search,
       sortBy,
@@ -61,8 +59,7 @@ export default function FeaturedCategoryTable() {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
-  const removeCategoryFeatured =
-    api.category.removeCategoryFromFeaturedById.useMutation();
+  const removeCategoryFeatured = api.category.removeFromFeatured.useMutation();
   // this state is to disable the featured button when the user clicks the featured button
   const [featuredCategoryState, setFeaturedCategoryState] = useState("");
 

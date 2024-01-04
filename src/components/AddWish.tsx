@@ -25,7 +25,7 @@ const AddWish: FC = () => {
 
   const [selectedModel, setSelectedModel] = useState<OptionalItem>();
 
-  const { mutateAsync: createWish } = api.wish.createWish.useMutation();
+  const { mutateAsync: createWish } = api.wish.create.useMutation();
 
   const handleClick = async () => {
     try {

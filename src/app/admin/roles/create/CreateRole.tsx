@@ -40,7 +40,7 @@ export default function CreateRole() {
     new Set(),
   );
   const [roleName, setRoleName] = useState("");
-  const createRoleApi = api.role.createRole.useMutation();
+  const createRoleApi = api.role.create.useMutation();
   const [creatingRole, setCreatingRole] = useState(false);
   const router = useRouter();
 

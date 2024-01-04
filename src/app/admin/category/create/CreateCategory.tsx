@@ -11,7 +11,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 const CreateCategory = () => {
-  const createCategoryApi = api.category.createCategory.useMutation();
+  const createCategoryApi = api.category.create.useMutation();
   const [categoryName, setCategoryName] = useState("");
   const selectedState = useAdminSelectedState((selected) => selected.state);
 

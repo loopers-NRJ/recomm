@@ -17,7 +17,7 @@ export default function EditCategory({
 }) {
   const router = useRouter();
 
-  const updateCategoryApi = api.category.updateCategoryById.useMutation();
+  const updateCategoryApi = api.category.update.useMutation();
 
   const [categoryName, setCategoryName] = useState("");
 

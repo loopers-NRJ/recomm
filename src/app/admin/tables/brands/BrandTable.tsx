@@ -28,7 +28,7 @@ import Searchbar from "../Searchbar";
 import TableHeader from "../TableHeader";
 import { ButtonLink } from "@/components/common/ButtonLink";
 
-type SortBy = OmitUndefined<RouterInputs["brand"]["getBrands"]["sortBy"]>;
+type SortBy = OmitUndefined<RouterInputs["brand"]["all"]["sortBy"]>;
 
 export default function BrandTable() {
   const searchParams = useSearchParams();
@@ -53,11 +53,11 @@ export default function BrandTable() {
   const categoryId = searchParams.get("category") ?? undefined;
 
   const [updatingBrandId, setUpdatingBrandId] = useState<string>();
-  const updateBrandById = api.brand.updateBrandById.useMutation();
+  const updateBrandById = api.brand.update.useMutation();
 
   const selectedState = useAdminSelectedState((selected) => selected.state);
 
-  const brandsApi = api.brand.getAllSubBrandsByCategoryId.useInfiniteQuery(
+  const brandsApi = api.brand.byCategoryId.useInfiniteQuery(
     {
       search,
       sortBy,
@@ -70,7 +70,7 @@ export default function BrandTable() {
     },
   );
 
-  const deleteBrandApi = api.brand.deleteBrandById.useMutation();
+  const deleteBrandApi = api.brand.delete.useMutation();
   // this state is to disable the delete button when admin clicks on it
   const [deleteBrandId, setDeleteBrandId] = useState<string>();
 

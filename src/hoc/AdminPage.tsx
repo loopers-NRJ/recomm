@@ -38,7 +38,7 @@ export default function AdminPage<
       return permanentRedirect("/login");
     }
 
-    const accesses = (await api.role.getRole.query({ id: roleId }))?.accesses;
+    const accesses = (await api.role.byId.query({ id: roleId }))?.accesses;
     const hasAccess = accesses
       ?.map((access) => access.type)
       .includes(AccessType.readAccess);

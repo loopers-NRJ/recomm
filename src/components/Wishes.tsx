@@ -23,7 +23,7 @@ function Wishes() {
 
   const search = params.get("search") ?? defaultSearch;
   const sortOrder = (params.get("sortOrder") as SortOrder) ?? defaultSortOrder;
-  const wishesApi = api.user.getMywishes.useInfiniteQuery(
+  const wishesApi = api.user.wishes.useInfiniteQuery(
     {
       search,
       sortOrder,

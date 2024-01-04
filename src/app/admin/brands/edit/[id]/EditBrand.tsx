@@ -13,7 +13,7 @@ import { useState } from "react";
 export default function EditBrand({ brand }: { brand: BrandPayloadIncluded }) {
   const router = useRouter();
 
-  const updateBrandApi = api.brand.updateBrandById.useMutation();
+  const updateBrandApi = api.brand.update.useMutation();
 
   const [brandName, setBrandName] = useState("");
 

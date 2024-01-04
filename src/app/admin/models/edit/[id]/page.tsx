@@ -7,7 +7,7 @@ import AdditionalInfoSection from "./additionalInfo/AdditionalInfoSection";
 
 const EditModelPage = AdminPage<{ id: string }>(async (props) => {
   const { id } = props.params;
-  const model = await api.model.getModelById.query({ modelId: id });
+  const model = await api.model.byId.query({ modelId: id });
 
   if (!model) {
     return notFound();

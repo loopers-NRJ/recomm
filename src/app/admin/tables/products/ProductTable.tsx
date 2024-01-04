@@ -26,7 +26,7 @@ import { useMemo, useState } from "react";
 import Searchbar from "../Searchbar";
 import TableHeader from "../TableHeader";
 
-type SortBy = OmitUndefined<RouterInputs["product"]["getProducts"]["sortBy"]>;
+type SortBy = OmitUndefined<RouterInputs["product"]["all"]["sortBy"]>;
 
 export default function ProductTable() {
   const searchParams = useSearchParams();
@@ -60,7 +60,7 @@ export default function ProductTable() {
 
   const selectedState = useAdminSelectedState((selected) => selected.state);
 
-  const productApi = api.product.getProducts.useInfiniteQuery(
+  const productApi = api.product.all.useInfiniteQuery(
     {
       search,
       sortBy,
@@ -74,7 +74,7 @@ export default function ProductTable() {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
-  const deleteProduct = api.product.deleteProductById.useMutation();
+  const deleteProduct = api.product.delete.useMutation();
   const [deleteId, setDeleteId] = useState<string>();
   const columns: ColumnDef<Omit<ProductsPayloadIncluded, "room">>[] = useMemo(
     () => [

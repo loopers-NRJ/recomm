@@ -25,7 +25,7 @@ import {
 } from "@/utils/constants";
 
 export const modelRouter = createTRPCRouter({
-  getModels: publicProcedure
+  all: publicProcedure
     .input(
       z.object({
         search: z.string().trim().default(""),
@@ -109,7 +109,7 @@ export const modelRouter = createTRPCRouter({
         };
       },
     ),
-  getModelById: publicProcedure
+  byId: publicProcedure
     .input(z.object({ modelId: idSchema.nullish() }))
     .query(async ({ input: { modelId: id }, ctx: { prisma } }) => {
       if (!id) {
@@ -127,7 +127,7 @@ export const modelRouter = createTRPCRouter({
       return model;
     }),
 
-  createModel: getProcedure(AccessType.createModel)
+  create: getProcedure(AccessType.createModel)
     .input(modelSchema)
     .mutation(
       ({
@@ -207,7 +207,7 @@ export const modelRouter = createTRPCRouter({
         });
       },
     ),
-  updateModelById: getProcedure(AccessType.updateModel)
+  update: getProcedure(AccessType.updateModel)
     .input(
       z.union([
         // TODO: enable updating options and questions
@@ -315,6 +315,25 @@ export const modelRouter = createTRPCRouter({
         return model;
       },
     ),
+  delete: getProcedure(AccessType.deleteModel)
+    .input(z.object({ modelId: idSchema }))
+    .mutation(async ({ input: { modelId: id }, ctx: { prisma } }) => {
+      const existingModel = await prisma.model.findUnique({
+        where: {
+          id,
+        },
+      });
+      if (existingModel === null) {
+        throw new Error("Model not found");
+      }
+      const model = await prisma.model.delete({
+        where: {
+          id,
+        },
+      });
+
+      return model;
+    }),
   addAtomicQuestion: getProcedure(AccessType.updateModel)
     .input(atomicQuestionSchema.extend({ modelId: idSchema }))
     .mutation(async ({ input: data, ctx: { prisma } }) => {
@@ -344,28 +363,6 @@ export const modelRouter = createTRPCRouter({
         include: {
           choices: true,
         },
-      });
-    }),
-  deleteAtomicQuestion: getProcedure(AccessType.updateModel)
-    .input(
-      z.object({
-        questionId: idSchema,
-      }),
-    )
-    .mutation(async ({ input: { questionId }, ctx: { prisma } }) => {
-      await prisma.atomicQuestion.delete({
-        where: { id: questionId },
-      });
-    }),
-  deleteMultipleChoiceQuestion: getProcedure(AccessType.updateModel)
-    .input(
-      z.object({
-        questionId: idSchema,
-      }),
-    )
-    .mutation(async ({ input: { questionId }, ctx: { prisma } }) => {
-      await prisma.multipleChoiceQuestion.delete({
-        where: { id: questionId },
       });
     }),
   updateAtomicQuestion: getProcedure(AccessType.updateModel)
@@ -427,6 +424,28 @@ export const modelRouter = createTRPCRouter({
         include: { choices: true },
       });
     }),
+  deleteAtomicQuestion: getProcedure(AccessType.updateModel)
+    .input(
+      z.object({
+        questionId: idSchema,
+      }),
+    )
+    .mutation(async ({ input: { questionId }, ctx: { prisma } }) => {
+      await prisma.atomicQuestion.delete({
+        where: { id: questionId },
+      });
+    }),
+  deleteMultipleChoiceQuestion: getProcedure(AccessType.updateModel)
+    .input(
+      z.object({
+        questionId: idSchema,
+      }),
+    )
+    .mutation(async ({ input: { questionId }, ctx: { prisma } }) => {
+      await prisma.multipleChoiceQuestion.delete({
+        where: { id: questionId },
+      });
+    }),
   addChoice: getProcedure(AccessType.updateModel)
     .input(
       z.object({
@@ -438,17 +457,6 @@ export const modelRouter = createTRPCRouter({
     .mutation(async ({ input: data, ctx: { prisma } }) => {
       const result = await prisma.choice.create({ data });
       return result;
-    }),
-  deleteChoice: getProcedure(AccessType.updateModel)
-    .input(
-      z.object({
-        choiceId: idSchema,
-      }),
-    )
-    .mutation(async ({ input: { choiceId }, ctx: { prisma } }) => {
-      await prisma.choice.delete({
-        where: { id: choiceId },
-      });
     }),
   updateChoice: getProcedure(AccessType.updateModel)
     .input(
@@ -463,23 +471,15 @@ export const modelRouter = createTRPCRouter({
         data: { value },
       });
     }),
-  deleteModelById: getProcedure(AccessType.deleteModel)
-    .input(z.object({ modelId: idSchema }))
-    .mutation(async ({ input: { modelId: id }, ctx: { prisma } }) => {
-      const existingModel = await prisma.model.findUnique({
-        where: {
-          id,
-        },
+  deleteChoice: getProcedure(AccessType.updateModel)
+    .input(
+      z.object({
+        choiceId: idSchema,
+      }),
+    )
+    .mutation(async ({ input: { choiceId }, ctx: { prisma } }) => {
+      await prisma.choice.delete({
+        where: { id: choiceId },
       });
-      if (existingModel === null) {
-        throw new Error("Model not found");
-      }
-      const model = await prisma.model.delete({
-        where: {
-          id,
-        },
-      });
-
-      return model;
     }),
 });

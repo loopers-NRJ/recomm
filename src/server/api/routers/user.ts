@@ -18,7 +18,7 @@ import {
 } from "@/utils/constants";
 
 export const userRouter = createTRPCRouter({
-  getUsers: publicProcedure
+  all: publicProcedure
     .input(
       z.object({
         search: z.string().trim().default(""),
@@ -101,7 +101,7 @@ export const userRouter = createTRPCRouter({
         }
       },
     ),
-  getUserById: publicProcedure
+  byId: publicProcedure
     .input(z.object({ userId: idSchema }))
     .query(async ({ input: { userId: id }, ctx: { prisma } }) => {
       try {
@@ -118,7 +118,7 @@ export const userRouter = createTRPCRouter({
         throw new Error("Something went wrong!");
       }
     }),
-  updateUserRole: getProcedure(AccessType.updateUsersRole)
+  updateRole: getProcedure(AccessType.updateUsersRole)
     .input(z.object({ userId: idSchema, roleId: idSchema.nullable() }))
     .mutation(async ({ input: { userId: id, roleId }, ctx: { prisma } }) => {
       await prisma.user.update({
@@ -138,7 +138,7 @@ export const userRouter = createTRPCRouter({
         },
       });
     }),
-  getMyBids: protectedProcedure
+  bids: protectedProcedure
     .input(
       z.object({
         search: z.string().trim().default(""),
@@ -203,7 +203,7 @@ export const userRouter = createTRPCRouter({
         };
       },
     ),
-  getMyFavorites: protectedProcedure
+  favorites: protectedProcedure
     .input(
       z.object({
         search: z.string().trim().default(""),
@@ -287,7 +287,7 @@ export const userRouter = createTRPCRouter({
         };
       },
     ),
-  getUserListingsById: publicProcedure
+  listingsById: publicProcedure
     .input(
       z.object({
         search: z.string().trim().default(""),
@@ -367,7 +367,7 @@ export const userRouter = createTRPCRouter({
         };
       },
     ),
-  getMyPurchases: protectedProcedure
+  purchases: protectedProcedure
     .input(
       z.object({
         search: z.string().trim().default(""),
@@ -447,7 +447,7 @@ export const userRouter = createTRPCRouter({
         };
       },
     ),
-  getMywishes: protectedProcedure
+  wishes: protectedProcedure
     .input(
       z.object({
         search: z.string().trim().default(""),

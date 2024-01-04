@@ -9,7 +9,7 @@ import { useClientSelectedState } from "@/store/SelectedState";
 
 const Categories: FC = () => {
   const selectedState = useClientSelectedState((selected) => selected.state);
-  const categoriesApi = api.category.getFeaturedCategories.useQuery({
+  const categoriesApi = api.category.featured.useQuery({
     state: selectedState,
   });
   if (categoriesApi.isLoading || categoriesApi.data === undefined) {

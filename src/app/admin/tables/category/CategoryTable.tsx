@@ -28,9 +28,7 @@ import { type RouterInputs } from "@/trpc/shared";
 import { api } from "@/trpc/react";
 import { ButtonLink } from "@/components/common/ButtonLink";
 
-type SortBy = OmitUndefined<
-  RouterInputs["category"]["getCategories"]["sortBy"]
->;
+type SortBy = OmitUndefined<RouterInputs["category"]["all"]["sortBy"]>;
 
 export default function CategoryTable() {
   const router = useRouter();
@@ -62,7 +60,7 @@ export default function CategoryTable() {
 
   const selectedState = useAdminSelectedState((selected) => selected.state);
 
-  const categoriesApi = api.category.getCategories.useInfiniteQuery(
+  const categoriesApi = api.category.all.useInfiniteQuery(
     {
       parentId,
       parentSlug,
@@ -76,14 +74,13 @@ export default function CategoryTable() {
     },
   );
 
-  const parentCategoryApi = api.category.getCategoryById.useQuery({
+  const parentCategoryApi = api.category.byId.useQuery({
     categoryId: parentId,
   });
 
-  const deleteCategoryApi = api.category.deleteCategoryById.useMutation();
-  const updateCategoryById = api.category.updateCategoryById.useMutation();
-  const removeCategoryFeatured =
-    api.category.removeCategoryFromFeaturedById.useMutation();
+  const deleteCategoryApi = api.category.delete.useMutation();
+  const updateCategoryById = api.category.update.useMutation();
+  const removeCategoryFeatured = api.category.removeFromFeatured.useMutation();
   // this state is to disable the update button when the user clicks the update button
   const [updatingCategoryId, setUpdatingCategoryId] = useState<string>();
   // this state is to disable the delete button when the user clicks the delete button

@@ -14,8 +14,8 @@ import { useRouter } from "next/navigation";
 export default function RoleEdit({ role }: { role: RolePayloadIncluded }) {
   const [processing, setProcessing] = useState<Processing>(false);
 
-  const addAccessToRole = api.role.addAccessToRole.useMutation();
-  const removeAccessFromRole = api.role.removeAccessFromRole.useMutation();
+  const addAccessToRole = api.role.addAccess.useMutation();
+  const removeAccessFromRole = api.role.removeAccess.useMutation();
   const router = useRouter();
   const handleCheckedChange = useCallback(
     async (checked: boolean, types: [AccessType, ...AccessType[]]) => {
