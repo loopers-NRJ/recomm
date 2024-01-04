@@ -160,7 +160,7 @@ export const categoryRouter = createTRPCRouter({
       },
     ),
   byId: publicProcedure
-    .input(z.object({ categoryId: idSchema.nullish() }))
+    .input(z.object({ categoryId: idSchema.nullable() }))
     .query(async ({ input: { categoryId: id }, ctx: { prisma } }) => {
       if (!id) {
         return null;
@@ -172,16 +172,13 @@ export const categoryRouter = createTRPCRouter({
         include: CategoryPayload.include,
       });
       if (category === null) {
-        throw new Error("Category does not exist");
+        return "Category not found";
       }
       return category;
     }),
   bySlug: publicProcedure
-    .input(z.object({ categorySlug: z.string().min(1).max(255).nullish() }))
+    .input(z.object({ categorySlug: z.string().min(1).max(255) }))
     .query(async ({ input: { categorySlug: slug }, ctx: { prisma } }) => {
-      if (!slug) {
-        return null;
-      }
       const category = await prisma.category.findUnique({
         where: {
           slug,
@@ -195,7 +192,7 @@ export const categoryRouter = createTRPCRouter({
         },
       });
       if (category === null) {
-        throw new Error("Category does not exist");
+        return "Category not found";
       }
       return category;
     }),
@@ -214,6 +211,7 @@ export const categoryRouter = createTRPCRouter({
         ctx: { prisma, session },
       }) => {
         // checking whether the category already exists
+
         const existingCategory = await prisma.category.findFirst({
           where: {
             name,
@@ -225,7 +223,7 @@ export const categoryRouter = createTRPCRouter({
           },
         });
         if (existingCategory !== null) {
-          throw new Error(`Category with name: ${name} already exists`);
+          return "Category already exists";
         }
         // creating the category
         const category = await prisma.category.create({
@@ -279,7 +277,6 @@ export const categoryRouter = createTRPCRouter({
         input: { id, name, parentCategoryId, active },
         ctx: { prisma },
       }) => {
-        // checking whether the category exists
         const existingCategory = await prisma.category.findUnique({
           where: {
             id,
@@ -290,7 +287,7 @@ export const categoryRouter = createTRPCRouter({
           },
         });
         if (existingCategory === null) {
-          throw new Error("Category does not exist");
+          return "Category not found";
         }
         // checking whether the new name already exists
         if (name !== undefined && name !== existingCategory.name) {
@@ -306,7 +303,7 @@ export const categoryRouter = createTRPCRouter({
             },
           });
           if (existingName !== null) {
-            throw new Error(`Category ${name} already exists`);
+            return "Category already exists";
           }
         }
 
@@ -335,13 +332,14 @@ export const categoryRouter = createTRPCRouter({
     .input(z.object({ categoryId: idSchema }))
     .mutation(async ({ input: { categoryId: id }, ctx: { prisma } }) => {
       // checking whether the category exists
+
       const existingCategory = await prisma.category.findUnique({
         where: {
           id,
         },
       });
       if (existingCategory === null) {
-        throw new Error("Category does not exist");
+        return "Category not found";
       }
       // deleting the category
       const category = await prisma.category.delete({
@@ -412,9 +410,7 @@ export const categoryRouter = createTRPCRouter({
       }) => {
         const totalFeaturedCategories = await prisma.featuredCategory.count();
         if (totalFeaturedCategories >= maxFeaturedCategory) {
-          throw new Error(
-            `Cannot make the category as featured. Maximum featured category limit reached`,
-          );
+          return "Cannot make the category as featured. Maximum featured category limit reached";
         }
 
         const data = await prisma.featuredCategory.create({
@@ -452,7 +448,7 @@ export const categoryRouter = createTRPCRouter({
         },
       });
       if (existingCategory === null) {
-        throw new Error("Category does not exist");
+        return "Category not found";
       }
       await prisma.featuredCategory.delete({
         where: {
@@ -468,7 +464,7 @@ export const categoryRouter = createTRPCRouter({
           existingCategory,
           error,
         });
-        throw new Error("Cannot able to delete the old image");
+        return "Cannot able to delete the old image";
       }
     }),
 
@@ -484,7 +480,7 @@ export const categoryRouter = createTRPCRouter({
         },
       });
       if (existingCategory === null) {
-        throw new Error("Category does not exist");
+        return "Category not found";
       }
 
       await prisma.featuredCategory.update({
@@ -506,7 +502,7 @@ export const categoryRouter = createTRPCRouter({
           existingCategory,
           error,
         });
-        throw new Error("Cannot able to delete the old image");
+        return "Cannot able to delete the old image";
       }
     }),
 });

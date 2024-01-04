@@ -211,7 +211,7 @@ export const productRouter = createTRPCRouter({
         ctx: { prisma, session },
       }) => {
         if (closedAt < new Date()) {
-          throw new Error("Closed at date must be in the future");
+          return "Closed at date must be in the future";
         }
         const user = session.user;
         const model = await prisma.model.findUnique({
@@ -229,7 +229,7 @@ export const productRouter = createTRPCRouter({
           },
         });
         if (model === null) {
-          throw new Error("Model does not exist");
+          return "Model not found";
         }
 
         const isValidValues = validateMultipleChoiceQuestionInput(
@@ -237,7 +237,7 @@ export const productRouter = createTRPCRouter({
           providedChoices,
         );
         if (isValidValues !== true) {
-          throw new Error("Invalid option");
+          return "Invalid option";
         }
 
         const choiceValueIds: string[] = [];
@@ -253,7 +253,7 @@ export const productRouter = createTRPCRouter({
         );
 
         if (isValidAnswers !== true) {
-          throw new Error("Invalid answers");
+          return "Invalid answers";
         }
 
         const product = await prisma.product.create({
@@ -377,16 +377,16 @@ export const productRouter = createTRPCRouter({
           include: singleProductPayload.include,
         });
         if (existingProduct === null) {
-          throw new Error("Product does not exist");
+          return "Product not found";
         }
         if (existingProduct.sellerId !== user.id) {
-          throw new Error("You are not the seller of this product");
+          return "You are not the seller of this product";
         }
         if (existingProduct.buyerId !== null) {
-          throw new Error("Product is already sold");
+          return "Product is already sold";
         }
         if (existingProduct.room.bids.length > 0) {
-          throw new Error("Cannot delete product with bids");
+          return "Cannot delete product with bids";
         }
         const product = await prisma.product.delete({
           where: {
@@ -449,7 +449,7 @@ export const productRouter = createTRPCRouter({
           },
         });
         if (productInFavorites !== null) {
-          throw new Error("Product is already in favorites");
+          return "Product is already in favorites";
         }
         await prisma.user.update({
           where: {
@@ -481,7 +481,7 @@ export const productRouter = createTRPCRouter({
           },
         });
         if (productInFavorites === null) {
-          throw new Error("Product is not in favorites");
+          return "Product is not in favorites";
         }
         await prisma.user.update({
           where: {

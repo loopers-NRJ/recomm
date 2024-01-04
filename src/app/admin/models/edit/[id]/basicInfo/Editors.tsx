@@ -19,6 +19,7 @@ import { Check } from "lucide-react";
 import { useState } from "react";
 import type { Model } from "../types";
 import { states } from "@/types/prisma";
+import toast from "react-hot-toast";
 
 export function ModelBrandEdit({ model }: { model: Model }) {
   const [selectedBrand, setSelectedBrand] = useState<Item>(model.brand);
@@ -40,6 +41,9 @@ export function ModelBrandEdit({ model }: { model: Model }) {
             updateModel
               .mutateAsync({ id: model.id, brandId: selectedBrand.id })
               .then((updatedModel) => {
+                if (typeof updatedModel === "string") {
+                  return toast.error(updatedModel);
+                }
                 model.brand = updatedModel.brand;
                 model.brandId = updatedModel.brandId;
               })
@@ -74,6 +78,9 @@ export function ModelCategoryEdit({ model }: { model: Model }) {
             updateModel
               .mutateAsync({ id: model.id, categoryId: selectedCategory.id })
               .then((updatedModel) => {
+                if (typeof updatedModel === "string") {
+                  return toast.error(updatedModel);
+                }
                 model.category = updatedModel.category;
                 model.categoryId = updatedModel.categoryId;
               })
@@ -126,8 +133,11 @@ export function ModelNameEdit({ model }: { model: Model }) {
           onClick={() => {
             updateModel
               .mutateAsync({ id: model.id, name: value })
-              .then((result) => {
-                model.name = result.name;
+              .then((updatedModel) => {
+                if (typeof updatedModel === "string") {
+                  return toast.error(updatedModel);
+                }
+                model.name = updatedModel.name;
               })
               .catch(console.error);
           }}
@@ -175,6 +185,9 @@ export function ModelCreatedStateEdit({ model }: { model: Model }) {
             updateModel
               .mutateAsync({ id: model.id, createdState })
               .then((updatedModel) => {
+                if (typeof updatedModel === "string") {
+                  return toast.error(updatedModel);
+                }
                 model.createdState = updatedModel.createdState;
               })
               .catch(console.error);

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { api } from "@/trpc/react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { useToast } from "./ui/use-toast";
+import toast from "react-hot-toast";
 
 const BidFormSchema = z.object({
   price: z
@@ -22,7 +22,6 @@ interface BidFormProps {
 const BidForm: FC<BidFormProps> = ({ roomId, onClose }) => {
   const [formData, setFormData] = useState<BidFormData>({ price: 0 });
   const placeBid = api.room.createBid.useMutation();
-  const { toast } = useToast();
 
   const handlePriceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newPrice = parseFloat(event.target.value);
@@ -39,11 +38,7 @@ const BidForm: FC<BidFormProps> = ({ roomId, onClose }) => {
       placeBid.mutate(data);
       onClose();
     } else {
-      toast({
-        title: "Invaid Bid",
-        description: "Bid Cannot have decimal price values",
-        variant: "destructive",
-      });
+      toast.error("Bid Cannot have decimal price values");
     }
   };
 

@@ -7,7 +7,7 @@ const EditCategoryPage = AdminPage<undefined, { id: string }>(async (props) => {
   const categoryId = props.searchParams.id;
   const category = await api.category.byId.query({ categoryId });
 
-  if (!category) {
+  if (!category || category === "Category not found") {
     return notFound();
   }
   return <EditCategory category={category} />;

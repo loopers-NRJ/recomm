@@ -49,58 +49,42 @@ const ImagePicker: FC<ImagePickerProps> = ({
   ) => {
     const imageCompression = (await import("browser-image-compression"))
       .default;
-    const { toast } = await import("../ui/use-toast");
+    const toast = (await import("react-hot-toast")).default;
 
     const newImages = [];
     if (event.target.files !== null) {
       const files = [...event.target.files];
       if (files.length > maxImages) {
-        toast({
-          title: "Error",
-          description: `Max image count is ${maxImages}`,
-          variant: "destructive",
-        });
+        toast.error(`Max image count is ${maxImages}`);
         files.splice(maxImages);
       }
       for (const image of files) {
         // condition to check weather the image is already present
         if (images.some((prevImage) => prevImage.file.name === image.name)) {
-          toast({
-            title: "Error",
-            description: "Image is already present",
-            variant: "destructive",
-          });
+          toast.error("Image is already present");
           continue;
         }
         // condition to check if the image size is greater than the max size
         if (image.size > maxImageSizeInMB * 1024 * 1024) {
-          toast({
-            title: "Error",
-            description: `Image size is too large. Max image size is ${maxImageSizeInMB}MB`,
-            variant: "destructive",
-          });
+          toast.error(
+            `Image size is too large. Max image size is ${maxImageSizeInMB}MB`,
+          );
           continue;
         }
         // condition to check if the image format is supported
         if (!acceptedImageFormats.includes(image.type)) {
-          toast({
-            title: "Error",
-            description: `${
+          toast.error(
+            `${
               image.type.split("/")?.[1] ?? "Image"
             } format is not supported. Supported formats are ${acceptedImageFormats.join(
               ", ",
             )}`,
-            variant: "destructive",
-          });
+          );
           continue;
         }
         // condition to check if the max image count is reached
         if (images.length + newImages.length >= maxImages) {
-          toast({
-            title: "Error",
-            description: `Max image count is ${maxImages}`,
-            variant: "destructive",
-          });
+          toast.error(`Max image count is ${maxImages}`);
           break;
         }
         const id = uuid();
@@ -145,11 +129,7 @@ const ImagePicker: FC<ImagePickerProps> = ({
             setImagesToParent((prev) => [...prev, compressedImageFile]);
           })
           .catch(() => {
-            toast({
-              title: "Error",
-              description: "Failed to compress image",
-              variant: "destructive",
-            });
+            toast.error("Failed to compress image");
           });
       }
     }

@@ -40,7 +40,7 @@ export const wishRouter = createTRPCRouter({
       }) => {
         const user = session.user;
         if (lowerBound > upperBound) {
-          throw new Error("Lower bound cannot be greater than upper bound");
+          return "Lower bound cannot be greater than upper bound";
         }
 
         const existingWish = await prisma.wish.findFirst({
@@ -51,7 +51,7 @@ export const wishRouter = createTRPCRouter({
         });
 
         if (existingWish !== null) {
-          throw new Error("wish already exists");
+          return "wish already exists";
         }
         const product = await prisma.product.findFirst({
           where: {
@@ -116,10 +116,10 @@ export const wishRouter = createTRPCRouter({
         },
       });
       if (wish === null) {
-        throw new Error("Wish not found");
+        return "Wish not found";
       }
       if (wish.userId !== user.id) {
-        throw new Error("Wish not found");
+        return "Wish not found";
       }
       const deletedWish = await prisma.wish.delete({
         where: {

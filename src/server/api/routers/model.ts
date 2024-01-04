@@ -122,7 +122,7 @@ export const modelRouter = createTRPCRouter({
         include: singleModelPayload.include,
       });
       if (model === null) {
-        throw new Error("Model not found");
+        return "Model not found";
       }
       return model;
     }),
@@ -130,7 +130,7 @@ export const modelRouter = createTRPCRouter({
   create: getProcedure(AccessType.createModel)
     .input(modelSchema)
     .mutation(
-      ({
+      async ({
         input: {
           name,
           brandId,
@@ -141,17 +141,16 @@ export const modelRouter = createTRPCRouter({
         },
         ctx: { prisma, session },
       }) => {
+        const existingModel = await prisma.model.findFirst({
+          where: {
+            name,
+            createdState: state,
+          },
+        });
+        if (existingModel !== null) {
+          return "Model already exists";
+        }
         return prisma.$transaction(async (prisma) => {
-          const existingModel = await prisma.model.findFirst({
-            where: {
-              name,
-              createdState: state,
-            },
-          });
-          if (existingModel !== null) {
-            throw new Error(`Model ${name} already exists`);
-          }
-
           const model = await prisma.model.create({
             data: {
               name,
@@ -210,7 +209,6 @@ export const modelRouter = createTRPCRouter({
   update: getProcedure(AccessType.updateModel)
     .input(
       z.union([
-        // TODO: enable updating options and questions
         z.object({
           id: idSchema,
           categoryId: idSchema.optional(),
@@ -269,7 +267,7 @@ export const modelRouter = createTRPCRouter({
           },
         });
         if (existingModel === null) {
-          throw new Error("Model not found");
+          return "Model not found";
         }
         // check whether the new name is unique
         if (newName !== undefined && newName !== existingModel.name) {
@@ -280,7 +278,7 @@ export const modelRouter = createTRPCRouter({
             },
           });
           if (existingName !== null) {
-            throw new Error(`Model ${newName} already exists`);
+            return "Model already exists";
           }
         }
         // update the model
@@ -324,7 +322,7 @@ export const modelRouter = createTRPCRouter({
         },
       });
       if (existingModel === null) {
-        throw new Error("Model not found");
+        return "Model not found";
       }
       const model = await prisma.model.delete({
         where: {

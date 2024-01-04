@@ -9,7 +9,7 @@ const EditModelPage = AdminPage<{ id: string }>(async (props) => {
   const { id } = props.params;
   const model = await api.model.byId.query({ modelId: id });
 
-  if (!model) {
+  if (!model || model === "Model not found") {
     return notFound();
   }
   return (

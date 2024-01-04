@@ -20,7 +20,12 @@ import {
   useQueryState,
 } from "next-usequerystate";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import {
+  notFound,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
 import { useMemo, useState } from "react";
 import Searchbar from "../Searchbar";
 import TableHeader from "../TableHeader";
@@ -313,6 +318,9 @@ export default function CategoryTable() {
         }
       />
     );
+  }
+  if (parentCategoryApi.data === "Category not found") {
+    return notFound();
   }
 
   return (

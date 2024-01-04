@@ -163,11 +163,8 @@ export const brandRouter = createTRPCRouter({
       },
     ),
   byId: publicProcedure
-    .input(z.object({ brandId: idSchema.nullish() }))
+    .input(z.object({ brandId: idSchema }))
     .query(async ({ input: { brandId: id }, ctx: { prisma } }) => {
-      if (!id) {
-        return null;
-      }
       const brand = await prisma.brand.findUnique({
         where: {
           id,
@@ -175,7 +172,7 @@ export const brandRouter = createTRPCRouter({
         include: BrandPayload.include,
       });
       if (brand === null) {
-        throw new Error("Brand not found");
+        return "Brand not found";
       }
       return brand;
     }),
@@ -196,7 +193,7 @@ export const brandRouter = createTRPCRouter({
         },
       });
       if (existingBrand !== null) {
-        throw new Error(`Brand ${name} already exists`);
+        return "Brand already exists";
       }
       // creating the brand
       const brand = await prisma.brand.create({
@@ -241,7 +238,7 @@ export const brandRouter = createTRPCRouter({
           },
         });
         if (existingBrand === null) {
-          throw new Error("Brand not found");
+          return "Brand not found";
         }
         // checking whether the new brand name already exists
         if (newName !== undefined && newName !== existingBrand.name) {
@@ -257,7 +254,7 @@ export const brandRouter = createTRPCRouter({
             },
           });
           if (existingName !== null) {
-            throw new Error(`Brand ${newName} already exists`);
+            return "Brand already exists";
           }
         }
         const brand = await prisma.brand.update({
@@ -283,7 +280,7 @@ export const brandRouter = createTRPCRouter({
         },
       });
       if (existingBrand === null) {
-        throw new Error("Brand not found");
+        return "Brand not found";
       }
       const brand = await prisma.brand.delete({
         where: {

@@ -42,6 +42,13 @@ export const RoleRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input: { name, accesses }, ctx: { prisma } }) => {
+      const existingRole = await prisma.role.findFirst({ where: { name } });
+      if (existingRole) {
+        return "Role already exists";
+      }
+      if (accesses.length === 0) {
+        return "Role must have at least one access";
+      }
       return prisma.role.create({
         data: {
           name,
@@ -54,6 +61,10 @@ export const RoleRouter = createTRPCRouter({
   delete: getProcedure(AccessType.deleteRole)
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input: { id }, ctx: { prisma } }) => {
+      const existingRole = await prisma.role.findFirst({ where: { id } });
+      if (!existingRole) {
+        return "Role not found";
+      }
       return prisma.role.delete({ where: { id } });
     }),
   addAccess: getProcedure(AccessType.updateRole)
@@ -65,6 +76,13 @@ export const RoleRouter = createTRPCRouter({
     )
     .mutation(
       async ({ input: { roleId, accesses: access }, ctx: { prisma } }) => {
+        const existingRole = await prisma.role.findFirst({
+          where: { id: roleId },
+        });
+        if (!existingRole) {
+          return "Role not found";
+        }
+
         return prisma.role.update({
           where: { id: roleId },
           data: {

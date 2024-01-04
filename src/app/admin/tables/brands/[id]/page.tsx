@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 const ViewBrandDetailsPage = AdminPage<{ id: string }>(async (props) => {
   const { id } = props.params;
   const brand = await api.brand.byId.query({ brandId: id });
-  if (!brand) {
+  if (brand === "Brand not found") {
     return notFound();
   }
   return (

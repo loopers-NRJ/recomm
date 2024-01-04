@@ -43,80 +43,72 @@ export const userRouter = createTRPCRouter({
         input: { limit, search, sortBy, sortOrder, cursor, role },
         ctx: { prisma },
       }) => {
-        try {
-          const users = await prisma.user.findMany({
-            take: limit,
+        const users = await prisma.user.findMany({
+          take: limit,
 
-            cursor: cursor
-              ? {
-                  id: cursor,
-                }
-              : undefined,
-            where: {
-              OR: [
-                {
-                  name: {
-                    contains: search,
-                  },
-                },
-                {
-                  email: {
-                    contains: search,
-                  },
-                },
-              ],
-              role: role
-                ? {
-                    id: role,
-                  }
-                : undefined,
-            },
-            orderBy: [
-              sortBy === "role"
-                ? {
-                    role: {
-                      name: sortOrder,
-                    },
-                  }
-                : {
-                    [sortBy]: sortOrder,
-                  },
-            ],
-            skip: cursor ? 1 : undefined,
-            include: {
-              role: {
-                include: {
-                  accesses: true,
+          cursor: cursor
+            ? {
+                id: cursor,
+              }
+            : undefined,
+          where: {
+            OR: [
+              {
+                name: {
+                  contains: search,
                 },
               },
+              {
+                email: {
+                  contains: search,
+                },
+              },
+            ],
+            role: role
+              ? {
+                  id: role,
+                }
+              : undefined,
+          },
+          orderBy: [
+            sortBy === "role"
+              ? {
+                  role: {
+                    name: sortOrder,
+                  },
+                }
+              : {
+                  [sortBy]: sortOrder,
+                },
+          ],
+          skip: cursor ? 1 : undefined,
+          include: {
+            role: {
+              include: {
+                accesses: true,
+              },
             },
-          });
+          },
+        });
 
-          return {
-            users,
-            nextCursor: users[limit - 1]?.id,
-          };
-        } catch (error) {
-          throw new Error("Something went wrong!");
-        }
+        return {
+          users,
+          nextCursor: users[limit - 1]?.id,
+        };
       },
     ),
   byId: publicProcedure
     .input(z.object({ userId: idSchema }))
     .query(async ({ input: { userId: id }, ctx: { prisma } }) => {
-      try {
-        const user = await prisma.user.findUnique({
-          where: {
-            id,
-          },
-        });
-        if (user === null) {
-          throw new Error("User not found");
-        }
-        return user;
-      } catch (error) {
-        throw new Error("Something went wrong!");
+      const user = await prisma.user.findUnique({
+        where: {
+          id,
+        },
+      });
+      if (user === null) {
+        return "User not found";
       }
+      return user;
     }),
   updateRole: getProcedure(AccessType.updateUsersRole)
     .input(z.object({ userId: idSchema, roleId: idSchema.nullable() }))

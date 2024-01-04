@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { type OptionalItem } from "@/types/custom";
 import { api } from "@/trpc/react";
-import { toast } from "./ui/use-toast";
+import toast from "react-hot-toast";
 import CategoryComboBox from "./common/CategoryComboBox";
 import BrandComboBox from "./common/BrandComboBox";
 import ModelComboBox from "./common/ModelComboBox";
@@ -30,27 +30,15 @@ const AddWish: FC = () => {
   const handleClick = async () => {
     try {
       if (selectedCategory === undefined) {
-        return toast({
-          title: "Error",
-          description: "Select the Category",
-          variant: "destructive",
-        });
+        return toast.error("Select the Category");
       }
 
       if (selectedBrand === undefined) {
-        return toast({
-          title: "Error",
-          description: "Select the Brand",
-          variant: "destructive",
-        });
+        return toast.error("Select the Brand");
       }
 
       if (selectedModel === undefined) {
-        return toast({
-          title: "Error",
-          description: "Select the Model",
-          variant: "destructive",
-        });
+        return toast.error("Select the Model");
       }
 
       // TODO: @naveen create ui to get the lower and upper bound
@@ -65,11 +53,7 @@ const AddWish: FC = () => {
       // TODO: navigate to the wish list page
     } catch (error) {
       console.log(error);
-      return toast({
-        title: "Error",
-        description: "Something went wrong",
-        variant: "destructive",
-      });
+      return toast.error("Something went wrong");
     }
   };
   return (
