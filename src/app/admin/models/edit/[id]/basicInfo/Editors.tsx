@@ -1,7 +1,7 @@
 "use client";
 
-import BrandComboBox from "@/components/common/BrandComboBox";
-import CategoryComboBox from "@/components/common/CategoryComboBox";
+import BrandComboBox from "@/components/combobox/BrandComboBox";
+import CategoryComboBox from "@/components/combobox/CategoryComboBox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,10 +20,20 @@ import { useState } from "react";
 import type { Model } from "../types";
 import { states } from "@/types/prisma";
 import toast from "react-hot-toast";
+import { errorHandler } from "@/utils/errorHandler";
 
 export function ModelBrandEdit({ model }: { model: Model }) {
   const [selectedBrand, setSelectedBrand] = useState<Item>(model.brand);
-  const updateModel = api.model.update.useMutation();
+  const updateModel = api.model.update.useMutation({
+    onSuccess: (updatedModel) => {
+      if (typeof updatedModel === "string") {
+        return toast.error(updatedModel);
+      }
+      model.brand = updatedModel.brand;
+      model.brandId = updatedModel.brandId;
+    },
+    onError: errorHandler,
+  });
 
   return (
     <div className="flex w-full items-center justify-between gap-2">
@@ -38,16 +48,7 @@ export function ModelBrandEdit({ model }: { model: Model }) {
           title="Update"
           disabled={updateModel.isLoading}
           onClick={() => {
-            updateModel
-              .mutateAsync({ id: model.id, brandId: selectedBrand.id })
-              .then((updatedModel) => {
-                if (typeof updatedModel === "string") {
-                  return toast.error(updatedModel);
-                }
-                model.brand = updatedModel.brand;
-                model.brandId = updatedModel.brandId;
-              })
-              .catch(console.error);
+            updateModel.mutate({ id: model.id, brandId: selectedBrand.id });
           }}
         >
           <Check />
@@ -61,7 +62,16 @@ export function ModelCategoryEdit({ model }: { model: Model }) {
   const [selectedCategory, setSelectedCategory] = useState<Item>(
     model.category,
   );
-  const updateModel = api.model.update.useMutation();
+  const updateModel = api.model.update.useMutation({
+    onSuccess: (updatedModel) => {
+      if (typeof updatedModel === "string") {
+        return toast.error(updatedModel);
+      }
+      model.category = updatedModel.category;
+      model.categoryId = updatedModel.categoryId;
+    },
+    onError: errorHandler,
+  });
   return (
     <div className="flex w-full items-center justify-between gap-2">
       <CategoryComboBox
@@ -75,16 +85,10 @@ export function ModelCategoryEdit({ model }: { model: Model }) {
           title="Update"
           disabled={updateModel.isLoading}
           onClick={() => {
-            updateModel
-              .mutateAsync({ id: model.id, categoryId: selectedCategory.id })
-              .then((updatedModel) => {
-                if (typeof updatedModel === "string") {
-                  return toast.error(updatedModel);
-                }
-                model.category = updatedModel.category;
-                model.categoryId = updatedModel.categoryId;
-              })
-              .catch(console.error);
+            updateModel.mutate({
+              id: model.id,
+              categoryId: selectedCategory.id,
+            });
           }}
         >
           <Check />
@@ -98,7 +102,15 @@ export function ModelNameEdit({ model }: { model: Model }) {
   const [value, setValue] = useState(model.name);
   const [modelNameEditEnabled, setModelNameEditEnabled] = useState(false);
 
-  const updateModel = api.model.update.useMutation();
+  const updateModel = api.model.update.useMutation({
+    onSuccess: (updatedModel) => {
+      if (typeof updatedModel === "string") {
+        return toast.error(updatedModel);
+      }
+      model.name = updatedModel.name;
+    },
+    onError: errorHandler,
+  });
   return (
     <div className="flex w-full items-center justify-between gap-2">
       <Label className="flex w-full items-center justify-between gap-2">
@@ -124,22 +136,14 @@ export function ModelNameEdit({ model }: { model: Model }) {
           </Button>
         )}
       </Label>
-      {model.name !== value && value.trim() !== "" && (
+      {model.name !== value.trim() && value.trim() !== "" && (
         <Button
           variant="ghost"
           size="sm"
           title="Update"
           disabled={updateModel.isLoading}
           onClick={() => {
-            updateModel
-              .mutateAsync({ id: model.id, name: value })
-              .then((updatedModel) => {
-                if (typeof updatedModel === "string") {
-                  return toast.error(updatedModel);
-                }
-                model.name = updatedModel.name;
-              })
-              .catch(console.error);
+            updateModel.mutate({ id: model.id, name: value });
           }}
         >
           <Check />
@@ -151,7 +155,15 @@ export function ModelNameEdit({ model }: { model: Model }) {
 
 export function ModelCreatedStateEdit({ model }: { model: Model }) {
   const [createdState, setCreatedState] = useState<State>(State.Tamil_Nadu);
-  const updateModel = api.model.update.useMutation();
+  const updateModel = api.model.update.useMutation({
+    onSuccess: (updatedModel) => {
+      if (typeof updatedModel === "string") {
+        return toast.error(updatedModel);
+      }
+      model.createdState = updatedModel.createdState;
+    },
+    onError: errorHandler,
+  });
 
   return (
     <div className="flex w-full items-center justify-between gap-2">
@@ -182,15 +194,7 @@ export function ModelCreatedStateEdit({ model }: { model: Model }) {
           title="Update"
           disabled={updateModel.isLoading}
           onClick={() => {
-            updateModel
-              .mutateAsync({ id: model.id, createdState })
-              .then((updatedModel) => {
-                if (typeof updatedModel === "string") {
-                  return toast.error(updatedModel);
-                }
-                model.createdState = updatedModel.createdState;
-              })
-              .catch(console.error);
+            updateModel.mutate({ id: model.id, createdState });
           }}
         >
           <Check />

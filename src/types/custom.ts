@@ -1,3 +1,5 @@
+import { type ReactNode } from "react";
+
 export interface Item {
   id: string;
   name: string;
@@ -19,4 +21,4 @@ export interface PageProps<
 
 export type Page<Params = DefaultParams, SearchParams = DefaultParams> = (
   props: PageProps<Params, SearchParams>,
-) => JSX.Element | Promise<JSX.Element>;
+) => ReactNode | Promise<ReactNode>;

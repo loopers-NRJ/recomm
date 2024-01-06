@@ -6,28 +6,29 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAdminSelectedState } from "@/store/SelectedState";
 import { api } from "@/trpc/react";
+import { errorHandler } from "@/utils/errorHandler";
 import { Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 const CreateCategory = () => {
-  const createCategoryApi = api.category.create.useMutation();
-  const [categoryName, setCategoryName] = useState("");
-  const selectedState = useAdminSelectedState((selected) => selected.state);
-
   const params = useSearchParams();
   const router = useRouter();
   const parentName = params.get("parentName");
   const parentId = params.get("parentId");
-  console.log({ parentName, parentId });
 
-  if (
-    createCategoryApi.isSuccess &&
-    createCategoryApi.data !== undefined &&
-    !createCategoryApi.isError
-  ) {
-    router.push("/admin/tables/category");
-  }
+  const createCategoryApi = api.category.create.useMutation({
+    onSuccess: (result) => {
+      if (typeof result === "string") {
+        return toast.error(result);
+      }
+      router.push("/admin/tables/category");
+    },
+    onError: errorHandler,
+  });
+  const [categoryName, setCategoryName] = useState("");
+  const selectedState = useAdminSelectedState((selected) => selected.state);
 
   return (
     <Container className="flex justify-center">

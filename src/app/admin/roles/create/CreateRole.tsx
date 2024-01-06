@@ -11,6 +11,7 @@ import { AccessType } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import AccordionSection from "./AccordionSection";
+import { errorHandler } from "@/utils/errorHandler";
 
 export const roleConfig = {
   readAccess: [
@@ -40,7 +41,18 @@ export default function CreateRole() {
     new Set(),
   );
   const [roleName, setRoleName] = useState("");
-  const createRoleApi = api.role.create.useMutation();
+  const createRoleApi = api.role.create.useMutation({
+    onMutate: () => {
+      setCreatingRole(true);
+    },
+    onSuccess: () => {
+      router.push("/admin/tables/roles");
+    },
+    onError: errorHandler,
+    onSettled: () => {
+      setCreatingRole(false);
+    },
+  });
   const [creatingRole, setCreatingRole] = useState(false);
   const router = useRouter();
 
@@ -52,10 +64,11 @@ export default function CreateRole() {
     const newSelectedRoles = new Set(selectedRoles);
     if (!hasReadAccess && isAllowed) {
       newSelectedRoles.add(AccessType.readAccess);
+      setSelectedRoles(newSelectedRoles);
     } else if (hasReadAccess && !isAllowed) {
       newSelectedRoles.delete(AccessType.readAccess);
+      setSelectedRoles(newSelectedRoles);
     }
-    setSelectedRoles(newSelectedRoles);
   }, [selectedRoles]);
 
   const handleCheckedChange = useCallback(
@@ -70,6 +83,18 @@ export default function CreateRole() {
     },
     [selectedRoles],
   );
+
+  /**
+   * This is a temporary solution to prevent hydration error:
+   * Using Checkbox inside AccordionSection cause hydration error in nextjs
+   * follow this issue: https://github.com/shadcn-ui/ui/issues/1273
+   */
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
+  if (!isMounted) return null;
 
   return (
     <Container className="flex justify-center">
@@ -159,16 +184,10 @@ export default function CreateRole() {
             creatingRole
           }
           onClick={() => {
-            setCreatingRole(true);
-            createRoleApi
-              .mutateAsync({
-                name: roleName,
-                accesses: [...selectedRoles],
-              })
-              .then(() => router.push("/admin/tables/roles"))
-              .catch(() => {
-                setCreatingRole(false);
-              });
+            createRoleApi.mutate({
+              name: roleName,
+              accesses: [...selectedRoles],
+            });
           }}
         >
           Create Role with {selectedRoles.size} access

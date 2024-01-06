@@ -223,7 +223,7 @@ export const categoryRouter = createTRPCRouter({
           },
         });
         if (existingCategory !== null) {
-          return "Category already exists";
+          return `Category with name '${existingCategory.name}' already exists` as const;
         }
         // creating the category
         const category = await prisma.category.create({
@@ -303,7 +303,7 @@ export const categoryRouter = createTRPCRouter({
             },
           });
           if (existingName !== null) {
-            return "Category already exists";
+            return `Category with name '${name}' already exists` as const;
           }
         }
 
@@ -337,9 +337,36 @@ export const categoryRouter = createTRPCRouter({
         where: {
           id,
         },
+        select: {
+          name: true,
+          subCategories: {
+            select: {
+              id: true,
+            },
+          },
+          models: {
+            select: {
+              id: true,
+            },
+          },
+          wishes: {
+            select: {
+              id: true,
+            },
+          },
+        },
       });
       if (existingCategory === null) {
         return "Category not found";
+      }
+      if (existingCategory.subCategories.length > 0) {
+        return `Cannot delete the category '${existingCategory.name}' because it has subcategories.` as const;
+      }
+      if (existingCategory.models.length > 0) {
+        return `Cannot delete the category '${existingCategory.name}'. it's in use by some models` as const;
+      }
+      if (existingCategory.wishes.length > 0) {
+        return `Cannot delete the category '${existingCategory.name}'. Some users have wished for it` as const;
       }
       // deleting the category
       const category = await prisma.category.delete({
@@ -412,7 +439,17 @@ export const categoryRouter = createTRPCRouter({
         if (totalFeaturedCategories >= maxFeaturedCategory) {
           return "Cannot make the category as featured. Maximum featured category limit reached";
         }
-
+        const existingFeatured = await prisma.featuredCategory.findUnique({
+          where: {
+            categoryId: id,
+          },
+          select: {
+            category: { select: { name: true } },
+          },
+        });
+        if (existingFeatured !== null) {
+          return `Category ${existingFeatured.category.name} is already featured` as const;
+        }
         const data = await prisma.featuredCategory.create({
           data: {
             category: {
@@ -443,8 +480,17 @@ export const categoryRouter = createTRPCRouter({
         where: {
           categoryId: id,
         },
-        include: {
-          image: true,
+        select: {
+          image: {
+            select: {
+              publicId: true,
+            },
+          },
+          category: {
+            select: {
+              name: true,
+            },
+          },
         },
       });
       if (existingCategory === null) {
@@ -464,7 +510,7 @@ export const categoryRouter = createTRPCRouter({
           existingCategory,
           error,
         });
-        return "Cannot able to delete the old image";
+        return `Cannot able to delete the of the category ${existingCategory.category.name}` as const;
       }
     }),
 
@@ -475,8 +521,17 @@ export const categoryRouter = createTRPCRouter({
         where: {
           categoryId: id,
         },
-        include: {
-          image: true,
+        select: {
+          image: {
+            select: {
+              publicId: true,
+            },
+          },
+          category: {
+            select: {
+              name: true,
+            },
+          },
         },
       });
       if (existingCategory === null) {
@@ -502,7 +557,7 @@ export const categoryRouter = createTRPCRouter({
           existingCategory,
           error,
         });
-        return "Cannot able to delete the old image";
+        return `Cannot able to delete the of the category ${existingCategory.category.name}'s Image` as const;
       }
     }),
 });

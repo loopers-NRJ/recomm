@@ -31,6 +31,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import Searchbar from "../Searchbar";
 import TableHeader from "../TableHeader";
+import { errorHandler } from "@/utils/errorHandler";
 
 type SortBy = OmitUndefined<RouterInputs["user"]["all"]["sortBy"]>;
 
@@ -71,7 +72,12 @@ export default function UserTable() {
     },
   );
 
-  const updateUserRole = api.user.updateRole.useMutation();
+  const updateUserRole = api.user.updateRole.useMutation({
+    onSuccess: () => {
+      void usersApi.refetch();
+    },
+    onError: errorHandler,
+  });
 
   const columns: ColumnDef<UserPayloadIncluded>[] = useMemo(
     () => [
@@ -125,14 +131,10 @@ export default function UserTable() {
               defaultValue={user.role?.id ?? "user"}
               onValueChange={(value) => {
                 const roleId = value === "user" ? null : value;
-                void updateUserRole
-                  .mutateAsync({
-                    userId: user.id,
-                    roleId,
-                  })
-                  .then(() => {
-                    void usersApi.refetch();
-                  });
+                updateUserRole.mutate({
+                  userId: user.id,
+                  roleId,
+                });
               }}
             >
               <SelectTrigger className="w-[180px]">

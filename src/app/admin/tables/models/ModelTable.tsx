@@ -27,6 +27,8 @@ import { useMemo, useState } from "react";
 import Searchbar from "../Searchbar";
 import TableHeader from "../TableHeader";
 import { ButtonLink } from "@/components/common/ButtonLink";
+import toast from "react-hot-toast";
+import { errorHandler } from "@/utils/errorHandler";
 
 type SortBy = OmitUndefined<RouterInputs["model"]["all"]["sortBy"]>;
 
@@ -55,7 +57,21 @@ export default function ModelTable() {
   );
 
   const [updatingModelId, setUpdatingModelId] = useState<string>();
-  const updateModelById = api.model.update.useMutation();
+  const updateModelById = api.model.update.useMutation({
+    onMutate: (variables) => {
+      setUpdatingModelId(variables.id);
+    },
+    onSuccess: (result) => {
+      if (typeof result === "string") {
+        return toast.error(result);
+      }
+      void modelsApi.refetch();
+    },
+    onError: errorHandler,
+    onSettled: () => {
+      setUpdatingModelId(undefined);
+    },
+  });
 
   const selectedState = useAdminSelectedState((selected) => selected.state);
   const [search, setSearch] = useQueryState(
@@ -76,7 +92,20 @@ export default function ModelTable() {
     },
   );
 
-  const deleteModelApi = api.model.delete.useMutation();
+  const deleteModelApi = api.model.delete.useMutation({
+    onMutate: (variables) => {
+      setDeleteModelId(variables.modelId);
+    },
+    onSuccess: (result) => {
+      if (typeof result === "string") {
+        return toast.error(result);
+      }
+      void modelsApi.refetch();
+    },
+    onSettled: () => {
+      setDeleteModelId(undefined);
+    },
+  });
   const [deleteModelId, setDeleteModelId] = useState<string>();
 
   const columns: ColumnDef<ModelPayloadIncluded>[] = useMemo(
@@ -104,19 +133,10 @@ export default function ModelTable() {
             // make the switch blue when active and black when inactive
             className="data-[state=checked]:bg-blue-500"
             onCheckedChange={() => {
-              setUpdatingModelId(row.original.id);
-              updateModelById
-                .mutateAsync({
-                  id: row.original.id,
-                  active: !row.original.active,
-                })
-                .then(async () => {
-                  await modelsApi.refetch();
-                  setUpdatingModelId(undefined);
-                })
-                .catch((err) => {
-                  console.log(err);
-                });
+              updateModelById.mutate({
+                id: row.original.id,
+                active: !row.original.active,
+              });
             }}
           />
         ),
@@ -205,13 +225,7 @@ export default function ModelTable() {
         cell: ({ row }) => (
           <Button
             onClick={() => {
-              setDeleteModelId(row.id);
-              void deleteModelApi
-                .mutateAsync({ modelId: row.original.id })
-                .then(async () => {
-                  await modelsApi.refetch();
-                  setDeleteModelId(undefined);
-                });
+              deleteModelApi.mutate({ modelId: row.original.id });
             }}
             disabled={deleteModelId === row.id}
             size="sm"

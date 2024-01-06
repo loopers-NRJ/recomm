@@ -32,6 +32,8 @@ import TableHeader from "../TableHeader";
 import { type RouterInputs } from "@/trpc/shared";
 import { api } from "@/trpc/react";
 import { ButtonLink } from "@/components/common/ButtonLink";
+import toast from "react-hot-toast";
+import { errorHandler } from "@/utils/errorHandler";
 
 type SortBy = OmitUndefined<RouterInputs["category"]["all"]["sortBy"]>;
 
@@ -83,9 +85,53 @@ export default function CategoryTable() {
     categoryId: parentId,
   });
 
-  const deleteCategoryApi = api.category.delete.useMutation();
-  const updateCategoryById = api.category.update.useMutation();
-  const removeCategoryFeatured = api.category.removeFromFeatured.useMutation();
+  const deleteCategoryApi = api.category.delete.useMutation({
+    onMutate: (variables) => {
+      setDeletingCategoryId(variables.categoryId);
+    },
+    onSuccess: (result) => {
+      if (typeof result === "string") {
+        return toast.error(result);
+      }
+      void categoriesApi.refetch();
+    },
+    onError: errorHandler,
+    onSettled: () => {
+      setDeletingCategoryId(undefined);
+    },
+  });
+  const updateCategoryById = api.category.update.useMutation({
+    onMutate: (variables) => {
+      setUpdatingCategoryId(variables.id);
+    },
+    onSuccess: (result) => {
+      if (typeof result === "string") {
+        return toast.error(result);
+      }
+      void categoriesApi.refetch();
+    },
+    onError: errorHandler,
+    onSettled: () => {
+      setUpdatingCategoryId(undefined);
+    },
+  });
+  const removeCategoryFeatured = api.category.removeFromFeatured.useMutation({
+    onMutate: (variables) => {
+      setFeaturedCategoryState(variables.categoryId);
+    },
+    onSuccess: (result) => {
+      if (typeof result === "string") {
+        return toast.error(result);
+      }
+      void categoriesApi.refetch();
+    },
+    onError: (err) => {
+      console.log(err);
+    },
+    onSettled: () => {
+      setFeaturedCategoryState("");
+    },
+  });
   // this state is to disable the update button when the user clicks the update button
   const [updatingCategoryId, setUpdatingCategoryId] = useState<string>();
   // this state is to disable the delete button when the user clicks the delete button
@@ -136,19 +182,10 @@ export default function CategoryTable() {
             // make the switch blue when active and black when inactive
             className="data-[state=checked]:bg-blue-500"
             onCheckedChange={() => {
-              setUpdatingCategoryId(row.original.id);
-              updateCategoryById
-                .mutateAsync({
-                  id: row.original.id,
-                  active: !row.original.active,
-                })
-                .then(async () => {
-                  await categoriesApi.refetch();
-                  setUpdatingCategoryId(undefined);
-                })
-                .catch((err) => {
-                  console.log(err);
-                });
+              updateCategoryById.mutate({
+                id: row.original.id,
+                active: !row.original.active,
+              });
             }}
           />
         ),
@@ -170,22 +207,13 @@ export default function CategoryTable() {
             checked={row.original.featuredCategory !== null}
             className="data-[state=checked]:bg-yellow-500"
             onCheckedChange={() => {
-              setFeaturedCategoryState(row.original.id);
               if (row.original.featuredCategory !== null) {
-                removeCategoryFeatured
-                  .mutateAsync({
-                    categoryId: row.original.id,
-                  })
-                  .then(async () => {
-                    await categoriesApi.refetch();
-                    setFeaturedCategoryState("");
-                  })
-                  .catch((err) => {
-                    console.log(err);
-                  });
+                removeCategoryFeatured.mutate({
+                  categoryId: row.original.id,
+                });
               } else {
                 router.push(
-                  `/admin/featured-category/create/?id=${row.original.id}`,
+                  `/admin/featured-category/create/${row.original.id}`,
                 );
               }
             }}
@@ -207,14 +235,17 @@ export default function CategoryTable() {
       {
         id: "brands",
         header: "Brands",
-        cell: ({ row }) => (
-          <Link
-            href={`/admin/tables/brands?category=${row.original.id}`}
-            className="text-blue-400 hover:text-blue-600"
-          >
-            Brands
-          </Link>
-        ),
+        cell: ({ row }) =>
+          row.original._count.subCategories === 0 ? (
+            <Link
+              href={`/admin/tables/brands?category=${row.original.id}`}
+              className="text-blue-400 hover:text-blue-600"
+            >
+              Brands
+            </Link>
+          ) : (
+            "N/A"
+          ),
       },
       {
         id: "models",
@@ -263,7 +294,7 @@ export default function CategoryTable() {
             variant="outline"
             size="sm"
             className="border-blue-400"
-            href={`/admin/category/edit/?id=${row.original.id}`}
+            href={`/admin/category/edit/${row.original.id}`}
           >
             Edit
           </ButtonLink>
@@ -276,13 +307,7 @@ export default function CategoryTable() {
         cell: ({ row }) => (
           <Button
             onClick={() => {
-              setDeletingCategoryId(row.original.id);
-              void deleteCategoryApi
-                .mutateAsync({ categoryId: row.original.id })
-                .then(async () => {
-                  await categoriesApi.refetch();
-                  setDeletingCategoryId(undefined);
-                });
+              deleteCategoryApi.mutate({ categoryId: row.original.id });
             }}
             disabled={deletingCategoryId === row.original.id}
             size="sm"

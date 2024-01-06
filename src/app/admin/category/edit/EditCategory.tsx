@@ -9,6 +9,8 @@ import { api } from "@/trpc/react";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import toast from "react-hot-toast";
+import { errorHandler } from "@/utils/errorHandler";
 
 export default function EditCategory({
   category,
@@ -17,7 +19,15 @@ export default function EditCategory({
 }) {
   const router = useRouter();
 
-  const updateCategoryApi = api.category.update.useMutation();
+  const updateCategoryApi = api.category.update.useMutation({
+    onSuccess: (result) => {
+      if (typeof result === "string") {
+        return toast.error(result);
+      }
+      router.push("/admin/tables/category");
+    },
+    onError: errorHandler,
+  });
 
   const [categoryName, setCategoryName] = useState("");
 
@@ -27,17 +37,10 @@ export default function EditCategory({
     if (categoryName.trim() === "") {
       return setError("Category name cannot be empty");
     }
-    try {
-      await updateCategoryApi.mutateAsync({
-        id: category.id,
-        name: categoryName,
-      });
-      router.push("/admin/tables/category");
-    } catch (error) {
-      if (error instanceof Error) {
-        return setError(error.message);
-      }
-    }
+    updateCategoryApi.mutate({
+      id: category.id,
+      name: categoryName,
+    });
   };
 
   return (

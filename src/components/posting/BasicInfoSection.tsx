@@ -1,5 +1,5 @@
-import BrandComboBox from "../common/BrandComboBox";
-import ModelComboBox from "../common/ModelComboBox";
+import BrandComboBox from "../combobox/BrandComboBox";
+import ModelComboBox from "../combobox/ModelComboBox";
 import { useEffect } from "react";
 import { type OptionalItem } from "@/types/custom";
 import { type Category } from "@prisma/client";

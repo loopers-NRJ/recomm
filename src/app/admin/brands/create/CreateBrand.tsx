@@ -6,32 +6,27 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAdminSelectedState } from "@/store/SelectedState";
 import { api } from "@/trpc/react";
+import { errorHandler } from "@/utils/errorHandler";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function CreateBrand() {
-  const createBrandApi = api.brand.create.useMutation();
+  const createBrandApi = api.brand.create.useMutation({
+    onSuccess: (result) => {
+      if (typeof result === "string") {
+        return toast.error(result);
+      }
+      router.push("/admin/tables/brands");
+    },
+    onError: errorHandler,
+  });
   const [brandName, setBrandName] = useState("");
 
-  const [error, setError] = useState<string>();
   const router = useRouter();
 
   const selectedState = useAdminSelectedState((selected) => selected.state);
-
-  const createBrand = async () => {
-    try {
-      await createBrandApi.mutateAsync({
-        name: brandName,
-        state: selectedState,
-      });
-      router.push("/admin/tables/brands");
-    } catch (error) {
-      if (error instanceof Error) {
-        return setError(error.message);
-      }
-    }
-  };
 
   return (
     <Container className="flex justify-center">
@@ -47,7 +42,12 @@ export default function CreateBrand() {
 
         <div className="flex items-end justify-end gap-8">
           <Button
-            onClick={() => void createBrand()}
+            onClick={() =>
+              createBrandApi.mutate({
+                name: brandName,
+                state: selectedState,
+              })
+            }
             disabled={brandName.trim() === "" || createBrandApi.isLoading}
           >
             Create Brand
@@ -57,12 +57,6 @@ export default function CreateBrand() {
           <div className="flex flex-col items-center justify-center rounded-lg border p-2">
             Creating Brand {brandName} ...
             <Loader2 className="animate-spin" />
-          </div>
-        )}
-
-        {error && (
-          <div className="rounded-lg border border-red-500 p-2 text-red-500">
-            {error}
           </div>
         )}
       </section>

@@ -26,6 +26,8 @@ import { useMemo, useState } from "react";
 import Searchbar from "../Searchbar";
 import TableHeader from "../TableHeader";
 import { ButtonLink } from "@/components/common/ButtonLink";
+import toast from "react-hot-toast";
+import { errorHandler } from "@/utils/errorHandler";
 
 type SortBy = OmitUndefined<RouterInputs["category"]["featured"]["sortBy"]>;
 
@@ -59,7 +61,21 @@ export default function FeaturedCategoryTable() {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
-  const removeCategoryFeatured = api.category.removeFromFeatured.useMutation();
+  const removeCategoryFeatured = api.category.removeFromFeatured.useMutation({
+    onMutate: (variables) => {
+      setFeaturedCategoryState(variables.categoryId);
+    },
+    onSuccess: (result) => {
+      if (typeof result === "string") {
+        return toast.error(result);
+      }
+      void categoriesApi.refetch();
+    },
+    onError: errorHandler,
+    onSettled: () => {
+      setFeaturedCategoryState("");
+    },
+  });
   // this state is to disable the featured button when the user clicks the featured button
   const [featuredCategoryState, setFeaturedCategoryState] = useState("");
 
@@ -167,18 +183,9 @@ export default function FeaturedCategoryTable() {
             size="sm"
             className="border-red-400"
             onClick={() => {
-              setFeaturedCategoryState(row.original.categoryId);
-              removeCategoryFeatured
-                .mutateAsync({
-                  categoryId: row.original.categoryId,
-                })
-                .then(async () => {
-                  await categoriesApi.refetch();
-                  setFeaturedCategoryState("");
-                })
-                .catch((err) => {
-                  console.log(err);
-                });
+              removeCategoryFeatured.mutate({
+                categoryId: row.original.categoryId,
+              });
             }}
           >
             Remove

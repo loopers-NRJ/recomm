@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import Searchbar from "../Searchbar";
 import TableHeader from "../TableHeader";
+import { errorHandler } from "@/utils/errorHandler";
 
 export default function RoleTable() {
   const router = useRouter();
@@ -34,7 +35,18 @@ export default function RoleTable() {
     sortOrder,
   });
   const [deletingRoleId, setDeletingRoleId] = useState<string>();
-  const deleteRoleApi = api.role.delete.useMutation();
+  const deleteRoleApi = api.role.delete.useMutation({
+    onMutate: (variables) => {
+      setDeletingRoleId(variables.id);
+    },
+    onSuccess: () => {
+      void rolesApi.refetch();
+    },
+    onError: errorHandler,
+    onSettled: () => {
+      setDeletingRoleId(undefined);
+    },
+  });
   const columns: ColumnDef<RolePayloadIncluded>[] = useMemo(
     () => [
       {
@@ -61,7 +73,7 @@ export default function RoleTable() {
               variant="ghost"
               className="border"
               onClick={() => {
-                router.push(`/admin/tables/roles/${role.id}`);
+                router.push(`/admin/roles/${role.id}`);
               }}
             >
               {role.accesses.length} Accesses
@@ -76,13 +88,7 @@ export default function RoleTable() {
         cell: ({ row }) => (
           <Button
             onClick={() => {
-              setDeletingRoleId(row.original.id);
-              void deleteRoleApi
-                .mutateAsync({ id: row.original.id })
-                .then(async () => {
-                  await rolesApi.refetch();
-                  setDeletingRoleId("");
-                });
+              deleteRoleApi.mutate({ id: row.original.id });
             }}
             disabled={deletingRoleId === row.original.id}
             size="sm"
@@ -102,7 +108,7 @@ export default function RoleTable() {
   }
   return (
     <>
-      <div className="flex items-center justify-between rounded-lg">
+      <div className="flex items-center justify-between gap-2 rounded-lg">
         <Searchbar search={search} setSearch={setSearch} />
         <Link href="/admin/roles/create">
           <Button>New</Button>

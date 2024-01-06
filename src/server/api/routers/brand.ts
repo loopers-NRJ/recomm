@@ -9,11 +9,7 @@ import {
   defaultSortOrder,
   maxLimit,
 } from "@/utils/constants";
-import {
-  BrandPayload,
-  type BrandPayloadIncluded,
-  states,
-} from "@/types/prisma";
+import { BrandPayload, states } from "@/types/prisma";
 
 export const brandRouter = createTRPCRouter({
   all: publicProcedure
@@ -73,95 +69,7 @@ export const brandRouter = createTRPCRouter({
         };
       },
     ),
-  byCategoryId: publicProcedure
-    .input(
-      z.object({
-        search: z.string().trim().default(""),
-        limit: z.number().int().positive().max(maxLimit).default(defaultLimit),
-        sortOrder: z.enum(["asc", "desc"]).default(defaultSortOrder),
-        sortBy: z
-          .enum(["name", "createdAt", "updatedAt", "active"])
-          .default(defaultSortBy),
-        cursor: idSchema.optional(),
-        categoryId: idSchema.optional(),
-        state: z.enum(states),
-      }),
-    )
-    .query(
-      async ({
-        input: { search, sortBy, sortOrder, categoryId, state, cursor, limit },
-        ctx: { prisma, isAdminPage },
-      }) => {
-        const fetchRecursiveBrandsByCategoryId = async (
-          categoryId?: string,
-        ) => {
-          if (categoryId) {
-            const subCategories = await prisma.category.findMany({
-              where: {
-                parentCategoryId: categoryId,
-              },
-              select: {
-                id: true,
-              },
-            });
 
-            if (subCategories.length !== 0) {
-              // this is not the leaf category
-              const subBrands: BrandPayloadIncluded[] = (
-                await Promise.all(
-                  subCategories.map((category) =>
-                    fetchRecursiveBrandsByCategoryId(category.id),
-                  ),
-                )
-              ).flat();
-              return subBrands;
-            }
-          }
-
-          // this is the leaf category
-          const brands = await prisma.brand.findMany({
-            where: {
-              name: {
-                contains: search,
-              },
-              models: categoryId
-                ? {
-                    some: {
-                      category: {
-                        id: categoryId,
-                        active: isAdminPage ? undefined : true,
-                      },
-                    },
-                  }
-                : undefined,
-              active: isAdminPage ? undefined : true,
-              createdState: state,
-            },
-            take: limit,
-            skip: cursor ? 1 : undefined,
-            cursor: cursor
-              ? {
-                  id: cursor,
-                }
-              : undefined,
-            orderBy: [
-              {
-                [sortBy]: sortOrder,
-              },
-            ],
-            include: BrandPayload.include,
-          });
-          return brands;
-        };
-
-        const brands = await fetchRecursiveBrandsByCategoryId(categoryId);
-
-        return {
-          brands,
-          nextCursor: brands[limit - 1]?.id,
-        };
-      },
-    ),
   byId: publicProcedure
     .input(z.object({ brandId: idSchema }))
     .query(async ({ input: { brandId: id }, ctx: { prisma } }) => {

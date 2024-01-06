@@ -10,6 +10,7 @@ import type {
 import { getServerAuthSession } from "@/server/auth";
 import { permanentRedirect } from "next/navigation";
 import type { Session } from "next-auth";
+import { type ReactNode } from "react";
 
 // type of the props
 export interface PagePropsWithSession<
@@ -25,7 +26,7 @@ export type PageWithSession<
   SearchParams = DefaultParams,
 > = (
   props: PagePropsWithSession<Params, SearchParams>,
-) => JSX.Element | Promise<JSX.Element>;
+) => ReactNode | Promise<ReactNode>;
 
 export default function AuthenticatedPage<
   Params = DefaultParams,

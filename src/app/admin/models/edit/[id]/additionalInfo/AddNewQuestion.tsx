@@ -24,6 +24,8 @@ import {
   atomicQuestionSchema,
   multipleChoiceQuestionSchema,
 } from "@/utils/validation";
+import toast from "react-hot-toast";
+import { errorHandler } from "@/utils/errorHandler";
 
 type ServerExpectedQuestion = {
   id: string;
@@ -70,9 +72,25 @@ export default function AddNewQuestion({
     [additionalQuestions],
   );
 
-  const addAtomicQuestion = api.model.addAtomicQuestion.useMutation();
+  const addAtomicQuestion = api.model.addAtomicQuestion.useMutation({
+    onSuccess: (result) => {
+      if (typeof result === "string") {
+        return toast.error(result);
+      }
+      handler(result);
+    },
+    onError: errorHandler,
+  });
   const addMultipleChoiceQuestion =
-    api.model.addMultipleChoiceQuestion.useMutation();
+    api.model.addMultipleChoiceQuestion.useMutation({
+      onSuccess: (result) => {
+        if (typeof result === "string") {
+          return toast.error(result);
+        }
+        handler(result);
+      },
+      onError: errorHandler,
+    });
 
   return (
     <section className="flex w-full flex-col gap-4">
@@ -112,15 +130,12 @@ export default function AddNewQuestion({
               title="Update"
               onClick={() => {
                 if (isAtomicQuestion(question)) {
-                  addAtomicQuestion
-                    .mutateAsync({ ...question, modelId: model.id })
-                    .then(handler)
-                    .catch(console.error);
+                  addAtomicQuestion.mutate({ ...question, modelId: model.id });
                 } else {
-                  addMultipleChoiceQuestion
-                    .mutateAsync({ ...question, modelId: model.id })
-                    .then(handler)
-                    .catch(console.error);
+                  addMultipleChoiceQuestion.mutate({
+                    ...question,
+                    modelId: model.id,
+                  });
                 }
               }}
               disabled={

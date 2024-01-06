@@ -1,30 +1,36 @@
 "use client";
 
 import Container from "@/components/Container";
-import CategoryComboBox from "@/components/common/CategoryComboBox";
 import ImagePicker from "@/components/common/ImagePicker";
 import Loading from "@/components/common/Loading";
 import { Button } from "@/components/ui/button";
 import type { OptionalItem } from "@/types/custom";
 import { api } from "@/trpc/react";
 import { useImageUploader } from "@/utils/imageUpload";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { errorHandler } from "@/utils/errorHandler";
+import { type CategoryPayloadIncluded } from "@/types/prisma";
+import AllCategoryComboBox from "@/components/combobox/AllCategoryComboBox";
 
-export default function CreateFeaturedCategory() {
+export default function CreateFeaturedCategory({
+  category,
+}: {
+  category: CategoryPayloadIncluded;
+}) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const urlId = searchParams.get("id");
 
-  const createFeaturedCategoryApi = api.category.addToFeatured.useMutation();
-  const [selectedCategory, setSelectedCategory] = useState<OptionalItem>(
-    urlId
-      ? {
-          id: urlId,
-          name: "",
-        }
-      : undefined,
-  );
+  const createFeaturedCategoryApi = api.category.addToFeatured.useMutation({
+    onSuccess: (result) => {
+      if (typeof result === "string") {
+        return setError(result);
+      }
+      router.push("/admin/tables/featured-category");
+    },
+    onError: errorHandler,
+  });
+  const [selectedCategory, setSelectedCategory] =
+    useState<OptionalItem>(category);
   // file object to store the file to upload
   const [imageFiles, setImageFiles] = useState<File[]>([]);
 
@@ -48,11 +54,10 @@ export default function CreateFeaturedCategory() {
         return setError("Upload an Image");
       }
 
-      await createFeaturedCategoryApi.mutateAsync({
+      createFeaturedCategoryApi.mutate({
         categoryId: selectedCategory.id,
         image,
       });
-      router.push("/admin/tables/categorys");
     } catch (error) {
       if (error instanceof Error) {
         return setError(error.message);
@@ -63,7 +68,7 @@ export default function CreateFeaturedCategory() {
   return (
     <Container className="flex justify-center">
       <section className="flex h-full w-full flex-col gap-4 p-4 md:h-fit md:w-4/6 lg:h-fit lg:w-3/6 xl:w-2/5">
-        <CategoryComboBox
+        <AllCategoryComboBox
           selected={selectedCategory}
           onSelect={(selected) => setSelectedCategory(selected)}
         />

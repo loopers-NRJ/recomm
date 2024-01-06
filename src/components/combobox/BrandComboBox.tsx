@@ -1,57 +1,58 @@
 import React, { useState } from "react";
 import { Label } from "../ui/label";
-import ComboBox from "./ComboBox";
+import ComboBox from "../common/ComboBox";
 import { api } from "@/trpc/react";
 import { type Item } from "@/types/custom";
-import ErrorMessage from "./ErrorMessage";
+import ErrorMessage from "../common/ErrorMessage";
 import { useClientSelectedState } from "@/store/SelectedState";
 
-function ModelComboBox({
+/**
+ * A wrapper for the ComboBox component with some default props for brands
+ */
+
+function BrandComboBox({
   onSelect,
   selected,
   categoryId,
-  brandId,
   error,
   disabled,
 }: {
   selected?: Item;
   onSelect: (selected?: Item) => void;
   categoryId?: string;
-  brandId?: string;
   error?: string;
   disabled?: boolean;
 }) {
   const [search, setSearch] = useState("");
 
   const selectedState = useClientSelectedState((selected) => selected.state);
-
-  const modelsSearch = api.search.models.useQuery({
+  const brandsSearch = api.search.brands.useQuery({
     categoryId,
-    brandId,
     search,
     state: selectedState,
   });
+
   return (
-    <div>
-      <Label className="flex items-center justify-between">
-        Model
+    <>
+      <Label className="flex w-full cursor-pointer items-center justify-between">
+        Brand
         <ComboBox
-          label="Models"
+          label="Brands"
           selected={selected}
           onSelect={onSelect}
           value={search}
           onChange={setSearch}
-          items={modelsSearch.data}
-          isLoading={modelsSearch.isLoading || !modelsSearch.data}
-          isError={modelsSearch.isError}
-          refetch={() => void modelsSearch.refetch()}
+          items={brandsSearch.data}
+          isLoading={brandsSearch.isLoading || !brandsSearch.data}
+          isError={brandsSearch.isError}
+          refetch={() => void brandsSearch.refetch()}
           requiredError={!!error}
           disabled={disabled}
         />
       </Label>
       {error && <ErrorMessage>{error}</ErrorMessage>}
-    </div>
+    </>
   );
 }
 
-export default React.memo(ModelComboBox);
+export default React.memo(BrandComboBox);

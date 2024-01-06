@@ -9,6 +9,7 @@ import AuthenticatedPage, {
 import { permanentRedirect } from "next/navigation";
 import { api } from "@/trpc/server";
 import { AccessType } from "@prisma/client";
+import { type ReactNode } from "react";
 
 // type of the props
 export interface PagePropsWithAccesses<
@@ -24,7 +25,7 @@ export type PageWithAccesses<
   SearchParams = DefaultParams,
 > = (
   props: PagePropsWithAccesses<Params, SearchParams>,
-) => JSX.Element | Promise<JSX.Element>;
+) => ReactNode | Promise<ReactNode>;
 
 export default function AdminPage<
   Params = DefaultParams,

@@ -3,6 +3,10 @@ import { Loader2 as Spinner, Plus } from "lucide-react";
 import Image from "next/image";
 import React, { type FC, useState } from "react";
 import { v4 as uuid } from "uuid";
+import {
+  maxImageSizeInMB as defaultMaxImageSizeInMB,
+  maxImageCount,
+} from "@/utils/constants";
 
 interface ImageFile {
   id: string;
@@ -22,8 +26,8 @@ export interface ImagePickerProps {
 }
 
 const ImagePicker: FC<ImagePickerProps> = ({
-  maxImageSizeInMB = 10,
-  maxImages = 5,
+  maxImageSizeInMB = defaultMaxImageSizeInMB,
+  maxImages = maxImageCount,
   acceptedImageFormats = [
     "image/jpeg",
     "image/jpg",

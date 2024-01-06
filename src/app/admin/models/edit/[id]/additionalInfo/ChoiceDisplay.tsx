@@ -9,6 +9,8 @@ import { useState } from "react";
 import { api } from "@/trpc/react";
 import { type Choice } from "@prisma/client";
 import { Cross1Icon } from "@radix-ui/react-icons";
+import toast from "react-hot-toast";
+import { errorHandler } from "@/utils/errorHandler";
 
 function ChoiceInput({
   choice,
@@ -21,8 +23,32 @@ function ChoiceInput({
 }) {
   const [enabled, setEnabled] = useState(false);
   const [value, setValue] = useState(choice.value);
-  const deleteChoice = api.model.deleteChoice.useMutation();
-  const updateChoice = api.model.updateChoice.useMutation();
+  const deleteChoice = api.model.deleteChoice.useMutation({
+    onSuccess: (result) => {
+      if (typeof result === "string") {
+        return toast.error(result);
+      }
+      setQuestion({
+        ...question,
+        choices: question.choices.filter((ch) => ch.id !== choice.id),
+      });
+    },
+    onError: errorHandler,
+  });
+  const updateChoice = api.model.updateChoice.useMutation({
+    onSuccess: (updatedChoice) => {
+      if (typeof updatedChoice === "string") {
+        return toast.error(updatedChoice);
+      }
+      setQuestion({
+        ...question,
+        choices: question.choices.map((choice) =>
+          choice.id === updatedChoice.id ? updatedChoice : choice,
+        ),
+      });
+    },
+    onError: errorHandler,
+  });
 
   return (
     <>
@@ -51,15 +77,7 @@ function ChoiceInput({
         size="sm"
         title="Delete"
         onClick={() => {
-          deleteChoice
-            .mutateAsync({ choiceId: choice.id })
-            .then(() =>
-              setQuestion({
-                ...question,
-                choices: question.choices.filter((ch) => ch.id !== choice.id),
-              }),
-            )
-            .catch(console.error);
+          deleteChoice.mutate({ choiceId: choice.id });
         }}
         disabled={deleteChoice.isLoading}
         className="h-6 w-6 p-0"
@@ -73,17 +91,7 @@ function ChoiceInput({
           title="Update"
           disabled={updateChoice.isLoading}
           onClick={() => {
-            updateChoice
-              .mutateAsync({ choiceId: choice.id, value })
-              .then((updatedChoice) =>
-                setQuestion({
-                  ...question,
-                  choices: question.choices.map((choice) =>
-                    choice.id === updatedChoice.id ? updatedChoice : choice,
-                  ),
-                }),
-              )
-              .catch(console.error);
+            updateChoice.mutate({ choiceId: choice.id, value });
           }}
         >
           <Check />

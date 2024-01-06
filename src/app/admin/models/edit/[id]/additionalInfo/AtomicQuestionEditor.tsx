@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/select";
 import { useState } from "react";
 import { Cross1Icon } from "@radix-ui/react-icons";
+import toast from "react-hot-toast";
+import { errorHandler } from "@/utils/errorHandler";
 
 export function AtomicQuestionEditor({
   question,
@@ -29,8 +31,24 @@ export function AtomicQuestionEditor({
     question.questionContent,
   );
 
-  const updateQuestion = api.model.updateAtomicQuestion.useMutation();
-  const deleteQuestion = api.model.deleteAtomicQuestion.useMutation();
+  const updateQuestion = api.model.updateAtomicQuestion.useMutation({
+    onSuccess: (result) => {
+      if (typeof result === "string") {
+        return toast.error(result);
+      }
+      setQuestion(result);
+    },
+    onError: errorHandler,
+  });
+  const deleteQuestion = api.model.deleteAtomicQuestion.useMutation({
+    onSuccess: (result) => {
+      if (typeof result === "string") {
+        return toast.error(result);
+      }
+      removeQuestion(question.id);
+    },
+    onError: errorHandler,
+  });
   return (
     <div className="flex w-full items-center justify-between gap-2">
       <Input
@@ -42,10 +60,7 @@ export function AtomicQuestionEditor({
           title="Required"
           checked={question.required}
           onCheckedChange={(required) => {
-            updateQuestion
-              .mutateAsync({ questionId: question.id, required })
-              .then(setQuestion)
-              .catch(console.error);
+            updateQuestion.mutate({ questionId: question.id, required });
           }}
           disabled={updateQuestion.isLoading}
           className="scale-90 data-[state=checked]:bg-red-400"
@@ -59,10 +74,7 @@ export function AtomicQuestionEditor({
           size="sm"
           title="Delete"
           onClick={() => {
-            deleteQuestion
-              .mutateAsync({ questionId: question.id })
-              .then(() => removeQuestion(question.id))
-              .catch(console.error);
+            deleteQuestion.mutate({ questionId: question.id });
           }}
           disabled={deleteQuestion.isLoading}
           className="h-6 w-6 p-0"
@@ -76,10 +88,10 @@ export function AtomicQuestionEditor({
               size="sm"
               title="Update"
               onClick={() => {
-                updateQuestion
-                  .mutateAsync({ questionId: question.id, questionContent })
-                  .then(setQuestion)
-                  .catch(console.error);
+                updateQuestion.mutate({
+                  questionId: question.id,
+                  questionContent,
+                });
               }}
               disabled={updateQuestion.isLoading}
             >
@@ -98,19 +110,24 @@ function AtomicQuestionTypeSelect({
   question: AtomicQuestion;
   setQuestion: (newType: AtomicQuestion) => void;
 }) {
-  const updateQuestion = api.model.updateAtomicQuestion.useMutation();
+  const updateQuestion = api.model.updateAtomicQuestion.useMutation({
+    onSuccess: (result) => {
+      if (typeof result === "string") {
+        return toast.error(result);
+      }
+      setQuestion(result);
+    },
+    onError: errorHandler,
+  });
 
   return (
     <Select
       value={question.type}
       onValueChange={(value) => {
-        updateQuestion
-          .mutateAsync({
-            questionId: question.id,
-            type: value as AtomicQuestionType,
-          })
-          .then(setQuestion)
-          .catch(console.error);
+        updateQuestion.mutate({
+          questionId: question.id,
+          type: value as AtomicQuestionType,
+        });
       }}
       disabled={updateQuestion.isLoading}
     >

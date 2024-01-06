@@ -5,29 +5,31 @@ import ImagePicker from "@/components/common/ImagePicker";
 import Loading from "@/components/common/Loading";
 import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/react";
+import { errorHandler } from "@/utils/errorHandler";
 import { useImageUploader } from "@/utils/imageUpload";
-import { Prisma } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
-const CustomCategoryPayload =
-  Prisma.validator<Prisma.FeaturedCategoryDefaultArgs>()({
-    select: {
-      category: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
-      image: true,
-    },
-  });
-
-type CustomCategoryType = Prisma.FeaturedCategoryGetPayload<
-  typeof CustomCategoryPayload
->;
+type CustomCategoryType = {
+  category: {
+    name: string;
+    id: string;
+  };
+  image: {
+    publicId: string;
+    url: string;
+    secureUrl: string;
+    originalFilename: string;
+    format: string;
+    width: number;
+    height: number;
+    resource_type: string;
+    productId: string | null;
+  };
+};
 
 export default function EditFeaturedCategory({
   category: featuredCategory,
@@ -51,26 +53,28 @@ export default function EditFeaturedCategory({
     return result;
   };
 
-  const updateFeaturedCategoryApi = api.category.updateFeatured.useMutation();
+  const updateFeaturedCategoryApi = api.category.updateFeatured.useMutation({
+    onSuccess: (result) => {
+      if (typeof result === "string") {
+        return toast.error(result);
+      }
+      router.push("/admin/tables/featured-category");
+    },
+    onError: errorHandler,
+  });
 
   const updateFeaturedCategory = async () => {
-    try {
-      const images = await uploadImage();
-      if (images instanceof Error) {
-        return setError(images.message);
-      }
-      if (images.length === 0) {
-        return setError("You must upload an image");
-      }
-      await updateFeaturedCategoryApi.mutateAsync({
-        categoryId: featuredCategory.category.id,
-        image: images[0]!,
-      });
-      router.push("/admin/tables/featured-category");
-    } catch (error) {
-      console.error(error);
-      return setError("Something went wrong");
+    const images = await uploadImage();
+    if (images instanceof Error) {
+      return setError(images.message);
     }
+    if (images.length === 0) {
+      return setError("You must upload an image");
+    }
+    updateFeaturedCategoryApi.mutate({
+      categoryId: featuredCategory.category.id,
+      image: images[0]!,
+    });
   };
 
   return (

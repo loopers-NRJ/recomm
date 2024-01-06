@@ -27,6 +27,8 @@ import { useMemo, useState } from "react";
 import Searchbar from "../Searchbar";
 import TableHeader from "../TableHeader";
 import { ButtonLink } from "@/components/common/ButtonLink";
+import toast from "react-hot-toast";
+import { errorHandler } from "@/utils/errorHandler";
 
 type SortBy = OmitUndefined<RouterInputs["brand"]["all"]["sortBy"]>;
 
@@ -53,11 +55,25 @@ export default function BrandTable() {
   const categoryId = searchParams.get("category") ?? undefined;
 
   const [updatingBrandId, setUpdatingBrandId] = useState<string>();
-  const updateBrandById = api.brand.update.useMutation();
+  const updateBrandById = api.brand.update.useMutation({
+    onMutate: (variables) => {
+      setUpdatingBrandId(variables.id);
+    },
+    onSuccess: (result) => {
+      if (typeof result === "string") {
+        return toast.error(result);
+      }
+      void brandsApi.refetch();
+    },
+    onError: errorHandler,
+    onSettled: () => {
+      setUpdatingBrandId(undefined);
+    },
+  });
 
   const selectedState = useAdminSelectedState((selected) => selected.state);
 
-  const brandsApi = api.brand.byCategoryId.useInfiniteQuery(
+  const brandsApi = api.brand.all.useInfiniteQuery(
     {
       search,
       sortBy,
@@ -70,7 +86,22 @@ export default function BrandTable() {
     },
   );
 
-  const deleteBrandApi = api.brand.delete.useMutation();
+  const deleteBrandApi = api.brand.delete.useMutation({
+    onMutate: (variables) => {
+      setDeleteBrandId(variables.brandId);
+    },
+
+    onSuccess: (result) => {
+      if (typeof result === "string") {
+        return toast.error(result);
+      }
+      void brandsApi.refetch();
+    },
+    onError: errorHandler,
+    onSettled: () => {
+      setDeleteBrandId(undefined);
+    },
+  });
   // this state is to disable the delete button when admin clicks on it
   const [deleteBrandId, setDeleteBrandId] = useState<string>();
 
@@ -100,19 +131,10 @@ export default function BrandTable() {
             // make the switch blue when active and black when inactive
             className="data-[state=checked]:bg-blue-500"
             onCheckedChange={() => {
-              setUpdatingBrandId(row.original.id);
-              updateBrandById
-                .mutateAsync({
-                  id: row.original.id,
-                  active: !row.original.active,
-                })
-                .then(async () => {
-                  await brandsApi.refetch();
-                  setUpdatingBrandId(undefined);
-                })
-                .catch((err) => {
-                  console.log(err);
-                });
+              updateBrandById.mutate({
+                id: row.original.id,
+                active: !row.original.active,
+              });
             }}
           />
         ),
@@ -189,15 +211,9 @@ export default function BrandTable() {
         cell: ({ row }) => (
           <Button
             onClick={() => {
-              setDeleteBrandId(row.original.id);
-              void deleteBrandApi
-                .mutateAsync({
-                  brandId: row.original.id,
-                })
-                .then(async () => {
-                  await brandsApi.refetch();
-                  setDeleteBrandId(undefined);
-                });
+              deleteBrandApi.mutate({
+                brandId: row.original.id,
+              });
             }}
             disabled={deleteBrandId === row.original.id}
             size="sm"

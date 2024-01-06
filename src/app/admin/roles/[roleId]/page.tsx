@@ -1,5 +1,5 @@
 import AdminPage from "@/hoc/AdminPage";
-import RoleEdit from "./RoleEdit";
+import EditRole from "./EditRole";
 import { api } from "@/trpc/server";
 import { notFound } from "next/navigation";
 
@@ -8,6 +8,6 @@ const RoleEditPage = AdminPage<{ roleId: string }>(async (props) => {
   if (!role) {
     return notFound();
   }
-  return <RoleEdit role={role} />;
+  return <EditRole role={role} />;
 });
 export default RoleEditPage;

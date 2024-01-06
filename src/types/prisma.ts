@@ -113,6 +113,11 @@ export const CategoryPayload = Prisma.validator<Prisma.CategoryDefaultArgs>()({
         image: true,
       },
     },
+    _count: {
+      select: {
+        subCategories: true,
+      },
+    },
   },
 });
 

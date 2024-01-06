@@ -14,9 +14,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { type MultipleChoiceQuestionType } from "@prisma/client";
 import { Cross1Icon } from "@radix-ui/react-icons";
+import toast from "react-hot-toast";
+import { errorHandler } from "@/utils/errorHandler";
 
 export function MultipleChoiceQuestionEditor({
   question,
@@ -31,10 +33,41 @@ export function MultipleChoiceQuestionEditor({
     question.questionContent,
   );
 
-  const addCoice = api.model.addChoice.useMutation();
-  const updateQuestion = api.model.updateMultipleChoiceQuestion.useMutation();
-  const deleteQuestion = api.model.deleteMultipleChoiceQuestion.useMutation();
+  const addCoice = api.model.addChoice.useMutation({
+    onSuccess: (newChoice) => {
+      if (typeof newChoice === "string") {
+        return toast.error(newChoice);
+      }
+      setQuestion({
+        ...question,
+        choices: [...question.choices, newChoice],
+      });
+      if (addMoreInputRef.current) {
+        addMoreInputRef.current.value = "";
+      }
+    },
+    onError: errorHandler,
+  });
+  const updateQuestion = api.model.updateMultipleChoiceQuestion.useMutation({
+    onSuccess: (result) => {
+      if (typeof result === "string") {
+        return toast.error(result);
+      }
+      setQuestion(result);
+    },
+    onError: errorHandler,
+  });
+  const deleteQuestion = api.model.deleteMultipleChoiceQuestion.useMutation({
+    onSuccess: (result) => {
+      if (typeof result === "string") {
+        return toast.error(result);
+      }
+      removeQuestion(question.id);
+    },
+    onError: errorHandler,
+  });
 
+  const addMoreInputRef = useRef<HTMLInputElement>(null);
   return (
     <div className="flex w-full justify-between gap-2">
       <div className="flex w-full flex-col gap-2">
@@ -44,24 +77,17 @@ export function MultipleChoiceQuestionEditor({
         />
         <ChoiceDisplay question={question} setQuestion={setQuestion} />
         <Input
+          ref={addMoreInputRef}
           placeholder="Add more"
           onKeyDown={(e) => {
             if (e.key !== "Enter") return;
             const newChoice = (e.target as HTMLInputElement).value;
             if (newChoice.trim() === "") return;
-            addCoice
-              .mutateAsync({
-                value: newChoice,
-                modelId: question.modelId,
-                questionId: question.id,
-              })
-              .then((choice) =>
-                setQuestion({
-                  ...question,
-                  choices: [...question.choices, choice],
-                }),
-              )
-              .catch(console.error);
+            addCoice.mutate({
+              value: newChoice,
+              modelId: question.modelId,
+              questionId: question.id,
+            });
           }}
           disabled={addCoice.isLoading}
         />
@@ -73,10 +99,7 @@ export function MultipleChoiceQuestionEditor({
             checked={question.required}
             disabled={updateQuestion.isLoading}
             onCheckedChange={(required) => {
-              updateQuestion
-                .mutateAsync({ questionId: question.id, required })
-                .then(setQuestion)
-                .catch(console.error);
+              updateQuestion.mutate({ questionId: question.id, required });
             }}
             className="scale-90 data-[state=checked]:bg-red-400"
           />
@@ -91,10 +114,7 @@ export function MultipleChoiceQuestionEditor({
           size="sm"
           title="Delete"
           onClick={() => {
-            deleteQuestion
-              .mutateAsync({ questionId: question.id })
-              .then(() => removeQuestion(question.id))
-              .catch(console.error);
+            deleteQuestion.mutate({ questionId: question.id });
           }}
           disabled={deleteQuestion.isLoading}
           className="h-6 w-6 p-0"
@@ -108,10 +128,10 @@ export function MultipleChoiceQuestionEditor({
               size="sm"
               title="Update"
               onClick={() => {
-                updateQuestion
-                  .mutateAsync({ questionId: question.id, questionContent })
-                  .then(setQuestion)
-                  .catch(console.error);
+                updateQuestion.mutate({
+                  questionId: question.id,
+                  questionContent,
+                });
               }}
               disabled={updateQuestion.isLoading}
             >
@@ -130,19 +150,24 @@ export function MultipleChoiceQuestionTypeSelect({
   question: MultipleChoiceQuestion;
   setQuestion: (newType: MultipleChoiceQuestion) => void;
 }) {
-  const updateQuestion = api.model.updateMultipleChoiceQuestion.useMutation();
+  const updateQuestion = api.model.updateMultipleChoiceQuestion.useMutation({
+    onSuccess: (result) => {
+      if (typeof result === "string") {
+        return toast.error(result);
+      }
+      setQuestion(result);
+    },
+    onError: errorHandler,
+  });
 
   return (
     <Select
       value={question.type}
       onValueChange={(value) => {
-        updateQuestion
-          .mutateAsync({
-            questionId: question.id,
-            type: value as MultipleChoiceQuestionType,
-          })
-          .then(setQuestion)
-          .catch(console.error);
+        updateQuestion.mutate({
+          questionId: question.id,
+          type: value as MultipleChoiceQuestionType,
+        });
       }}
       disabled={updateQuestion.isLoading}
     >

@@ -1,8 +1,8 @@
 "use client";
 
 import Container from "@/components/Container";
-import BrandComboBox from "@/components/common/BrandComboBox";
-import CategoryComboBox from "@/components/common/CategoryComboBox";
+import BrandComboBox from "@/components/combobox/BrandComboBox";
+import CategoryComboBox from "@/components/combobox/CategoryComboBox";
 import ImagePicker from "@/components/common/ImagePicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +28,8 @@ import { v4 as uuid } from "uuid";
 import { type ZodIssue } from "zod";
 import QuestionEditor from "./QuestionEditor";
 import type { Question, MultipleChoiceQuestion } from "./types";
+import toast from "react-hot-toast";
+import { errorHandler } from "@/utils/errorHandler";
 
 type Tab = "tab-1" | "tab-2";
 
@@ -41,7 +43,15 @@ const tab1Schema = modelSchema.pick({
 export default function CreateModel() {
   const [tab, changeTab] = useState<Tab>("tab-1");
 
-  const createModelApi = api.model.create.useMutation();
+  const createModelApi = api.model.create.useMutation({
+    onSuccess: (result) => {
+      if (typeof result === "string") {
+        return toast.error(result);
+      }
+      router.push("/admin/tables/models");
+    },
+    onError: errorHandler,
+  });
 
   const [modelName, setModelName] = useState("");
   // file object to store the file to upload
@@ -131,14 +141,7 @@ export default function CreateModel() {
       return setFormError(modelValidationResult.error.errors);
     }
 
-    try {
-      await createModelApi.mutateAsync(modelValidationResult.data);
-      router.push("/admin/tables/models");
-    } catch (error) {
-      if (error instanceof Error) {
-        return setError(error.message);
-      }
-    }
+    createModelApi.mutate(modelValidationResult.data);
   };
 
   const handleChangeTab = (tab: Tab) => {

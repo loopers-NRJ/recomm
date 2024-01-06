@@ -25,6 +25,7 @@ import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import Searchbar from "../Searchbar";
 import TableHeader from "../TableHeader";
+import { errorHandler } from "@/utils/errorHandler";
 
 type SortBy = OmitUndefined<RouterInputs["product"]["all"]["sortBy"]>;
 
@@ -74,8 +75,19 @@ export default function ProductTable() {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
-  const deleteProduct = api.product.delete.useMutation();
-  const [deleteId, setDeleteId] = useState<string>();
+  const deleteProduct = api.product.delete.useMutation({
+    onMutate: (variables) => {
+      setDeletingProductId(variables.productId);
+    },
+    onSuccess: () => {
+      void productApi.refetch();
+    },
+    onError: errorHandler,
+    onSettled: () => {
+      setDeletingProductId(undefined);
+    },
+  });
+  const [deletingProductId, setDeletingProductId] = useState<string>();
   const columns: ColumnDef<Omit<ProductsPayloadIncluded, "room">>[] = useMemo(
     () => [
       {
@@ -187,15 +199,9 @@ export default function ProductTable() {
             size="sm"
             variant="outline"
             onClick={() => {
-              setDeleteId(row.original.id);
-              void deleteProduct
-                .mutateAsync({ productId: row.original.id })
-                .then(async () => {
-                  await productApi.refetch();
-                  setDeleteId(undefined);
-                });
+              deleteProduct.mutate({ productId: row.original.id });
             }}
-            disabled={deleteId === row.original.id}
+            disabled={deletingProductId === row.original.id}
             className="border-red-400"
           >
             Delete
@@ -204,7 +210,7 @@ export default function ProductTable() {
       },
     ],
     [
-      deleteId,
+      deletingProductId,
       deleteProduct,
       productApi,
       setSortBy,

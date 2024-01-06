@@ -1,9 +1,13 @@
 import React, { useState } from "react";
 import { Label } from "../ui/label";
-import ComboBox from "./ComboBox";
+import ComboBox from "../common/ComboBox";
 import { api } from "@/trpc/react";
 import { type Item } from "@/types/custom";
 import { useClientSelectedState } from "@/store/SelectedState";
+
+/**
+ * A wrapper for the ComboBox component with some default props for categories
+ */
 
 function CategoryComboBox({
   onSelect,

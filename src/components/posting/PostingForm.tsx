@@ -21,6 +21,7 @@ import { notFound, useRouter } from "next/navigation";
 import { useImageUploader } from "@/utils/imageUpload";
 import { makeIssue } from "zod";
 import toast from "react-hot-toast";
+import { errorHandler } from "@/utils/errorHandler";
 
 export default function PostingForm({
   selectedCategorySlug,
@@ -65,13 +66,14 @@ export default function PostingForm({
   const { isLoading, upload } = useImageUploader();
   const router = useRouter();
   const productApi = api.product.create.useMutation({
-    onSuccess: (data) => {
-      if (typeof data === "string") {
-        return toast.error(data);
+    onSuccess: (result) => {
+      if (typeof result === "string") {
+        return toast.error(result);
       }
       toast.success("Product created successfully");
-      router.push(`/users/${data.sellerId}/listings`);
+      router.push(`/users/${result.sellerId}/listings`);
     },
+    onError: errorHandler,
   });
 
   const modelApi = api.model.byId.useQuery(
@@ -170,8 +172,6 @@ export default function PostingForm({
   );
 
   const handleSubmit = async () => {
-    console.log(price, Number(price));
-
     const result = productSchema.omit({ images: true }).safeParse({
       title,
       description,

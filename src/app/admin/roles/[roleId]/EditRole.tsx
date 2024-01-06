@@ -6,44 +6,70 @@ import { AccessType } from "@prisma/client";
 import { Accordion } from "@/components/ui/accordion";
 import Container from "@/components/Container";
 import { api } from "@/trpc/react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import AccordionSection, { type Processing } from "./AccordionSection";
 import type { RolePayloadIncluded } from "@/types/prisma";
 import { useRouter } from "next/navigation";
+import { errorHandler } from "@/utils/errorHandler";
 
-export default function RoleEdit({ role }: { role: RolePayloadIncluded }) {
+export default function EditRole({ role }: { role: RolePayloadIncluded }) {
   const [processing, setProcessing] = useState<Processing>(false);
 
-  const addAccessToRole = api.role.addAccess.useMutation();
-  const removeAccessFromRole = api.role.removeAccess.useMutation();
+  const addAccessToRole = api.role.addAccess.useMutation({
+    onMutate: async (variables) => {
+      setProcessing({ action: "adding", types: variables.accesses });
+    },
+    onSuccess: () => {
+      router.refresh();
+    },
+    onError: errorHandler,
+    onSettled: () => {
+      setProcessing(false);
+    },
+  });
+  const removeAccessFromRole = api.role.removeAccess.useMutation({
+    onMutate: async (variables) => {
+      setProcessing({ action: "removing", types: variables.accesses });
+    },
+    onSuccess: () => {
+      router.refresh();
+    },
+    onError: errorHandler,
+    onSettled: () => {
+      setProcessing(false);
+    },
+  });
   const router = useRouter();
   const handleCheckedChange = useCallback(
-    async (checked: boolean, types: [AccessType, ...AccessType[]]) => {
-      try {
-        if (checked) {
-          setProcessing({ action: "adding", types });
-          await addAccessToRole.mutateAsync({
-            roleId: role.id,
-            accesses: types,
-          });
-        } else {
-          setProcessing({ action: "removing", types });
-          await removeAccessFromRole.mutateAsync({
-            roleId: role.id,
-            accesses: types,
-          });
-        }
-        router.refresh();
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setProcessing(false);
+    (checked: boolean, types: [AccessType, ...AccessType[]]) => {
+      if (checked) {
+        addAccessToRole.mutate({
+          roleId: role.id,
+          accesses: types,
+        });
+      } else {
+        removeAccessFromRole.mutate({
+          roleId: role.id,
+          accesses: types,
+        });
       }
     },
     [addAccessToRole, removeAccessFromRole],
   );
 
   const selectedRoles = role.accesses.map((access) => access.type);
+
+  /**
+   * This is a temporary solution to prevent hydration error:
+   * Using Checkbox inside AccordionSection cause hydration error in nextjs
+   * follow this issue: https://github.com/shadcn-ui/ui/issues/1273
+   */
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
+  if (!isMounted) return null;
 
   return (
     <Container className="flex justify-center">

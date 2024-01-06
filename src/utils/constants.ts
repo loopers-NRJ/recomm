@@ -17,4 +17,7 @@ export const requestPathHeaderName = "x-forwarded-path" as const;
 export const adminPageRegex = /\/admin\//g;
 export const pathHeaderName = "x-pathname" as const;
 
-export const maxImageCount = 10 as const;
+// image upload
+export const maxImageCount = 5 as const;
+export const imageFieldName = "images" as const;
+export const maxImageSizeInMB = 10 as const;
