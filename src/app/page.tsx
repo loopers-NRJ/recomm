@@ -18,9 +18,10 @@ import Categories from "@/components/navbar/Categories";
 import { Button } from "@/components/ui/button";
 import Loading from "@/components/common/Loading";
 import { useClientSelectedState } from "@/store/SelectedState";
+import type { NextPage } from "next";
 
 
-export function Home() {
+const Home: NextPage = () => {
   // get products according to the search params
   const params = useSearchParams()!
 
