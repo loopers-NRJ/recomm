@@ -13,10 +13,10 @@ import {
 } from "@/components/ui/dialog";
 import { type OptionalItem } from "@/types/custom";
 import { api } from "@/trpc/react";
-import { toast } from "./ui/use-toast";
-import CategoryComboBox from "./common/CategoryComboBox";
-import BrandComboBox from "./common/BrandComboBox";
-import ModelComboBox from "./common/ModelComboBox";
+import { toast } from "@/components/ui/use-toast";
+import CategoryComboBox from "@/components/common/CategoryComboBox";
+import BrandComboBox from "@/components/common/BrandComboBox";
+import ModelComboBox from "@/components/common/ModelComboBox";
 
 const AddWish: FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<OptionalItem>();

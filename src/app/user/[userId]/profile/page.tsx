@@ -1,20 +1,20 @@
 import Image from "next/image";
-import { redirect } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import AuthenticatedPage from "@/hoc/AuthenticatedPage";
-import { getServerAuthSession } from "@/server/auth";
 import { api } from "@/trpc/server";
 import LogoutButton from "./logout";
+import type { NextPage } from "next";
 
-async function ProfilePage() {
-  const session = await getServerAuthSession();
-  if (!session || !session.user) {
-    redirect("/login")
+interface ProfilePageParams {
+  params: {
+    userId: string
   }
-  const userId = session.user.id
+}
 
-  const userData = await api.user.getUserById.query({userId})
+const ProfilePage: NextPage<ProfilePageParams> = async ({ params }) => {
+  const { userId } = params
+  const userData = await api.user.getUserById.query({ userId })
 
   return (
     <div className="relative mx-auto w-full rounded-lg bg-white shadow md:w-5/6 lg:w-4/6 xl:w-3/6">
@@ -41,7 +41,7 @@ async function ProfilePage() {
           >
             Edit Profile
           </Button>
-          <LogoutButton/>
+          <LogoutButton />
         </div>
 
         <div className="w-full">
@@ -57,7 +57,7 @@ async function ProfilePage() {
             </a>
 
             <a
-              href={`/users/${userId}/listings`}
+              href={`/user/${userId}/listings`}
               className=" block w-full border-t border-gray-100 py-4 pl-6 pr-3 text-gray-600 transition duration-150 hover:bg-gray-100"
             >
               Product Listings
