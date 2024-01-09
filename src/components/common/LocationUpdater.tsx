@@ -1,3 +1,4 @@
+"use client"
 import { useUserLocation } from "@/store/userLocation";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
