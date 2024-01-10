@@ -14,9 +14,9 @@ import {
 import { type OptionalItem } from "@/types/custom";
 import { api } from "@/trpc/react";
 import toast from "react-hot-toast";
-import CategoryComboBox from "./combobox/CategoryComboBox";
-import BrandComboBox from "./combobox/BrandComboBox";
-import ModelComboBox from "./combobox/ModelComboBox";
+import CategoryComboBox from "@/components/combobox/CategoryComboBox";
+import BrandComboBox from "@/components/combobox/BrandComboBox";
+import ModelComboBox from "@/components/combobox/ModelComboBox";
 
 const AddWish: FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<OptionalItem>();

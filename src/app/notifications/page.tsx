@@ -1,7 +1,5 @@
 import Container from "@/components/Container";
-import { withProtectedRoute } from "@/hoc/ProtectedRoute";
-
-export const getServerSideProps = withProtectedRoute();
+import AuthenticatedPage from "@/hoc/AuthenticatedPage";
 
 function NotificationPage() {
   return (
@@ -14,4 +12,4 @@ function NotificationPage() {
     </main>
   );
 }
-export default NotificationPage;
+export default AuthenticatedPage(NotificationPage);

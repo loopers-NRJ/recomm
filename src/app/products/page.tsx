@@ -1,3 +1,4 @@
+"use client"
 import { NextPage } from "next";
 import { useSearchParams } from "next/navigation";
 
@@ -17,9 +18,8 @@ import { Button } from "@/components/ui/button";
 import Loading from "@/components/common/Loading";
 import { useClientSelectedState } from "@/store/SelectedState";
 
-export const ProductsPages: NextPage = () => {
-  const searchParams = useSearchParams();
-  const params = new URLSearchParams(searchParams);
+const ProductsPages: NextPage = () => {
+  const params = useSearchParams()!
 
   const search = params.get("search") ?? defaultSearch;
   const sortBy = (params.get("sortBy") as SortBy) ?? defaultSortBy;

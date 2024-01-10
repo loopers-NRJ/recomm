@@ -14,11 +14,12 @@ import AdminButton from "./AdminButton";
 const Profile = ({ session }: { session: Session | null }) => {
   return (
     <Link
-      href={session ? `/users/${session.user.id}/profile` : "/login"}
+      href={session ? `/user/${session.user.id}/profile` : "/login"}
       className="rounded-full"
     >
       <Button
         variant="ghost"
+        asChild
         className="h-fit w-fit overflow-hidden rounded-full p-1.5 "
       >
         <Image

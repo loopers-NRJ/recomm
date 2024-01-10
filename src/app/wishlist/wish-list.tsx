@@ -3,17 +3,17 @@
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { api } from "@/trpc/react";
-import LoadingWishes from "./loading/LoadingWishes";
-import WishCard from "./WishCard";
-import ServerError from "./common/ServerError";
+import LoadingWishes from "@/components/loading/LoadingWishes";
+import WishCard from "./wish-card";
+import ServerError from "@/components/common/ServerError";
 import {
   defaultSearch,
   type SortOrder,
   defaultSortOrder,
 } from "@/utils/constants";
 import { useSearchParams } from "next/navigation";
-import { Button } from "./ui/button";
-import Loading from "./common/Loading";
+import { Button } from "@/components/ui/button";
+import Loading from "@/components/common/Loading";
 
 function Wishes() {
   const session = useSession();
