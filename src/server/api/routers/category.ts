@@ -8,35 +8,35 @@ import {
   publicProcedure,
 } from "@/server/api/trpc";
 import {
-  DefaultLimit,
-  DefaultSortBy,
-  DefaultSortOrder,
-  MaxFeaturedCategory,
-  MaxLimit,
-} from "@/utils/constants";
-import { idSchema, imageInputs } from "@/utils/validation";
-import { AccessType } from "@prisma/client";
-import {
   CategoryPayload,
   FeaturedCategoryPayload,
   states,
 } from "@/types/prisma";
+import {
+  defaultLimit,
+  defaultSortBy,
+  defaultSortOrder,
+  maxFeaturedCategory,
+  maxLimit,
+} from "@/utils/constants";
+import { idSchema, imageInputs } from "@/utils/validation";
+import { AccessType } from "@prisma/client";
 
 export const categoryRouter = createTRPCRouter({
-  getCategories: publicProcedure
+  all: publicProcedure
     .input(
       z.object({
         search: z.string().trim().default(""),
-        limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
-        sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
+        limit: z.number().int().positive().max(maxLimit).default(defaultLimit),
+        sortOrder: z.enum(["asc", "desc"]).default(defaultSortOrder),
         sortBy: z
           .enum(["name", "createdAt", "updatedAt", "active", "featured"])
-          .default(DefaultSortBy),
+          .default(defaultSortBy),
         cursor: idSchema.optional(),
         parentId: idSchema.nullish(),
         parentSlug: z.string().min(1).max(255).nullish(),
         state: z.enum(states),
-      })
+      }),
     )
     .query(
       async ({
@@ -93,23 +93,23 @@ export const categoryRouter = createTRPCRouter({
           categories,
           nextCursor: categories[limit - 1]?.id,
         };
-      }
+      },
     ),
 
-  getCategoriesWithoutPayload: publicProcedure
+  allWithoutPayload: publicProcedure
     .input(
       z.object({
         search: z.string().trim().default(""),
-        limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
-        sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
+        limit: z.number().int().positive().max(maxLimit).default(defaultLimit),
+        sortOrder: z.enum(["asc", "desc"]).default(defaultSortOrder),
         sortBy: z
           .enum(["name", "createdAt", "updatedAt", "active", "featured"])
-          .default(DefaultSortBy),
+          .default(defaultSortBy),
         cursor: idSchema.optional(),
         parentId: idSchema.nullish(),
         parentSlug: z.string().min(1).max(255).nullish(),
         state: z.enum(states),
-      })
+      }),
     )
     .query(
       async ({
@@ -157,10 +157,10 @@ export const categoryRouter = createTRPCRouter({
           categories,
           nextCursor: categories[limit - 1]?.id,
         };
-      }
+      },
     ),
-  getCategoryById: publicProcedure
-    .input(z.object({ categoryId: idSchema.nullish() }))
+  byId: publicProcedure
+    .input(z.object({ categoryId: idSchema.nullable() }))
     .query(async ({ input: { categoryId: id }, ctx: { prisma } }) => {
       if (!id) {
         return null;
@@ -172,11 +172,11 @@ export const categoryRouter = createTRPCRouter({
         include: CategoryPayload.include,
       });
       if (category === null) {
-        throw new Error("Category does not exist");
+        return "Category not found";
       }
       return category;
     }),
-  getCategoryBySlug: publicProcedure
+  bySlug: publicProcedure
     .input(z.object({ categorySlug: z.string().min(1).max(255) }))
     .query(async ({ input: { categorySlug: slug }, ctx: { prisma } }) => {
       const category = await prisma.category.findUnique({
@@ -192,18 +192,18 @@ export const categoryRouter = createTRPCRouter({
         },
       });
       if (category === null) {
-        throw new Error("Category does not exist");
+        return "Category not found";
       }
       return category;
     }),
 
-  createCategory: getProcedure(AccessType.createCategory)
+  create: getProcedure(AccessType.createCategory)
     .input(
       z.object({
         name: z.string().min(3).max(255),
         parentCategoryId: idSchema.optional(),
         state: z.enum(states),
-      })
+      }),
     )
     .mutation(
       async ({
@@ -211,6 +211,7 @@ export const categoryRouter = createTRPCRouter({
         ctx: { prisma, session },
       }) => {
         // checking whether the category already exists
+
         const existingCategory = await prisma.category.findFirst({
           where: {
             name,
@@ -222,7 +223,7 @@ export const categoryRouter = createTRPCRouter({
           },
         });
         if (existingCategory !== null) {
-          throw new Error(`Category with name: ${name} already exists`);
+          return `Category with name '${existingCategory.name}' already exists` as const;
         }
         // creating the category
         const category = await prisma.category.create({
@@ -246,9 +247,9 @@ export const categoryRouter = createTRPCRouter({
           include: CategoryPayload.include,
         });
         return category;
-      }
+      },
     ),
-  updateCategoryById: getProcedure(AccessType.updateCategory)
+  update: getProcedure(AccessType.updateCategory)
     .input(
       z.union([
         z.object({
@@ -269,14 +270,13 @@ export const categoryRouter = createTRPCRouter({
           parentCategoryId: idSchema.optional(),
           active: z.boolean(),
         }),
-      ])
+      ]),
     )
     .mutation(
       async ({
         input: { id, name, parentCategoryId, active },
         ctx: { prisma },
       }) => {
-        // checking whether the category exists
         const existingCategory = await prisma.category.findUnique({
           where: {
             id,
@@ -287,7 +287,7 @@ export const categoryRouter = createTRPCRouter({
           },
         });
         if (existingCategory === null) {
-          throw new Error("Category does not exist");
+          return "Category not found";
         }
         // checking whether the new name already exists
         if (name !== undefined && name !== existingCategory.name) {
@@ -303,7 +303,7 @@ export const categoryRouter = createTRPCRouter({
             },
           });
           if (existingName !== null) {
-            throw new Error(`Category ${name} already exists`);
+            return `Category with name '${name}' already exists` as const;
           }
         }
 
@@ -326,19 +326,47 @@ export const categoryRouter = createTRPCRouter({
           include: CategoryPayload.include,
         });
         return updatedCategory;
-      }
+      },
     ),
-  deleteCategoryById: getProcedure(AccessType.deleteCategory)
+  delete: getProcedure(AccessType.deleteCategory)
     .input(z.object({ categoryId: idSchema }))
     .mutation(async ({ input: { categoryId: id }, ctx: { prisma } }) => {
       // checking whether the category exists
+
       const existingCategory = await prisma.category.findUnique({
         where: {
           id,
         },
+        select: {
+          name: true,
+          subCategories: {
+            select: {
+              id: true,
+            },
+          },
+          models: {
+            select: {
+              id: true,
+            },
+          },
+          wishes: {
+            select: {
+              id: true,
+            },
+          },
+        },
       });
       if (existingCategory === null) {
-        throw new Error("Category does not exist");
+        return "Category not found";
+      }
+      if (existingCategory.subCategories.length > 0) {
+        return `Cannot delete the category '${existingCategory.name}' because it has subcategories.` as const;
+      }
+      if (existingCategory.models.length > 0) {
+        return `Cannot delete the category '${existingCategory.name}'. it's in use by some models` as const;
+      }
+      if (existingCategory.wishes.length > 0) {
+        return `Cannot delete the category '${existingCategory.name}'. Some users have wished for it` as const;
       }
       // deleting the category
       const category = await prisma.category.delete({
@@ -348,18 +376,18 @@ export const categoryRouter = createTRPCRouter({
       });
       return category;
     }),
-  getFeaturedCategories: publicProcedure
+  featured: publicProcedure
     .input(
       z.object({
         search: z.string().trim().default(""),
-        limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
-        sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
+        limit: z.number().int().positive().max(maxLimit).default(defaultLimit),
+        sortOrder: z.enum(["asc", "desc"]).default(defaultSortOrder),
         sortBy: z
           .enum(["name", "createdAt", "updatedAt", "active"])
-          .default(DefaultSortBy),
+          .default(defaultSortBy),
         cursor: idSchema.optional(),
         state: z.enum(states),
-      })
+      }),
     )
     .query(
       async ({
@@ -397,10 +425,10 @@ export const categoryRouter = createTRPCRouter({
           categories,
           nextCursor: categories[limit - 1]?.categoryId,
         };
-      }
+      },
     ),
 
-  makeCategoryFeaturedById: getProcedure(AccessType.updateCategory)
+  addToFeatured: getProcedure(AccessType.updateCategory)
     .input(z.object({ categoryId: idSchema, image: imageInputs }))
     .mutation(
       async ({
@@ -408,12 +436,20 @@ export const categoryRouter = createTRPCRouter({
         ctx: { prisma, session },
       }) => {
         const totalFeaturedCategories = await prisma.featuredCategory.count();
-        if (totalFeaturedCategories >= MaxFeaturedCategory) {
-          throw new Error(
-            `Cannot make the category as featured. Maximum featured category limit reached`
-          );
+        if (totalFeaturedCategories >= maxFeaturedCategory) {
+          return "Cannot make the category as featured. Maximum featured category limit reached";
         }
-
+        const existingFeatured = await prisma.featuredCategory.findUnique({
+          where: {
+            categoryId: id,
+          },
+          select: {
+            category: { select: { name: true } },
+          },
+        });
+        if (existingFeatured !== null) {
+          return `Category ${existingFeatured.category.name} is already featured` as const;
+        }
         const data = await prisma.featuredCategory.create({
           data: {
             category: {
@@ -435,21 +471,30 @@ export const categoryRouter = createTRPCRouter({
           },
         });
         return data.category;
-      }
+      },
     ),
-  removeCategoryFromFeaturedById: getProcedure(AccessType.updateCategory)
+  removeFromFeatured: getProcedure(AccessType.updateCategory)
     .input(z.object({ categoryId: idSchema }))
     .mutation(async ({ input: { categoryId: id }, ctx: { prisma } }) => {
       const existingCategory = await prisma.featuredCategory.findUnique({
         where: {
           categoryId: id,
         },
-        include: {
-          image: true,
+        select: {
+          image: {
+            select: {
+              publicId: true,
+            },
+          },
+          category: {
+            select: {
+              name: true,
+            },
+          },
         },
       });
       if (existingCategory === null) {
-        throw new Error("Category does not exist");
+        return "Category not found";
       }
       await prisma.featuredCategory.delete({
         where: {
@@ -465,23 +510,32 @@ export const categoryRouter = createTRPCRouter({
           existingCategory,
           error,
         });
-        throw new Error("Cannot able to delete the old image");
+        return `Cannot able to delete the of the category ${existingCategory.category.name}` as const;
       }
     }),
 
-  updateFeaturedCategoryById: getProcedure(AccessType.updateCategory)
+  updateFeatured: getProcedure(AccessType.updateCategory)
     .input(z.object({ categoryId: idSchema, image: imageInputs }))
     .mutation(async ({ input: { categoryId: id, image }, ctx: { prisma } }) => {
       const existingCategory = await prisma.featuredCategory.findUnique({
         where: {
           categoryId: id,
         },
-        include: {
-          image: true,
+        select: {
+          image: {
+            select: {
+              publicId: true,
+            },
+          },
+          category: {
+            select: {
+              name: true,
+            },
+          },
         },
       });
       if (existingCategory === null) {
-        throw new Error("Category does not exist");
+        return "Category not found";
       }
 
       await prisma.featuredCategory.update({
@@ -503,7 +557,7 @@ export const categoryRouter = createTRPCRouter({
           existingCategory,
           error,
         });
-        throw new Error("Cannot able to delete the old image");
+        return `Cannot able to delete the of the category ${existingCategory.category.name}'s Image` as const;
       }
     }),
 });

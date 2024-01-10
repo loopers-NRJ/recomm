@@ -1,8 +1,12 @@
 import { cn } from "@/lib/utils";
 import { Loader2 as Spinner, Plus } from "lucide-react";
 import Image from "next/image";
-import React, { FC, useState } from "react";
+import React, { type FC, useState } from "react";
 import { v4 as uuid } from "uuid";
+import {
+  maxImageSizeInMB as defaultMaxImageSizeInMB,
+  maxImageCount,
+} from "@/utils/constants";
 
 interface ImageFile {
   id: string;
@@ -22,8 +26,8 @@ export interface ImagePickerProps {
 }
 
 const ImagePicker: FC<ImagePickerProps> = ({
-  maxImageSizeInMB = 10,
-  maxImages = 5,
+  maxImageSizeInMB = defaultMaxImageSizeInMB,
+  maxImages = maxImageCount,
   acceptedImageFormats = [
     "image/jpeg",
     "image/jpg",
@@ -34,73 +38,57 @@ const ImagePicker: FC<ImagePickerProps> = ({
   images: parentImages,
   requiredError,
   children,
-  className
+  className,
 }) => {
   const [images, setImages] = useState<ImageFile[]>(
     parentImages.map((image) => ({
       id: image.name,
       file: image,
       progress: 100,
-    }))
+    })),
   );
 
   const handleImageSelect = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const imageCompression = (await import("browser-image-compression"))
       .default;
-    const { toast } = await import("../ui/use-toast");
+    const toast = (await import("react-hot-toast")).default;
 
     const newImages = [];
     if (event.target.files !== null) {
       const files = [...event.target.files];
       if (files.length > maxImages) {
-        toast({
-          title: "Error",
-          description: `Max image count is ${maxImages}`,
-          variant: "destructive",
-        });
+        toast.error(`Max image count is ${maxImages}`);
         files.splice(maxImages);
       }
       for (const image of files) {
         // condition to check weather the image is already present
         if (images.some((prevImage) => prevImage.file.name === image.name)) {
-          toast({
-            title: "Error",
-            description: "Image is already present",
-            variant: "destructive",
-          });
+          toast.error("Image is already present");
           continue;
         }
         // condition to check if the image size is greater than the max size
         if (image.size > maxImageSizeInMB * 1024 * 1024) {
-          toast({
-            title: "Error",
-            description: `Image size is too large. Max image size is ${maxImageSizeInMB}MB`,
-            variant: "destructive",
-          });
+          toast.error(
+            `Image size is too large. Max image size is ${maxImageSizeInMB}MB`,
+          );
           continue;
         }
         // condition to check if the image format is supported
         if (!acceptedImageFormats.includes(image.type)) {
-          toast({
-            title: "Error",
-            description: `${
+          toast.error(
+            `${
               image.type.split("/")?.[1] ?? "Image"
             } format is not supported. Supported formats are ${acceptedImageFormats.join(
-              ", "
+              ", ",
             )}`,
-            variant: "destructive",
-          });
+          );
           continue;
         }
         // condition to check if the max image count is reached
         if (images.length + newImages.length >= maxImages) {
-          toast({
-            title: "Error",
-            description: `Max image count is ${maxImages}`,
-            variant: "destructive",
-          });
+          toast.error(`Max image count is ${maxImages}`);
           break;
         }
         const id = uuid();
@@ -145,11 +133,7 @@ const ImagePicker: FC<ImagePickerProps> = ({
             setImagesToParent((prev) => [...prev, compressedImageFile]);
           })
           .catch(() => {
-            toast({
-              title: "Error",
-              description: "Failed to compress image",
-              variant: "destructive",
-            });
+            toast.error("Failed to compress image");
           });
       }
     }
@@ -202,7 +186,7 @@ const ImagePicker: FC<ImagePickerProps> = ({
             className={cn(
               "flex h-24 w-24 shrink-0 cursor-pointer items-center justify-center rounded-xl border object-cover",
               requiredError ? "border-red-500" : "",
-              className
+              className,
             )}
             htmlFor="image-picker"
           >

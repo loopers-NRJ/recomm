@@ -1,20 +1,19 @@
-"use client";
-
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import RecommLogo from "@/../public/recomm.png";
 
 const Logo = () => {
-  const router = useRouter();
-
   return (
-    <Image
-      onClick={() => router.push("/")}
-      className="cursor-pointer"
-      src="/recomm.png"
-      height="130"
-      width="130"
-      alt="Logo"
-    />
+    <Link href="/">
+      <Image
+        className="cursor-pointer"
+        src={RecommLogo}
+        height="33"
+        width="130"
+        alt="Logo"
+        priority
+      />
+    </Link>
   );
 };
 

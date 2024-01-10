@@ -1,10 +1,10 @@
-import { AtomicQuestion, AtomicQuestionType } from "@prisma/client";
+import { type AtomicQuestion, AtomicQuestionType } from "@prisma/client";
 import { Input } from "../ui/input";
 import DatePicker from "../common/DatePicker";
 import { type ReactNode } from "react";
 import { Label } from "../ui/label";
 import Textarea from "../common/Textarea";
-import { ZodIssue } from "zod";
+import { type ZodIssue } from "zod";
 import ErrorMessage from "../common/ErrorMessage";
 
 export type AtomicAnswer = {

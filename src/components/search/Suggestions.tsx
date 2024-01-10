@@ -1,5 +1,5 @@
-import { useRouter } from "next/router";
-import { FC, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { type FC, useEffect } from "react";
 
 import {
   CommandEmpty,
@@ -7,7 +7,7 @@ import {
   CommandItem,
   CommandSeparator,
 } from "@/components/ui/command";
-import { api } from "@/utils/api";
+import { api } from "@/trpc/react";
 import { debounce } from "@/utils/helper";
 import { useClientSelectedState } from "@/store/SelectedState";
 
@@ -59,7 +59,7 @@ const Suggestions: FC<SuggestionProps> = ({ searchKey }) => {
           <CommandItem
             key={category.id}
             onSelect={() => {
-              void router.push(`/products/?category=${category.id}`);
+              router.push(`/products/?category=${category.id}`);
             }}
             className="flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-200/50"
           >
@@ -73,7 +73,7 @@ const Suggestions: FC<SuggestionProps> = ({ searchKey }) => {
           <CommandItem
             key={brand.id}
             onSelect={() => {
-              void router.push(`/products/?brand=${brand.id}`);
+              router.push(`/products/?brand=${brand.id}`);
             }}
             className="flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-200/50"
           >
@@ -87,7 +87,7 @@ const Suggestions: FC<SuggestionProps> = ({ searchKey }) => {
           <CommandItem
             key={modal.id}
             onSelect={() => {
-              void router.push(`/products/?model=${modal.id}`);
+              router.push(`/products/?model=${modal.id}`);
             }}
             className="flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-200/50"
           >

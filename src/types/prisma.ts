@@ -113,6 +113,11 @@ export const CategoryPayload = Prisma.validator<Prisma.CategoryDefaultArgs>()({
         image: true,
       },
     },
+    _count: {
+      select: {
+        subCategories: true,
+      },
+    },
   },
 });
 
@@ -158,14 +163,14 @@ export const wishPayload = Prisma.validator<Prisma.WishDefaultArgs>()({
 
 export type WishPayloadIncluded = Prisma.WishGetPayload<typeof wishPayload>;
 
-export const MultipleChoiceQuestionTypeArray = [
+export const multipleChoiceQuestionTypeArray = [
   MultipleChoiceQuestionType.Checkbox,
   MultipleChoiceQuestionType.Dropdown,
   MultipleChoiceQuestionType.RadioGroup,
   MultipleChoiceQuestionType.Variant,
 ] as const;
 
-export const AtomicQuestionTypeArray = [
+export const atomicQuestionTypeArray = [
   AtomicQuestionType.Text,
   AtomicQuestionType.Paragraph,
   AtomicQuestionType.Number,
@@ -173,8 +178,8 @@ export const AtomicQuestionTypeArray = [
 ] as const;
 
 export const allQuestionTypes = [
-  ...AtomicQuestionTypeArray,
-  ...MultipleChoiceQuestionTypeArray,
+  ...atomicQuestionTypeArray,
+  ...multipleChoiceQuestionTypeArray,
 ] as const;
 
 export type AllQuestionType = (typeof allQuestionTypes)[number];

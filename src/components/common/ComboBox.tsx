@@ -1,6 +1,5 @@
 import { Check, ChevronsUpDown } from "lucide-react";
-import { FC, useEffect, useRef, useState } from "react";
-
+import { type FC, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -14,7 +13,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { Item } from "@/types/custom";
+import { type Item } from "@/types/custom";
 import { debounce } from "@/utils/helper";
 import Loading from "./Loading";
 
@@ -73,7 +72,7 @@ const ComboBox: FC<ComboBoxProps> = ({
         >
           {selected
             ? (isItems ? items : previousItemsRef.current).find(
-                (item) => item.id === selected.id
+                (item) => item.id === selected.id,
               )?.name
             : `Select ${label}...`}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -100,8 +99,8 @@ const ComboBox: FC<ComboBoxProps> = ({
                       : (isItems ? items : previousItemsRef.current).find(
                           (item) =>
                             item.name.toLowerCase() ===
-                            currentValue.toLowerCase()
-                        )
+                            currentValue.toLowerCase(),
+                        ),
                   );
                   setOpen(false);
                 }}
@@ -110,7 +109,7 @@ const ComboBox: FC<ComboBoxProps> = ({
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
-                    selected?.name === item.name ? "opacity-100" : "opacity-0"
+                    selected?.name === item.name ? "opacity-100" : "opacity-0",
                   )}
                 />
                 {item.name}

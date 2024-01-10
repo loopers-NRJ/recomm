@@ -1,5 +1,5 @@
-import { AppRouter } from "@/server/api/root";
-import { TRPCLink } from "@trpc/client";
+import type { AppRouter } from "@/server/api/root";
+import type { TRPCLink } from "@trpc/client";
 import { observable } from "@trpc/server/observable";
 
 export const ErrorLink: TRPCLink<AppRouter> = () => {
@@ -8,10 +8,11 @@ export const ErrorLink: TRPCLink<AppRouter> = () => {
       // before sending the request
       const unsubscribe = next(op).subscribe({
         error(err) {
+          // before receiving the response
           // handle errors
           if (err.data?.code === "INTERNAL_SERVER_ERROR") {
             console.error(err);
-            return window.location.replace("/500");
+            return window.location.replace("/something-went-wrong");
           }
           if (err.data?.code === "UNAUTHORIZED") {
             return window.location.replace("/unauthorized");

@@ -1,8 +1,8 @@
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import BidDurationPicker from "../common/BidDurationPicker";
-import { SingleModelPayloadIncluded } from "@/types/prisma";
-import { ProductFormError } from "@/utils/validation";
+import { type SingleModelPayloadIncluded } from "@/types/prisma";
+import { type ProductFormError } from "@/utils/validation";
 
 interface PricingInfoSectionProps {
   price: string;

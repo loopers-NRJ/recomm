@@ -2,7 +2,7 @@ import { idSchema } from "@/utils/validation";
 
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { z } from "zod";
-import { DefaultLimit } from "@/utils/constants";
+import { defaultLimit } from "@/utils/constants";
 import { states } from "@/types/prisma";
 
 export const searchRouter = createTRPCRouter({
@@ -11,7 +11,7 @@ export const searchRouter = createTRPCRouter({
       z.object({
         search: z.string().trim().default(""),
         state: z.enum(states),
-      })
+      }),
     )
     .query(async ({ input: { search, state }, ctx: { prisma } }) => {
       if (search.trim() === "") {
@@ -30,7 +30,7 @@ export const searchRouter = createTRPCRouter({
             active: true,
             createdState: state,
           },
-          take: DefaultLimit,
+          take: defaultLimit,
           select: {
             id: true,
             name: true,
@@ -47,7 +47,7 @@ export const searchRouter = createTRPCRouter({
             active: true,
             createdState: state,
           },
-          take: DefaultLimit,
+          take: defaultLimit,
           select: {
             id: true,
             name: true,
@@ -64,7 +64,7 @@ export const searchRouter = createTRPCRouter({
             active: true,
             createdState: state,
           },
-          take: DefaultLimit,
+          take: defaultLimit,
           select: {
             id: true,
             name: true,
@@ -85,7 +85,7 @@ export const searchRouter = createTRPCRouter({
       z.object({
         search: z.string().trim().default(""),
         state: z.enum(states),
-      })
+      }),
     )
     .query(
       async ({ input: { search, state }, ctx: { prisma, isAdminPage } }) => {
@@ -99,7 +99,7 @@ export const searchRouter = createTRPCRouter({
             active: isAdminPage ? undefined : true,
             createdState: state,
           },
-          take: DefaultLimit,
+          take: defaultLimit,
           select: {
             id: true,
             name: true,
@@ -108,14 +108,14 @@ export const searchRouter = createTRPCRouter({
           },
         });
         return categories;
-      }
+      },
     ),
   leafCategory: publicProcedure
     .input(
       z.object({
         search: z.string().trim().default(""),
         state: z.enum(states),
-      })
+      }),
     )
     .query(
       async ({ input: { search, state }, ctx: { prisma, isAdminPage } }) => {
@@ -133,14 +133,14 @@ export const searchRouter = createTRPCRouter({
 
             createdState: state,
           },
-          take: DefaultLimit,
+          take: defaultLimit,
           select: {
             id: true,
             name: true,
           },
         });
         return categories;
-      }
+      },
     ),
 
   brands: publicProcedure
@@ -149,7 +149,7 @@ export const searchRouter = createTRPCRouter({
         search: z.string().trim().default(""),
         categoryId: idSchema.optional(),
         state: z.enum(states),
-      })
+      }),
     )
     .query(
       async ({
@@ -176,7 +176,7 @@ export const searchRouter = createTRPCRouter({
               : undefined,
             createdState: state,
           },
-          take: DefaultLimit,
+          take: defaultLimit,
           select: {
             id: true,
             name: true,
@@ -185,7 +185,7 @@ export const searchRouter = createTRPCRouter({
           },
         });
         return brands;
-      }
+      },
     ),
 
   models: publicProcedure
@@ -195,7 +195,7 @@ export const searchRouter = createTRPCRouter({
         categoryId: idSchema.optional(),
         brandId: idSchema.optional(),
         state: z.enum(states),
-      })
+      }),
     )
     .query(
       async ({
@@ -222,7 +222,7 @@ export const searchRouter = createTRPCRouter({
               : undefined,
             createdState: state,
           },
-          take: DefaultLimit,
+          take: defaultLimit,
           select: {
             id: true,
             name: true,
@@ -231,6 +231,6 @@ export const searchRouter = createTRPCRouter({
           },
         });
         return models;
-      }
+      },
     ),
 });

@@ -1,6 +1,6 @@
 import { Label } from "../ui/label";
 import { Checkbox } from "../ui/checkbox";
-import { MultipleChoiceQuestionPayloadIncluded } from "@/types/prisma";
+import { type MultipleChoiceQuestionPayloadIncluded } from "@/types/prisma";
 import {
   Select,
   SelectContent,
@@ -11,7 +11,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { MultipleChoiceQuestionType } from "@prisma/client";
 import { Button } from "../ui/button";
-import { ZodIssue } from "zod";
+import { type ZodIssue } from "zod";
 import ErrorMessage from "../common/ErrorMessage";
 
 export type MultipleChoiceAnswer = {
@@ -84,7 +84,7 @@ export default function MultipleChoiceQuestionInputField({
                     onChange({
                       ...answer,
                       valueIds: answer.valueIds.filter(
-                        (id) => id !== choice.id
+                        (id) => id !== choice.id,
                       ),
                     });
                   }

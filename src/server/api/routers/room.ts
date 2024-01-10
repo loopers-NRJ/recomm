@@ -5,17 +5,17 @@ import { idSchema } from "@/utils/validation";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 import type { PrismaClient } from "@prisma/client";
-import { DefaultLimit, DefaultSortOrder, MaxLimit } from "@/utils/constants";
+import { defaultLimit, defaultSortOrder, maxLimit } from "@/utils/constants";
 
 export const roomRounter = createTRPCRouter({
   getBidsByRoomId: publicProcedure
     .input(
       z.object({
-        limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
-        sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
+        limit: z.number().int().positive().max(maxLimit).default(defaultLimit),
+        sortOrder: z.enum(["asc", "desc"]).default(defaultSortOrder),
         cursor: idSchema.optional(),
         roomId: idSchema,
-      })
+      }),
     )
     .query(
       async ({
@@ -47,7 +47,7 @@ export const roomRounter = createTRPCRouter({
           bids,
           nextCursor: bids[limit - 1]?.id,
         };
-      }
+      },
     ),
 
   getHighestBidByRoomId: publicProcedure
@@ -61,7 +61,7 @@ export const roomRounter = createTRPCRouter({
       z.object({
         roomId: idSchema,
         price: z.number().int().gt(0),
-      })
+      }),
     )
     .mutation(
       async ({ input: { price, roomId }, ctx: { prisma, session } }) => {
@@ -71,7 +71,7 @@ export const roomRounter = createTRPCRouter({
           userId: session.user.id,
           prisma,
         });
-      }
+      },
     ),
 
   deleteBid: protectedProcedure
@@ -92,7 +92,7 @@ export const roomRounter = createTRPCRouter({
       });
       // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
       if (bid === null || bid.room.product === null) {
-        throw new Error("Bid not found");
+        return "Bid not found";
       }
 
       if (
@@ -101,7 +101,7 @@ export const roomRounter = createTRPCRouter({
         // this condition allows seller to delete bid of other users
         bid.room.product.sellerId !== session.user.id
       ) {
-        throw new Error("You cannot delete this bid");
+        return "You cannot delete this bid";
       }
 
       // using void to ignore the returning promise
@@ -122,7 +122,7 @@ export const roomRounter = createTRPCRouter({
 
 export const getHighestBidByRoomId = async (
   id: string,
-  prisma: PrismaClient
+  prisma: PrismaClient,
 ) => {
   const bid = await prisma.bid.findFirst({
     where: {
@@ -159,21 +159,19 @@ export const createABid = ({
       },
     });
     if (room === null) {
-      throw new Error("Room not found");
+      return "Room not found";
     }
     if (room.product === null) {
-      throw new Error(
-        "Product you are trying to bid was not found, try again later"
-      );
+      return "Product you are trying to bid was not found, try again later";
     }
     if (room.product.price >= price) {
-      throw new Error("Bid amount too low");
+      return "Bid amount too low";
     }
     if (room.product.sellerId === userId) {
-      throw new Error("You cannot bid on your own product");
+      return "You cannot bid on your own product";
     }
     if (room.product.buyerId != null) {
-      throw new Error("Product already sold");
+      return "Product already sold";
     }
 
     let highestBid;
@@ -184,16 +182,16 @@ export const createABid = ({
         procedure: "createABid",
         error,
       });
-      throw new Error("Something went wrong");
+      return "Something went wrong";
     }
 
     // this condition block user from bidding twice
     if (highestBid !== null && highestBid.userId === userId) {
-      throw new Error("You are already the highest bidder");
+      return "You are already the highest bidder";
     }
     // this condition decides whether to allow user to bid lesser than or equal to the highest bid
     // if (highestBid.price >= price) {
-    //   throw new Error("Bid is too low");
+    //   return ("Bid is too low");
     // }
 
     const bid = await prisma.bid.create({

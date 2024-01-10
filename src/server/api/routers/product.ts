@@ -22,19 +22,19 @@ import {
 import { productsPayload, singleProductPayload, states } from "@/types/prisma";
 import slugify from "@/lib/slugify";
 import {
-  DefaultLimit,
-  DefaultSortBy,
-  DefaultSortOrder,
-  MaxLimit,
+  defaultLimit,
+  defaultSortBy,
+  defaultSortOrder,
+  maxLimit,
 } from "@/utils/constants";
 
 export const productRouter = createTRPCRouter({
-  getProducts: publicProcedure
+  all: publicProcedure
     .input(
       z.object({
         search: z.string().trim().default(""),
-        limit: z.number().int().positive().max(MaxLimit).default(DefaultLimit),
-        sortOrder: z.enum(["asc", "desc"]).default(DefaultSortOrder),
+        limit: z.number().int().positive().max(maxLimit).default(defaultLimit),
+        sortOrder: z.enum(["asc", "desc"]).default(defaultSortOrder),
         sortBy: z
           .enum([
             "name",
@@ -44,13 +44,13 @@ export const productRouter = createTRPCRouter({
             "active",
             "sellerName",
           ])
-          .default(DefaultSortBy),
+          .default(defaultSortBy),
         cursor: idSchema.optional(),
         categoryId: idSchema.optional(),
         brandId: idSchema.optional(),
         modelId: idSchema.optional(),
         state: z.enum(states),
-      })
+      }),
     )
     .query(
       async ({
@@ -120,14 +120,14 @@ export const productRouter = createTRPCRouter({
                   },
                 }
               : sortBy === "sellerName"
-              ? {
-                  seller: {
-                    name: sortOrder,
+                ? {
+                    seller: {
+                      name: sortOrder,
+                    },
+                  }
+                : {
+                    [sortBy]: sortOrder,
                   },
-                }
-              : {
-                  [sortBy]: sortOrder,
-                },
           ],
           include: productsPayload.include,
         });
@@ -135,9 +135,9 @@ export const productRouter = createTRPCRouter({
           products,
           nextCursor: products[limit - 1]?.id,
         };
-      }
+      },
     ),
-  getProductById: publicProcedure
+  byId: publicProcedure
     .input(z.object({ productId: idSchema }))
     .query(async ({ input: { productId: id }, ctx: { prisma, session } }) => {
       const product = await prisma.product.findUnique({
@@ -165,7 +165,7 @@ export const productRouter = createTRPCRouter({
       }
       return product as ProductWithIsFavorite;
     }),
-  getProductBySlug: publicProcedure
+  bySlug: publicProcedure
     .input(z.object({ productSlug: z.string() }))
     .query(async ({ input: { productSlug }, ctx: { prisma, session } }) => {
       const product = await prisma.product.findUnique({
@@ -194,7 +194,7 @@ export const productRouter = createTRPCRouter({
       return product as ProductWithIsFavorite;
     }),
   // createProduct: getProcedure(AccessType.subscriber)
-  createProduct: protectedProcedure
+  create: protectedProcedure
     .input(productSchema)
     .mutation(
       async ({
@@ -211,7 +211,7 @@ export const productRouter = createTRPCRouter({
         ctx: { prisma, session },
       }) => {
         if (closedAt < new Date()) {
-          throw new Error("Closed at date must be in the future");
+          return "Closed at date must be in the future";
         }
         const user = session.user;
         const model = await prisma.model.findUnique({
@@ -229,31 +229,31 @@ export const productRouter = createTRPCRouter({
           },
         });
         if (model === null) {
-          throw new Error("Model does not exist");
+          return "Model not found";
         }
 
         const isValidValues = validateMultipleChoiceQuestionInput(
           model.multipleChoiceQuestions,
-          providedChoices
+          providedChoices,
         );
         if (isValidValues !== true) {
-          throw new Error("Invalid option");
+          return "Invalid option";
         }
 
         const choiceValueIds: string[] = [];
         providedChoices.forEach((choice) =>
           choice.type === MultipleChoiceQuestionType.Checkbox
             ? choiceValueIds.push(...choice.valueIds)
-            : choice.valueId && choiceValueIds.push(choice.valueId)
+            : choice.valueId && choiceValueIds.push(choice.valueId),
         );
 
         const isValidAnswers = validateAtomicQuestionAnswers(
           model.atomicQuestions,
-          providedAnswers
+          providedAnswers,
         );
 
         if (isValidAnswers !== true) {
-          throw new Error("Invalid answers");
+          return "Invalid answers";
         }
 
         const product = await prisma.product.create({
@@ -362,13 +362,10 @@ export const productRouter = createTRPCRouter({
         });
 
         return product;
-      }
+      },
     ),
 
-  deleteProductById: getProcedure([
-    AccessType.subscriber,
-    AccessType.deleteProduct,
-  ])
+  delete: getProcedure([AccessType.subscriber, AccessType.deleteProduct])
     .input(z.object({ productId: idSchema }))
     .mutation(
       async ({ input: { productId: id }, ctx: { prisma, session } }) => {
@@ -380,16 +377,16 @@ export const productRouter = createTRPCRouter({
           include: singleProductPayload.include,
         });
         if (existingProduct === null) {
-          throw new Error("Product does not exist");
+          return "Product not found";
         }
         if (existingProduct.sellerId !== user.id) {
-          throw new Error("You are not the seller of this product");
+          return "You are not the seller of this product";
         }
         if (existingProduct.buyerId !== null) {
-          throw new Error("Product is already sold");
+          return "Product is already sold";
         }
         if (existingProduct.room.bids.length > 0) {
-          throw new Error("Cannot delete product with bids");
+          return "Cannot delete product with bids";
         }
         const product = await prisma.product.delete({
           where: {
@@ -433,9 +430,9 @@ export const productRouter = createTRPCRouter({
         });
 
         return product;
-      }
+      },
     ),
-  addProductToFavorites: protectedProcedure
+  addToFavorites: protectedProcedure
     .input(z.object({ productId: idSchema }))
     .mutation(
       async ({ input: { productId: id }, ctx: { prisma, session } }) => {
@@ -452,7 +449,7 @@ export const productRouter = createTRPCRouter({
           },
         });
         if (productInFavorites !== null) {
-          throw new Error("Product is already in favorites");
+          return "Product is already in favorites";
         }
         await prisma.user.update({
           where: {
@@ -466,9 +463,9 @@ export const productRouter = createTRPCRouter({
             },
           },
         });
-      }
+      },
     ),
-  removeProductFromFavorites: protectedProcedure
+  removeFromFavorites: protectedProcedure
     .input(z.object({ productId: idSchema }))
     .mutation(
       async ({ input: { productId: id }, ctx: { prisma, session } }) => {
@@ -484,7 +481,7 @@ export const productRouter = createTRPCRouter({
           },
         });
         if (productInFavorites === null) {
-          throw new Error("Product is not in favorites");
+          return "Product is not in favorites";
         }
         await prisma.user.update({
           where: {
@@ -498,6 +495,6 @@ export const productRouter = createTRPCRouter({
             },
           },
         });
-      }
+      },
     ),
 });

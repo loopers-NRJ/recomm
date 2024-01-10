@@ -1,8 +1,6 @@
 "use client";
-import { FC } from "react";
-
-import { api } from "@/utils/api";
-
+import { type FC } from "react";
+import { api } from "@/trpc/react";
 import Container from "../Container";
 import CategoryBox from "./CategoryBox";
 import LoadingCategories from "./LoadingCategories";
@@ -11,7 +9,7 @@ import { useClientSelectedState } from "@/store/SelectedState";
 
 const Categories: FC = () => {
   const selectedState = useClientSelectedState((selected) => selected.state);
-  const categoriesApi = api.category.getFeaturedCategories.useQuery({
+  const categoriesApi = api.category.featured.useQuery({
     state: selectedState,
   });
   if (categoriesApi.isLoading || categoriesApi.data === undefined) {

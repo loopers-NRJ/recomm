@@ -1,9 +1,7 @@
 "use client";
 
 import Link from "next/link";
-
-import { ProductsPayloadIncluded } from "@/types/prisma";
-
+import { type ProductsPayloadIncluded } from "@/types/prisma";
 // import Image from "next/image";
 import Carousel from "./common/Carousel";
 import HeartButton from "./HeartButton";
