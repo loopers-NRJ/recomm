@@ -1,6 +1,4 @@
-import { NextPage } from "next";
-
-const ProductPage: NextPage<{ params: { slug: string } }> = async ({ params }) => {
+const ProductPage = async () => {
   return <div>Product Page</div>;
 };
 export default ProductPage;

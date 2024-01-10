@@ -108,8 +108,7 @@ model User {
     role              Role?     @relation(fields: [roleId], references: [id], onDelete: SetNull)
     roleId            String?
     // location
-    latitude          Float?
-    longitude         Float?
+    address           Address[]
     // meta
     createdAt         DateTime  @default(now())
     updatedAt         DateTime  @updatedAt
@@ -121,6 +120,25 @@ model User {
     createdModels      Model[]
 
     @@index([roleId])
+}
+
+model Address {
+    id          String  @id @default(cuid())
+    tag         String?
+    addressLine String
+    city        String
+    state       State
+    country     String
+    postalCode  String
+    user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId      String
+
+    // Meta
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    Product   Product[]
+
+    @@index([userId])
 }
 
 enum State {
@@ -337,15 +355,18 @@ model Product {
     images          Image[]
     selectedChoices Choice[]
     answers         AtomicAnswer[]
-    model           Model          @relation(fields: [modelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-    modelId         String
-    seller          User           @relation("listedProducts", fields: [sellerId], references: [id], onDelete: Cascade)
-    sellerId        String
-    buyer           User?          @relation("purchasedProducts", fields: [buyerId], references: [id], onDelete: SetNull)
-    buyerId         String?
-    favoritedUsers  User[]         @relation("favoriteProducts")
-    room            Room           @relation(fields: [roomId], references: [id], onDelete: Restrict)
-    roomId          String         @unique
+
+    address        Address? @relation(fields: [addressId], references: [id], onDelete: Restrict)
+    addressId      String?
+    model          Model    @relation(fields: [modelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    modelId        String
+    seller         User     @relation("listedProducts", fields: [sellerId], references: [id], onDelete: Cascade)
+    sellerId       String
+    buyer          User?    @relation("purchasedProducts", fields: [buyerId], references: [id], onDelete: SetNull)
+    buyerId        String?
+    favoritedUsers User[]   @relation("favoriteProducts")
+    room           Room     @relation(fields: [roomId], references: [id], onDelete: Restrict)
+    roomId         String   @unique
 
     // Meta
     createdAt DateTime @default(now())
@@ -354,6 +375,7 @@ model Product {
     @@index([sellerId])
     @@index([modelId])
     @@index([buyerId])
+    @@index([addressId])
 }
 
 model Room {

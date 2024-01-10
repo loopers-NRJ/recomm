@@ -2,7 +2,6 @@
 
 import { DataTable } from "@/app/admin/tables/Table";
 import ServerError from "@/components/common/ServerError";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -27,7 +26,6 @@ import {
   parseAsStringEnum,
   useQueryState,
 } from "next-usequerystate";
-import Link from "next/link";
 import { useMemo, useState } from "react";
 import Searchbar from "../Searchbar";
 import TableHeader from "../TableHeader";
@@ -165,35 +163,35 @@ export default function UserTable() {
         ),
         accessorFn: (row) => row.lastActive?.toLocaleString("en-US") ?? "N/A",
       },
-      {
-        id: "latitude",
-        header: "latitude",
-        accessorFn: (row) => row.latitude,
-      },
-      {
-        id: "longitude",
-        header: "longitude",
-        accessorFn: (row) => row.longitude,
-      },
-      {
-        id: "map",
-        header: "map view",
-        cell: ({ row: { original: user } }) => (
-          <Button
-            variant="ghost"
-            disabled={user.latitude === null || user.longitude === null}
-            size="sm"
-            className="p-0"
-          >
-            <Link
-              href={`https://www.google.com/maps/@${user.latitude},${user.longitude}`}
-              className="flex h-full w-full items-center justify-center px-3"
-            >
-              view
-            </Link>
-          </Button>
-        ),
-      },
+      // {
+      //   id: "latitude",
+      //   header: "latitude",
+      //   accessorFn: (row) => row.latitude,
+      // },
+      // {
+      //   id: "longitude",
+      //   header: "longitude",
+      //   accessorFn: (row) => row.longitude,
+      // },
+      // {
+      //   id: "map",
+      //   header: "map view",
+      //   cell: ({ row: { original: user } }) => (
+      //     <Button
+      //       variant="ghost"
+      //       disabled={user.latitude === null || user.longitude === null}
+      //       size="sm"
+      //       className="p-0"
+      //     >
+      //       <Link
+      //         href={`https://www.google.com/maps/@${user.latitude},${user.longitude}`}
+      //         className="flex h-full w-full items-center justify-center px-3"
+      //       >
+      //         view
+      //       </Link>
+      //     </Button>
+      //   ),
+      // },
       {
         id: "createdAt",
         header: () => (

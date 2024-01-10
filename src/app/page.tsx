@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useSearchParams } from "next/navigation";
 
@@ -9,21 +9,19 @@ import { api } from "@/trpc/react";
 
 import {
   defaultSearch,
-  SortBy,
+  type SortBy,
   defaultSortBy,
-  SortOrder,
+  type SortOrder,
   defaultSortOrder,
 } from "@/utils/constants";
 import Categories from "@/components/navbar/Categories";
 import { Button } from "@/components/ui/button";
 import Loading from "@/components/common/Loading";
 import { useClientSelectedState } from "@/store/SelectedState";
-import type { NextPage } from "next";
 
-
-const Home: NextPage = () => {
+export default function Home() {
   // get products according to the search params
-  const params = useSearchParams()!
+  const params = useSearchParams()!;
 
   const search = params.get("search") ?? defaultSearch;
   const sortBy = (params.get("sortBy") as SortBy) ?? defaultSortBy;
@@ -34,7 +32,7 @@ const Home: NextPage = () => {
 
   const selectedState = useClientSelectedState((selected) => selected.state);
 
-  const productsApi = api.product.getProducts.useInfiniteQuery(
+  const productsApi = api.product.all.useInfiniteQuery(
     {
       search,
       sortBy,
@@ -46,7 +44,7 @@ const Home: NextPage = () => {
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
-    }
+    },
   );
 
   if (productsApi.isLoading) {
@@ -103,5 +101,3 @@ const Home: NextPage = () => {
     </main>
   );
 }
-
-export default Home;

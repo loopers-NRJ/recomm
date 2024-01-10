@@ -1,8 +1,14 @@
+import { getServerAuthSession } from "@/server/auth";
 import { prisma } from "@/server/db";
 import { AccessType } from "@prisma/client";
 
-export async function GET(request: Request) {
-  console.log(request.body);
+export async function GET() {
+  const session = await getServerAuthSession();
+  if (!session) {
+    return new Response("Unauthorized", {
+      status: 401,
+    });
+  }
   try {
     await prisma.role.deleteMany({});
     await prisma.access.deleteMany({});

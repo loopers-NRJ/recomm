@@ -14,12 +14,7 @@ import { getServerAuthSession } from "@/server/auth";
 import { prisma } from "@/server/db";
 import { initTRPC, TRPCError } from "@trpc/server";
 import type { AccessType } from "@prisma/client";
-import {
-  adminPageRegex,
-  requestPathHeaderName,
-  userLatitudeHeaderName,
-  userLongitudeHeaderName,
-} from "@/utils/constants";
+import { adminPageRegex, requestPathHeaderName } from "@/utils/constants";
 import { userPayload } from "@/types/prisma";
 
 /**
@@ -93,17 +88,12 @@ export const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
   let userAccesses: AccessType[] = [];
   // Update user last active, latitude and longitude
   if (ctx.session?.user) {
-    const lat = ctx.headers.get(userLatitudeHeaderName);
-    const lon = ctx.headers.get(userLongitudeHeaderName);
-
     const user = await prisma.user.update({
       where: {
         id: ctx.session.user.id,
       },
       data: {
         lastActive: new Date(),
-        latitude: lat ? parseFloat(lat) : undefined,
-        longitude: lon ? parseFloat(lon) : undefined,
       },
       include: userPayload.include,
     });

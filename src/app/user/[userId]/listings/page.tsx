@@ -1,5 +1,4 @@
-"use client"
-import { NextPage } from "next";
+"use client";
 
 import Container from "@/components/Container";
 import ListingCard from "@/components/ListingCard";
@@ -10,27 +9,26 @@ import {
   defaultSearch,
   defaultSortBy,
   defaultSortOrder,
-  SortBy,
-  SortOrder,
+  type SortBy,
+  type SortOrder,
 } from "@/utils/constants";
-import { redirect, useParams } from "next/navigation"
+import { redirect, useParams } from "next/navigation";
 
-
-const Listings: NextPage = () => {
+export default function Listings() {
   // user the params to get User ID
-  const params = useParams() 
+  const params = useParams();
 
   const userId = params.userId as string;
 
   if (!userId) {
-    redirect("/login")
+    redirect("/login");
   }
 
-  const search = params.search as string ?? defaultSearch;
+  const search = (params.search as string) ?? defaultSearch;
   const sortBy = (params.sortBy as SortBy) ?? defaultSortBy;
   const sortOrder = (params.sortOrder as SortOrder) ?? defaultSortOrder;
   // use the user ID to get the listings
-  const listingApi = api.user.getUserListingsById.useInfiniteQuery(
+  const listingApi = api.user.listingsById.useInfiniteQuery(
     {
       userId,
       search,
@@ -70,6 +68,4 @@ const Listings: NextPage = () => {
       </Container>
     </main>
   );
-};
-
-export default Listings;
+}

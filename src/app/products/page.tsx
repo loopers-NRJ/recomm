@@ -1,5 +1,4 @@
-"use client"
-import { NextPage } from "next";
+"use client";
 import { useSearchParams } from "next/navigation";
 
 import Container from "@/components/Container";
@@ -8,9 +7,9 @@ import LoadingProducts from "@/components/loading/LoadingProducts";
 import { api } from "@/trpc/react";
 import {
   defaultSearch,
-  SortBy,
+  type SortBy,
   defaultSortBy,
-  SortOrder,
+  type SortOrder,
   defaultSortOrder,
 } from "@/utils/constants";
 import ServerError from "@/components/common/ServerError";
@@ -18,8 +17,8 @@ import { Button } from "@/components/ui/button";
 import Loading from "@/components/common/Loading";
 import { useClientSelectedState } from "@/store/SelectedState";
 
-const ProductsPages: NextPage = () => {
-  const params = useSearchParams()!
+export default function ProductsPages() {
+  const params = useSearchParams()!;
 
   const search = params.get("search") ?? defaultSearch;
   const sortBy = (params.get("sortBy") as SortBy) ?? defaultSortBy;
@@ -29,7 +28,7 @@ const ProductsPages: NextPage = () => {
   const modelId = params.get("model") ?? undefined;
 
   const selectedState = useClientSelectedState((selected) => selected.state);
-  const productsApi = api.product.getProducts.useInfiniteQuery(
+  const productsApi = api.product.all.useInfiniteQuery(
     {
       search,
       sortBy,
@@ -79,6 +78,4 @@ const ProductsPages: NextPage = () => {
       </Container>
     </main>
   );
-};
-
-export default ProductsPages;
+}

@@ -4,18 +4,18 @@ import { Button } from "@/components/ui/button";
 import AuthenticatedPage from "@/hoc/AuthenticatedPage";
 import { api } from "@/trpc/server";
 import LogoutButton from "./logout";
-import type { NextPage } from "next";
+import { notFound } from "next/navigation";
 
 interface ProfilePageParams {
-  params: {
-    userId: string
-  }
+  userId: string;
 }
 
-const ProfilePage: NextPage<ProfilePageParams> = async ({ params }) => {
-  const { userId } = params
-  const userData = await api.user.getUserById.query({ userId })
-
+const ProfilePage = AuthenticatedPage<ProfilePageParams>(async ({ params }) => {
+  const { userId } = params;
+  const userData = await api.user.byId.query({ userId });
+  if (userData === "User not found") {
+    return notFound();
+  }
   return (
     <div className="relative mx-auto w-full rounded-lg bg-white shadow md:w-5/6 lg:w-4/6 xl:w-3/6">
       <Image
@@ -23,7 +23,8 @@ const ProfilePage: NextPage<ProfilePageParams> = async ({ params }) => {
         height={128}
         src={userData.image ?? "/placeholder.jpg"}
         alt=""
-        className="mx-auto h-32 w-32 transform rounded-full border-4 border-white shadow-md transition duration-200 hover:scale-110" />
+        className="mx-auto h-32 w-32 transform rounded-full border-4 border-white shadow-md transition duration-200 hover:scale-110"
+      />
 
       <div className="mt-16 w-full">
         <h1 className="text-center text-3xl font-bold text-gray-900">
@@ -36,9 +37,7 @@ const ProfilePage: NextPage<ProfilePageParams> = async ({ params }) => {
           <span></span>
         </p>
         <div className="my-5 grid grid-flow-col grid-cols-2 grid-rows-1 space-x-2 px-6">
-          <Button
-            className="col-span-1 block rounded-lg bg-gray-900 px-6 py-3 text-center font-medium leading-6 text-gray-200 hover:bg-black hover:text-white"
-          >
+          <Button className="col-span-1 block rounded-lg bg-gray-900 px-6 py-3 text-center font-medium leading-6 text-gray-200 hover:bg-black hover:text-white">
             Edit Profile
           </Button>
           <LogoutButton />
@@ -74,5 +73,5 @@ const ProfilePage: NextPage<ProfilePageParams> = async ({ params }) => {
       </div>
     </div>
   );
-}
+});
 export default AuthenticatedPage(ProfilePage);

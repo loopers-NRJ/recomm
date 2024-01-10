@@ -1,6 +1,6 @@
 # TODO
 
-- [ ] default option or default value in model
+- [ ] default option or default value in model (Optional)
 - [ ] Pricing and bidding duration should be shown in the next page.
 - [ ] add Address model
 - [ ] add location to product

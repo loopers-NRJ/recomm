@@ -12,8 +12,7 @@ cloudinary.config({
 });
 
 export const uploadToCloudinary = (fileArrayBuffer: ArrayBuffer) => {
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  return new Promise<Image>(async (resolve, reject) => {
+  return new Promise<Image>((resolve, reject) => {
     cloudinary.uploader
       .upload_stream({ resource_type: "image" }, (error, response) => {
         if (error ?? !response) {

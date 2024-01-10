@@ -7,12 +7,7 @@ import { useCallback, useState } from "react";
 
 import { type AppRouter } from "@/server/api/root";
 import { getUrl, transformer } from "./shared";
-import {
-  requestPathHeaderName,
-  userLatitudeHeaderName,
-  userLongitudeHeaderName,
-} from "@/utils/constants";
-import { useUserLocation } from "@/store/userLocation";
+import { requestPathHeaderName } from "@/utils/constants";
 import { ErrorLink } from "@/utils/ErrorLink";
 
 export const api = createTRPCReact<AppRouter>();
@@ -23,8 +18,6 @@ export function TRPCReactProvider(props: {
 }) {
   const [queryClient] = useState(() => new QueryClient());
 
-  const userLocation = useUserLocation((state) => state.location);
-
   const getHeaders = useCallback(() => {
     const headers: HTTPHeaders = {
       cookie: props.cookies,
@@ -33,12 +26,8 @@ export function TRPCReactProvider(props: {
     if (typeof window !== "undefined") {
       headers[requestPathHeaderName] = window.location.pathname;
     }
-    if (userLocation) {
-      headers[userLatitudeHeaderName] = userLocation.latitude.toString();
-      headers[userLongitudeHeaderName] = userLocation.longitude.toString();
-    }
     return headers;
-  }, [userLocation, props.cookies]);
+  }, [props.cookies]);
 
   const [trpcClient] = useState(() =>
     api.createClient({
