@@ -1,49 +1,42 @@
-"use client";
-
 import Link from "next/link";
 import { type ProductsPayloadIncluded } from "@/types/prisma";
-// import Image from "next/image";
-import Carousel from "./common/Carousel";
-import HeartButton from "./HeartButton";
+import Image from "next/image";
+import { HeartOutline, HeartSolid } from "@/components/navbar/Icons";
+import FavoriteToggle from "@/components/favorite-toggle";
 
 interface ListingCardProps {
-  isFavourite?: boolean;
-  product: ProductsPayloadIncluded;
-  onFavoriteStateChange?: () => void;
-  hideHeartIcon?: true;
+  product: ProductsPayloadIncluded & { isFav: boolean };
+  isUser: boolean;
 }
 
 const ListingCard: React.FC<ListingCardProps> = ({
   product,
-  isFavourite,
-  onFavoriteStateChange,
-  hideHeartIcon = false,
+  isUser = false,
 }) => {
+
   return (
-    <Link
-      href={`/products/${product.slug}`}
-      className="group col-span-1 cursor-pointer"
-    >
-      <div className="flex w-full flex-col gap-2">
-        <div className="relative w-full overflow-hidden rounded-xl">
-          <Carousel images={product.images} />
-          <div className="absolute right-3 top-3">
-            {!hideHeartIcon && (
-              <HeartButton
-                productId={product.id}
-                enabled={isFavourite ?? false}
-                onChange={onFavoriteStateChange}
-              />
-            )}
-          </div>
-        </div>
-        <div className="text-lg font-semibold">{product.model.name}</div>
-        <div className="flex flex-row items-center gap-1">
-          <div className="font-semibold">$ {product.price}</div>
-        </div>
-      </div>
-    </Link>
+    <div className="relative flex w-full flex-col">
+      {
+        isUser ?
+          <FavoriteToggle
+            id={product.id}
+            state={product.isFav}
+            uncheckedIcon={<HeartOutline className="text-red-500" />}
+            checkedIcon={<HeartSolid className="text-red-500" />} />
+          :
+          null
+      }
+      <Link
+        href={`/products/${product.slug}`}
+        className="group cursor-pointer"
+      >
+        <Image alt={product.slug} src={product.images[0]!.url} className="w-full overflow-hidden rounded-xl" width={180} height={200} />
+        <span className="text-lg font-semibold">{product.model.name}</span>
+        <span className="font-semibold">₹ {product.price}</span>
+      </Link>
+    </div>
   );
 };
+
 
 export default ListingCard;

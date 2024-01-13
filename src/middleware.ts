@@ -1,8 +1,14 @@
-import { type NextRequest, NextResponse } from "next/server";
-import { pathHeaderName } from "./utils/constants";
+import { type NextRequest, NextResponse, userAgent } from "next/server";
+import { deviceTypeHeaderName, pathHeaderName } from "./utils/constants";
 
 export function middleware(request: NextRequest) {
-  request.headers.set(pathHeaderName, request.nextUrl.pathname);
+  const url = request.nextUrl
+
+  const { device } = userAgent(request)
+  const deviceType = device.type === 'mobile' ? 'mobile' : 'desktop'
+
+  request.headers.set(pathHeaderName, url.pathname);
+  request.headers.set(deviceTypeHeaderName, deviceType);
 
   return NextResponse.next({ request });
 }

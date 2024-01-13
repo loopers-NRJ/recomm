@@ -10,6 +10,7 @@ import NotificationLink from "./NotificationLink";
 import { api } from "@/trpc/server";
 import { AccessType } from "@prisma/client";
 import AdminButton from "./AdminButton";
+import Search from "../search/Searchbar";
 
 const Profile = ({ session }: { session: Session | null }) => {
   return (
@@ -66,12 +67,12 @@ export default async function Navbar() {
                 <NotificationLink session={session} />
               </div>
             </div>
-            {/* <div className="flex w-full justify-between gap-3">
+            <div className="flex w-full justify-between gap-3">
               <Search />
               <p className="flex w-fit items-center rounded-lg border px-3 py-2">
                 Location
               </p>
-            </div> */}
+            </div>
           </div>
         </Container>
       </div>

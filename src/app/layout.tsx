@@ -1,12 +1,13 @@
 import "@/styles/globals.css";
 
 import { Inter } from "next/font/google";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 
 import { TRPCReactProvider } from "@/trpc/react";
 import Providers from "./providers";
 import { type Metadata } from "next";
 import Navbar from "@/components/navbar/Navbar";
+import BottomBar from "@/components/navbar/BottomBar"
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const inter = Inter({
@@ -25,6 +26,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const device = headers().get("x-device-type")
   return (
     <html lang="en">
       <head>
@@ -35,6 +37,7 @@ export default function RootLayout({
           <Providers >
             <Navbar />
             {children}
+            {device === "mobile" ? <BottomBar /> : <></>}
           </Providers>
         </TRPCReactProvider>
       </body>
