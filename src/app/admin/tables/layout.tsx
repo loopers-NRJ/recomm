@@ -1,92 +1,45 @@
-"use client";
-
 import Container from "@/components/Container";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useAdminSelectedState } from "@/store/SelectedState";
-import { states } from "@/types/prisma";
-import type { State } from "@prisma/client";
-import { usePathname, useRouter } from "next/navigation";
+import Sidebar from "./Sidebar";
+import Titlebar from "./Titlebar";
+import { getServerAuthSession } from "@/server/auth";
+import { notFound } from "next/navigation";
 import { titles } from "./titles";
-import { ButtonLink } from "@/components/common/ButtonLink";
+import { api } from "@/trpc/server";
+import { AccessType } from "@prisma/client";
 
-export default function layout({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const selectedTitle = pathname.replace("/admin/tables/", "");
-
-  const selectedState = useAdminSelectedState();
+export default async function layout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const session = await getServerAuthSession();
+  if (!session) return notFound();
+  const roleId = session.user.roleId;
+  if (!roleId) return notFound();
+  const accesses = (await api.role.byId.query({ id: roleId }))?.accesses;
+  const userAccessTypes = accesses?.map((access) => access.type);
+  if (!userAccessTypes?.includes(AccessType.readAccess)) return notFound();
+  let filteredTitles = [...titles];
+  if (
+    !userAccessTypes?.includes(AccessType.createRole) ||
+    !userAccessTypes?.includes(AccessType.deleteRole) ||
+    !userAccessTypes?.includes(AccessType.updateRole)
+  ) {
+    filteredTitles = filteredTitles.filter((title) => title !== "roles");
+  }
+  if (
+    !userAccessTypes?.includes(AccessType.deleteUser) ||
+    !userAccessTypes?.includes(AccessType.updateUser) ||
+    !userAccessTypes?.includes(AccessType.updateUsersRole)
+  ) {
+    filteredTitles = filteredTitles.filter((title) => title !== "users");
+  }
 
   return (
     <Container className="pt-3 md:flex md:gap-2">
-      <div className="md:hidden">
-        <Select
-          onValueChange={(value) => router.push(`/admin/tables/${value}`)}
-          value={selectedTitle}
-        >
-          <SelectTrigger className="w-[180px] capitalize">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {titles.map((title) => (
-              <SelectItem value={title} key={title} className="capitalize">
-                {title}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="hidden h-fit w-40 shrink-0 rounded-lg border md:block">
-        <div className="flex h-full flex-col">
-          {titles.map((title) => (
-            <ButtonLink
-              key={title}
-              className={`
-                justify-start rounded-none
-                ${
-                  title === selectedTitle
-                    ? "bg-accent text-accent-foreground"
-                    : ""
-                }
-              `}
-              variant="ghost"
-              size="sm"
-              href={`/admin/tables/${title}`}
-            >
-              {title}
-            </ButtonLink>
-          ))}
-        </div>
-      </div>
+      <Sidebar titles={filteredTitles} />
       <div className="my-4 flex grow flex-col gap-2 overflow-hidden md:m-0">
-        <div className="flex w-full items-center justify-between">
-          <h1 className="pl-2 font-bold capitalize">
-            {selectedTitle.replace("-", " ")}
-          </h1>
-          <Select
-            onValueChange={(value) => {
-              selectedState.onStateChange(value as State);
-            }}
-            value={selectedState.state}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="h-80">
-              {states.map((state) => (
-                <SelectItem value={state} key={state}>
-                  {state.replace("_", " ")}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
+        <Titlebar />
         {children}
       </div>
     </Container>

@@ -1,6 +1,6 @@
-import AdminPage from "@/hoc/AdminPage";
 import Sellit from "./SellIt";
+import AuthenticatedPage from "@/hoc/AuthenticatedPage";
 
-const SellitPage = AdminPage(Sellit);
+const SellitPage = AuthenticatedPage(Sellit);
 
 export default SellitPage;

@@ -1,36 +1,24 @@
 import Container from "@/components/Container";
 import Logo from "./Logo";
 import NavItems from "./NavItems";
-import { Button } from "../ui/button";
-import Image from "next/image";
-import Link from "next/link";
 import { getServerAuthSession } from "@/server/auth";
 import { type Session } from "next-auth";
 import NotificationLink from "./NotificationLink";
 import { api } from "@/trpc/server";
 import { AccessType } from "@prisma/client";
 import AdminButton from "./AdminButton";
+import { ButtonLink } from "../common/ButtonLink";
+import Avatar from "./Avatar";
 
 const Profile = ({ session }: { session: Session | null }) => {
   return (
-    <Link
+    <ButtonLink
       href={session ? `/user/${session.user.id}/profile` : "/login"}
-      className="rounded-full"
+      className="overflow-hidden rounded-full p-1.5"
+      variant="ghost"
     >
-      <Button
-        variant="ghost"
-        asChild
-        className="h-fit w-fit overflow-hidden rounded-full p-1.5 "
-      >
-        <Image
-          className="rounded-full"
-          height={30}
-          width={30}
-          alt="Avatar"
-          src={session?.user.image ?? "/placeholder.jpg"}
-        />
-      </Button>
-    </Link>
+      <Avatar src={session?.user.image} />
+    </ButtonLink>
   );
 };
 
