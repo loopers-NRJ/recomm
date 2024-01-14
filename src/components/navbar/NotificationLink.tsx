@@ -4,6 +4,7 @@ import Link from "next/link";
 import { type Session } from "next-auth";
 import { usePathname } from "next/navigation";
 import { Bell } from "./Icons";
+import { ButtonLink } from "../common/ButtonLink";
 
 export default function NotificationLink({
   session,
@@ -12,15 +13,16 @@ export default function NotificationLink({
 }) {
   const pathname = usePathname();
   return (
-    <Link
+    <ButtonLink
       className={
         pathname === "/notifications"
           ? "rounded-full bg-slate-100 p-2"
           : "rounded-full p-2"
       }
       href={session ? "/notifications" : "/login"}
+      variant="ghost"
     >
       <Bell className="h-6 w-6" />
-    </Link>
+    </ButtonLink>
   );
 }

@@ -78,6 +78,9 @@ export default function CreateFeaturedCategory({
             setImages={setImageFiles}
             maxImages={1}
             images={imageFiles}
+            compress={false}
+            // svg and png only
+            acceptedImageFormats={["image/svg+xml", "image/png"]}
           />
           <Button
             onClick={() => void createFeaturedCategory()}

@@ -167,7 +167,7 @@ export default function FeaturedCategoryTable() {
             size="sm"
             variant="outline"
             className="border-blue-400"
-            href={`/admin/featured-category/edit/?id=${row.original.categoryId}`}
+            href={`/admin/featured-category/edit/${row.original.categoryId}`}
           >
             Edit
           </ButtonLink>

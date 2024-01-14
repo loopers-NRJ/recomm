@@ -23,6 +23,7 @@ export interface ImagePickerProps {
   requiredError?: boolean;
   children?: React.ReactNode;
   className?: string;
+  compress?: boolean;
 }
 
 const ImagePicker: FC<ImagePickerProps> = ({
@@ -39,6 +40,7 @@ const ImagePicker: FC<ImagePickerProps> = ({
   requiredError,
   children,
   className,
+  compress = true,
 }) => {
   const [images, setImages] = useState<ImageFile[]>(
     parentImages.map((image) => ({
@@ -101,40 +103,52 @@ const ImagePicker: FC<ImagePickerProps> = ({
             progress: 0,
           },
         ]);
-        imageCompression(image, {
-          maxSizeMB: 3,
-          onProgress(progress) {
-            setImages((prev) => {
-              const newImages = [...prev];
-              const index = newImages.findIndex((image) => image.id === id);
-              newImages[index]!.progress = progress;
-              return newImages;
-            });
-          },
-        })
-          .then((compressedImage) => {
-            setImages((prev) => {
-              const newImages = [...prev];
-              const index = newImages.findIndex((image) => image.id === id);
-              newImages[index]!.file = compressedImage;
-              return newImages;
-            });
-            let compressedImageFile: File;
-
-            if (compressedImage instanceof Blob) {
-              compressedImageFile = new File([compressedImage], image.name, {
-                type: image.type,
-                lastModified: Date.now(),
+        if (compress) {
+          imageCompression(image, {
+            maxSizeMB: 3,
+            alwaysKeepResolution: true,
+            onProgress(progress) {
+              setImages((prev) => {
+                const newImages = [...prev];
+                const index = newImages.findIndex((image) => image.id === id);
+                newImages[index]!.progress = progress;
+                return newImages;
               });
-            } else {
-              compressedImageFile = compressedImage;
-            }
-
-            setImagesToParent((prev) => [...prev, compressedImageFile]);
+            },
           })
-          .catch(() => {
-            toast.error("Failed to compress image");
+            .then((compressedImage) => {
+              setImages((prev) => {
+                const newImages = [...prev];
+                const index = newImages.findIndex((image) => image.id === id);
+                newImages[index]!.file = compressedImage;
+                return newImages;
+              });
+              let compressedImageFile: File;
+
+              if (compressedImage instanceof Blob) {
+                compressedImageFile = new File([compressedImage], image.name, {
+                  type: image.type,
+                  lastModified: Date.now(),
+                });
+              } else {
+                compressedImageFile = compressedImage;
+              }
+
+              setImagesToParent((prev) => [...prev, compressedImageFile]);
+            })
+            .catch((error) => {
+              console.error(error);
+              toast.error("Failed to compress image");
+            });
+        } else {
+          setImages((prev) => {
+            const newImages = [...prev];
+            const index = newImages.findIndex((image) => image.id === id);
+            newImages[index]!.progress = 100;
+            return newImages;
           });
+          setImagesToParent((prev) => [...prev, image]);
+        }
       }
     }
     event.target.value = "";
