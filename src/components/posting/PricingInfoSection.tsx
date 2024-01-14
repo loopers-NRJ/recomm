@@ -28,20 +28,9 @@ export default function PricingInfoSection({
           <span>Set the Selling price for your {model.name}</span>
           <Input
             type="number"
-            placeholder="Enter here"
+            placeholder="Enter"
             value={price}
-            onChange={(e) => {
-              // const num = Number(e.target.value);
-              // evaluate using regex
-              console.log(e.target.value);
-
-              if (e.target.value === "" || e.target.value.match(/^[1-9]+$/gm)) {
-                setPrice(e.target.value);
-              }
-              // if (!isNaN(num) && num >= 0 && Number.isInteger(num)) {
-              //   setPrice(e.target.value);
-              // }
-            }}
+            onChange={(e) => setPrice(e.target.value)}
             className={formError.price ? "border-red-500" : ""}
           />
           {formError.price && (
