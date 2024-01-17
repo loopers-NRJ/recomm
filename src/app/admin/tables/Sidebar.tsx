@@ -10,7 +10,7 @@ import {
 
 import { ButtonLink } from "@/components/common/ButtonLink";
 import { usePathname, useRouter } from "next/navigation";
-import { Title } from "./titles";
+import { type Title } from "./titles";
 
 export default function Sidebar({ titles }: { titles: Title[] }) {
   const router = useRouter();

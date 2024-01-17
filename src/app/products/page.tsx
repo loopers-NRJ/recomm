@@ -18,7 +18,7 @@ import Loading from "@/components/common/Loading";
 import { useClientSelectedState } from "@/store/SelectedState";
 
 export default function ProductsPages() {
-  const params = useSearchParams()!;
+  const params = useSearchParams();
 
   const search = params.get("search") ?? defaultSearch;
   const sortBy = (params.get("sortBy") as SortBy) ?? defaultSortBy;

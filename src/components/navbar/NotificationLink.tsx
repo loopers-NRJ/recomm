@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { type Session } from "next-auth";
 import { usePathname } from "next/navigation";
 import { Bell } from "./Icons";

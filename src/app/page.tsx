@@ -21,7 +21,7 @@ import { useClientSelectedState } from "@/store/SelectedState";
 
 export default function Home() {
   // get products according to the search params
-  const params = useSearchParams()!;
+  const params = useSearchParams();
 
   const search = params.get("search") ?? defaultSearch;
   const sortBy = (params.get("sortBy") as SortBy) ?? defaultSortBy;
