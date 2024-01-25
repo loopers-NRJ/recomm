@@ -5,7 +5,7 @@ import { HeartOutline, HeartSolid } from "@/components/navbar/Icons";
 import FavoriteToggle from "@/components/favorite-toggle";
 
 interface ListingCardProps {
-  product: ProductsPayloadIncluded & { isFav: boolean };
+  product: ProductsPayloadIncluded & { isFav: boolean }
   isUser: boolean;
 }
 
@@ -30,9 +30,17 @@ const ListingCard: React.FC<ListingCardProps> = ({
         href={`/products/${product.slug}`}
         className="group cursor-pointer"
       >
-        <Image alt={product.slug} src={product.images[0]!.url} className="w-full overflow-hidden rounded-xl" width={180} height={200} />
-        <span className="text-lg font-semibold">{product.model.name}</span>
-        <span className="font-semibold">₹ {product.price}</span>
+        <div className="w-full overflow-hidden rounded-xl aspect-square border shadow-md group-hover:shadow-lg transition-shadow duration-300 ease-in-out">
+          <Image
+            alt={product.slug}
+            src={product.images[0]!.url}
+            className="w-full h-full rounded-xl object-cover"
+            width={180} height={150} />
+        </div>
+        <div className="p-2">
+          <p className="text-lg font-semibold">{product.model.name}</p>
+          <p className="font-semibold">₹ {product.price}</p>
+        </div>
       </Link>
     </div>
   );

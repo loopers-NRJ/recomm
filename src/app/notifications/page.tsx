@@ -1,5 +1,5 @@
 import Container from "@/components/Container";
-import AuthenticatedPage from "@/hoc/AuthenticatedPage";
+// import AuthenticatedPage from "@/hoc/AuthenticatedPage";
 
 function NotificationPage() {
   return (
@@ -12,4 +12,5 @@ function NotificationPage() {
     </main>
   );
 }
-export default AuthenticatedPage(NotificationPage);
+// export default AuthenticatedPage(NotificationPage);
+export default NotificationPage;

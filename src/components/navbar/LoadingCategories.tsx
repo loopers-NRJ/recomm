@@ -1,6 +1,4 @@
-"use client";
-
-import { Skeleton } from "../ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const LoadingCategories = () => {
   const dummy = new Array(10).fill(0);

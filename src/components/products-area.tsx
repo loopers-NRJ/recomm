@@ -9,16 +9,16 @@ import LoadingProducts from '@/components/loading/LoadingProducts';
 import { useSession } from 'next-auth/react';
 
 interface Props {
-  search: string | undefined;
+  search?: string
   sortBy: SortBy
   sortOrder: SortOrder
-  modelId: string | undefined;
-  categoryId: string | undefined;
-  brandId: string | undefined;
+  modelId?: string
+  categoryId?: string
+  brandId?: string
 }
 
 const Products: FC<Props> = ({ search, sortBy, sortOrder, modelId, categoryId, brandId, }) => {
-  
+
   const session = useSession();
 
   const selectedState = useClientSelectedState((selected) => selected.state);
@@ -36,7 +36,6 @@ const Products: FC<Props> = ({ search, sortBy, sortOrder, modelId, categoryId, b
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
-  const { isLoading: favLoading, data } = api.user.favorites.useQuery({});
 
   const linkRef = useRef(null);
   const [inView, setInView] = useState(false);
@@ -59,27 +58,39 @@ const Products: FC<Props> = ({ search, sortBy, sortOrder, modelId, categoryId, b
   }, [linkRef.current, options]);
 
 
-  if (allProductsQuery.isLoading || favLoading) return <LoadingProducts />;
+  let favQuery = undefined
+  try {
+    if (session.status === "authenticated")
+      favQuery = api.user.favorites.useQuery({});
+  } catch (err) { }
+
+  if (allProductsQuery.isLoading || favQuery?.isLoading) return <LoadingProducts />;
   if (allProductsQuery.error) return <div>Error</div>;
 
-  const products = allProductsQuery.data.pages.flatMap((page) => page.products);
-  if(inView && allProductsQuery.hasNextPage && !allProductsQuery.isFetching) allProductsQuery.fetchNextPage();
+  let favourites = favQuery?.data?.favoritedProducts ?? []
 
-  const favourites = data?.favoritedProducts ?? []
-  const productsWithFavourites = products.map(product => {
-    const isFav = favourites.some((fav) => fav.id === product.id);
-    return { ...product, isFav }
+  const products = allProductsQuery.data.pages.flatMap((page) => {
+    if (favourites.length === 0) return page.products.map(product => ({ ...product, isFav: false }))
+    else return page.products.map(product => {
+      const isFav = favourites.some((fav) => fav.id === product.id);
+      return { ...product, isFav }
+    })
   });
+  if (inView && allProductsQuery.hasNextPage && !allProductsQuery.isFetching) allProductsQuery.fetchNextPage();
+
 
   return <>
     <div className="product-area grid gap-8 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6">
-      {
-        products.length === 0 ?
-          <div className="flex h-[500px] items-center justify-center font-semibold">
-            No Products Available
-          </div> :
-          productsWithFavourites.map(product => <ListingCard key={product.id} isUser={session.status === "authenticated"} product={product} />)
-      }
+      {products.length === 0 ?
+        <div className="flex h-[500px] items-center justify-center font-semibold">
+          No Products Available
+        </div> :
+        products.map(product =>
+          <ListingCard
+            key={product.id}
+            isUser={session.status === "authenticated"}
+            product={product} />
+        )}
       <a ref={linkRef}></a>
     </div>
     {allProductsQuery.isFetchingNextPage && <Loading />}

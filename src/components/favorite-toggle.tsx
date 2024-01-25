@@ -15,7 +15,7 @@ const FavoriteToggle: React.FC<FavoriteToggleProps> = ({ id, state, checkedIcon,
   const [isFav, setIsFav] = useState(state);
   return (
     <div
-      className="absolute cursor-pointer top-0 right-0"
+      className="absolute cursor-pointer top-0 p-2 right-0"
       onClick={async () => {
         setIsFav(!isFav);
         await toggleFavourite(id);
