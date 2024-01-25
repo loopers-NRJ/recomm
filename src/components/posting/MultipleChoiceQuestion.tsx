@@ -13,6 +13,7 @@ import { MultipleChoiceQuestionType } from "@prisma/client";
 import { Button } from "../ui/button";
 import { type ZodIssue } from "zod";
 import ErrorMessage from "../common/ErrorMessage";
+import * as React from "react";
 
 export type MultipleChoiceAnswer = {
   questionId: string;
@@ -46,7 +47,7 @@ interface MultipleChoiceQuestionInputFieldProps {
   index?: number;
   error: ZodIssue | undefined;
 }
-export default function MultipleChoiceQuestionInputField({
+function MultipleChoiceQuestionInputField({
   question,
   answer,
   onChange,
@@ -191,7 +192,9 @@ export default function MultipleChoiceQuestionInputField({
               role="button"
               key={choice.id}
               className={`border ${
-                answer.valueId === choice.id ? "bg-slate-200" : ""
+                answer.valueId === choice.id
+                  ? "border-2 border-black bg-slate-200"
+                  : ""
               } 
             ${error ? "border-red-500" : "border-slate-300"}
             `}
@@ -221,3 +224,5 @@ export default function MultipleChoiceQuestionInputField({
 
   return null;
 }
+
+export default React.memo(MultipleChoiceQuestionInputField);

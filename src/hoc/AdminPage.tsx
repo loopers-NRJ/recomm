@@ -32,6 +32,7 @@ export default function AdminPage<
   SearchParams = DefaultSearchParams,
 >(
   Component: PageWithAccesses<Params, SearchParams>,
+  requiredAccessTypes: [AccessType, ...AccessType[]] = [AccessType.readAccess],
 ): Page<Params, SearchParams> {
   return AuthenticatedPage(async (props) => {
     const roleId = props.session?.user.roleId;
@@ -40,9 +41,10 @@ export default function AdminPage<
     }
 
     const accesses = (await api.role.byId.query({ id: roleId }))?.accesses;
-    const hasAccess = accesses
-      ?.map((access) => access.type)
-      .includes(AccessType.readAccess);
+    const userAccessTypes = accesses?.map((access) => access.type);
+    const hasAccess = requiredAccessTypes.every(
+      (access) => userAccessTypes?.includes(access),
+    );
 
     if (!hasAccess) {
       return permanentRedirect("/login");

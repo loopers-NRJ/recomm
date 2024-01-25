@@ -1,7 +1,7 @@
 import { type AtomicQuestion, AtomicQuestionType } from "@prisma/client";
 import { Input } from "../ui/input";
 import DatePicker from "../common/DatePicker";
-import { type ReactNode } from "react";
+import * as React from "react";
 import { Label } from "../ui/label";
 import Textarea from "../common/Textarea";
 import { type ZodIssue } from "zod";
@@ -50,14 +50,14 @@ interface AtomicQuestionInputFieldProps {
   error: ZodIssue | undefined;
 }
 
-export default function AtomicQuestionInputField({
+function AtomicQuestionInputField({
   question,
   onChange,
   index,
   answer,
   error,
 }: AtomicQuestionInputFieldProps) {
-  let InputField: ReactNode;
+  let InputField: React.ReactNode;
   if (
     question.type === AtomicQuestionType.Text &&
     answer.type === AtomicQuestionType.Text
@@ -132,3 +132,5 @@ export default function AtomicQuestionInputField({
     </Label>
   );
 }
+
+export default React.memo(AtomicQuestionInputField);

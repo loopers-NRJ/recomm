@@ -12,9 +12,9 @@ import {
 import AuthenticatedPage from "@/hoc/AuthenticatedPage";
 
 interface FavouritePageSearchParams {
-  search: string;
-  sortBy: SortBy;
-  sortOrder: SortOrder;
+  search?: string;
+  sortBy?: SortBy;
+  sortOrder?: SortOrder;
 }
 
 const FavouritesPage = AuthenticatedPage<undefined, FavouritePageSearchParams>(

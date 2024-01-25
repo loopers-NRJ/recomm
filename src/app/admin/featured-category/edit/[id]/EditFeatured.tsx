@@ -98,6 +98,9 @@ export default function EditFeaturedCategory({
             maxImages={1}
             images={imageFiles}
             className="text-center text-xs"
+            // only svg and png
+            acceptedImageFormats={["image/svg+xml", "image/png"]}
+            compress={false}
           >
             Click here to upload new Image
           </ImagePicker>

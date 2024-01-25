@@ -1,27 +1,26 @@
-import { api } from "@/trpc/react";
 import Container from "../Container";
-import { useState } from "react";
-import { type OptionalItem } from "@/types/custom";
 import Loading from "../common/Loading";
-import { AtomicQuestionType, MultipleChoiceQuestionType } from "@prisma/client";
-
 import { Button } from "../ui/button";
-import { type AtomicAnswer } from "./AtomicQuestion";
-import { type MultipleChoiceAnswer } from "./MultipleChoiceQuestion";
-import BasicInfoSection from "./BasicInfoSection";
 import AdditionalInfoSection from "./AdditionalInfoSection";
+import { type AtomicAnswer } from "./AtomicQuestion";
+import BasicInfoSection from "./BasicInfoSection";
 import ImageUploadSection from "./ImageUploadSection";
+import { type MultipleChoiceAnswer } from "./MultipleChoiceQuestion";
 import PricingInfoSection from "./PricingInfoSection";
+import { api } from "@/trpc/react";
+import { type OptionalItem } from "@/types/custom";
+import { errorHandler } from "@/utils/errorHandler";
+import { useImageUploader } from "@/utils/imageUpload";
 import {
   type ProductFormError,
   type ProductSchemaKeys,
   productSchema,
 } from "@/utils/validation";
+import { AtomicQuestionType, MultipleChoiceQuestionType } from "@prisma/client";
 import { notFound, useRouter } from "next/navigation";
-import { useImageUploader } from "@/utils/imageUpload";
-import { makeIssue } from "zod";
+import { useCallback, useState } from "react";
 import toast from "react-hot-toast";
-import { errorHandler } from "@/utils/errorHandler";
+import { makeIssue } from "zod";
 
 export default function PostingForm({
   selectedCategorySlug,
@@ -50,18 +49,7 @@ export default function PostingForm({
     ProductFormError & {
       serverError?: string;
     }
-  >({
-    title: undefined,
-    description: undefined,
-    price: undefined,
-    categoryId: undefined,
-    brandId: undefined,
-    modelId: undefined,
-    closedAt: undefined,
-    atomicAnswers: undefined,
-    multipleChoiceAnswers: undefined,
-    images: undefined,
-  });
+  >({});
 
   const { isLoading, upload } = useImageUploader();
   const router = useRouter();
@@ -71,7 +59,7 @@ export default function PostingForm({
         return toast.error(result);
       }
       toast.success("Product created successfully");
-      router.push(`/users/${result.sellerId}/listings`);
+      router.push(`/user/${result.sellerId}/listings`);
     },
     onError: errorHandler,
   });
@@ -82,9 +70,14 @@ export default function PostingForm({
     },
     {
       onSuccess(data) {
-        if (!data || data === "Model not found") {
+        if (!selectedModel?.id) return;
+        if (!data || data === "Model not found")
           return toast.error("Model not found");
-        }
+        if (
+          data.atomicQuestions.length === atomicAnswers.length &&
+          data.multipleChoiceQuestions.length === multipleChoiceAnswers.length
+        )
+          return;
 
         setAtomicAnswers(
           data.atomicQuestions.map((question) => {
@@ -234,6 +227,86 @@ export default function PostingForm({
     });
   };
 
+  const getAdditionalSection = useCallback(
+    function getAdditionalSection() {
+      if (!selectedModel?.id) {
+        return;
+      }
+      if (!modelApi.data || modelApi.isLoading) {
+        return (
+          <div className="flex flex-col items-center gap-4 py-4">
+            <Loading />
+            Loading Details...
+          </div>
+        );
+      }
+      if (modelApi.data === "Model not found") {
+        return (
+          <div className="flex flex-col items-center gap-4">
+            <p className="text-red-500">Model not found</p>
+          </div>
+        );
+      }
+      if (
+        modelApi.data.atomicQuestions.length !== atomicAnswers.length ||
+        modelApi.data.multipleChoiceQuestions.length !==
+          multipleChoiceAnswers.length
+      ) {
+        return (
+          <div className="flex flex-col items-center gap-4 py-4">
+            <Loading />
+            Loading Details...
+          </div>
+        );
+      }
+      if (modelApi.isError) {
+        return (
+          <div className="flex flex-col items-center gap-4">
+            <p className="text-red-500">Something went wrong!</p>
+          </div>
+        );
+      }
+      return (
+        <>
+          <AdditionalInfoSection
+            model={modelApi.data}
+            atomicAnswers={atomicAnswers}
+            setAtomicAnswers={setAtomicAnswers}
+            multipleChoiceAnswers={multipleChoiceAnswers}
+            setMultipleChoiceAnswers={setMultipleChoiceAnswers}
+            formError={formError}
+          />
+          <ImageUploadSection
+            images={images}
+            setImages={setImages}
+            maxImages={10}
+            model={modelApi.data}
+            formError={formError}
+          />
+          <PricingInfoSection
+            price={price}
+            setPrice={setPrice}
+            onBidDurationChange={setBidEndTime}
+            model={modelApi.data}
+            formError={formError}
+          />
+        </>
+      );
+    },
+    [
+      selectedModel?.id,
+      modelApi.data,
+      modelApi.isLoading,
+      modelApi.isError,
+      atomicAnswers,
+      multipleChoiceAnswers,
+      images,
+      price,
+      bidEndTime,
+      formError,
+    ],
+  );
+
   if (
     categoryApi.isError ||
     modelApi.isError ||
@@ -256,72 +329,6 @@ export default function PostingForm({
 
   const selectedCategory = categoryApi.data;
 
-  function AdditionalSection() {
-    if (!selectedCategory?.id || !selectedBrand?.id || !selectedModel?.id) {
-      return null;
-    }
-    if (!modelApi.data || modelApi.isLoading) {
-      return (
-        <div className="flex flex-col items-center gap-4 py-4">
-          <Loading />
-          Loading Details...
-        </div>
-      );
-    }
-    if (modelApi.data === "Model not found") {
-      return (
-        <div className="flex flex-col items-center gap-4">
-          <p className="text-red-500">Model not found</p>
-        </div>
-      );
-    }
-    if (
-      modelApi.data.atomicQuestions.length !== atomicAnswers.length ||
-      modelApi.data.multipleChoiceQuestions.length !==
-        multipleChoiceAnswers.length
-    ) {
-      return (
-        <div className="flex flex-col items-center gap-4 py-4">
-          <Loading />
-          Loading Details...
-        </div>
-      );
-    }
-    if (modelApi.isError) {
-      return (
-        <div className="flex flex-col items-center gap-4">
-          <p className="text-red-500">Something went wrong!</p>
-        </div>
-      );
-    }
-    return (
-      <>
-        <AdditionalInfoSection
-          model={modelApi.data}
-          atomicAnswers={atomicAnswers}
-          setAtomicAnswers={setAtomicAnswers}
-          multipleChoiceAnswers={multipleChoiceAnswers}
-          setMultipleChoiceAnswers={setMultipleChoiceAnswers}
-          formError={formError}
-        />
-        <ImageUploadSection
-          images={images}
-          setImages={setImages}
-          maxImages={10}
-          model={modelApi.data}
-          formError={formError}
-        />
-        <PricingInfoSection
-          price={price}
-          setPrice={setPrice}
-          onBidDurationChange={setBidEndTime}
-          model={modelApi.data}
-          formError={formError}
-        />
-      </>
-    );
-  }
-
   return (
     <Container className="flex flex-col items-center justify-center pb-40">
       <h1 className="my-4 text-center text-2xl font-bold">
@@ -342,13 +349,17 @@ export default function PostingForm({
           formError={formError}
         />
 
-        <AdditionalSection />
+        {getAdditionalSection()}
 
         <Button
           onClick={() => void handleSubmit()}
           disabled={productApi.isLoading || isLoading || modelApi.isLoading}
         >
-          Post
+          {productApi.isLoading || isLoading || modelApi.isLoading ? (
+            <Loading color="white" size={24} />
+          ) : (
+            "Post"
+          )}
         </Button>
       </div>
     </Container>
