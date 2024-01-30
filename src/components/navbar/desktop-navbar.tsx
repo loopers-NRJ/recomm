@@ -23,8 +23,8 @@ const DesktopNavbar = async () => {
     }
   }
   return (
-    <Container>
-      <nav className="sticky left-0 top-0 z-10 flex items-center justify-between py-5 w-full bg-white">
+    <Container className="navbar sticky left-0 top-0 z-10 w-full bg-white">
+      <nav className="flex items-center justify-between py-5 w-full">
         <div className="flex gap-2">
           <Image className="cursor-pointer w-full h-full" src={RecommLogo} height="30" width="150" alt="Logo" priority />
           <Search />

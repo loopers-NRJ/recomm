@@ -13,7 +13,7 @@ const Profile = ({ session }: { session: Session | null }) => {
         height={30}
         width={30}
         alt="Avatar"
-        src={session?.user.image ?? "/placeholder.jpg"}
+        src={session?.user.image ?? ""}
       />
     </Link>
   );

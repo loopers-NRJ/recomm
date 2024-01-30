@@ -17,8 +17,8 @@ const MobileNavbar = () => {
   const style = "font-medium border text-md flex items-center justify-center w-fit p-3 rounded-md hover:bg-slate-100"
 
   return (
-    <Container>
-      <nav className="sticky left-0 space-y-5 py-5 top-0 z-10 w-full bg-white">
+    <Container className="navbar sticky left-0 top-0 z-10 w-full bg-white">
+      <nav className="space-y-5 py-5 w-full">
         <div className="flex w-full items-center justify-between">
           {/* Logo */}
           <Link href="/">
@@ -35,10 +35,12 @@ const MobileNavbar = () => {
           </div>
         </div>
         {/* Search bar and location selector */}
-        <div className="flex w-full gap-2">
-          <Search />
-          <p className="p-2 items-center justify-center border">Location</p>
-        </div>
+        {pathname == "/" && (
+          <div className="flex w-full gap-2">
+            <Search />
+            <p className="p-2 items-center justify-center border">Location</p>
+          </div>
+        )}
       </nav>
     </Container>
   );
