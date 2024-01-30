@@ -1,19 +1,62 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import { type FC } from "react";
-import NavItems from "./NavItems";
+import { ButtonLink } from "@/components/common/ButtonLink";
+import { usePathname } from "next/navigation";
+import { HomeSolid, HomeOutline, HeartSolid, HeartOutline, StarSolid, StarOutline, CoinSolid, CoinOutline } from "./Icons";
 
 interface BottomBarProps {
   className?: string;
 }
 
 const BottomBar: FC<BottomBarProps> = () => {
-  const { data: session } = useSession();
+  const pathname = usePathname();
+
+  const HomeIcon = pathname === "/" ? <HomeSolid /> : <HomeOutline />;
+  const HeartIcon =
+    pathname === "/favourites" ? <HeartSolid /> : <HeartOutline />;
+  const WishListIcon =
+    pathname === "/wishlist" ? <StarSolid /> : <StarOutline />;
+  const SellIcon = pathname === "/sell" ? <CoinSolid /> : <CoinOutline />;
+
+  const highlight = "rounded-b-none border-b-2 border-b-black md:rounded-lg md:border-none md:bg-slate-200/50" 
 
   return (
-    <div className="fixed bottom-0 left-0 z-30 flex w-full border p-0 md:hidden">
-      <NavItems session={session} />
+    <div className="bottom-bar fixed bottom-0 h-fit left-0 z-30 flex w-full border p-0 bg-white">
+      <ButtonLink
+        href="/"
+        variant="ghost"
+        className={pathname === "/" ? highlight: ""}
+      >
+        <span className="text-xl">{HomeIcon}</span>
+        <span className="text-xs md:text-sm">Home</span>
+      </ButtonLink>
+      <ButtonLink
+        href="/favourites"
+        variant="ghost"
+        className={ pathname === "/favourites" ? highlight: ""}
+      >
+        <span className="text-xl">{HeartIcon}</span>
+        <span className="text-xs md:text-sm">Favourites</span>
+      </ButtonLink>
+
+      <ButtonLink
+        href="/wishlist"
+        variant="ghost"
+        className={ pathname === "/wishlist" ? highlight : "" }
+      >
+        <span className="text-xl">{WishListIcon}</span>
+        <span className="text-xs md:text-sm">Wish It</span>
+      </ButtonLink>
+
+      <ButtonLink
+        href="/sell"
+        variant="ghost"
+        className={ pathname === "/sell" ? highlight : ""}
+      >
+        <span className="text-xl">{SellIcon}</span>
+        <span className="text-xs md:text-sm">Sell It</span>
+      </ButtonLink>
     </div>
   );
 };
