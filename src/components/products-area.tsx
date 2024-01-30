@@ -67,7 +67,7 @@ const Products: FC<Props> = ({ search, sortBy, sortOrder, modelId, categoryId, b
   if (allProductsQuery.isLoading || favQuery?.isLoading) return <LoadingProducts />;
   if (allProductsQuery.error) return <div>Error</div>;
 
-  let favourites = favQuery?.data?.favoritedProducts ?? []
+  const favourites = favQuery?.data?.favoritedProducts ?? []
 
   const products = allProductsQuery.data.pages.flatMap((page) => {
     if (favourites.length === 0) return page.products.map(product => ({ ...product, isFav: false }))
@@ -76,7 +76,8 @@ const Products: FC<Props> = ({ search, sortBy, sortOrder, modelId, categoryId, b
       return { ...product, isFav }
     })
   });
-  if (inView && allProductsQuery.hasNextPage && !allProductsQuery.isFetching) allProductsQuery.fetchNextPage();
+  if (inView && allProductsQuery.hasNextPage && !allProductsQuery.isFetching)
+    void allProductsQuery.fetchNextPage();
 
 
   return <>

@@ -1,11 +1,8 @@
 import Products from "@/components/products-area";
 import {
-  deviceTypeHeaderName,
   type SortBy,
   type SortOrder,
 } from "@/utils/constants";
-import { headers } from "next/headers";
-import type { FC } from "react";
 
 interface SearchParams {
   search?: string;
@@ -16,13 +13,10 @@ interface SearchParams {
   brandId?: string;
 }
 
-const ProductsPage: FC<SearchParams> = (props) => {
-  const device = headers().get(deviceTypeHeaderName);
+export default function ProductsPage({ searchParams } : {searchParams: SearchParams }) {
   return (
     <>
-      <Products {...props} />
+      <Products {...searchParams} />
     </>
   );
 };
-
-export default ProductsPage;
