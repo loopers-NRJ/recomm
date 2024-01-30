@@ -42,9 +42,9 @@ const FavouritesPage = AuthenticatedPage<undefined, FavouritePageSearchParams>(
     return (
       <Container>
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-6">
-          {favoritedProducts.map((product) => (
-            <ListingCard key={product.id} product={product} isFavourite />
-          ))}
+          {favoritedProducts.map((product) => {
+            return <ListingCard key={product.id} product={{...product, isFav: true}} isUser />
+          })}
         </div>
       </Container>
     );

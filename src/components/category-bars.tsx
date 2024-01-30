@@ -1,5 +1,5 @@
 "use client"
-import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
+import {type ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/trpc/react"
 import { useClientSelectedState } from "@/store/SelectedState"
