@@ -1,6 +1,7 @@
-"use client"
+"use client";
+
 import { usePathname, useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface CategoryBoxProps {
   icon: JSX.Element;
@@ -9,6 +10,7 @@ interface CategoryBoxProps {
 }
 
 const CategoryBox: React.FC<CategoryBoxProps> = ({ icon, label, id }) => {
+  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -25,8 +27,12 @@ const CategoryBox: React.FC<CategoryBoxProps> = ({ icon, label, id }) => {
       : searchParams.get("category") === id;
 
   return (
-    <Link
-      href={id ? `${pathname}?${createQueryString("category", id)}` : pathname}
+    <div
+      onClick={() => {
+        router.push(
+          id ? `${pathname}?${createQueryString("category", id)}` : pathname,
+        );
+      }}
       className={`
         flex cursor-pointer flex-col items-center justify-between gap-2 border-b-2 p-3 transition hover:text-neutral-800
         ${selected ? "border-b-neutral-800" : "border-transparent"}
@@ -35,7 +41,7 @@ const CategoryBox: React.FC<CategoryBoxProps> = ({ icon, label, id }) => {
     >
       {icon}
       <div className="text-sm font-medium">{label}</div>
-    </Link>
+    </div>
   );
 };
 

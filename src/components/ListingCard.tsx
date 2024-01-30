@@ -1,50 +1,49 @@
+"use client";
+
 import Link from "next/link";
 import { type ProductsPayloadIncluded } from "@/types/prisma";
-import Image from "next/image";
-import { HeartOutline, HeartSolid } from "@/components/navbar/Icons";
-import FavoriteToggle from "@/components/favorite-toggle";
+// import Image from "next/image";
+import Carousel from "./common/Carousel";
+import HeartButton from "./HeartButton";
 
 interface ListingCardProps {
-  product: ProductsPayloadIncluded & { isFav: boolean }
-  isUser: boolean;
+  isFavourite?: boolean;
+  product: ProductsPayloadIncluded;
+  onFavoriteStateChange?: () => void;
+  hideHeartIcon?: true;
 }
 
 const ListingCard: React.FC<ListingCardProps> = ({
   product,
-  isUser = false,
+  isFavourite,
+  onFavoriteStateChange,
+  hideHeartIcon = false,
 }) => {
-
   return (
-    <div className="relative flex w-full flex-col">
-      {
-        isUser ?
-          <FavoriteToggle
-            id={product.id}
-            state={product.isFav}
-            uncheckedIcon={<HeartOutline className="text-red-500" />}
-            checkedIcon={<HeartSolid className="text-red-500" />} />
-          :
-          null
-      }
-      <Link
-        href={`/products/${product.slug}`}
-        className="group cursor-pointer"
-      >
-        <div className="w-full overflow-hidden rounded-xl aspect-square border shadow-md group-hover:shadow-lg transition-shadow duration-300 ease-in-out">
-          <Image
-            alt={product.slug}
-            src={product.images[0]!.url}
-            className="w-full h-full rounded-xl object-cover"
-            width={180} height={150} />
+    <Link
+      href={`/products/${product.slug}`}
+      className="group col-span-1 cursor-pointer"
+    >
+      <div className="flex w-full flex-col gap-2">
+        <div className="relative w-full overflow-hidden rounded-xl">
+          <Carousel images={product.images} />
+          <div className="absolute right-3 top-3">
+            {!hideHeartIcon && (
+              <HeartButton
+                productId={product.id}
+                enabled={isFavourite ?? false}
+                onChange={onFavoriteStateChange}
+              />
+            )}
+          </div>
         </div>
-        <div className="p-2">
-          <p className="text-lg font-semibold">{product.model.name}</p>
-          <p className="font-semibold">₹ {product.price}</p>
+        <div className="text-lg font-semibold">{product.model.name}</div>
+        <div className="flex flex-row items-center gap-1">
+          <div className="font-semibold">$ {product.price}</div>
         </div>
-      </Link>
-    </div>
+      </div>
+    </Link>
   );
 };
-
 
 export default ListingCard;

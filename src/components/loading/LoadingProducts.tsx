@@ -11,19 +11,23 @@ const LoadingProducts: FC<LoadingProductsProps> = ({ className }) => {
   const dummy = new Array(20).fill(0);
 
   return (
-    <div
-      className={cn(
-        className,
-        "grid gap-8 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6",
-      )}
-    >
-      {dummy.map((_, i) => (
-        <Skeleton
-          key={i}
-          className="group h-52 w-full bg-slate-400/20"
-        />
-      ))}
-    </div>
+    <main>
+      <Container>
+        <div
+          className={cn(
+            className,
+            "grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-6",
+          )}
+        >
+          {dummy.map((_, i) => (
+            <Skeleton
+              key={i}
+              className="group col-span-1 h-60 w-full bg-slate-400/20"
+            />
+          ))}
+        </div>
+      </Container>
+    </main>
   );
 };
 export default LoadingProducts;

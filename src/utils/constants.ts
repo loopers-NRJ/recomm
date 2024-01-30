@@ -14,7 +14,6 @@ export const maxFeaturedCategory = 12 as const;
 export const requestPathHeaderName = "x-forwarded-path" as const;
 export const adminPageRegex = /\/admin\//g;
 export const pathHeaderName = "x-pathname" as const;
-export const deviceTypeHeaderName = "x-device-type" as const;
 
 // image upload
 export const maxImageCount = 5 as const;

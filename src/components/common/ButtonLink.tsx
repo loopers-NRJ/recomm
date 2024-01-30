@@ -44,7 +44,7 @@ const ButtonLink = React.forwardRef<HTMLAnchorElement, ButtonProps>(
     return (
       <Link
         href={href}
-        className={"h-full w-full min-w-max flex-col justify-center md:gap-3 rounded-lg px-6 md:flex-row " + cn(buttonVariants({ variant, size, className }))}
+        className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         {...props}
       />

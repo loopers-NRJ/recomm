@@ -3,6 +3,7 @@
 import { type FC, useEffect } from "react";
 import { api } from "@/trpc/react";
 import { type Room } from "@prisma/client";
+import Avatar from "@/components/navbar/Avatar";
 import { Card, CardContent } from "./ui/card";
 
 interface BiddingListProps {
@@ -34,6 +35,7 @@ const BiddingList: FC<BiddingListProps> = ({ room, revalidate }) => {
             <CardContent className="p-5">
               <div className="flex w-full items-center justify-between space-x-4">
                 <div className="flex items-center space-x-4">
+                  <Avatar src={bid.user.image} />
                   <div>
                     <p className="text-sm font-medium leading-none">
                       {bid.user.name}
@@ -53,7 +55,5 @@ const BiddingList: FC<BiddingListProps> = ({ room, revalidate }) => {
     </div>
   );
 };
-
-// <Avatar src={bid.user.image ?? "/placeholder.jpg"} />
 
 export default BiddingList;
