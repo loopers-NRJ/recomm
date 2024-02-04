@@ -275,7 +275,7 @@ export const categoryRouter = createTRPCRouter({
     .mutation(
       async ({
         input: { id, name, parentCategoryId, active },
-        ctx: { prisma },
+        ctx: { prisma, session },
       }) => {
         const existingCategory = await prisma.category.findUnique({
           where: {
@@ -322,6 +322,11 @@ export const categoryRouter = createTRPCRouter({
                 }
               : undefined,
             active,
+            updatedBy: {
+              connect: {
+                id: session.user.id,
+              },
+            },
           },
           include: CategoryPayload.include,
         });

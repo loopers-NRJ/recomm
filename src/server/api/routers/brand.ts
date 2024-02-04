@@ -1,15 +1,15 @@
 import slugify from "@/lib/slugify";
-import { z } from "zod";
-import { idSchema } from "@/utils/validation";
-import { createTRPCRouter, getProcedure, publicProcedure } from "../trpc";
-import { AccessType } from "@prisma/client";
+import { BrandPayload, states } from "@/types/prisma";
 import {
   defaultLimit,
   defaultSortBy,
   defaultSortOrder,
   maxLimit,
 } from "@/utils/constants";
-import { BrandPayload, states } from "@/types/prisma";
+import { idSchema } from "@/utils/validation";
+import { AccessType } from "@prisma/client";
+import { z } from "zod";
+import { createTRPCRouter, getProcedure, publicProcedure } from "../trpc";
 
 export const brandRouter = createTRPCRouter({
   all: publicProcedure
@@ -134,7 +134,10 @@ export const brandRouter = createTRPCRouter({
       ]),
     )
     .mutation(
-      async ({ input: { id, name: newName, active }, ctx: { prisma } }) => {
+      async ({
+        input: { id, name: newName, active },
+        ctx: { prisma, session },
+      }) => {
         // checking whether the brand exists
         const existingBrand = await prisma.brand.findUnique({
           where: {
@@ -173,6 +176,11 @@ export const brandRouter = createTRPCRouter({
             name: newName,
             slug: newName ? slugify(newName) : undefined,
             active,
+            updatedBy: {
+              connect: {
+                id: session.user.id,
+              },
+            },
           },
         });
 

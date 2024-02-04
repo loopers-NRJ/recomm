@@ -114,10 +114,16 @@ model User {
     updatedAt         DateTime  @updatedAt
 
     // admin level
-    createdCategories  Category[]
-    FeaturedCategories FeaturedCategory[]
-    createdBrands      Brand[]
-    createdModels      Model[]
+    createdCategories              Category[]               @relation("categoryCreate")
+    updatedCategories              Category[]               @relation("categoryUpdate")
+    FeaturedCategories             FeaturedCategory[]
+    createdBrands                  Brand[]                  @relation("brandCreate")
+    updatedBrands                  Brand[]                  @relation("brandUpdate")
+    createdModels                  Model[]                  @relation("modelCreate")
+    updatedModels                  Model[]                  @relation("modelUpdate")
+    updatedMultipleChoiceQuestions MultipleChoiceQuestion[] @relation("multipleChoiceQuestionUpdate")
+    updatedChoice                  Choice[]                 @relation("choiceUpdate")
+    updatedAtomicQuestions         AtomicQuestion[]         @relation("atomicQuestionUpdate")
 
     @@index([roleId])
 }
@@ -185,9 +191,11 @@ model Category {
     featuredCategory FeaturedCategory?
 
     // Meta
-    createdBy    User     @relation(fields: [createdById], references: [id])
-    createdById  String
     createdState State
+    createdBy    User     @relation("categoryCreate", fields: [createdById], references: [id])
+    updatedBy    User?    @relation("categoryUpdate", fields: [updatedById], references: [id])
+    createdById  String
+    updatedById  String?
     createdAt    DateTime @default(now())
     updatedAt    DateTime @updatedAt
 
@@ -196,6 +204,7 @@ model Category {
     @@index([name, parentCategoryId])
     @@index([parentCategoryId])
     @@index([createdById])
+    @@index([updatedById])
 }
 
 model FeaturedCategory {
@@ -223,15 +232,18 @@ model Brand {
     wishes Wish[]
 
     // Meta
-    createdBy    User     @relation(fields: [createdById], references: [id])
-    createdById  String
     createdState State
+    createdBy    User     @relation("brandCreate", fields: [createdById], references: [id])
+    updatedBy    User?    @relation("brandUpdate", fields: [updatedById], references: [id])
+    createdById  String
+    updatedById  String?
     createdAt    DateTime @default(now())
     updatedAt    DateTime @updatedAt
 
     @@unique([name, createdState])
     @@index([name])
     @@index([createdById])
+    @@index([updatedById])
 }
 
 model Model {
@@ -251,9 +263,11 @@ model Model {
     answers                 AtomicAnswer[]
 
     // Meta
-    createdBy    User     @relation(fields: [createdById], references: [id])
-    createdById  String
     createdState State
+    createdBy    User     @relation("modelCreate", fields: [createdById], references: [id])
+    updatedBy    User?    @relation("modelUpdate", fields: [updatedById], references: [id])
+    createdById  String
+    updatedById  String?
     createdAt    DateTime @default(now())
     updatedAt    DateTime @updatedAt
 
@@ -262,6 +276,7 @@ model Model {
     @@index([brandId])
     @@index([categoryId])
     @@index([createdById])
+    @@index([updatedById])
 }
 
 enum MultipleChoiceQuestionType {
@@ -279,12 +294,15 @@ model MultipleChoiceQuestion {
     required        Boolean                    @default(true)
     model           Model                      @relation(fields: [modelId], references: [id], onDelete: Cascade)
     modelId         String
-
     // Meta
-    updatedAt DateTime @updatedAt
+
+    updatedAt   DateTime @updatedAt
+    updatedBy   User?    @relation("multipleChoiceQuestionUpdate", fields: [updatedById], references: [id])
+    updatedById String?
 
     @@unique([questionContent, modelId])
     @@index([modelId])
+    @@index([updatedById])
 }
 
 model Choice {
@@ -297,11 +315,14 @@ model Choice {
     products   Product[]
 
     // Meta
-    updatedAt DateTime @updatedAt
+    updatedAt   DateTime @updatedAt
+    updatedBy   User?    @relation("choiceUpdate", fields: [updatedById], references: [id])
+    updatedById String?
 
     @@unique([value, questionId, modelId])
     @@index([questionId])
     @@index([modelId])
+    @@index([updatedById])
 }
 
 enum AtomicQuestionType {
@@ -321,10 +342,13 @@ model AtomicQuestion {
     modelId         String
 
     // Meta
-    updatedAt DateTime @updatedAt
+    updatedAt   DateTime @updatedAt
+    updatedBy   User?    @relation("atomicQuestionUpdate", fields: [updatedById], references: [id])
+    updatedById String?
 
     @@unique([modelId, questionContent])
     @@index([modelId])
+    @@index([updatedById])
 }
 
 model AtomicAnswer {
@@ -355,18 +379,18 @@ model Product {
     images          Image[]
     selectedChoices Choice[]
     answers         AtomicAnswer[]
-
-    address        Address? @relation(fields: [addressId], references: [id], onDelete: Restrict)
-    addressId      String?
-    model          Model    @relation(fields: [modelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-    modelId        String
-    seller         User     @relation("listedProducts", fields: [sellerId], references: [id], onDelete: Cascade)
-    sellerId       String
-    buyer          User?    @relation("purchasedProducts", fields: [buyerId], references: [id], onDelete: SetNull)
-    buyerId        String?
-    favoritedUsers User[]   @relation("favoriteProducts")
-    room           Room     @relation(fields: [roomId], references: [id], onDelete: Restrict)
-    roomId         String   @unique
+    isDeleted       Boolean        @default(false)
+    address         Address?       @relation(fields: [addressId], references: [id], onDelete: Restrict)
+    addressId       String?
+    model           Model          @relation(fields: [modelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    modelId         String
+    seller          User           @relation("listedProducts", fields: [sellerId], references: [id], onDelete: Cascade)
+    sellerId        String
+    buyer           User?          @relation("purchasedProducts", fields: [buyerId], references: [id], onDelete: SetNull)
+    buyerId         String?
+    favoritedUsers  User[]         @relation("favoriteProducts")
+    room            Room           @relation(fields: [roomId], references: [id], onDelete: Restrict)
+    roomId          String         @unique
 
     // Meta
     createdAt DateTime @default(now())
