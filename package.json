@@ -9,7 +9,9 @@
     "postinstall": "prisma generate",
     "lint": "next lint",
     "start": "next start",
-    "db:push": "prisma db push"
+    "db:push": "prisma db push",
+    "db:generate": "prisma generate",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.2",

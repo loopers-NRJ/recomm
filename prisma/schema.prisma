@@ -472,3 +472,11 @@ model Image {
 
     @@index([productId])
 }
+
+model Log {
+    id        String   @id @default(cuid())
+    message   String
+    detail    String?
+    level     String
+    createdAt DateTime @default(now())
+}
