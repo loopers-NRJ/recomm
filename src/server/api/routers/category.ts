@@ -208,7 +208,7 @@ export const categoryRouter = createTRPCRouter({
     .mutation(
       async ({
         input: { name, parentCategoryId, state },
-        ctx: { prisma, session },
+        ctx: { prisma, session, logger },
       }) => {
         // checking whether the category already exists
 
@@ -246,6 +246,11 @@ export const categoryRouter = createTRPCRouter({
           },
           include: CategoryPayload.include,
         });
+
+        await logger.info(
+          `New category '${category.name}' created by '${session.user.name}'`,
+        );
+
         return category;
       },
     ),

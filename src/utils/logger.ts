@@ -1,6 +1,7 @@
 import { type PrismaClient } from "@prisma/client";
 
-export type LogLevel = "info" | "warn" | "error";
+export const logLevel = ["info", "warn", "error"] as const;
+export type LogLevel = (typeof logLevel)[number];
 export type Logger = Record<
   LogLevel,
   (message: string, detail?: unknown) => Promise<void>
