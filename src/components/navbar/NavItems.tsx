@@ -5,9 +5,9 @@ import type { FC } from "react";
 import Link from "next/link";
 import { adminPageRegex } from "@/utils/constants";
 import { Bell } from "./Icons";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
 import type { Session } from "next-auth";
+import Profile from "./profile";
 
 interface NavItemsProps {
   isAdmin: boolean;
@@ -48,18 +48,7 @@ const NavItems: FC<NavItemsProps> = ({ isAdmin, session }) => {
       >
         <Bell className="h-5 w-5" />
       </Link>
-      <Link
-        href={session ? `/user/${session.user.id}/profile` : "/login"}
-        className="rounded-full border w-fit min-w-fit p-0.5 h-full hover:bg-slate-100"
-      >
-        <Image
-          className="rounded-full w-full h-full"
-          height={30}
-          width={30}
-          alt="Avatar"
-          src={session?.user.image ?? "/placeholder.jpg"}
-        />
-      </Link>
+      <Profile session={session ?? null} />
     </div>
   );
 };
