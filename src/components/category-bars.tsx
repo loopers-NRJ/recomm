@@ -1,9 +1,11 @@
 "use client"
-import {type ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
+import { type ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/trpc/react"
 import { useClientSelectedState } from "@/store/SelectedState"
 import Image from "next/image";
+import { useState } from "react";
+import { ArrowLeft } from "lucide-react";
 
 function createQueryString(searchParams: ReadonlyURLSearchParams, name: string, value: string) {
   const params = new URLSearchParams(searchParams);
@@ -27,13 +29,32 @@ const MobileCategoryBar = () => {
     state: selectedState,
   });
 
+  const [expanded, setExpanded] = useState(false);
+
+  const list = api.category.allWithoutPayload.useQuery({
+    parentId: undefined,
+    state: selectedState
+  })
   return (
     <div className="grid grid-cols-4 grid-rows-2 gap-2 mb-5 min-h-[200px]">
       {catergoriesQuery.data?.categories.map(({ category, image }) => {
         const url = "/products/?" + createQueryString(searchParams, "category", category.id);
         return <CategoryBox key={category.id} label={category.name} link={url} image={image.url} />
       })}
-      <Link href="/products/"></Link>
+      <div onClick={() => setExpanded(true)} className="flex justify-center items-center border rounded-xl w-full h-full font-bold text-sm">
+        See All
+      </div>
+      <aside
+        className={`selection-box ${!expanded && "hidden"} fixed top-0 left-0 h-screen w-screen z-[99] bg-white`}
+      >
+        <h1 className="flex">
+          <ArrowLeft onClick={() => setExpanded(false)} />
+          Categories
+        </h1>
+        <ul>
+          { list.data?.categories.map(ele => ele.parentCategoryId == null ? <h1 key={ele.id}>{ele.name}</h1> : null) }
+        </ul>
+      </aside>
     </div>
   )
 }
@@ -47,10 +68,10 @@ interface CategoryBoxProps {
 
 const CategoryBox: React.FC<CategoryBoxProps> = ({ image, label, link }) => {
   return (
-      <Link href={link} className="flex flex-col justify-center items-center bg-white border rounded-xl shadow-md w-full h-full">
-        <Image src={image} width={30} height={30} alt={label} className="m-2" />
-        <label className="text-sm font-medium">{label}</label>
-      </Link>
+    <Link href={link} className="flex flex-col justify-center items-center bg-white border rounded-xl shadow-md w-full h-full">
+      <Image src={image} width={30} height={30} alt={label} className="m-2" />
+      <label className="text-sm font-medium">{label}</label>
+    </Link>
   );
 };
 
