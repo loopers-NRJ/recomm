@@ -13,6 +13,7 @@ export function getLogger(db: PrismaClient): Logger {
     message: string,
     detail?: unknown,
   ) => {
+    console[level]("Our message: ", message, detail);
     await db.log.create({
       data: {
         level,

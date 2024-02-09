@@ -211,7 +211,6 @@ export const categoryRouter = createTRPCRouter({
         ctx: { prisma, session, logger },
       }) => {
         // checking whether the category already exists
-
         const existingCategory = await prisma.category.findFirst({
           where: {
             name,
@@ -248,7 +247,7 @@ export const categoryRouter = createTRPCRouter({
         });
 
         await logger.info(
-          `New category '${category.name}' created by '${session.user.name}'`,
+          `'${session.user.name}' created a category named '${category.name}'`,
         );
 
         return category;
@@ -277,115 +276,133 @@ export const categoryRouter = createTRPCRouter({
         }),
       ]),
     )
+    .mutation(async ({ input, ctx: { prisma, session, logger } }) => {
+      const existingCategory = await prisma.category.findUnique({
+        where: {
+          id: input.id,
+        },
+      });
+      if (existingCategory === null) {
+        return "Category not found";
+      }
+      // checking whether the new name already exists
+      if (input.name !== undefined && input.name !== existingCategory.name) {
+        const existingName = await prisma.category.findFirst({
+          where: {
+            name: {
+              equals: input.name,
+            },
+            createdState: existingCategory.createdState,
+          },
+          select: {
+            id: true,
+          },
+        });
+        if (existingName !== null) {
+          return `Category with name '${input.name}' already exists` as const;
+        }
+      }
+
+      const updatedCategory = await prisma.category.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          name: input.name,
+          slug: input.name ? slugify(input.name) : undefined,
+          parentCategory: input.parentCategoryId
+            ? {
+                connect: {
+                  id: input.parentCategoryId,
+                },
+              }
+            : undefined,
+          active: input.active,
+          updatedBy: {
+            connect: {
+              id: session.user.id,
+            },
+          },
+        },
+        include: CategoryPayload.include,
+      });
+
+      if (input.name) {
+        await logger.info(
+          `'${session.user.name}' updated a model's name from '${existingCategory.name}' to '${updatedCategory.name}'`,
+        );
+      }
+      if (input.active !== undefined) {
+        await logger.info(
+          `'${session.user.name}' updated a model's active state from '${existingCategory.active}' to '${updatedCategory.active}'`,
+        );
+      }
+      if (input.parentCategoryId) {
+        await logger.info(
+          `'${session.user.name}' updated a model's parentId from '${existingCategory.parentCategoryId}' to '${updatedCategory.parentCategoryId}'`,
+        );
+      }
+
+      return updatedCategory;
+    }),
+  delete: getProcedure(AccessType.deleteCategory)
+    .input(z.object({ categoryId: idSchema }))
     .mutation(
       async ({
-        input: { id, name, parentCategoryId, active },
-        ctx: { prisma, session },
+        input: { categoryId: id },
+        ctx: { prisma, session, logger },
       }) => {
+        // checking whether the category exists
+
         const existingCategory = await prisma.category.findUnique({
           where: {
             id,
           },
           select: {
             name: true,
-            createdState: true,
+            subCategories: {
+              select: {
+                id: true,
+              },
+            },
+            models: {
+              select: {
+                id: true,
+              },
+            },
+            wishes: {
+              select: {
+                id: true,
+              },
+            },
           },
         });
         if (existingCategory === null) {
           return "Category not found";
         }
-        // checking whether the new name already exists
-        if (name !== undefined && name !== existingCategory.name) {
-          const existingName = await prisma.category.findFirst({
-            where: {
-              name: {
-                equals: name,
-              },
-              createdState: existingCategory.createdState,
-            },
-            select: {
-              id: true,
-            },
-          });
-          if (existingName !== null) {
-            return `Category with name '${name}' already exists` as const;
-          }
+        if (existingCategory.subCategories.length > 0) {
+          return `Cannot delete the category '${existingCategory.name}' because it has subcategories.` as const;
         }
-
-        const updatedCategory = await prisma.category.update({
+        if (existingCategory.models.length > 0) {
+          return `Cannot delete the category '${existingCategory.name}'. it's in use by some models` as const;
+        }
+        if (existingCategory.wishes.length > 0) {
+          return `Cannot delete the category '${existingCategory.name}'. Some users have wished for it` as const;
+        }
+        // deleting the category
+        const category = await prisma.category.delete({
           where: {
             id,
           },
-          data: {
-            name,
-            slug: name ? slugify(name) : undefined,
-            parentCategory: parentCategoryId
-              ? {
-                  connect: {
-                    id: parentCategoryId,
-                  },
-                }
-              : undefined,
-            active,
-            updatedBy: {
-              connect: {
-                id: session.user.id,
-              },
-            },
-          },
-          include: CategoryPayload.include,
         });
-        return updatedCategory;
+
+        await logger.info(
+          `'${session.user.name}' deleted a model named '${category.name}'`,
+        );
+
+        return category;
       },
     ),
-  delete: getProcedure(AccessType.deleteCategory)
-    .input(z.object({ categoryId: idSchema }))
-    .mutation(async ({ input: { categoryId: id }, ctx: { prisma } }) => {
-      // checking whether the category exists
-
-      const existingCategory = await prisma.category.findUnique({
-        where: {
-          id,
-        },
-        select: {
-          name: true,
-          subCategories: {
-            select: {
-              id: true,
-            },
-          },
-          models: {
-            select: {
-              id: true,
-            },
-          },
-          wishes: {
-            select: {
-              id: true,
-            },
-          },
-        },
-      });
-      if (existingCategory === null) {
-        return "Category not found";
-      }
-      if (existingCategory.subCategories.length > 0) {
-        return `Cannot delete the category '${existingCategory.name}' because it has subcategories.` as const;
-      }
-      if (existingCategory.models.length > 0) {
-        return `Cannot delete the category '${existingCategory.name}'. it's in use by some models` as const;
-      }
-      if (existingCategory.wishes.length > 0) {
-        return `Cannot delete the category '${existingCategory.name}'. Some users have wished for it` as const;
-      }
-      // deleting the category
-      const category = await prisma.category.delete({
-        where: {
-          id,
-        },
-      });
-      return category;
-    }),
   featured: publicProcedure
     .input(
       z.object({
@@ -431,6 +448,7 @@ export const categoryRouter = createTRPCRouter({
           ],
           include: FeaturedCategoryPayload.include,
         });
+
         return {
           categories,
           nextCursor: categories[limit - 1]?.categoryId,
@@ -443,7 +461,7 @@ export const categoryRouter = createTRPCRouter({
     .mutation(
       async ({
         input: { categoryId: id, image },
-        ctx: { prisma, session },
+        ctx: { prisma, session, logger },
       }) => {
         const totalFeaturedCategories = await prisma.featuredCategory.count();
         if (totalFeaturedCategories >= maxFeaturedCategory) {
@@ -480,94 +498,121 @@ export const categoryRouter = createTRPCRouter({
             category: true,
           },
         });
+
+        await logger.info(
+          `'${session.user.name}' promoted a category named '${data.category.name}' to featured category`,
+        );
+
         return data.category;
       },
     ),
   removeFromFeatured: getProcedure(AccessType.updateCategory)
     .input(z.object({ categoryId: idSchema }))
-    .mutation(async ({ input: { categoryId: id }, ctx: { prisma } }) => {
-      const existingCategory = await prisma.featuredCategory.findUnique({
-        where: {
-          categoryId: id,
-        },
-        select: {
-          image: {
-            select: {
-              publicId: true,
+    .mutation(
+      async ({
+        input: { categoryId: id },
+        ctx: { prisma, session, logger },
+      }) => {
+        const existingCategory = await prisma.featuredCategory.findUnique({
+          where: {
+            categoryId: id,
+          },
+          select: {
+            image: {
+              select: {
+                publicId: true,
+              },
+            },
+            category: {
+              select: {
+                name: true,
+              },
             },
           },
-          category: {
-            select: {
-              name: true,
-            },
-          },
-        },
-      });
-      if (existingCategory === null) {
-        return "Category not found";
-      }
-      await prisma.featuredCategory.delete({
-        where: {
-          categoryId: id,
-        },
-      });
-
-      const error = await deleteImage(existingCategory.image.publicId);
-      if (error) {
-        console.error({
-          procedure: "removeCategoryFromFeaturedById",
-          message: "cannot able delete the old image in cloudinary",
-          existingCategory,
-          error,
         });
-        return `Cannot able to delete the of the category ${existingCategory.category.name}` as const;
-      }
-    }),
+        if (existingCategory === null) {
+          return "Category not found";
+        }
+        await prisma.featuredCategory.delete({
+          where: {
+            categoryId: id,
+          },
+        });
+
+        const error = await deleteImage(existingCategory.image.publicId);
+        if (error) {
+          await logger.error(
+            "cannot able delete the old image in cloudinary",
+            JSON.stringify({
+              procedure: "removeCategoryFromFeaturedById",
+              message: "cannot able delete the old image in cloudinary",
+              existingCategory,
+              error,
+            }),
+          );
+          return `Cannot able to delete the of the category ${existingCategory.category.name}` as const;
+        }
+        await logger.info(
+          `'${session.user.name}' demoted a featured category named '${existingCategory.category.name}' to category`,
+        );
+      },
+    ),
 
   updateFeatured: getProcedure(AccessType.updateCategory)
     .input(z.object({ categoryId: idSchema, image: imageInputs }))
-    .mutation(async ({ input: { categoryId: id, image }, ctx: { prisma } }) => {
-      const existingCategory = await prisma.featuredCategory.findUnique({
-        where: {
-          categoryId: id,
-        },
-        select: {
-          image: {
-            select: {
-              publicId: true,
+    .mutation(
+      async ({
+        input: { categoryId: id, image },
+        ctx: { prisma, session, logger },
+      }) => {
+        const existingCategory = await prisma.featuredCategory.findUnique({
+          where: {
+            categoryId: id,
+          },
+          select: {
+            image: {
+              select: {
+                publicId: true,
+              },
+            },
+            category: {
+              select: {
+                name: true,
+              },
             },
           },
-          category: {
-            select: {
-              name: true,
-            },
-          },
-        },
-      });
-      if (existingCategory === null) {
-        return "Category not found";
-      }
-
-      await prisma.featuredCategory.update({
-        where: {
-          categoryId: id,
-        },
-        data: {
-          image: {
-            update: image,
-          },
-        },
-      });
-
-      const error = await deleteImage(existingCategory.image.publicId);
-      if (error) {
-        console.error({
-          procedure: "updateFeaturedCategoryById",
-          message: "cannot able delete the old image in cloudinary",
-          existingCategory,
-          error,
         });
-        return `Cannot able to delete the of the category ${existingCategory.category.name}'s Image` as const;
-      }
-    }),
+        if (existingCategory === null) {
+          return "Category not found";
+        }
+
+        await prisma.featuredCategory.update({
+          where: {
+            categoryId: id,
+          },
+          data: {
+            image: {
+              update: image,
+            },
+          },
+        });
+
+        const error = await deleteImage(existingCategory.image.publicId);
+        if (error) {
+          await logger.error(
+            "cannot able delete the old image in cloudinary",
+            JSON.stringify({
+              procedure: "updateFeaturedCategoryById",
+              message: "cannot able delete the old image in cloudinary",
+              existingCategory,
+              error,
+            }),
+          );
+          return `Cannot able to delete the of the category ${existingCategory.category.name}'s Image` as const;
+        }
+        await logger.info(
+          `'${session.user.name}' updated image of a featured category named '${existingCategory.category.name}'`,
+        );
+      },
+    ),
 });

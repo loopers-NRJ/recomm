@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { ButtonLink } from "@/components/common/ButtonLink";
+import { AdminButtonLink } from "@/components/common/ButtonLink";
 import { usePathname, useRouter } from "next/navigation";
 import { type Title } from "./titles";
 
@@ -19,7 +19,7 @@ export default function Sidebar({ titles }: { titles: Title[] }) {
 
   return (
     <>
-      <div className="md:hidden">
+      <nav className="md:hidden">
         <Select
           onValueChange={(value) => router.push(`/admin/tables/${value}`)}
           value={selectedTitle}
@@ -35,13 +35,13 @@ export default function Sidebar({ titles }: { titles: Title[] }) {
             ))}
           </SelectContent>
         </Select>
-      </div>
-      <div className="hidden h-fit w-40 shrink-0 rounded-lg border md:block">
-        <div className="flex h-full flex-col">
-          {titles.map((title) => (
-            <ButtonLink
-              key={title}
-              className={`
+      </nav>
+      <div className="hidden h-fit w-40 shrink-0 flex-col rounded-lg border md:flex">
+        {/* <div className="flex h-full flex-col"> */}
+        {titles.map((title) => (
+          <AdminButtonLink
+            key={title}
+            className={`
                 justify-start rounded-none
                 ${
                   title === selectedTitle
@@ -49,14 +49,14 @@ export default function Sidebar({ titles }: { titles: Title[] }) {
                     : ""
                 }
               `}
-              variant="ghost"
-              size="sm"
-              href={`/admin/tables/${title}`}
-            >
-              {title}
-            </ButtonLink>
-          ))}
-        </div>
+            variant="ghost"
+            size="sm"
+            href={`/admin/tables/${title}`}
+          >
+            {title}
+          </AdminButtonLink>
+        ))}
+        {/* </div> */}
       </div>
     </>
   );

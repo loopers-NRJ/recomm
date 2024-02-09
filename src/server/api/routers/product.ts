@@ -207,7 +207,7 @@ export const productRouter = createTRPCRouter({
           multipleChoiceAnswers: providedChoices,
           atomicAnswers: providedAnswers,
         },
-        ctx: { prisma, session },
+        ctx: { prisma, session, logger },
       }) => {
         if (closedAt < new Date()) {
           return "Closed at date must be in the future";
@@ -352,12 +352,15 @@ export const productRouter = createTRPCRouter({
           });
         };
 
-        void updateWishes().catch((error) => {
-          console.error({
-            procedure: "createProduct",
-            message: "cannot update wishes",
-            error,
-          });
+        void updateWishes().catch(async (error) => {
+          await logger.error(
+            "cannot update wishes",
+            JSON.stringify({
+              procedure: "createProduct",
+              message: "cannot update wishes",
+              error,
+            }),
+          );
         });
 
         return product;

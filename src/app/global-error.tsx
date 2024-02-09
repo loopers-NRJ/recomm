@@ -1,7 +1,7 @@
 "use client";
 
 import Container from "@/components/Container";
-import { ButtonLink } from "@/components/common/ButtonLink";
+import { AdminButtonLink } from "@/components/common/ButtonLink";
 import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
 
@@ -28,14 +28,14 @@ export default function GlobalError({
             <Button variant="ghost" size="sm" className="mr-2" onClick={reset}>
               Try again
             </Button>
-            <ButtonLink
+            <AdminButtonLink
               href="/"
               variant="ghost"
               size="sm"
               className="font-semibold"
             >
               Get back to Home page
-            </ButtonLink>
+            </AdminButtonLink>
           </div>
         </Container>
       </body>

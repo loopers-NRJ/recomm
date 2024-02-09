@@ -12,7 +12,7 @@ export const ErrorLink: TRPCLink<AppRouter> = () => {
           // handle errors
           if (err.data?.code === "INTERNAL_SERVER_ERROR") {
             console.error(err);
-            return window.location.replace("/something-went-wrong");
+            throw new Error("something went wrong");
           }
           if (err.data?.code === "UNAUTHORIZED") {
             return window.location.replace("/unauthorized");

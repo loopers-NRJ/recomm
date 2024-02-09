@@ -44,7 +44,10 @@ const ButtonLink = React.forwardRef<HTMLAnchorElement, ButtonProps>(
     return (
       <Link
         href={href}
-        className={"h-full w-full min-w-max flex-col justify-center md:gap-3 rounded-lg px-6 md:flex-row " + cn(buttonVariants({ variant, size, className }))}
+        className={
+          "h-full w-full min-w-max flex-col justify-center rounded-lg px-6 md:flex-row md:gap-3 " +
+          cn(buttonVariants({ variant, size, className }))
+        }
         ref={ref}
         {...props}
       />
@@ -52,6 +55,17 @@ const ButtonLink = React.forwardRef<HTMLAnchorElement, ButtonProps>(
   },
 );
 
-ButtonLink.displayName = "Button";
+export const AdminButtonLink = React.forwardRef<HTMLAnchorElement, ButtonProps>(
+  ({ className, variant, size, href, ...props }, ref) => {
+    return (
+      <Link
+        href={href}
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      />
+    );
+  },
+);
 
 export { ButtonLink, buttonVariants };

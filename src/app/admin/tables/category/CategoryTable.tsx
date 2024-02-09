@@ -31,7 +31,7 @@ import Searchbar from "../Searchbar";
 import TableHeader from "../TableHeader";
 import { type RouterInputs } from "@/trpc/shared";
 import { api } from "@/trpc/react";
-import { ButtonLink } from "@/components/common/ButtonLink";
+import { AdminButtonLink } from "@/components/common/ButtonLink";
 import toast from "react-hot-toast";
 import { errorHandler } from "@/utils/errorHandler";
 
@@ -290,14 +290,14 @@ export default function CategoryTable() {
         header: "Edit",
         accessorFn: (row) => row.id,
         cell: ({ row }) => (
-          <ButtonLink
+          <AdminButtonLink
             variant="outline"
             size="sm"
             className="border-blue-400"
             href={`/admin/category/edit/${row.original.id}`}
           >
             Edit
-          </ButtonLink>
+          </AdminButtonLink>
         ),
       },
       {
