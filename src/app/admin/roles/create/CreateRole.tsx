@@ -117,7 +117,7 @@ export default function CreateRole() {
         <Accordion type="single" collapsible>
           <AccordionSection
             title="general"
-            types={[AccessType.subscriber, AccessType.retailer]}
+            types={[AccessType.seller, AccessType.primeSeller]}
             selectedRoles={selectedRoles}
             handleCheckedChange={handleCheckedChange}
           />

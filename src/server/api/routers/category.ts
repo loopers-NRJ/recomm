@@ -594,6 +594,11 @@ export const categoryRouter = createTRPCRouter({
             image: {
               update: image,
             },
+            updatedBy: {
+              connect: {
+                id: session.user.id,
+              }
+            }
           },
         });
 

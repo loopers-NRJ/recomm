@@ -212,7 +212,7 @@ export default function FeaturedCategoryTable() {
     <>
       <div className="flex items-center justify-between gap-2 rounded-lg">
         <Searchbar search={search} setSearch={setSearch} />
-        <Link href="/admin/featured-category/create">
+        <Link href="/admin/featured-category/create/new">
           <Button>New</Button>
         </Link>
       </div>

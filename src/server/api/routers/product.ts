@@ -192,7 +192,7 @@ export const productRouter = createTRPCRouter({
       }
       return product as ProductWithIsFavorite;
     }),
-  // createProduct: getProcedure(AccessType.subscriber)
+  // createProduct: getProcedure(AccessType.seller)
   create: protectedProcedure
     .input(productSchema)
     .mutation(
@@ -367,7 +367,7 @@ export const productRouter = createTRPCRouter({
       },
     ),
 
-  delete: getProcedure([AccessType.subscriber, AccessType.deleteProduct])
+  delete: getProcedure([AccessType.seller, AccessType.deleteProduct])
     .input(z.object({ productId: idSchema }))
     .mutation(
       async ({ input: { productId: id }, ctx: { prisma, session } }) => {

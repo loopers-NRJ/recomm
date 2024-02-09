@@ -47,8 +47,8 @@ model VerificationToken {
 
 enum AccessType {
     // public level
-    subscriber // allow to sell and buy products
-    retailer // allow to sell and buy products in large quantity
+    seller // allow to sell and buy products @map("subscriber")
+    primeSeller // allow to sell and buy products in large quantity @map("retailer")
 
     // admin level
     readAccess // allow to view admin page
@@ -116,7 +116,8 @@ model User {
     // admin level
     createdCategories              Category[]               @relation("categoryCreate")
     updatedCategories              Category[]               @relation("categoryUpdate")
-    FeaturedCategories             FeaturedCategory[]
+    FeaturedCategories             FeaturedCategory[]       @relation("featureCreate")
+    updatedFeaturedCategories      FeaturedCategory[]       @relation("featureUpdate")
     createdBrands                  Brand[]                  @relation("brandCreate")
     updatedBrands                  Brand[]                  @relation("brandUpdate")
     createdModels                  Model[]                  @relation("modelCreate")
@@ -214,13 +215,16 @@ model FeaturedCategory {
     imageId    String   @unique
 
     // Meta
-    featuredBy   User     @relation(fields: [featuredById], references: [id])
+    featuredBy   User     @relation("featureCreate", fields: [featuredById], references: [id])
     featuredById String
     createdAt    DateTime @default(now())
     updatedAt    DateTime @updatedAt
+    updatedBy    User?    @relation("featureUpdate", fields: [updatedById], references: [id])
+    updatedById  String?
 
     @@index([categoryId])
     @@index([featuredById])
+    @@index([updatedById])
 }
 
 model Brand {

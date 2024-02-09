@@ -185,8 +185,8 @@ export const allQuestionTypes = [
 export type AllQuestionType = (typeof allQuestionTypes)[number];
 
 export const accessTypes = [
-  AccessType.subscriber,
-  AccessType.retailer,
+  AccessType.seller,
+  AccessType.primeSeller,
 
   AccessType.readAccess,
 

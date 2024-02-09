@@ -26,7 +26,7 @@ export async function GET() {
           connect: Object.values(AccessType)
             .filter(
               (type) =>
-                type !== AccessType.retailer && type !== AccessType.subscriber,
+                type !== AccessType.primeSeller && type !== AccessType.seller,
             )
             .map((type) => ({ type })),
         },
