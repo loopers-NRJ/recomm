@@ -1,6 +1,8 @@
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { getServerAuthSession } from "@/server/auth";
+import { prisma } from "@/server/db";
 import { maxImageCount } from "@/utils/constants";
+import { getLogger } from "@/utils/logger";
 import { type Image } from "@/utils/validation";
 
 export async function POST(request: Request) {
@@ -30,7 +32,10 @@ export async function POST(request: Request) {
     }
     return new Response(JSON.stringify(uploadedImages));
   } catch (error) {
-    console.log(error);
+    await getLogger(prisma).error(
+      "Error uploading images",
+      JSON.stringify(error),
+    );
     return new Response("Something went wrong", { status: 500 });
   }
 }

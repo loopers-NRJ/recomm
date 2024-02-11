@@ -26,7 +26,7 @@ import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import Searchbar from "../Searchbar";
 import TableHeader from "../TableHeader";
-import { ButtonLink } from "@/components/common/ButtonLink";
+import { AdminButtonLink } from "@/components/common/ButtonLink";
 import toast from "react-hot-toast";
 import { errorHandler } from "@/utils/errorHandler";
 
@@ -209,14 +209,14 @@ export default function ModelTable() {
         id: "edit",
         header: "Edit",
         cell: ({ row }) => (
-          <ButtonLink
+          <AdminButtonLink
             size="sm"
             variant="outline"
             className="border-blue-400"
             href={`/admin/models/edit/${row.original.id}`}
           >
             Edit
-          </ButtonLink>
+          </AdminButtonLink>
         ),
       },
       {

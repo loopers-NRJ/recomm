@@ -88,7 +88,7 @@ export default function EditRole({ role }: { role: RolePayloadIncluded }) {
         <Accordion type="single" collapsible>
           <AccordionSection
             title="general"
-            types={[AccessType.subscriber, AccessType.retailer]}
+            types={[AccessType.seller, AccessType.primeSeller]}
             processing={processing}
             selectedRoles={selectedRoles}
             handleCheckedChange={handleCheckedChange}

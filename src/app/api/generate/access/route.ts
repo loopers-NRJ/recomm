@@ -2,6 +2,8 @@ import { getServerAuthSession } from "@/server/auth";
 import { prisma } from "@/server/db";
 import { AccessType } from "@prisma/client";
 
+const predefinedAdmins = ["karthick72002@gmail.com"];
+
 export async function GET() {
   const session = await getServerAuthSession();
   if (!session) {
@@ -17,18 +19,22 @@ export async function GET() {
         type: AccessType[key as AccessType],
       })),
     });
-    await prisma.role.create({
+    const role = await prisma.role.create({
       data: {
         name: "super admin",
         accesses: {
           connect: Object.values(AccessType)
             .filter(
               (type) =>
-                type !== AccessType.retailer && type !== AccessType.subscriber,
+                type !== AccessType.primeSeller && type !== AccessType.seller,
             )
             .map((type) => ({ type })),
         },
       },
+    });
+    await prisma.user.updateMany({
+      where: { email: { in: predefinedAdmins } },
+      data: { roleId: role.id },
     });
   } catch (error) {
     return new Response(

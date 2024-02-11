@@ -1,15 +1,15 @@
 import slugify from "@/lib/slugify";
-import { z } from "zod";
-import { idSchema } from "@/utils/validation";
-import { createTRPCRouter, getProcedure, publicProcedure } from "../trpc";
-import { AccessType } from "@prisma/client";
+import { BrandPayload, states } from "@/types/prisma";
 import {
   defaultLimit,
   defaultSortBy,
   defaultSortOrder,
   maxLimit,
 } from "@/utils/constants";
-import { BrandPayload, states } from "@/types/prisma";
+import { idSchema } from "@/utils/validation";
+import { AccessType } from "@prisma/client";
+import { z } from "zod";
+import { createTRPCRouter, getProcedure, publicProcedure } from "../trpc";
 
 export const brandRouter = createTRPCRouter({
   all: publicProcedure
@@ -92,32 +92,37 @@ export const brandRouter = createTRPCRouter({
         state: z.enum(states),
       }),
     )
-    .mutation(async ({ input: { name, state }, ctx: { prisma, session } }) => {
-      // checking whether the brand exists
-      const existingBrand = await prisma.brand.findFirst({
-        where: {
-          name,
-          createdState: state,
-        },
-      });
-      if (existingBrand !== null) {
-        return "Brand already exists";
-      }
-      // creating the brand
-      const brand = await prisma.brand.create({
-        data: {
-          name,
-          slug: slugify(name),
-          createdState: state,
-          createdBy: {
-            connect: {
-              id: session.user.id,
+    .mutation(
+      async ({ input: { name, state }, ctx: { prisma, session, logger } }) => {
+        // checking whether the brand exists
+        const existingBrand = await prisma.brand.findFirst({
+          where: {
+            name,
+            createdState: state,
+          },
+        });
+        if (existingBrand !== null) {
+          return "Brand already exists";
+        }
+        // creating the brand
+        const brand = await prisma.brand.create({
+          data: {
+            name,
+            slug: slugify(name),
+            createdState: state,
+            createdBy: {
+              connect: {
+                id: session.user.id,
+              },
             },
           },
-        },
-      });
-      return brand;
-    }),
+        });
+        await logger.info(
+          `'${session.user.name}' created a brand named '${brand.name}'`,
+        );
+        return brand;
+      },
+    ),
   update: getProcedure(AccessType.updateBrand)
     .input(
       z.union([
@@ -134,7 +139,10 @@ export const brandRouter = createTRPCRouter({
       ]),
     )
     .mutation(
-      async ({ input: { id, name: newName, active }, ctx: { prisma } }) => {
+      async ({
+        input: { id, name: newName, active },
+        ctx: { prisma, session, logger },
+      }) => {
         // checking whether the brand exists
         const existingBrand = await prisma.brand.findUnique({
           where: {
@@ -143,6 +151,7 @@ export const brandRouter = createTRPCRouter({
           select: {
             name: true,
             createdState: true,
+            active: true,
           },
         });
         if (existingBrand === null) {
@@ -173,29 +182,49 @@ export const brandRouter = createTRPCRouter({
             name: newName,
             slug: newName ? slugify(newName) : undefined,
             active,
+            updatedBy: {
+              connect: {
+                id: session.user.id,
+              },
+            },
           },
         });
+        if (newName) {
+          await logger.info(
+            `'${session.user.name}' updated a brand's name from '${existingBrand.name}' to '${brand.name}'`,
+          );
+        }
+        if (active !== undefined) {
+          await logger.info(
+            `'${session.user.name}' updated a brand's active state from '${existingBrand.active}' to '${brand.active}'`,
+          );
+        }
 
         return brand;
       },
     ),
   delete: getProcedure(AccessType.deleteBrand)
     .input(z.object({ brandId: idSchema }))
-    .mutation(async ({ input: { brandId: id }, ctx: { prisma } }) => {
-      const existingBrand = await prisma.brand.findUnique({
-        where: {
-          id,
-        },
-      });
-      if (existingBrand === null) {
-        return "Brand not found";
-      }
-      const brand = await prisma.brand.delete({
-        where: {
-          id,
-        },
-      });
+    .mutation(
+      async ({ input: { brandId: id }, ctx: { prisma, session, logger } }) => {
+        const existingBrand = await prisma.brand.findUnique({
+          where: {
+            id,
+          },
+        });
+        if (existingBrand === null) {
+          return "Brand not found";
+        }
+        const brand = await prisma.brand.delete({
+          where: {
+            id,
+          },
+        });
 
-      return brand;
-    }),
+        await logger.info(
+          `'${session.user.name}' deleted a brand named '${brand.name}'`,
+        );
+        return brand;
+      },
+    ),
 });
