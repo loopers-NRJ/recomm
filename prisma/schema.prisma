@@ -51,7 +51,6 @@ enum AccessType {
     primeSeller // allow to sell and buy products in large quantity @map("retailer")
 
     // admin level
-    readAccess // allow to view admin page
 
     createCategory // allow to create category
     updateCategory // allow to update category
@@ -70,11 +69,16 @@ enum AccessType {
 
     createRole // allow to create role
     updateRole // allow to update role
-    updateUsersRole // allow to update role of user
     deleteRole // allow to delete role
 
+    updateUsersRole // allow to update role of user
     updateUser // allow to update user
     deleteUser // allow to delete user
+
+    viewLogs // allow to view logs
+    clearLogs // allow to clear logs
+
+    // update types/prisma.ts when adding new access type
 }
 
 model Access {
@@ -86,9 +90,19 @@ model Role {
     id       String   @id @default(cuid())
     name     String   @unique
     accesses Access[]
-    user     User[]
+    users    User[]   @relation("role")
+
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+    createdBy   User     @relation("roleCreate", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    updatedBy   User?    @relation("roleUpdate", fields: [updatedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    createdById String
+    updatedById String?
+    // createdState State
 
     @@index([name])
+    @@index([updatedById])
+    @@index([createdById])
 }
 
 model User {
@@ -105,7 +119,7 @@ model User {
     favoriteProducts  Product[] @relation("favoriteProducts")
     wishes            Wish[]
     bids              Bid[]
-    role              Role?     @relation(fields: [roleId], references: [id], onDelete: SetNull)
+    role              Role?     @relation("role", fields: [roleId], references: [id], onDelete: SetNull)
     roleId            String?
     // location
     address           Address[]
@@ -116,7 +130,7 @@ model User {
     // admin level
     createdCategories              Category[]               @relation("categoryCreate")
     updatedCategories              Category[]               @relation("categoryUpdate")
-    FeaturedCategories             FeaturedCategory[]       @relation("featureCreate")
+    createdFeaturedCategories      FeaturedCategory[]       @relation("featureCreate")
     updatedFeaturedCategories      FeaturedCategory[]       @relation("featureUpdate")
     createdBrands                  Brand[]                  @relation("brandCreate")
     updatedBrands                  Brand[]                  @relation("brandUpdate")
@@ -125,6 +139,8 @@ model User {
     updatedMultipleChoiceQuestions MultipleChoiceQuestion[] @relation("multipleChoiceQuestionUpdate")
     updatedChoice                  Choice[]                 @relation("choiceUpdate")
     updatedAtomicQuestions         AtomicQuestion[]         @relation("atomicQuestionUpdate")
+    createdRoles                   Role[]                   @relation("roleCreate")
+    updatedRoles                   Role[]                   @relation("roleUpdate")
 
     @@index([roleId])
 }
@@ -479,6 +495,7 @@ model Image {
 
 model Log {
     id        String   @id @default(cuid())
+    state     State?
     message   String
     detail    String?
     level     String

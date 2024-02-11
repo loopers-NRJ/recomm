@@ -142,12 +142,19 @@ export const protectedProcedure = publicProcedure.use(({ ctx, next }) => {
 });
 
 // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-export const getProcedure = (accessType: AccessType | AccessType[]) => {
+export const getProcedure = (
+  accessType:
+    | AccessType
+    | [AccessType, AccessType, ...AccessType[]]
+    | ((type: AccessType[]) => boolean),
+) => {
   return protectedProcedure.use(async ({ ctx, next }) => {
     const isAllowed =
       accessType instanceof Array
         ? ctx.session.userAccesses.some((access) => accessType.includes(access))
-        : ctx.session.userAccesses.includes(accessType);
+        : accessType instanceof Function
+          ? accessType(ctx.session.userAccesses)
+          : ctx.session.userAccesses.includes(accessType);
 
     if (!isAllowed) {
       throw new TRPCError({ code: "UNAUTHORIZED" });

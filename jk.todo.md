@@ -11,9 +11,9 @@
 
 - credit based
 - count and duration of selling a product for subscriber.
-- price field in category for seller to pay
+- price field in category for seller to pay.
 - create coupon code functionality -> only for sub categories
-- report option
+- report option (entity and route only)
 
 # notes
 

@@ -117,9 +117,10 @@ export const brandRouter = createTRPCRouter({
             },
           },
         });
-        await logger.info(
-          `'${session.user.name}' created a brand named '${brand.name}'`,
-        );
+        await logger.info({
+          message: `'${session.user.name}' created a brand named '${brand.name}'`,
+          state,
+        });
         return brand;
       },
     ),
@@ -190,14 +191,16 @@ export const brandRouter = createTRPCRouter({
           },
         });
         if (newName) {
-          await logger.info(
-            `'${session.user.name}' updated a brand's name from '${existingBrand.name}' to '${brand.name}'`,
-          );
+          await logger.info({
+            message: `'${session.user.name}' updated a brand's name from '${existingBrand.name}' to '${brand.name}'`,
+            state: existingBrand.createdState,
+          });
         }
         if (active !== undefined) {
-          await logger.info(
-            `'${session.user.name}' updated a brand's active state from '${existingBrand.active}' to '${brand.active}'`,
-          );
+          await logger.info({
+            message: `'${session.user.name}' updated a brand's active state from '${existingBrand.active}' to '${brand.active}'`,
+            state: existingBrand.createdState,
+          });
         }
 
         return brand;
@@ -221,9 +224,10 @@ export const brandRouter = createTRPCRouter({
           },
         });
 
-        await logger.info(
-          `'${session.user.name}' deleted a brand named '${brand.name}'`,
-        );
+        await logger.info({
+          message: `'${session.user.name}' deleted a brand named '${brand.name}'`,
+          state: existingBrand.createdState,
+        });
         return brand;
       },
     ),

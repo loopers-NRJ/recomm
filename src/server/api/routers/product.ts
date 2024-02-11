@@ -353,14 +353,15 @@ export const productRouter = createTRPCRouter({
         };
 
         void updateWishes().catch(async (error) => {
-          await logger.error(
-            "cannot update wishes",
-            JSON.stringify({
+          await logger.error({
+            message: "cannot update wishes",
+            detail: JSON.stringify({
               procedure: "createProduct",
               message: "cannot update wishes",
               error,
             }),
-          );
+            state: "common",
+          });
         });
 
         return product;

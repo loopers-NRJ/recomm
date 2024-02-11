@@ -3,7 +3,6 @@
 import Container from "@/components/Container";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api } from "@/trpc/react";
@@ -12,29 +11,6 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import AccordionSection from "./AccordionSection";
 import { errorHandler } from "@/utils/errorHandler";
-
-export const roleConfig = {
-  readAccess: [
-    AccessType.createCategory,
-    AccessType.updateCategory,
-    AccessType.deleteCategory,
-    AccessType.createBrand,
-    AccessType.updateBrand,
-    AccessType.deleteBrand,
-    AccessType.createModel,
-    AccessType.updateModel,
-    AccessType.deleteModel,
-    AccessType.updateProduct,
-    AccessType.deleteProduct,
-    AccessType.createRole,
-    AccessType.updateRole,
-    AccessType.updateUsersRole,
-    AccessType.deleteRole,
-    AccessType.updateUser,
-    AccessType.deleteUser,
-    // Add more here
-  ],
-};
 
 export default function CreateRole() {
   const [selectedRoles, setSelectedRoles] = useState<Set<AccessType>>(
@@ -55,21 +31,6 @@ export default function CreateRole() {
   });
   const [creatingRole, setCreatingRole] = useState(false);
   const router = useRouter();
-
-  useEffect(() => {
-    const hasReadAccess = selectedRoles.has(AccessType.readAccess);
-    const isAllowed = roleConfig.readAccess.some((adminAccess) =>
-      selectedRoles.has(adminAccess),
-    );
-    const newSelectedRoles = new Set(selectedRoles);
-    if (!hasReadAccess && isAllowed) {
-      newSelectedRoles.add(AccessType.readAccess);
-      setSelectedRoles(newSelectedRoles);
-    } else if (hasReadAccess && !isAllowed) {
-      newSelectedRoles.delete(AccessType.readAccess);
-      setSelectedRoles(newSelectedRoles);
-    }
-  }, [selectedRoles]);
 
   const handleCheckedChange = useCallback(
     (checked: boolean, types: [AccessType, ...AccessType[]]) => {
@@ -106,13 +67,6 @@ export default function CreateRole() {
             value={roleName}
             onChange={(e) => setRoleName(e.target.value)}
           />
-        </Label>
-        <Label className="flex items-center gap-2">
-          <Checkbox
-            checked={selectedRoles.has(AccessType.readAccess)}
-            disabled
-          />
-          Admin page access
         </Label>
         <Accordion type="single" collapsible>
           <AccordionSection
@@ -171,6 +125,13 @@ export default function CreateRole() {
           <AccordionSection
             title="user"
             types={[AccessType.updateUser, AccessType.deleteUser]}
+            selectedRoles={selectedRoles}
+            handleCheckedChange={handleCheckedChange}
+          />
+
+          <AccordionSection
+            title="log"
+            types={[AccessType.viewLogs, AccessType.clearLogs]}
             selectedRoles={selectedRoles}
             handleCheckedChange={handleCheckedChange}
           />

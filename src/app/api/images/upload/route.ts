@@ -32,10 +32,11 @@ export async function POST(request: Request) {
     }
     return new Response(JSON.stringify(uploadedImages));
   } catch (error) {
-    await getLogger(prisma).error(
-      "Error uploading images",
-      JSON.stringify(error),
-    );
+    await getLogger(prisma).error({
+      message: "Error uploading images",
+      detail: JSON.stringify(error),
+      state: "common",
+    });
     return new Response("Something went wrong", { status: 500 });
   }
 }

@@ -1,30 +1,28 @@
-import { type PrismaClient } from "@prisma/client";
+import type { State, PrismaClient } from "@prisma/client";
 
 export const logLevel = ["info", "warn", "error"] as const;
 export type LogLevel = (typeof logLevel)[number];
-export type Logger = Record<
-  LogLevel,
-  (message: string, detail?: unknown) => Promise<void>
->;
+type LoggerProps = {
+  message: string;
+  detail?: unknown;
+  state: State | "common";
+};
+export type Logger = Record<LogLevel, (props: LoggerProps) => Promise<void>>;
 
 export function getLogger(db: PrismaClient): Logger {
-  const addLogToDB = async (
-    level: LogLevel,
-    message: string,
-    detail?: unknown,
-  ) => {
-    console[level]("Our message: ", message, detail);
+  const addLogToDB = async (level: LogLevel, props: LoggerProps) => {
     await db.log.create({
       data: {
-        level,
-        message,
-        detail: JSON.stringify(detail),
+        level: level,
+        message: props.message,
+        detail: JSON.stringify(props.detail),
+        state: props.state === "common" ? null : props.state,
       },
     });
   };
   return {
-    info: (message, detail) => addLogToDB("info", message, detail),
-    warn: (message, detail) => addLogToDB("warn", message, detail),
-    error: (message, detail) => addLogToDB("error", message, detail),
+    info: (props) => addLogToDB("info", props),
+    warn: (props) => addLogToDB("warn", props),
+    error: (props) => addLogToDB("error", props),
   };
 }

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useEffect } from "react";
 import Container from "../Container";
 import { cn } from "@/lib/utils";
@@ -23,7 +23,7 @@ const ServerError = ({
     <Container
       className={cn(
         "flex h-full w-full items-center justify-center",
-        className
+        className,
       )}
       {...props}
     >

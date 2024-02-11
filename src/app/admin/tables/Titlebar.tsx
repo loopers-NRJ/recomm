@@ -17,12 +17,13 @@ export default function Titlebar() {
   const selectedState = useAdminSelectedState();
   const pathname = usePathname();
   const selectedTitle = pathname.replace("/admin/tables/", "");
-
+  if (selectedTitle === "logs") return;
   return (
     <div className="flex w-full items-center justify-between">
       <h1 className="pl-2 font-bold capitalize">
         {selectedTitle.replace("-", " ")}
       </h1>
+
       <Select
         onValueChange={(value) => {
           selectedState.onStateChange(value as State);

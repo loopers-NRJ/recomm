@@ -1,21 +1,21 @@
-import Container from '@/components/Container'
-import { deviceTypeHeaderName } from '@/utils/constants'
-import { headers } from 'next/headers'
-import React from 'react'
-import FilterBarMobile from './components/filterbar-mobile'
+import Container from "@/components/Container";
+import { deviceTypeHeaderName } from "@/utils/constants";
+import { headers } from "next/headers";
+import React from "react";
+import FilterBarMobile from "./components/filterbar-mobile";
 
 interface ProductPageLayoutProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
-const Layout = ({ children } : ProductPageLayoutProps) => {
-  const device = headers().get(deviceTypeHeaderName)
+const Layout = ({ children }: ProductPageLayoutProps) => {
+  const device = headers().get(deviceTypeHeaderName);
   return (
     <Container>
-      {device === 'mobile' ? <FilterBarMobile/> : "world"}
+      {device === "mobile" ? <FilterBarMobile /> : "world"}
       {children}
     </Container>
-  )
-}
+  );
+};
 
-export default Layout
+export default Layout;

@@ -29,7 +29,10 @@ import { useMemo, useState } from "react";
 import Searchbar from "../Searchbar";
 import TableHeader from "../TableHeader";
 import { type LogLevel, logLevel } from "@/utils/logger";
-import type { Log } from "@prisma/client";
+import type { Log, State } from "@prisma/client";
+import { states } from "@/types/prisma";
+import { Button } from "@/components/ui/button";
+import { AdminButtonLink } from "@/components/common/ButtonLink";
 
 type SortBy = OmitUndefined<RouterInputs["log"]["all"]["sortBy"]>;
 
@@ -40,7 +43,9 @@ export default function LogTable() {
   );
   const [sortBy, setSortBy] = useQueryState<SortBy>(
     "sortBy",
-    parseAsStringEnum(["createdAt", "level"]).withDefault(defaultSortBy),
+    parseAsStringEnum(["createdAt", "level", "state"]).withDefault(
+      defaultSortBy,
+    ),
   );
 
   const [search, setSearch] = useQueryState(
@@ -48,7 +53,12 @@ export default function LogTable() {
     parseAsString.withDefault(defaultSearch),
   );
 
-  //   const rolesApi = api.role.all.useQuery({});
+  const [selectedState, setSelectedState] = useState<State | "common" | "">("");
+  const clientStateToQuery = (state: State | "common" | "") => {
+    if (state === "") return;
+    if (state === "common") return null;
+    return state;
+  };
   const [selectedLevel, setSelectedLevel] = useState<LogLevel>();
   const logsApi = api.log.all.useInfiniteQuery(
     {
@@ -56,11 +66,18 @@ export default function LogTable() {
       sortBy,
       sortOrder,
       level: selectedLevel,
+      state: clientStateToQuery(selectedState),
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
+
+  const clearLogs = api.log.clear.useMutation({
+    onSuccess: async () => {
+      await logsApi.refetch();
+    },
+  });
 
   const columns: ColumnDef<Log>[] = useMemo(
     () => [
@@ -76,6 +93,19 @@ export default function LogTable() {
           />
         ),
         accessorFn: (row) => row.level,
+      },
+      {
+        id: "state",
+        header: () => (
+          <TableHeader
+            title="state"
+            sortOrder={sortOrder}
+            setSortOrder={(order) => void setSortOrder(order)}
+            sortBy={sortBy}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
+          />
+        ),
+        accessorFn: (row) => row.state ?? "common",
       },
       {
         id: "message",
@@ -113,7 +143,7 @@ export default function LogTable() {
       <div className="flex items-center justify-between gap-3">
         <Searchbar search={search} setSearch={setSearch} />
         <Label className="flex items-center gap-3">
-          Filter
+          Level
           <Select
             onValueChange={(value) => {
               setSelectedLevel(value === "" ? undefined : (value as LogLevel));
@@ -133,6 +163,46 @@ export default function LogTable() {
             </SelectContent>
           </Select>
         </Label>
+        <Label className="flex items-center gap-3">
+          State
+          <Select
+            onValueChange={(value) => {
+              setSelectedState(value as State);
+            }}
+            value={selectedState ?? ""}
+          >
+            <SelectTrigger className="w-[180px] capitalize">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="h-80">
+              <SelectItem value="">All</SelectItem>
+              <SelectItem value="common">common</SelectItem>
+              {states.map((state) => (
+                <SelectItem value={state} key={state} className="capitalize">
+                  {state}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Label>
+        <AdminButtonLink
+          href="/api/generate/logs"
+          variant="outline"
+          size="sm"
+          className="border-blue-400"
+        >
+          EXPORT
+        </AdminButtonLink>
+        <Button
+          size="sm"
+          variant="outline"
+          className="border-red-400"
+          onClick={() => {
+            clearLogs.mutate();
+          }}
+        >
+          CLEAR
+        </Button>
       </div>
       <DataTable
         columns={columns}

@@ -135,9 +135,10 @@ export const userRouter = createTRPCRouter({
           include: { role: true },
         });
 
-        await logger.info(
-          `'${session.user.name}' promoted '${user.name}' as '${user.role?.name}'`,
-        );
+        await logger.info({
+          message: `'${session.user.name}' promoted '${user.name}' as '${user.role?.name}'`,
+          state: "common",
+        });
       },
     ),
   bids: protectedProcedure
