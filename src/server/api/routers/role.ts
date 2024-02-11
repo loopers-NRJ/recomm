@@ -5,8 +5,16 @@ import { RolePayload, accessTypes } from "@/types/prisma";
 import { idSchema } from "@/utils/validation";
 import { defaultSortOrder } from "@/utils/constants";
 
+const hasRoleAccess = (types: AccessType[]) =>
+  types.some(
+    (type) =>
+      type === AccessType.createRole ||
+      type === AccessType.updateRole ||
+      type === AccessType.deleteRole,
+  );
+
 export const RoleRouter = createTRPCRouter({
-  all: getProcedure(AccessType.readAccess)
+  all: getProcedure(hasRoleAccess)
     .input(
       z.object({
         search: z.string().trim().default(""),
@@ -26,7 +34,7 @@ export const RoleRouter = createTRPCRouter({
         },
       });
     }),
-  byId: getProcedure(AccessType.readAccess)
+  byId: getProcedure(hasRoleAccess)
     .input(z.object({ id: idSchema }))
     .query(async ({ input: { id }, ctx: { prisma } }) => {
       return prisma.role.findUnique({
@@ -59,11 +67,16 @@ export const RoleRouter = createTRPCRouter({
             accesses: {
               connect: accesses.map((access) => ({ type: access })),
             },
+            createdBy: {
+              connect: { id: session.user.id },
+            },
+            // createdState: state,
           },
         });
-        await logger.info(
-          `'${session.user.name}' created a role named '${role.name}'`,
-        );
+        await logger.info({
+          message: `'${session.user.name}' created a role named '${role.name}'`,
+          state: "common",
+        });
         return role;
       },
     ),
@@ -75,9 +88,10 @@ export const RoleRouter = createTRPCRouter({
         return "Role not found";
       }
       const role = await prisma.role.delete({ where: { id } });
-      await logger.info(
-        `'${session.user.name}' deleted a role named '${role.name}'`,
-      );
+      await logger.info({
+        message: `'${session.user.name}' deleted a role named '${role.name}'`,
+        state: "common",
+      });
       return role;
     }),
   addAccess: getProcedure(AccessType.updateRole)
@@ -105,13 +119,17 @@ export const RoleRouter = createTRPCRouter({
             accesses: {
               connect: access.map((access) => ({ type: access })),
             },
+            updatedBy: {
+              connect: { id: session.user.id },
+            },
           },
         });
-        await logger.info(
-          `'${session.user.name}' added access '${access.join(
+        await logger.info({
+          message: `'${session.user.name}' added access '${access.join(
             ", ",
           )}' to a role named '${existingRole.name}'`,
-        );
+          state: "common",
+        });
         return role;
       },
     ),
@@ -127,20 +145,30 @@ export const RoleRouter = createTRPCRouter({
         input: { roleId, accesses: access },
         ctx: { prisma, session, logger },
       }) => {
+        const existingRole = await prisma.role.findFirst({
+          where: { id: roleId },
+        });
+        if (!existingRole) {
+          return "Role not found";
+        }
         const role = await prisma.role.update({
           where: { id: roleId },
           data: {
             accesses: {
               disconnect: access.map((access) => ({ type: access })),
             },
+            updatedBy: {
+              connect: { id: session.user.id },
+            },
           },
         });
 
-        await logger.info(
-          `'${session.user.name}' removed access '${access.join(
+        await logger.info({
+          message: `'${session.user.name}' removed access '${access.join(
             ", ",
           )}' to a role named '${role.name}'`,
-        );
+          state: "common",
+        });
 
         return role;
       },

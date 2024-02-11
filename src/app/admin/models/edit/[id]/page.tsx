@@ -4,6 +4,7 @@ import { api } from "@/trpc/server";
 import { notFound } from "next/navigation";
 import BasicInfoEditSection from "./basicInfo/BasicInfoEditSection";
 import AdditionalInfoSection from "./additionalInfo/AdditionalInfoSection";
+import { AccessType } from "@prisma/client";
 
 const EditModelPage = AdminPage<{ id: string }>(async (props) => {
   const { id } = props.params;
@@ -18,6 +19,6 @@ const EditModelPage = AdminPage<{ id: string }>(async (props) => {
       <AdditionalInfoSection model={model} />
     </Container>
   );
-});
+}, AccessType.updateModel);
 
 export default EditModelPage;

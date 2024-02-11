@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { CommandList } from "cmdk";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -10,7 +10,7 @@ const Search = () => {
   const router = useRouter();
 
   return (
-    <Command className="relative min-w-40 w-full overflow-visible rounded-lg border">
+    <Command className="relative w-full min-w-40 overflow-visible rounded-lg border">
       <CommandInput
         onValueChange={(key) => void setSearchKey(key)}
         value={searchKey}

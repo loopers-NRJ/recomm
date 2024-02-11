@@ -6,7 +6,7 @@ const Logo = () => {
   return (
     <Link href="/">
       <Image
-        className="cursor-pointer w-full"
+        className="w-full cursor-pointer"
         src={RecommLogo}
         height="33"
         width="130"

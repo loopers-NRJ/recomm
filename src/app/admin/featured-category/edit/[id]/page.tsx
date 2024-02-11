@@ -2,6 +2,7 @@ import AdminPage from "@/hoc/AdminPage";
 import { prisma } from "@/server/db";
 import { notFound, redirect } from "next/navigation";
 import EditFeaturedCategory from "./EditFeatured";
+import { AccessType } from "@prisma/client";
 
 const EditFeaturedCategoryPage = AdminPage<{ id: string }>(async (props) => {
   const { id } = props.params;
@@ -28,6 +29,6 @@ const EditFeaturedCategoryPage = AdminPage<{ id: string }>(async (props) => {
   }
 
   return <EditFeaturedCategory category={category} />;
-});
+}, AccessType.updateCategory);
 
 export default EditFeaturedCategoryPage;

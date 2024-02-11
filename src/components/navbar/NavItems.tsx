@@ -11,40 +11,55 @@ import Profile from "./profile";
 
 interface NavItemsProps {
   isAdmin: boolean;
-  session?: Session
+  session?: Session;
 }
 
 const NavItems: FC<NavItemsProps> = ({ isAdmin, session }) => {
   const pathname = usePathname();
   const isAdminPage = !!pathname.match(adminPageRegex);
   const content = [
-    { text: "Home", path: "/", },
-    { text: "Favourites", path: "/favourites", },
-    { text: "Wish It", path: "/wishlist", },
-    { text: "Sell It", path: "/sell", },
-  ]
+    { text: "Home", path: "/" },
+    { text: "Favourites", path: "/favourites" },
+    { text: "Wish It", path: "/wishlist" },
+    { text: "Sell It", path: "/sell" },
+  ];
 
-  const style = "border text-sm flex items-center justify-center w-fit min-w-fit p-2 rounded-md hover:bg-slate-100"
+  const style =
+    "border text-sm flex items-center justify-center w-fit min-w-fit p-2 rounded-md hover:bg-slate-100";
 
   return (
-    <div className="flex items-center justify-end gap-2 w-full h-full">
-      {isAdmin &&
-        <Link href="/admin"
-          className={style + (isAdminPage ? "text-red-300 border border-red-300" : "")}
+    <div className="flex h-full w-full items-center justify-end gap-2">
+      {isAdmin && (
+        <Link
+          href="/admin"
+          className={
+            style + (isAdminPage ? "border border-red-300 text-red-300" : "")
+          }
         >
           Admin
-        </Link>}
-      {content.map((item, i) =>
+        </Link>
+      )}
+      {content.map((item, i) => (
         <Link
           key={i}
           href={item.path}
-          className={style + (pathname === item.path ? "text-red-300 border border-red-300" : "")}
+          className={
+            style +
+            (pathname === item.path ? "border border-red-300 text-red-300" : "")
+          }
         >
           {item.text}
         </Link>
-      )}
-      <Link href="/notifications"
-        className={cn(style + (pathname == "/notifications" ? "text-red-300 border border-red-300" : ""), "rounded-full")}
+      ))}
+      <Link
+        href="/notifications"
+        className={cn(
+          style +
+            (pathname == "/notifications"
+              ? "border border-red-300 text-red-300"
+              : ""),
+          "rounded-full",
+        )}
       >
         <Bell className="h-5 w-5" />
       </Link>

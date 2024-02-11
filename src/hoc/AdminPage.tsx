@@ -8,7 +8,7 @@ import AuthenticatedPage, {
 
 import { permanentRedirect } from "next/navigation";
 import { api } from "@/trpc/server";
-import { AccessType } from "@prisma/client";
+import { type AccessType } from "@prisma/client";
 import { type ReactNode } from "react";
 
 // type of the props
@@ -32,7 +32,10 @@ export default function AdminPage<
   SearchParams = DefaultSearchParams,
 >(
   Component: PageWithAccesses<Params, SearchParams>,
-  requiredAccessTypes: [AccessType, ...AccessType[]] = [AccessType.readAccess],
+  requiredAccessTypes:
+    | AccessType
+    | [AccessType, AccessType, ...AccessType[]]
+    | ((access: AccessType[]) => boolean),
 ): Page<Params, SearchParams> {
   return AuthenticatedPage(async (props) => {
     const roleId = props.session?.user.roleId;
@@ -42,9 +45,14 @@ export default function AdminPage<
 
     const accesses = (await api.role.byId.query({ id: roleId }))?.accesses;
     const userAccessTypes = accesses?.map((access) => access.type);
-    const hasAccess = requiredAccessTypes.every(
-      (access) => userAccessTypes?.includes(access),
-    );
+    const hasAccess =
+      requiredAccessTypes instanceof Array
+        ? requiredAccessTypes.every(
+            (access) => userAccessTypes?.includes(access),
+          )
+        : requiredAccessTypes instanceof Function
+          ? requiredAccessTypes(userAccessTypes!)
+          : userAccessTypes?.includes(requiredAccessTypes);
 
     if (!hasAccess) {
       return permanentRedirect("/login");

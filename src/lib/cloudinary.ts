@@ -43,10 +43,11 @@ export const deleteImage: (publicId: string) => Promise<void | Error> = async (
     await cloudinary.uploader.destroy(publicId);
   } catch (error) {
     console.log(error);
-    await getLogger(prisma).error(
-      "Error deleting image",
-      JSON.stringify({ publicId, error }),
-    );
+    await getLogger(prisma).error({
+      message: "Error deleting image",
+      detail: JSON.stringify({ publicId, error }),
+      state: "common",
+    });
     throw new Error("cannot delete the image");
   }
 };

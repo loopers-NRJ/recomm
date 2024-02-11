@@ -108,9 +108,9 @@ export const HomeOutline = () => (
     />
   </svg>
 );
-export const HeartSolid = ({ className }: {className?: string}) => (
+export const HeartSolid = ({ className }: { className?: string }) => (
   <svg
-    className={"heart m-[2px] "+ (className ?? "")}
+    className={"heart m-[2px] " + (className ?? "")}
     fill="currentColor"
     stroke="currentColor"
     strokeLinecap="round"
@@ -125,9 +125,9 @@ export const HeartSolid = ({ className }: {className?: string}) => (
   </svg>
 );
 
-export const HeartOutline = ({ className }: {className?: string}) => (
+export const HeartOutline = ({ className }: { className?: string }) => (
   <svg
-    className={"heart m-[2px] "+ (className ?? "")}
+    className={"heart m-[2px] " + (className ?? "")}
     fill="none"
     stroke="currentColor"
     strokeLinecap="round"

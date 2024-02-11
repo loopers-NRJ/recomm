@@ -3,7 +3,16 @@
 import { type FC } from "react";
 import { ButtonLink } from "@/components/common/ButtonLink";
 import { usePathname } from "next/navigation";
-import { HomeSolid, HomeOutline, HeartSolid, HeartOutline, StarSolid, StarOutline, CoinSolid, CoinOutline } from "./Icons";
+import {
+  HomeSolid,
+  HomeOutline,
+  HeartSolid,
+  HeartOutline,
+  StarSolid,
+  StarOutline,
+  CoinSolid,
+  CoinOutline,
+} from "./Icons";
 
 interface BottomBarProps {
   className?: string;
@@ -19,14 +28,15 @@ const BottomBar: FC<BottomBarProps> = () => {
     pathname === "/wishlist" ? <StarSolid /> : <StarOutline />;
   const SellIcon = pathname === "/sell" ? <CoinSolid /> : <CoinOutline />;
 
-  const highlight = "rounded-b-none border-b-2 border-b-black md:rounded-lg md:border-none md:bg-slate-200/50" 
+  const highlight =
+    "rounded-b-none border-b-2 border-b-black md:rounded-lg md:border-none md:bg-slate-200/50";
 
   return (
-    <div className="bottom-bar fixed bottom-0 h-fit left-0 z-30 flex w-full border p-0 bg-white">
+    <div className="bottom-bar fixed bottom-0 left-0 z-30 flex h-fit w-full border bg-white p-0">
       <ButtonLink
         href="/"
         variant="ghost"
-        className={pathname === "/" ? highlight: ""}
+        className={pathname === "/" ? highlight : ""}
       >
         <span className="text-xl">{HomeIcon}</span>
         <span className="text-xs md:text-sm">Home</span>
@@ -34,7 +44,7 @@ const BottomBar: FC<BottomBarProps> = () => {
       <ButtonLink
         href="/favourites"
         variant="ghost"
-        className={ pathname === "/favourites" ? highlight: ""}
+        className={pathname === "/favourites" ? highlight : ""}
       >
         <span className="text-xl">{HeartIcon}</span>
         <span className="text-xs md:text-sm">Favourites</span>
@@ -43,7 +53,7 @@ const BottomBar: FC<BottomBarProps> = () => {
       <ButtonLink
         href="/wishlist"
         variant="ghost"
-        className={ pathname === "/wishlist" ? highlight : "" }
+        className={pathname === "/wishlist" ? highlight : ""}
       >
         <span className="text-xl">{WishListIcon}</span>
         <span className="text-xs md:text-sm">Wish It</span>
@@ -52,7 +62,7 @@ const BottomBar: FC<BottomBarProps> = () => {
       <ButtonLink
         href="/sell"
         variant="ghost"
-        className={ pathname === "/sell" ? highlight : ""}
+        className={pathname === "/sell" ? highlight : ""}
       >
         <span className="text-xl">{SellIcon}</span>
         <span className="text-xs md:text-sm">Sell It</span>

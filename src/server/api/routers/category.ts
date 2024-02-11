@@ -246,9 +246,10 @@ export const categoryRouter = createTRPCRouter({
           include: CategoryPayload.include,
         });
 
-        await logger.info(
-          `'${session.user.name}' created a category named '${category.name}'`,
-        );
+        await logger.info({
+          message: `'${session.user.name}' created a category named '${category.name}'`,
+          state,
+        });
 
         return category;
       },
@@ -328,19 +329,22 @@ export const categoryRouter = createTRPCRouter({
       });
 
       if (input.name) {
-        await logger.info(
-          `'${session.user.name}' updated a model's name from '${existingCategory.name}' to '${updatedCategory.name}'`,
-        );
+        await logger.info({
+          message: `'${session.user.name}' updated a category's name from '${existingCategory.name}' to '${updatedCategory.name}'`,
+          state: existingCategory.createdState,
+        });
       }
       if (input.active !== undefined) {
-        await logger.info(
-          `'${session.user.name}' updated a model's active state from '${existingCategory.active}' to '${updatedCategory.active}'`,
-        );
+        await logger.info({
+          message: `'${session.user.name}' updated a category's active state from '${existingCategory.active}' to '${updatedCategory.active}'`,
+          state: existingCategory.createdState,
+        });
       }
       if (input.parentCategoryId) {
-        await logger.info(
-          `'${session.user.name}' updated a model's parentId from '${existingCategory.parentCategoryId}' to '${updatedCategory.parentCategoryId}'`,
-        );
+        await logger.info({
+          message: `'${session.user.name}' updated a category's parentId from '${existingCategory.parentCategoryId}' to '${updatedCategory.parentCategoryId}'`,
+          state: existingCategory.createdState,
+        });
       }
 
       return updatedCategory;
@@ -360,6 +364,7 @@ export const categoryRouter = createTRPCRouter({
           },
           select: {
             name: true,
+            createdState: true,
             subCategories: {
               select: {
                 id: true,
@@ -396,9 +401,10 @@ export const categoryRouter = createTRPCRouter({
           },
         });
 
-        await logger.info(
-          `'${session.user.name}' deleted a model named '${category.name}'`,
-        );
+        await logger.info({
+          message: `'${session.user.name}' deleted a category named '${category.name}'`,
+          state: existingCategory.createdState,
+        });
 
         return category;
       },
@@ -499,9 +505,10 @@ export const categoryRouter = createTRPCRouter({
           },
         });
 
-        await logger.info(
-          `'${session.user.name}' promoted a category named '${data.category.name}' to featured category`,
-        );
+        await logger.info({
+          message: `'${session.user.name}' promoted a category named '${data.category.name}' to featured category`,
+          state: data.category.createdState,
+        });
 
         return data.category;
       },
@@ -526,6 +533,7 @@ export const categoryRouter = createTRPCRouter({
             category: {
               select: {
                 name: true,
+                createdState: true,
               },
             },
           },
@@ -541,20 +549,22 @@ export const categoryRouter = createTRPCRouter({
 
         const error = await deleteImage(existingCategory.image.publicId);
         if (error) {
-          await logger.error(
-            "cannot able delete the old image in cloudinary",
-            JSON.stringify({
+          await logger.error({
+            message: "cannot able delete the old image in cloudinary",
+            state: existingCategory.category.createdState,
+            detail: JSON.stringify({
               procedure: "removeCategoryFromFeaturedById",
               message: "cannot able delete the old image in cloudinary",
               existingCategory,
               error,
             }),
-          );
+          });
           return `Cannot able to delete the of the category ${existingCategory.category.name}` as const;
         }
-        await logger.info(
-          `'${session.user.name}' demoted a featured category named '${existingCategory.category.name}' to category`,
-        );
+        await logger.info({
+          message: `'${session.user.name}' demoted a featured category named '${existingCategory.category.name}' to category`,
+          state: existingCategory.category.createdState,
+        });
       },
     ),
 
@@ -578,6 +588,7 @@ export const categoryRouter = createTRPCRouter({
             category: {
               select: {
                 name: true,
+                createdState: true,
               },
             },
           },
@@ -597,27 +608,29 @@ export const categoryRouter = createTRPCRouter({
             updatedBy: {
               connect: {
                 id: session.user.id,
-              }
-            }
+              },
+            },
           },
         });
 
         const error = await deleteImage(existingCategory.image.publicId);
         if (error) {
-          await logger.error(
-            "cannot able delete the old image in cloudinary",
-            JSON.stringify({
+          await logger.error({
+            message: "cannot able delete the old image in cloudinary",
+            detail: JSON.stringify({
               procedure: "updateFeaturedCategoryById",
               message: "cannot able delete the old image in cloudinary",
               existingCategory,
               error,
             }),
-          );
+            state: existingCategory.category.createdState,
+          });
           return `Cannot able to delete the of the category ${existingCategory.category.name}'s Image` as const;
         }
-        await logger.info(
-          `'${session.user.name}' updated image of a featured category named '${existingCategory.category.name}'`,
-        );
+        await logger.info({
+          message: `'${session.user.name}' updated image of a featured category named '${existingCategory.category.name}'`,
+          state: existingCategory.category.createdState,
+        });
       },
     ),
 });

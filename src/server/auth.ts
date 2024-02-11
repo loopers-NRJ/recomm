@@ -1,4 +1,8 @@
-import { type DefaultSession, getServerSession, type NextAuthOptions } from "next-auth";
+import {
+  type DefaultSession,
+  getServerSession,
+  type NextAuthOptions,
+} from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
 import { env } from "@/env";

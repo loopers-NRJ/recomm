@@ -1,9 +1,7 @@
-import React from 'react'
+import React from "react";
 
 const FilterBarMobile = () => {
-  return (
-    <div className='flex flex-wrap w-full h-fit'></div>
-  )
-}
+  return <div className="flex h-fit w-full flex-wrap"></div>;
+};
 
-export default FilterBarMobile
+export default FilterBarMobile;

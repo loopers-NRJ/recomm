@@ -114,13 +114,14 @@ export const roomRounter = createTRPCRouter({
             },
           })
           .catch(async (error) => {
-            await logger.error(
-              "error deleting bid",
-              JSON.stringify({
+            await logger.error({
+              message: "error deleting bid",
+              detail: JSON.stringify({
                 procedure: "deleteABid",
                 error,
               }),
-            );
+              state: "common",
+            });
           });
       },
     ),
@@ -184,13 +185,14 @@ const createABid = ({
     try {
       highestBid = await getHighestBidByRoomId(roomId, prisma as PrismaClient);
     } catch (error) {
-      await getLogger(prisma as PrismaClient).error(
-        "error creating a bid",
-        JSON.stringify({
+      await getLogger(prisma as PrismaClient).error({
+        message: "error creating a bid",
+        detail: JSON.stringify({
           procedure: "createABid",
           error,
         }),
-      );
+        state: "common",
+      });
       return "Something went wrong";
     }
 

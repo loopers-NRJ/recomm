@@ -2,6 +2,7 @@ import AdminPage from "@/hoc/AdminPage";
 import { api } from "@/trpc/server";
 import { notFound } from "next/navigation";
 import EditCategory from "../EditCategory";
+import { AccessType } from "@prisma/client";
 
 const EditCategoryPage = AdminPage<{ id: string }>(async (props) => {
   const categoryId = props.params.id;
@@ -11,6 +12,6 @@ const EditCategoryPage = AdminPage<{ id: string }>(async (props) => {
     return notFound();
   }
   return <EditCategory category={category} />;
-});
+}, AccessType.updateCategory);
 
 export default EditCategoryPage;

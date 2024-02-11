@@ -202,9 +202,10 @@ export const modelRouter = createTRPCRouter({
             });
           }
 
-          await logger.info(
-            `'${session.user.name}' created a model named '${model.name}'`,
-          );
+          await logger.info({
+            message: `'${session.user.name}' created a model named '${model.name}'`,
+            state: model.createdState,
+          });
 
           return model;
         });
@@ -316,29 +317,34 @@ export const modelRouter = createTRPCRouter({
         });
 
         if (newName) {
-          await logger.info(
-            `'${session.user.name}' updated a model's name from '${existingModel.name}' to '${model.name}'`,
-          );
+          await logger.info({
+            message: `'${session.user.name}' updated a model's name from '${existingModel.name}' to '${model.name}'`,
+            state: model.createdState,
+          });
         }
         if (categoryId) {
-          await logger.info(
-            `'${session.user.name}' updated a model's name from '${existingModel.categoryId}' to '${model.categoryId}'`,
-          );
+          await logger.info({
+            message: `'${session.user.name}' updated a model's name from '${existingModel.categoryId}' to '${model.categoryId}'`,
+            state: model.createdState,
+          });
         }
         if (brandId) {
-          await logger.info(
-            `'${session.user.name}' updated a model's name from '${existingModel.brandId}' to '${model.brandId}'`,
-          );
+          await logger.info({
+            message: `'${session.user.name}' updated a model's name from '${existingModel.brandId}' to '${model.brandId}'`,
+            state: model.createdState,
+          });
         }
         if (active) {
-          await logger.info(
-            `'${session.user.name}' updated a model's name from '${existingModel.active}' to '${model.active}'`,
-          );
+          await logger.info({
+            message: `'${session.user.name}' updated a model's name from '${existingModel.active}' to '${model.active}'`,
+            state: model.createdState,
+          });
         }
         if (createdState) {
-          await logger.info(
-            `'${session.user.name}' updated a model's name from '${existingModel.createdState}' to '${model.createdState}'`,
-          );
+          await logger.info({
+            message: `'${session.user.name}' updated a model's name from '${existingModel.createdState}' to '${model.createdState}'`,
+            state: model.createdState,
+          });
         }
 
         return model;
@@ -362,9 +368,10 @@ export const modelRouter = createTRPCRouter({
           },
         });
 
-        await logger.info(
-          `'${session.user.name}' deleted a model named '${existingModel.name}'`,
-        );
+        await logger.info({
+          message: `'${session.user.name}' deleted a model named '${existingModel.name}'`,
+          state: model.createdState,
+        });
 
         return model;
       },
@@ -379,6 +386,7 @@ export const modelRouter = createTRPCRouter({
         select: {
           name: true,
           atomicQuestions: true,
+          createdState: true,
         },
       });
       if (model === null) {
@@ -390,10 +398,13 @@ export const modelRouter = createTRPCRouter({
       if (existingQuestion !== undefined) {
         return "Question already exists";
       }
-      const question = await prisma.atomicQuestion.create({ data });
-      await logger.info(
-        `'${session.user.name}' added a atomic Question to a model named '${model.name}'`,
-      );
+      const question = await prisma.atomicQuestion.create({
+        data,
+      });
+      await logger.info({
+        message: `'${session.user.name}' added a atomic Question to a model named '${model.name}'`,
+        state: model.createdState,
+      });
 
       return question;
     }),
@@ -407,6 +418,7 @@ export const modelRouter = createTRPCRouter({
         select: {
           multipleChoiceQuestions: true,
           name: true,
+          createdState: true,
         },
       });
       if (model === null) {
@@ -441,9 +453,10 @@ export const modelRouter = createTRPCRouter({
         },
       });
 
-      await logger.info(
-        `'${session.user.name}' added a multipleChoice Question to a model named '${model.name}'`,
-      );
+      await logger.info({
+        message: `'${session.user.name}' added a multipleChoice Question to a model named '${model.name}'`,
+        state: model.createdState,
+      });
 
       return result;
     }),
@@ -479,7 +492,7 @@ export const modelRouter = createTRPCRouter({
           where: {
             id: questionId,
           },
-          select: { modelId: true },
+          select: { modelId: true, model: { select: { createdState: true } } },
         });
         if (existingQuestion === null) {
           return "Question not found";
@@ -511,9 +524,10 @@ export const modelRouter = createTRPCRouter({
             },
           },
         });
-        await logger.info(
-          `'${session.user.name}' updated a atomic Question of a model named '${question.modelId}'`,
-        );
+        await logger.info({
+          message: `'${session.user.name}' updated a atomic Question of a model named '${question.modelId}'`,
+          state: existingQuestion.model.createdState,
+        });
 
         return question;
       },
@@ -665,7 +679,10 @@ export const modelRouter = createTRPCRouter({
           where: {
             id: choiceId,
           },
-          select: { questionId: true },
+          select: {
+            questionId: true,
+            model: { select: { createdState: true } },
+          },
         });
         if (existingChoice === null) {
           return "Choice not found";
@@ -688,9 +705,10 @@ export const modelRouter = createTRPCRouter({
           data: { value, updatedBy: { connect: { id: session.user.id } } },
         });
 
-        await logger.info(
-          `'${session.user.name}' updated a choice to a model with id=${question.modelId}`,
-        );
+        await logger.info({
+          message: `'${session.user.name}' updated a choice to a model with id=${question.modelId}`,
+          state: existingChoice.model.createdState,
+        });
 
         return question;
       },
@@ -707,6 +725,7 @@ export const modelRouter = createTRPCRouter({
           where: {
             id: choiceId,
           },
+          select: { model: { select: { createdState: true } } },
         });
         if (existingChoice === null) {
           return "Choice not found";
@@ -714,9 +733,10 @@ export const modelRouter = createTRPCRouter({
         const deleted = await prisma.choice.delete({
           where: { id: choiceId },
         });
-        await logger.info(
-          `'${session.user.name}' deleted a choice for a model with id=${deleted.modelId}`,
-        );
+        await logger.info({
+          message: `'${session.user.name}' deleted a choice for a model with id=${deleted.modelId}`,
+          state: existingChoice.model.createdState,
+        });
       },
     ),
 });
