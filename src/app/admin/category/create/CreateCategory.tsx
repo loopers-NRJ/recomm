@@ -28,21 +28,33 @@ const CreateCategory = () => {
     onError: errorHandler,
   });
   const [categoryName, setCategoryName] = useState("");
+  const [categoryPrice, setCategoryPrice] = useState("");
   const selectedState = useAdminSelectedState((selected) => selected.state);
 
   return (
     <Container className="flex justify-center">
       <section className="flex h-full w-full flex-col gap-4 p-4 md:h-fit md:w-4/6 lg:h-fit lg:w-3/6 xl:w-2/5">
-        <Label className="my-4">
+        <h1 className="text-lg font-bold">Create New Category</h1>
+        <Label className="flex flex-col gap-1">
           Category Name
           <Input
             className="my-2"
             value={categoryName}
             onChange={(e) => setCategoryName(e.target.value)}
+            placeholder="Enter here"
+          />
+        </Label>
+        <Label className="flex flex-col gap-1">
+          Category Price
+          <Input
+            type="number"
+            placeholder="Enter here"
+            value={categoryPrice}
+            onChange={(e) => setCategoryPrice(e.target.value)}
           />
         </Label>
 
-        <Label className="flex items-center justify-between">
+        <Label className="flex items-center justify-between p-1">
           <div>Parent Category</div>
           <div>{parentName ?? "None"}</div>
         </Label>
@@ -54,9 +66,14 @@ const CreateCategory = () => {
                 name: categoryName,
                 parentCategoryId: parentId ?? undefined,
                 state: selectedState,
+                price: +categoryPrice,
               })
             }
-            disabled={categoryName.trim() === "" || createCategoryApi.isLoading}
+            disabled={
+              categoryName.trim() === "" ||
+              !+categoryPrice ||
+              createCategoryApi.isLoading
+            }
           >
             Create Category
           </Button>

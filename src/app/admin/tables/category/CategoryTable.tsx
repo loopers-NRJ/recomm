@@ -165,6 +165,19 @@ export default function CategoryTable() {
         },
       },
       {
+        id: "Price",
+        header: () => (
+          <TableHeader
+            title="price"
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
+            setSortOrder={(sortOrder) => void setSortOrder(sortOrder)}
+          />
+        ),
+        accessorFn: (row) => row.price,
+      },
+      {
         id: "active",
         header: () => (
           <TableHeader
