@@ -1,11 +1,11 @@
-"use client";
-import { type ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
+"use client"
+import { type ReadonlyURLSearchParams, useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/trpc/react";
 import { useClientSelectedState } from "@/store/SelectedState";
 import Image from "next/image";
 import { useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 
 function createQueryString(
   searchParams: ReadonlyURLSearchParams,
@@ -18,22 +18,25 @@ function createQueryString(
 }
 
 const DesktopCategoryBar = () => {
-  return <div>Desktop</div>;
-};
+  return <div> Desktop </div>
+}
 
 const MobileCategoryBar = () => {
   const searchParams = useSearchParams();
   const selectedState = useClientSelectedState((selected) => selected.state);
+  const router = useRouter();
   const catergoriesQuery = api.category.featured.useQuery({
     state: selectedState,
   });
 
   const [expanded, setExpanded] = useState(false);
+  const [parentId, setParentId] = useState<string | undefined>(undefined);
 
   const list = api.category.allWithoutPayload.useQuery({
-    parentId: undefined,
-    state: selectedState,
-  });
+    parentId: parentId,
+    state: selectedState
+  })
+
   return (
     <div className="mb-5 grid min-h-[200px] grid-cols-4 grid-rows-2 gap-2">
       {catergoriesQuery.data?.categories.map(({ category, image }) => {
@@ -61,20 +64,30 @@ const MobileCategoryBar = () => {
         } fixed left-0 top-0 z-[99] h-screen w-screen bg-white`}
       >
         <h1 className="flex">
-          <ArrowLeft onClick={() => setExpanded(false)} />
+          <ArrowLeft onClick={() => {
+            setExpanded(false)
+            setParentId(undefined)
+          }} />
           Categories
         </h1>
         <ul>
-          {list.data?.categories.map((ele) =>
-            ele.parentCategoryId == null ? (
-              <h1 key={ele.id}>{ele.name}</h1>
-            ) : null,
-          )}
+          {list.error && <div>Error</div>}
+          {list.isLoading && <Loader2 />}
+          {list.data?.categories.length == 0 ?
+            parentId && void router.push("/products?" + createQueryString(searchParams, "category", parentId))
+            : list.data?.categories.map(category => {
+              if (category.parentCategoryId == null) {
+                return <li key={category.id} onClick={() => setParentId(category.id)}>{category.name}</li>
+              } else if (parentId == category.parentCategoryId) {
+                const url = "/products?" + createQueryString(searchParams, "category", category.id);
+                return <Link key={category.id} href={url}><li>{category.name}</li></Link>
+              }
+            })}
         </ul>
       </aside>
     </div>
-  );
-};
+  )
+}
 
 interface CategoryBoxProps {
   image: string;
