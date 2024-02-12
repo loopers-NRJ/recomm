@@ -47,11 +47,10 @@ model VerificationToken {
 
 enum AccessType {
     // public level
-    subscriber // allow to sell and buy products
-    retailer // allow to sell and buy products in large quantity
+    seller // allow to sell and buy products @map("subscriber")
+    primeSeller // allow to sell and buy products in large quantity @map("retailer")
 
     // admin level
-    readAccess // allow to view admin page
 
     createCategory // allow to create category
     updateCategory // allow to update category
@@ -70,11 +69,16 @@ enum AccessType {
 
     createRole // allow to create role
     updateRole // allow to update role
-    updateUsersRole // allow to update role of user
     deleteRole // allow to delete role
 
+    updateUsersRole // allow to update role of user
     updateUser // allow to update user
     deleteUser // allow to delete user
+
+    viewLogs // allow to view logs
+    clearLogs // allow to clear logs
+
+    // update types/prisma.ts when adding new access type
 }
 
 model Access {
@@ -86,9 +90,19 @@ model Role {
     id       String   @id @default(cuid())
     name     String   @unique
     accesses Access[]
-    user     User[]
+    users    User[]   @relation("role")
+
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+    createdBy   User     @relation("roleCreate", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    updatedBy   User?    @relation("roleUpdate", fields: [updatedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    createdById String
+    updatedById String?
+    // createdState State
 
     @@index([name])
+    @@index([updatedById])
+    @@index([createdById])
 }
 
 model User {
@@ -105,7 +119,7 @@ model User {
     favoriteProducts  Product[] @relation("favoriteProducts")
     wishes            Wish[]
     bids              Bid[]
-    role              Role?     @relation(fields: [roleId], references: [id], onDelete: SetNull)
+    role              Role?     @relation("role", fields: [roleId], references: [id], onDelete: SetNull)
     roleId            String?
     // location
     address           Address[]
@@ -114,10 +128,19 @@ model User {
     updatedAt         DateTime  @updatedAt
 
     // admin level
-    createdCategories  Category[]
-    FeaturedCategories FeaturedCategory[]
-    createdBrands      Brand[]
-    createdModels      Model[]
+    createdCategories              Category[]               @relation("categoryCreate")
+    updatedCategories              Category[]               @relation("categoryUpdate")
+    createdFeaturedCategories      FeaturedCategory[]       @relation("featureCreate")
+    updatedFeaturedCategories      FeaturedCategory[]       @relation("featureUpdate")
+    createdBrands                  Brand[]                  @relation("brandCreate")
+    updatedBrands                  Brand[]                  @relation("brandUpdate")
+    createdModels                  Model[]                  @relation("modelCreate")
+    updatedModels                  Model[]                  @relation("modelUpdate")
+    updatedMultipleChoiceQuestions MultipleChoiceQuestion[] @relation("multipleChoiceQuestionUpdate")
+    updatedChoice                  Choice[]                 @relation("choiceUpdate")
+    updatedAtomicQuestions         AtomicQuestion[]         @relation("atomicQuestionUpdate")
+    createdRoles                   Role[]                   @relation("roleCreate")
+    updatedRoles                   Role[]                   @relation("roleUpdate")
 
     @@index([roleId])
 }
@@ -185,9 +208,11 @@ model Category {
     featuredCategory FeaturedCategory?
 
     // Meta
-    createdBy    User     @relation(fields: [createdById], references: [id])
-    createdById  String
     createdState State
+    createdBy    User     @relation("categoryCreate", fields: [createdById], references: [id])
+    updatedBy    User?    @relation("categoryUpdate", fields: [updatedById], references: [id])
+    createdById  String
+    updatedById  String?
     createdAt    DateTime @default(now())
     updatedAt    DateTime @updatedAt
 
@@ -196,6 +221,7 @@ model Category {
     @@index([name, parentCategoryId])
     @@index([parentCategoryId])
     @@index([createdById])
+    @@index([updatedById])
 }
 
 model FeaturedCategory {
@@ -205,13 +231,16 @@ model FeaturedCategory {
     imageId    String   @unique
 
     // Meta
-    featuredBy   User     @relation(fields: [featuredById], references: [id])
+    featuredBy   User     @relation("featureCreate", fields: [featuredById], references: [id])
     featuredById String
     createdAt    DateTime @default(now())
     updatedAt    DateTime @updatedAt
+    updatedBy    User?    @relation("featureUpdate", fields: [updatedById], references: [id])
+    updatedById  String?
 
     @@index([categoryId])
     @@index([featuredById])
+    @@index([updatedById])
 }
 
 model Brand {
@@ -223,15 +252,18 @@ model Brand {
     wishes Wish[]
 
     // Meta
-    createdBy    User     @relation(fields: [createdById], references: [id])
-    createdById  String
     createdState State
+    createdBy    User     @relation("brandCreate", fields: [createdById], references: [id])
+    updatedBy    User?    @relation("brandUpdate", fields: [updatedById], references: [id])
+    createdById  String
+    updatedById  String?
     createdAt    DateTime @default(now())
     updatedAt    DateTime @updatedAt
 
     @@unique([name, createdState])
     @@index([name])
     @@index([createdById])
+    @@index([updatedById])
 }
 
 model Model {
@@ -251,9 +283,11 @@ model Model {
     answers                 AtomicAnswer[]
 
     // Meta
-    createdBy    User     @relation(fields: [createdById], references: [id])
-    createdById  String
     createdState State
+    createdBy    User     @relation("modelCreate", fields: [createdById], references: [id])
+    updatedBy    User?    @relation("modelUpdate", fields: [updatedById], references: [id])
+    createdById  String
+    updatedById  String?
     createdAt    DateTime @default(now())
     updatedAt    DateTime @updatedAt
 
@@ -262,6 +296,7 @@ model Model {
     @@index([brandId])
     @@index([categoryId])
     @@index([createdById])
+    @@index([updatedById])
 }
 
 enum MultipleChoiceQuestionType {
@@ -279,12 +314,15 @@ model MultipleChoiceQuestion {
     required        Boolean                    @default(true)
     model           Model                      @relation(fields: [modelId], references: [id], onDelete: Cascade)
     modelId         String
-
     // Meta
-    updatedAt DateTime @updatedAt
+
+    updatedAt   DateTime @updatedAt
+    updatedBy   User?    @relation("multipleChoiceQuestionUpdate", fields: [updatedById], references: [id])
+    updatedById String?
 
     @@unique([questionContent, modelId])
     @@index([modelId])
+    @@index([updatedById])
 }
 
 model Choice {
@@ -297,11 +335,14 @@ model Choice {
     products   Product[]
 
     // Meta
-    updatedAt DateTime @updatedAt
+    updatedAt   DateTime @updatedAt
+    updatedBy   User?    @relation("choiceUpdate", fields: [updatedById], references: [id])
+    updatedById String?
 
     @@unique([value, questionId, modelId])
     @@index([questionId])
     @@index([modelId])
+    @@index([updatedById])
 }
 
 enum AtomicQuestionType {
@@ -321,10 +362,13 @@ model AtomicQuestion {
     modelId         String
 
     // Meta
-    updatedAt DateTime @updatedAt
+    updatedAt   DateTime @updatedAt
+    updatedBy   User?    @relation("atomicQuestionUpdate", fields: [updatedById], references: [id])
+    updatedById String?
 
     @@unique([modelId, questionContent])
     @@index([modelId])
+    @@index([updatedById])
 }
 
 model AtomicAnswer {
@@ -355,18 +399,18 @@ model Product {
     images          Image[]
     selectedChoices Choice[]
     answers         AtomicAnswer[]
-
-    address        Address? @relation(fields: [addressId], references: [id], onDelete: Restrict)
-    addressId      String?
-    model          Model    @relation(fields: [modelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-    modelId        String
-    seller         User     @relation("listedProducts", fields: [sellerId], references: [id], onDelete: Cascade)
-    sellerId       String
-    buyer          User?    @relation("purchasedProducts", fields: [buyerId], references: [id], onDelete: SetNull)
-    buyerId        String?
-    favoritedUsers User[]   @relation("favoriteProducts")
-    room           Room     @relation(fields: [roomId], references: [id], onDelete: Restrict)
-    roomId         String   @unique
+    isDeleted       Boolean        @default(false)
+    address         Address?       @relation(fields: [addressId], references: [id], onDelete: Restrict)
+    addressId       String?
+    model           Model          @relation(fields: [modelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    modelId         String
+    seller          User           @relation("listedProducts", fields: [sellerId], references: [id], onDelete: Cascade)
+    sellerId        String
+    buyer           User?          @relation("purchasedProducts", fields: [buyerId], references: [id], onDelete: SetNull)
+    buyerId         String?
+    favoritedUsers  User[]         @relation("favoriteProducts")
+    room            Room           @relation(fields: [roomId], references: [id], onDelete: Restrict)
+    roomId          String         @unique
 
     // Meta
     createdAt DateTime @default(now())
@@ -447,4 +491,13 @@ model Image {
     productId        String?
 
     @@index([productId])
+}
+
+model Log {
+    id        String   @id @default(cuid())
+    state     State?
+    message   String
+    detail    String?
+    level     String
+    createdAt DateTime @default(now())
 }

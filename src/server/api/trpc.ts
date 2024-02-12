@@ -12,10 +12,11 @@ import { ZodError } from "zod";
 
 import { getServerAuthSession } from "@/server/auth";
 import { prisma } from "@/server/db";
-import { initTRPC, TRPCError } from "@trpc/server";
-import type { AccessType } from "@prisma/client";
-import { adminPageRegex, requestPathHeaderName } from "@/utils/constants";
 import { userPayload } from "@/types/prisma";
+import { adminPageRegex, requestPathHeaderName } from "@/utils/constants";
+import { getLogger } from "@/utils/logger";
+import type { AccessType } from "@prisma/client";
+import { TRPCError, initTRPC } from "@trpc/server";
 
 /**
  * 1. CONTEXT
@@ -31,6 +32,7 @@ import { userPayload } from "@/types/prisma";
  *
  * @see https://trpc.io/docs/context
  */
+
 export const createTRPCContext = async (opts: { headers: Headers }) => {
   // Get the session from the server using the getServerSession wrapper function
   const session = await getServerAuthSession();
@@ -38,6 +40,7 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
     session,
     prisma,
     headers: opts.headers,
+    logger: getLogger(prisma),
   };
 };
 
@@ -139,12 +142,19 @@ export const protectedProcedure = publicProcedure.use(({ ctx, next }) => {
 });
 
 // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-export const getProcedure = (accessType: AccessType | AccessType[]) => {
+export const getProcedure = (
+  accessType:
+    | AccessType
+    | [AccessType, AccessType, ...AccessType[]]
+    | ((type: AccessType[]) => boolean),
+) => {
   return protectedProcedure.use(async ({ ctx, next }) => {
     const isAllowed =
       accessType instanceof Array
         ? ctx.session.userAccesses.some((access) => accessType.includes(access))
-        : ctx.session.userAccesses.includes(accessType);
+        : accessType instanceof Function
+          ? accessType(ctx.session.userAccesses)
+          : ctx.session.userAccesses.includes(accessType);
 
     if (!isAllowed) {
       throw new TRPCError({ code: "UNAUTHORIZED" });

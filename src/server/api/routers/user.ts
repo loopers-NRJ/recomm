@@ -112,24 +112,35 @@ export const userRouter = createTRPCRouter({
     }),
   updateRole: getProcedure(AccessType.updateUsersRole)
     .input(z.object({ userId: idSchema, roleId: idSchema.nullable() }))
-    .mutation(async ({ input: { userId: id, roleId }, ctx: { prisma } }) => {
-      await prisma.user.update({
-        where: {
-          id,
-        },
-        data: {
-          role: roleId
-            ? {
-                connect: {
-                  id: roleId,
+    .mutation(
+      async ({
+        input: { userId: id, roleId },
+        ctx: { prisma, session, logger },
+      }) => {
+        const user = await prisma.user.update({
+          where: {
+            id,
+          },
+          data: {
+            role: roleId
+              ? {
+                  connect: {
+                    id: roleId,
+                  },
+                }
+              : {
+                  disconnect: true,
                 },
-              }
-            : {
-                disconnect: true,
-              },
-        },
-      });
-    }),
+          },
+          include: { role: true },
+        });
+
+        await logger.info({
+          message: `'${session.user.name}' promoted '${user.name}' as '${user.role?.name}'`,
+          state: "common",
+        });
+      },
+    ),
   bids: protectedProcedure
     .input(
       z.object({

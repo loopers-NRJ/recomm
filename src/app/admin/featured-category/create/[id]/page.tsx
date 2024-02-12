@@ -3,8 +3,12 @@ import CreateFeaturedCategory from "./CreateFeatured";
 import { api } from "@/trpc/server";
 import toast from "react-hot-toast";
 import { notFound } from "next/navigation";
+import { AccessType } from "@prisma/client";
 
 const CreateFeaturedCategoryPage = AdminPage<{ id: string }>(async (props) => {
+  if (props.params.id === "new") {
+    return <CreateFeaturedCategory />;
+  }
   const category = await api.category.byId.query({
     categoryId: props.params.id,
   });
@@ -16,6 +20,6 @@ const CreateFeaturedCategoryPage = AdminPage<{ id: string }>(async (props) => {
   }
 
   return <CreateFeaturedCategory category={category} />;
-});
+}, AccessType.updateCategory);
 
 export default CreateFeaturedCategoryPage;

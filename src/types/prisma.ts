@@ -31,6 +31,7 @@ export const productsPayload = Prisma.validator<Prisma.ProductDefaultArgs>()({
     images: true,
   },
 });
+
 export type ProductsPayloadIncluded = Prisma.ProductGetPayload<
   typeof productsPayload
 >;
@@ -185,10 +186,8 @@ export const allQuestionTypes = [
 export type AllQuestionType = (typeof allQuestionTypes)[number];
 
 export const accessTypes = [
-  AccessType.subscriber,
-  AccessType.retailer,
-
-  AccessType.readAccess,
+  AccessType.seller,
+  AccessType.primeSeller,
 
   AccessType.createCategory,
   AccessType.updateCategory,
@@ -212,7 +211,18 @@ export const accessTypes = [
 
   AccessType.updateUser,
   AccessType.deleteUser,
+
+  AccessType.viewLogs,
+  AccessType.clearLogs,
 ] as const;
+
+export const hasAdminPageAccess = (accesses: AccessType[] = []) =>
+  accesses.some(
+    (access) =>
+      accessTypes.includes(access) &&
+      access !== AccessType.seller &&
+      access !== AccessType.primeSeller,
+  );
 
 export const states = [
   State.Andhra_Pradesh,

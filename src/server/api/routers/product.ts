@@ -1,11 +1,10 @@
 import { z } from "zod";
 
-import { deleteImage } from "@/lib/cloudinary";
 import {
   idSchema,
   productSchema,
-  validateMultipleChoiceQuestionInput,
   validateAtomicQuestionAnswers,
+  validateMultipleChoiceQuestionInput,
 } from "@/utils/validation";
 import {
   AccessType,
@@ -13,20 +12,20 @@ import {
   WishStatus,
 } from "@prisma/client";
 
-import {
-  createTRPCRouter,
-  getProcedure,
-  protectedProcedure,
-  publicProcedure,
-} from "../trpc";
-import { productsPayload, singleProductPayload, states } from "@/types/prisma";
 import slugify from "@/lib/slugify";
+import { productsPayload, singleProductPayload, states } from "@/types/prisma";
 import {
   defaultLimit,
   defaultSortBy,
   defaultSortOrder,
   maxLimit,
 } from "@/utils/constants";
+import {
+  createTRPCRouter,
+  getProcedure,
+  protectedProcedure,
+  publicProcedure,
+} from "../trpc";
 
 export const productRouter = createTRPCRouter({
   all: publicProcedure
@@ -148,7 +147,7 @@ export const productRouter = createTRPCRouter({
       });
       type ProductWithIsFavorite = typeof product & { isFavorite?: true };
       if (session?.user !== undefined) {
-        const favorited = await prisma.product.findUnique({
+        const favorite = await prisma.product.findUnique({
           where: {
             id,
             favoritedUsers: {
@@ -159,7 +158,7 @@ export const productRouter = createTRPCRouter({
           },
         });
 
-        if (favorited !== null) {
+        if (favorite !== null) {
           (product as ProductWithIsFavorite).isFavorite = true;
         }
       }
@@ -176,7 +175,7 @@ export const productRouter = createTRPCRouter({
       });
       type ProductWithIsFavorite = typeof product & { isFavorite?: true };
       if (session?.user !== undefined) {
-        const favorited = await prisma.product.findUnique({
+        const favorite = await prisma.product.findUnique({
           where: {
             slug: productSlug,
             favoritedUsers: {
@@ -187,13 +186,13 @@ export const productRouter = createTRPCRouter({
           },
         });
 
-        if (favorited !== null) {
+        if (favorite !== null) {
           (product as ProductWithIsFavorite).isFavorite = true;
         }
       }
       return product as ProductWithIsFavorite;
     }),
-  // createProduct: getProcedure(AccessType.subscriber)
+  // createProduct: getProcedure(AccessType.seller)
   create: protectedProcedure
     .input(productSchema)
     .mutation(
@@ -208,7 +207,7 @@ export const productRouter = createTRPCRouter({
           multipleChoiceAnswers: providedChoices,
           atomicAnswers: providedAnswers,
         },
-        ctx: { prisma, session },
+        ctx: { prisma, session, logger },
       }) => {
         if (closedAt < new Date()) {
           return "Closed at date must be in the future";
@@ -353,11 +352,15 @@ export const productRouter = createTRPCRouter({
           });
         };
 
-        void updateWishes().catch((error) => {
-          console.error({
-            procedure: "createProduct",
+        void updateWishes().catch(async (error) => {
+          await logger.error({
             message: "cannot update wishes",
-            error,
+            detail: JSON.stringify({
+              procedure: "createProduct",
+              message: "cannot update wishes",
+              error,
+            }),
+            state: "common",
           });
         });
 
@@ -365,7 +368,7 @@ export const productRouter = createTRPCRouter({
       },
     ),
 
-  delete: getProcedure([AccessType.subscriber, AccessType.deleteProduct])
+  delete: getProcedure([AccessType.seller, AccessType.deleteProduct])
     .input(z.object({ productId: idSchema }))
     .mutation(
       async ({ input: { productId: id }, ctx: { prisma, session } }) => {
@@ -374,7 +377,7 @@ export const productRouter = createTRPCRouter({
           where: {
             id,
           },
-          include: singleProductPayload.include,
+          // include: { room: { include: { bids: { take: 1 } } } }
         });
         if (existingProduct === null) {
           return "Product not found";
@@ -385,51 +388,56 @@ export const productRouter = createTRPCRouter({
         if (existingProduct.buyerId !== null) {
           return "Product is already sold";
         }
-        if (existingProduct.room.bids.length > 0) {
-          return "Cannot delete product with bids";
-        }
-        const product = await prisma.product.delete({
-          where: {
-            id,
-          },
+        // uncomment if needed
+        // if (existingProduct.room.bids.length > 0) {
+        //   return "Cannot delete product with bids";
+        // }
+
+        await prisma.product.update({
+          where: { id },
+          data: { isDeleted: true },
         });
 
-        void prisma.room
-          .delete({
-            where: {
-              id: existingProduct.roomId,
-            },
-          })
-          .catch((error) => {
-            console.error({
-              procedure: "deleteProductById",
-              message: "cannot delete room",
-              error,
-            });
-          });
+        // const product = await prisma.product.delete({
+        //   where: {
+        //     id,
+        //   },
+        // });
 
-        existingProduct.images.forEach((image) => {
-          // using void to not wait for the promise to resolve
-          void deleteImage(image.publicId)
-            .then((error) => {
-              if (error instanceof Error) {
-                console.error({
-                  procedure: "deleteProductById",
-                  message: `cannot delete image in cloudinary with publicId ${image.publicId}`,
-                  error,
-                });
-              }
-            })
-            .catch((error) => {
-              console.error({
-                procedure: "deleteProductById",
-                message: "cannot delete images in cloudinary",
-                error,
-              });
-            });
-        });
+        // void prisma.room
+        //   .delete({
+        //     where: {
+        //       id: existingProduct.roomId,
+        //     },
+        //   })
+        //   .catch((error) => {
+        //     console.error({
+        //       procedure: "deleteProductById",
+        //       message: "cannot delete room",
+        //       error,
+        //     });
+        //   });
 
-        return product;
+        // existingProduct.images.forEach((image) => {
+        //   // using void to not wait for the promise to resolve
+        //   void deleteImage(image.publicId)
+        //     .then((error) => {
+        //       if (error instanceof Error) {
+        //         console.error({
+        //           procedure: "deleteProductById",
+        //           message: `cannot delete image in cloudinary with publicId ${image.publicId}`,
+        //           error,
+        //         });
+        //       }
+        //     })
+        //     .catch((error) => {
+        //       console.error({
+        //         procedure: "deleteProductById",
+        //         message: "cannot delete images in cloudinary",
+        //         error,
+        //       });
+        //     });
+        // });
       },
     ),
   addToFavorites: protectedProcedure

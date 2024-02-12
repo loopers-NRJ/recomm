@@ -3,6 +3,8 @@ import "server-only";
 import { v2 as cloudinary } from "cloudinary";
 import { env } from "@/env";
 import type { Image } from "@/utils/validation";
+import { getLogger } from "@/utils/logger";
+import { prisma } from "@/server/db";
 
 cloudinary.config({
   cloud_name: env.CLOUDINARY_CLOUD_NAME,
@@ -41,6 +43,11 @@ export const deleteImage: (publicId: string) => Promise<void | Error> = async (
     await cloudinary.uploader.destroy(publicId);
   } catch (error) {
     console.log(error);
+    await getLogger(prisma).error({
+      message: "Error deleting image",
+      detail: JSON.stringify({ publicId, error }),
+      state: "common",
+    });
     throw new Error("cannot delete the image");
   }
 };

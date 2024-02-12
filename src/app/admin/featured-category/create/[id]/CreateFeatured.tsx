@@ -16,7 +16,7 @@ import AllCategoryComboBox from "@/components/combobox/AllCategoryComboBox";
 export default function CreateFeaturedCategory({
   category,
 }: {
-  category: CategoryPayloadIncluded;
+  category?: CategoryPayloadIncluded;
 }) {
   const router = useRouter();
 

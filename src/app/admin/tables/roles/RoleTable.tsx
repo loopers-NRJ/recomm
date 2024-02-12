@@ -30,6 +30,7 @@ export default function RoleTable() {
     "search",
     parseAsString.withDefault(defaultSearch),
   );
+
   const rolesApi = api.role.all.useQuery({
     search,
     sortOrder,

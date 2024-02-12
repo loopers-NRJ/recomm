@@ -1,6 +1,5 @@
 "use client";
 
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { AccessType } from "@prisma/client";
 import { Accordion } from "@/components/ui/accordion";
@@ -78,17 +77,10 @@ export default function EditRole({ role }: { role: RolePayloadIncluded }) {
           <span>Role Name:</span>
           <span>{role.name}</span>
         </Label>
-        <Label className="flex items-center gap-2">
-          <Checkbox
-            checked={selectedRoles.includes(AccessType.readAccess)}
-            disabled
-          />
-          Admin page access
-        </Label>
         <Accordion type="single" collapsible>
           <AccordionSection
             title="general"
-            types={[AccessType.subscriber, AccessType.retailer]}
+            types={[AccessType.seller, AccessType.primeSeller]}
             processing={processing}
             selectedRoles={selectedRoles}
             handleCheckedChange={handleCheckedChange}
@@ -147,6 +139,13 @@ export default function EditRole({ role }: { role: RolePayloadIncluded }) {
           <AccordionSection
             title="user"
             types={[AccessType.updateUser, AccessType.deleteUser]}
+            processing={processing}
+            selectedRoles={selectedRoles}
+            handleCheckedChange={handleCheckedChange}
+          />
+          <AccordionSection
+            title="log"
+            types={[AccessType.viewLogs, AccessType.clearLogs]}
             processing={processing}
             selectedRoles={selectedRoles}
             handleCheckedChange={handleCheckedChange}

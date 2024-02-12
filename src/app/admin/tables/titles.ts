@@ -6,5 +6,6 @@ export const titles = [
   "products",
   "users",
   "roles",
+  "logs",
 ] as const;
 export type Title = (typeof titles)[number];

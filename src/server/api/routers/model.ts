@@ -15,14 +15,14 @@ import {
   multipleChoiceQuestionSchema,
 } from "@/utils/validation";
 
-import { createTRPCRouter, getProcedure, publicProcedure } from "../trpc";
-import { AccessType } from "@prisma/client";
 import {
   defaultLimit,
   defaultSortBy,
   defaultSortOrder,
   maxLimit,
 } from "@/utils/constants";
+import { AccessType } from "@prisma/client";
+import { createTRPCRouter, getProcedure, publicProcedure } from "../trpc";
 
 export const modelRouter = createTRPCRouter({
   all: publicProcedure
@@ -139,7 +139,7 @@ export const modelRouter = createTRPCRouter({
           atomicQuestions,
           state,
         },
-        ctx: { prisma, session },
+        ctx: { prisma, session, logger },
       }) => {
         const existingModel = await prisma.model.findFirst({
           where: {
@@ -202,6 +202,11 @@ export const modelRouter = createTRPCRouter({
             });
           }
 
+          await logger.info({
+            message: `'${session.user.name}' created a model named '${model.name}'`,
+            state: model.createdState,
+          });
+
           return model;
         });
       },
@@ -254,16 +259,12 @@ export const modelRouter = createTRPCRouter({
     .mutation(
       async ({
         input: { id, name: newName, categoryId, active, brandId, createdState },
-        ctx: { prisma },
+        ctx: { prisma, session, logger },
       }) => {
         // check whether the model exists
         const existingModel = await prisma.model.findUnique({
           where: {
             id,
-          },
-          select: {
-            name: true,
-            createdState: true,
           },
         });
         if (existingModel === null) {
@@ -306,41 +307,86 @@ export const modelRouter = createTRPCRouter({
               : undefined,
             active,
             createdState: createdState,
+            updatedBy: {
+              connect: {
+                id: session.user.id,
+              },
+            },
           },
           include: singleModelPayload.include,
         });
+
+        if (newName) {
+          await logger.info({
+            message: `'${session.user.name}' updated a model's name from '${existingModel.name}' to '${model.name}'`,
+            state: model.createdState,
+          });
+        }
+        if (categoryId) {
+          await logger.info({
+            message: `'${session.user.name}' updated a model's name from '${existingModel.categoryId}' to '${model.categoryId}'`,
+            state: model.createdState,
+          });
+        }
+        if (brandId) {
+          await logger.info({
+            message: `'${session.user.name}' updated a model's name from '${existingModel.brandId}' to '${model.brandId}'`,
+            state: model.createdState,
+          });
+        }
+        if (active) {
+          await logger.info({
+            message: `'${session.user.name}' updated a model's name from '${existingModel.active}' to '${model.active}'`,
+            state: model.createdState,
+          });
+        }
+        if (createdState) {
+          await logger.info({
+            message: `'${session.user.name}' updated a model's name from '${existingModel.createdState}' to '${model.createdState}'`,
+            state: model.createdState,
+          });
+        }
 
         return model;
       },
     ),
   delete: getProcedure(AccessType.deleteModel)
     .input(z.object({ modelId: idSchema }))
-    .mutation(async ({ input: { modelId: id }, ctx: { prisma } }) => {
-      const existingModel = await prisma.model.findUnique({
-        where: {
-          id,
-        },
-      });
-      if (existingModel === null) {
-        return "Model not found";
-      }
-      const model = await prisma.model.delete({
-        where: {
-          id,
-        },
-      });
+    .mutation(
+      async ({ input: { modelId: id }, ctx: { prisma, session, logger } }) => {
+        const existingModel = await prisma.model.findUnique({
+          where: {
+            id,
+          },
+        });
+        if (existingModel === null) {
+          return "Model not found";
+        }
+        const model = await prisma.model.delete({
+          where: {
+            id,
+          },
+        });
 
-      return model;
-    }),
+        await logger.info({
+          message: `'${session.user.name}' deleted a model named '${existingModel.name}'`,
+          state: model.createdState,
+        });
+
+        return model;
+      },
+    ),
   addAtomicQuestion: getProcedure(AccessType.updateModel)
     .input(atomicQuestionSchema.extend({ modelId: idSchema }))
-    .mutation(async ({ input: data, ctx: { prisma } }) => {
+    .mutation(async ({ input: data, ctx: { prisma, session, logger } }) => {
       const model = await prisma.model.findUnique({
         where: {
           id: data.modelId,
         },
         select: {
+          name: true,
           atomicQuestions: true,
+          createdState: true,
         },
       });
       if (model === null) {
@@ -352,17 +398,27 @@ export const modelRouter = createTRPCRouter({
       if (existingQuestion !== undefined) {
         return "Question already exists";
       }
-      return prisma.atomicQuestion.create({ data });
+      const question = await prisma.atomicQuestion.create({
+        data,
+      });
+      await logger.info({
+        message: `'${session.user.name}' added a atomic Question to a model named '${model.name}'`,
+        state: model.createdState,
+      });
+
+      return question;
     }),
   addMultipleChoiceQuestion: getProcedure(AccessType.updateModel)
     .input(multipleChoiceQuestionSchema.extend({ modelId: idSchema }))
-    .mutation(async ({ input: question, ctx: { prisma } }) => {
+    .mutation(async ({ input: question, ctx: { prisma, session, logger } }) => {
       const model = await prisma.model.findUnique({
         where: {
           id: question.modelId,
         },
         select: {
           multipleChoiceQuestions: true,
+          name: true,
+          createdState: true,
         },
       });
       if (model === null) {
@@ -374,7 +430,7 @@ export const modelRouter = createTRPCRouter({
       if (existingQuestion !== undefined) {
         return "Question already exists";
       }
-      return await prisma.multipleChoiceQuestion.create({
+      const result = await prisma.multipleChoiceQuestion.create({
         data: {
           questionContent: question.questionContent,
           model: {
@@ -396,6 +452,13 @@ export const modelRouter = createTRPCRouter({
           choices: true,
         },
       });
+
+      await logger.info({
+        message: `'${session.user.name}' added a multipleChoice Question to a model named '${model.name}'`,
+        state: model.createdState,
+      });
+
+      return result;
     }),
   updateAtomicQuestion: getProcedure(AccessType.updateModel)
     .input(
@@ -420,35 +483,55 @@ export const modelRouter = createTRPCRouter({
         }),
       ]),
     )
-    .mutation(async ({ input: { questionId, ...data }, ctx: { prisma } }) => {
-      const existingQuestion = await prisma.atomicQuestion.findUnique({
-        where: {
-          id: questionId,
-        },
-        select: { modelId: true },
-      });
-      if (existingQuestion === null) {
-        return "Question not found";
-      }
-      if (data.questionContent !== undefined) {
-        const existingQuestionContent = await prisma.atomicQuestion.findFirst({
+    .mutation(
+      async ({
+        input: { questionId, ...data },
+        ctx: { prisma, session, logger },
+      }) => {
+        const existingQuestion = await prisma.atomicQuestion.findUnique({
           where: {
-            modelId: existingQuestion.modelId,
-            questionContent: data.questionContent,
-            id: {
-              not: questionId,
+            id: questionId,
+          },
+          select: { modelId: true, model: { select: { createdState: true } } },
+        });
+        if (existingQuestion === null) {
+          return "Question not found";
+        }
+        if (data.questionContent !== undefined) {
+          const existingQuestionContent = await prisma.atomicQuestion.findFirst(
+            {
+              where: {
+                modelId: existingQuestion.modelId,
+                questionContent: data.questionContent,
+                id: {
+                  not: questionId,
+                },
+              },
+            },
+          );
+          if (existingQuestionContent !== null) {
+            return "Question already exists";
+          }
+        }
+        const question = await prisma.atomicQuestion.update({
+          where: { id: questionId },
+          data: {
+            ...data,
+            updatedBy: {
+              connect: {
+                id: session.user.id,
+              },
             },
           },
         });
-        if (existingQuestionContent !== null) {
-          return "Question already exists";
-        }
-      }
-      return await prisma.atomicQuestion.update({
-        where: { id: questionId },
-        data,
-      });
-    }),
+        await logger.info({
+          message: `'${session.user.name}' updated a atomic Question of a model named '${question.modelId}'`,
+          state: existingQuestion.model.createdState,
+        });
+
+        return question;
+      },
+    ),
   updateMultipleChoiceQuestion: getProcedure(AccessType.updateModel)
     .input(
       z.union([
@@ -472,37 +555,48 @@ export const modelRouter = createTRPCRouter({
         }),
       ]),
     )
-    .mutation(async ({ input: { questionId, ...data }, ctx: { prisma } }) => {
-      const existingQuestion = await prisma.multipleChoiceQuestion.findUnique({
-        where: {
-          id: questionId,
-        },
-        select: { modelId: true },
-      });
-      if (existingQuestion === null) {
-        return "Question not found";
-      }
-      if (data.questionContent !== undefined) {
-        const existingQuestionContent =
-          await prisma.multipleChoiceQuestion.findFirst({
+    .mutation(
+      async ({ input: { questionId, ...data }, ctx: { prisma, session } }) => {
+        const existingQuestion = await prisma.multipleChoiceQuestion.findUnique(
+          {
             where: {
-              modelId: existingQuestion.modelId,
-              questionContent: data.questionContent,
-              id: {
-                not: questionId,
+              id: questionId,
+            },
+            select: { modelId: true },
+          },
+        );
+        if (existingQuestion === null) {
+          return "Question not found";
+        }
+        if (data.questionContent !== undefined) {
+          const existingQuestionContent =
+            await prisma.multipleChoiceQuestion.findFirst({
+              where: {
+                modelId: existingQuestion.modelId,
+                questionContent: data.questionContent,
+                id: {
+                  not: questionId,
+                },
+              },
+            });
+          if (existingQuestionContent !== null) {
+            return "Question already exists";
+          }
+        }
+        return await prisma.multipleChoiceQuestion.update({
+          where: { id: questionId },
+          data: {
+            ...data,
+            updatedBy: {
+              connect: {
+                id: session.user.id,
               },
             },
-          });
-        if (existingQuestionContent !== null) {
-          return "Question already exists";
-        }
-      }
-      return await prisma.multipleChoiceQuestion.update({
-        where: { id: questionId },
-        data,
-        include: { choices: true },
-      });
-    }),
+          },
+          include: { choices: true },
+        });
+      },
+    ),
   deleteAtomicQuestion: getProcedure(AccessType.updateModel)
     .input(
       z.object({
@@ -576,50 +670,73 @@ export const modelRouter = createTRPCRouter({
         value: z.string().trim().min(1),
       }),
     )
-    .mutation(async ({ input: { choiceId, value }, ctx: { prisma } }) => {
-      const existingChoice = await prisma.choice.findUnique({
-        where: {
-          id: choiceId,
-        },
-        select: { questionId: true },
-      });
-      if (existingChoice === null) {
-        return "Choice not found";
-      }
-      const existingChoiceValue = await prisma.choice.findFirst({
-        where: {
-          questionId: existingChoice.questionId,
-          value,
-          id: {
-            not: choiceId,
+    .mutation(
+      async ({
+        input: { choiceId, value },
+        ctx: { prisma, session, logger },
+      }) => {
+        const existingChoice = await prisma.choice.findUnique({
+          where: {
+            id: choiceId,
           },
-        },
-      });
-      if (existingChoiceValue !== null) {
-        return "Choice already exists";
-      }
-      return await prisma.choice.update({
-        where: { id: choiceId },
-        data: { value },
-      });
-    }),
+          select: {
+            questionId: true,
+            model: { select: { createdState: true } },
+          },
+        });
+        if (existingChoice === null) {
+          return "Choice not found";
+        }
+        const existingChoiceValue = await prisma.choice.findFirst({
+          where: {
+            questionId: existingChoice.questionId,
+            value,
+            id: {
+              not: choiceId,
+            },
+          },
+        });
+        if (existingChoiceValue !== null) {
+          return "Choice already exists";
+        }
+
+        const question = await prisma.choice.update({
+          where: { id: choiceId },
+          data: { value, updatedBy: { connect: { id: session.user.id } } },
+        });
+
+        await logger.info({
+          message: `'${session.user.name}' updated a choice to a model with id=${question.modelId}`,
+          state: existingChoice.model.createdState,
+        });
+
+        return question;
+      },
+    ),
   deleteChoice: getProcedure(AccessType.updateModel)
     .input(
       z.object({
         choiceId: idSchema,
       }),
     )
-    .mutation(async ({ input: { choiceId }, ctx: { prisma } }) => {
-      const existingChoice = await prisma.choice.findUnique({
-        where: {
-          id: choiceId,
-        },
-      });
-      if (existingChoice === null) {
-        return "Choice not found";
-      }
-      await prisma.choice.delete({
-        where: { id: choiceId },
-      });
-    }),
+    .mutation(
+      async ({ input: { choiceId }, ctx: { prisma, session, logger } }) => {
+        const existingChoice = await prisma.choice.findUnique({
+          where: {
+            id: choiceId,
+          },
+          select: { model: { select: { createdState: true } } },
+        });
+        if (existingChoice === null) {
+          return "Choice not found";
+        }
+        const deleted = await prisma.choice.delete({
+          where: { id: choiceId },
+        });
+        await logger.info({
+          message: `'${session.user.name}' deleted a choice for a model with id=${deleted.modelId}`,
+          state: existingChoice.model.createdState,
+        });
+      },
+    ),
 });

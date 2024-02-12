@@ -1,5 +1,5 @@
 import Container from "@/components/Container";
-import { ButtonLink } from "@/components/common/ButtonLink";
+import { AdminButtonLink } from "@/components/common/ButtonLink";
 
 /**
  * this page is responsible for handling 404 errors
@@ -13,9 +13,9 @@ export default function NativeNotFoundPage() {
           Oops! Looks like we hit a digital dead end. Fear not, <b>Recomm</b> is
           ready to guide you back.
         </h1>
-        <ButtonLink href="/" variant="outline">
+        <AdminButtonLink href="/" variant="outline">
           Get back to Home page
-        </ButtonLink>
+        </AdminButtonLink>
       </div>
     </Container>
   );

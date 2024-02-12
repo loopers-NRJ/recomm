@@ -1,17 +1,21 @@
 "use client"
 import { type ReadonlyURLSearchParams, useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { api } from "@/trpc/react"
-import { useClientSelectedState } from "@/store/SelectedState"
+import { api } from "@/trpc/react";
+import { useClientSelectedState } from "@/store/SelectedState";
 import Image from "next/image";
 import { useState } from "react";
 import { ArrowLeft, Loader2 } from "lucide-react";
 
-function createQueryString(searchParams: ReadonlyURLSearchParams, name: string, value: string) {
+function createQueryString(
+  searchParams: ReadonlyURLSearchParams,
+  name: string,
+  value: string,
+) {
   const params = new URLSearchParams(searchParams);
   params.set(name, value);
   return params.toString();
-};
+}
 
 const DesktopCategoryBar = () => {
   return <div> Desktop </div>
@@ -34,16 +38,30 @@ const MobileCategoryBar = () => {
   })
 
   return (
-    <div className="grid grid-cols-4 grid-rows-2 gap-2 mb-5 min-h-[200px]">
+    <div className="mb-5 grid min-h-[200px] grid-cols-4 grid-rows-2 gap-2">
       {catergoriesQuery.data?.categories.map(({ category, image }) => {
-        const url = "/products/?" + createQueryString(searchParams, "category", category.id);
-        return <CategoryBox key={category.id} label={category.name} link={url} image={image.url} />
+        const url =
+          "/products/?" +
+          createQueryString(searchParams, "category", category.id);
+        return (
+          <CategoryBox
+            key={category.id}
+            label={category.name}
+            link={url}
+            image={image.url}
+          />
+        );
       })}
-      <div onClick={() => setExpanded(true)} className="flex justify-center items-center border rounded-xl w-full h-full font-bold text-sm">
+      <div
+        onClick={() => setExpanded(true)}
+        className="flex h-full w-full items-center justify-center rounded-xl border text-sm font-bold"
+      >
         See All
       </div>
       <aside
-        className={`selection-box ${!expanded && "hidden"} fixed top-0 left-0 h-screen w-screen z-[99] bg-white`}
+        className={`selection-box ${
+          !expanded && "hidden"
+        } fixed left-0 top-0 z-[99] h-screen w-screen bg-white`}
       >
         <h1 className="flex">
           <ArrowLeft onClick={() => {
@@ -79,11 +97,14 @@ interface CategoryBoxProps {
 
 const CategoryBox: React.FC<CategoryBoxProps> = ({ image, label, link }) => {
   return (
-    <Link href={link} className="flex flex-col justify-center items-center bg-white border rounded-xl shadow-md w-full h-full">
+    <Link
+      href={link}
+      className="flex h-full w-full flex-col items-center justify-center rounded-xl border bg-white shadow-md"
+    >
       <Image src={image} width={30} height={30} alt={label} className="m-2" />
       <label className="text-sm font-medium">{label}</label>
     </Link>
   );
 };
 
-export { DesktopCategoryBar, MobileCategoryBar }
+export { DesktopCategoryBar, MobileCategoryBar };
