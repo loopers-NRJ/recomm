@@ -227,85 +227,79 @@ export default function PostingForm({
     });
   };
 
-  const getAdditionalSection = useCallback(
-    function getAdditionalSection() {
-      if (!selectedModel?.id) {
-        return;
-      }
-      if (!modelApi.data || modelApi.isLoading) {
-        return (
-          <div className="flex flex-col items-center gap-4 py-4">
-            <Loading />
-            Loading Details...
-          </div>
-        );
-      }
-      if (modelApi.data === "Model not found") {
-        return (
-          <div className="flex flex-col items-center gap-4">
-            <p className="text-red-500">Model not found</p>
-          </div>
-        );
-      }
-      if (
-        modelApi.data.atomicQuestions.length !== atomicAnswers.length ||
-        modelApi.data.multipleChoiceQuestions.length !==
-          multipleChoiceAnswers.length
-      ) {
-        return (
-          <div className="flex flex-col items-center gap-4 py-4">
-            <Loading />
-            Loading Details...
-          </div>
-        );
-      }
-      if (modelApi.isError) {
-        return (
-          <div className="flex flex-col items-center gap-4">
-            <p className="text-red-500">Something went wrong!</p>
-          </div>
-        );
-      }
+  const getAdditionalSection = useCallback(() => {
+    if (!selectedModel?.id) {
+      return;
+    }
+    if (!modelApi.data || modelApi.isLoading) {
       return (
-        <>
-          <AdditionalInfoSection
-            model={modelApi.data}
-            atomicAnswers={atomicAnswers}
-            setAtomicAnswers={setAtomicAnswers}
-            multipleChoiceAnswers={multipleChoiceAnswers}
-            setMultipleChoiceAnswers={setMultipleChoiceAnswers}
-            formError={formError}
-          />
-          <ImageUploadSection
-            images={images}
-            setImages={setImages}
-            maxImages={10}
-            model={modelApi.data}
-            formError={formError}
-          />
-          <PricingInfoSection
-            price={price}
-            setPrice={setPrice}
-            onBidDurationChange={setBidEndTime}
-            model={modelApi.data}
-            formError={formError}
-          />
-        </>
+        <div className="flex flex-col items-center gap-4 py-4">
+          <Loading />
+          Loading Details...
+        </div>
       );
-    },
-    [
-      selectedModel?.id,
-      modelApi.data,
-      modelApi.isLoading,
-      modelApi.isError,
-      atomicAnswers,
-      multipleChoiceAnswers,
-      images,
-      price,
-      bidEndTime,
-      formError,
-    ],
-  );
+    }
+    if (modelApi.data === "Model not found") {
+      toast.error("Model not found");
+      return;
+    }
+    if (
+      modelApi.data.atomicQuestions.length !== atomicAnswers.length ||
+      modelApi.data.multipleChoiceQuestions.length !==
+        multipleChoiceAnswers.length
+    ) {
+      return (
+        <div className="flex flex-col items-center gap-4 py-4">
+          <Loading />
+          Loading Details...
+        </div>
+      );
+    }
+    if (modelApi.isError) {
+      return (
+        <div className="flex flex-col items-center gap-4">
+          <p className="text-red-500">Something went wrong!</p>
+        </div>
+      );
+    }
+    return (
+      <>
+        <AdditionalInfoSection
+          model={modelApi.data}
+          atomicAnswers={atomicAnswers}
+          setAtomicAnswers={setAtomicAnswers}
+          multipleChoiceAnswers={multipleChoiceAnswers}
+          setMultipleChoiceAnswers={setMultipleChoiceAnswers}
+          formError={formError}
+        />
+        <ImageUploadSection
+          images={images}
+          setImages={setImages}
+          maxImages={10}
+          model={modelApi.data}
+          formError={formError}
+        />
+        <PricingInfoSection
+          price={price}
+          setPrice={setPrice}
+          onBidDurationChange={setBidEndTime}
+          model={modelApi.data}
+          formError={formError}
+        />
+      </>
+    );
+  }, [
+    selectedModel?.id,
+    modelApi.data,
+    modelApi.isLoading,
+    modelApi.isError,
+    atomicAnswers,
+    multipleChoiceAnswers,
+    images,
+    price,
+    bidEndTime,
+    formError,
+  ]);
 
   if (
     categoryApi.isError ||

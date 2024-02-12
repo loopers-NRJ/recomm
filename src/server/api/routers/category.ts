@@ -30,7 +30,14 @@ export const categoryRouter = createTRPCRouter({
         limit: z.number().int().positive().max(maxLimit).default(defaultLimit),
         sortOrder: z.enum(["asc", "desc"]).default(defaultSortOrder),
         sortBy: z
-          .enum(["name", "createdAt", "updatedAt", "active", "featured"])
+          .enum([
+            "name",
+            "price",
+            "createdAt",
+            "updatedAt",
+            "active",
+            "featured",
+          ])
           .default(defaultSortBy),
         cursor: idSchema.optional(),
         parentId: idSchema.nullish(),
@@ -103,7 +110,7 @@ export const categoryRouter = createTRPCRouter({
         limit: z.number().int().positive().max(maxLimit).default(defaultLimit),
         sortOrder: z.enum(["asc", "desc"]).default(defaultSortOrder),
         sortBy: z
-          .enum(["name", "createdAt", "updatedAt", "active", "featured"])
+          .enum(["name", "price", "createdAt", "updatedAt", "active", "featured"])
           .default(defaultSortBy),
         cursor: idSchema.optional(),
         parentId: idSchema.nullish(),
@@ -201,13 +208,14 @@ export const categoryRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string().min(3).max(255),
+        price: z.number().int().positive(),
         parentCategoryId: idSchema.optional(),
         state: z.enum(states),
       }),
     )
     .mutation(
       async ({
-        input: { name, parentCategoryId, state },
+        input: { name, price, parentCategoryId, state },
         ctx: { prisma, session, logger },
       }) => {
         // checking whether the category already exists
@@ -229,6 +237,7 @@ export const categoryRouter = createTRPCRouter({
           data: {
             name,
             slug: slugify(name),
+            price,
             createdBy: {
               connect: {
                 id: session.user.id,
@@ -262,18 +271,28 @@ export const categoryRouter = createTRPCRouter({
           name: z.string().min(1).max(255),
           parentCategoryId: idSchema.optional(),
           active: z.boolean().optional(),
+          price: z.number().int().positive().optional(),
         }),
         z.object({
           id: idSchema,
           name: z.string().min(1).max(255).optional(),
           parentCategoryId: idSchema,
           active: z.boolean().optional(),
+          price: z.number().int().positive().optional(),
         }),
         z.object({
           id: idSchema,
           name: z.string().min(1).max(255).optional(),
           parentCategoryId: idSchema.optional(),
           active: z.boolean(),
+          price: z.number().int().positive().optional(),
+        }),
+        z.object({
+          id: idSchema,
+          name: z.string().min(1).max(255).optional(),
+          parentCategoryId: idSchema.optional(),
+          active: z.boolean().optional(),
+          price: z.number().int().positive(),
         }),
       ]),
     )
@@ -318,6 +337,7 @@ export const categoryRouter = createTRPCRouter({
                 },
               }
             : undefined,
+          price: input.price,
           active: input.active,
           updatedBy: {
             connect: {

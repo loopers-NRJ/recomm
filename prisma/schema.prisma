@@ -200,6 +200,7 @@ model Category {
     name             String
     slug             String            @unique
     active           Boolean           @default(true)
+    price            Float
     subCategories    Category[]        @relation("SubCategory")
     parentCategory   Category?         @relation("SubCategory", fields: [parentCategoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
     parentCategoryId String?

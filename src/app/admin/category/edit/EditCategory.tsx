@@ -29,17 +29,24 @@ export default function EditCategory({
     onError: errorHandler,
   });
 
-  const [categoryName, setCategoryName] = useState("");
-
-  const [error, setError] = useState<string>();
+  const [categoryName, setCategoryName] = useState(category.name);
+  const [categoryPrice, setCategoryPrice] = useState(category.price.toString());
 
   const updateCategory = async () => {
     if (categoryName.trim() === "") {
-      return setError("Category name cannot be empty");
+      return toast.error("Category name cannot be empty");
     }
+    if (!+categoryPrice) {
+      return toast.error("Invalid price");
+    }
+    if (categoryName === category.name && +categoryPrice === category.price) {
+      return toast.error("No changes to update");
+    }
+
     updateCategoryApi.mutate({
       id: category.id,
       name: categoryName,
+      price: +categoryPrice,
     });
   };
 
@@ -47,28 +54,31 @@ export default function EditCategory({
     <Container className="flex justify-center">
       <section className="flex flex-col gap-4 p-4 md:h-fit md:w-4/6 lg:h-fit lg:w-3/6 xl:w-2/5">
         <h1 className="text-lg font-bold">Edit Category - {category.name}</h1>
-        <Label className="my-4">
+        <Label className="flex flex-col gap-1">
           New name
           <Input
             className="my-2"
             value={categoryName}
             onChange={(e) => {
               setCategoryName(e.target.value);
-              if (error) {
-                setError(undefined);
-              }
             }}
+            placeholder="Enter here"
+          />
+        </Label>
+        <Label className="flex flex-col gap-1">
+          New price
+          <Input
+            className="my-2"
+            value={categoryPrice}
+            onChange={(e) => setCategoryPrice(e.target.value)}
+            placeholder="New price"
           />
         </Label>
 
         <div className="flex items-end justify-end gap-8">
           <Button
             onClick={() => void updateCategory()}
-            disabled={
-              updateCategoryApi.isLoading ||
-              categoryName.trim() === "" ||
-              categoryName === category.name
-            }
+            disabled={updateCategoryApi.isLoading}
           >
             Update category
           </Button>
@@ -77,12 +87,6 @@ export default function EditCategory({
           <div className="flex flex-col items-center justify-center rounded-lg border p-2">
             Updating Category {categoryName} ...
             <Loader2 className="animate-spin" />
-          </div>
-        )}
-
-        {error && (
-          <div className="rounded-lg border border-red-500 p-2 text-red-500">
-            {error}
           </div>
         )}
       </section>
