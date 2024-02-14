@@ -2,7 +2,12 @@ import { getServerAuthSession } from "@/server/auth";
 import { prisma } from "@/server/db";
 import { AccessType } from "@prisma/client";
 
-const predefinedAdmins = ["karthick72002@gmail.com"];
+const predefinedAdmins = [
+  "karthick72002@gmail.com",
+  "mynameisrizwan35@gmail.com",
+  "imnaveenbharath@gmail.com",
+  "loopers.nrj@gmail.com"
+];
 
 /**
  * Internal API to generate access types and roles.
