@@ -7,6 +7,9 @@ import { Accordion, AccordionContent, AccordionTrigger, AccordionItem } from "@/
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import BiddingButton from "../_components/BiddingButton";
+import { getServerAuthSession } from "@/server/auth";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 function lastSeen(lastActive: Date | null) {
   if (!lastActive) {
@@ -14,7 +17,10 @@ function lastSeen(lastActive: Date | null) {
   }
   const diff = Date.now() - lastActive.getTime();
   const minutes = Math.floor(diff / 60000);
-  if (minutes < 60) {
+  if (minutes < 1) {
+    return "Last seen just now";
+  }
+  else if (minutes < 60) {
     return `Last seen ${minutes} minutes ago`;
   }
   const hours = Math.floor(minutes / 60);
@@ -31,12 +37,13 @@ interface ProductPageParams {
 
 async function ProductPage({ params }: { params: ProductPageParams }) {
 
+  const session = await getServerAuthSession();
   const product = await api.product.bySlug.query({ productSlug: params.slug });
 
   return <>
     <Carousel>
       <CarouselContent className="w-full aspect-video overflow-hidden items-center justify-center m-0">
-        {product.images.map((image, i) => (
+        {product.images && product.images.map((image, i) => (
           <CarouselItem key={i} className="flex items-center h-full w-full p-0 bg-black">
             <Image src={image.url} width={400} height={400} className="w-full h-auto" alt="Product Image" />
           </CarouselItem>
@@ -60,7 +67,9 @@ async function ProductPage({ params }: { params: ProductPageParams }) {
           {" "}.{" "}
           <span className="text-sm text-gray-500">{product.createdAt.toLocaleDateString()}</span>
         </div>
-        <BiddingButton bids={ product.room.bids } />
+        { session && session.user ?
+          <BiddingButton roomId={product.room.id} bids={ product.room.bids } /> : 
+          <Button className="bg-sky-400 hover:bg-sky-500 font-bold text-white" variant="link" size="lg" asChild><Link href="/login">Login to Place a Bid</Link></Button> }
       </div>
       <Separator />
       <div className="my-5">
