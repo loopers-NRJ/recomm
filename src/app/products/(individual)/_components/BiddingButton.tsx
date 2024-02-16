@@ -35,13 +35,13 @@ function BiddingButton({bids, roomId }: { bids: Bidding[], roomId: string }) {
       onSuccess: (bid) => {
         console.log(bid)
         if (typeof bid === "string") {
-          return toast({ title: "Error placing bid", description: bid, })
+          return toast({ title: "Cannot place Bid", description: bid, })
         }
         setBids(prev => [...prev, bid])
       },
       onError: (e) => {
         toast({
-          title: "Error placing bid",
+          title: "Error place bid",
           description: e.message,
         })
       }

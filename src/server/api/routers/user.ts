@@ -290,6 +290,23 @@ export const userRouter = createTRPCRouter({
         };
       },
     ),
+
+  notifications: protectedProcedure
+    .query(
+      async ({ ctx: { prisma, session } }) => {
+        const id = session.user.id;
+        const updates = await prisma.product.findMany({
+          where: {
+            sellerId: id,
+          },
+          include: {
+            room: true,
+          },
+        });
+        return updates;
+      },
+    ),
+
   listingsById: publicProcedure
     .input(
       z.object({
