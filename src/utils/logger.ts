@@ -11,6 +11,7 @@ export type Logger = Record<LogLevel, (props: LoggerProps) => Promise<void>>;
 
 export function getLogger(db: PrismaClient): Logger {
   const addLogToDB = async (level: LogLevel, props: LoggerProps) => {
+    console[level](props.state, props.message, props.detail);
     await db.log.create({
       data: {
         level: level,
