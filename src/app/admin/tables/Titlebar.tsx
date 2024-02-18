@@ -17,7 +17,7 @@ export default function Titlebar() {
   const selectedState = useAdminSelectedState();
   const pathname = usePathname();
   const selectedTitle = pathname.replace("/admin/tables/", "");
-  if (selectedTitle === "logs") return;
+  if (selectedTitle === "logs" || selectedTitle.endsWith("coupons")) return;
   return (
     <div className="flex w-full items-center justify-between">
       <h1 className="pl-2 font-bold capitalize">
