@@ -6,15 +6,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-
-const plans = [
-  { label: "7 Days", value: "7" },
-  { label: "14 Days", value: "14" },
-  { label: "30 Days", value: "30" },
-] as const;
+import { type Plan, plans } from "@/utils/constants";
 
 interface BidDurationPickerProps {
-  onChange: (date: Date | undefined) => void;
+  onChange: (date?: Plan) => void;
 }
 
 const BidDurationPicker: FC<BidDurationPickerProps> = ({
@@ -22,11 +17,8 @@ const BidDurationPicker: FC<BidDurationPickerProps> = ({
 }) => {
   return (
     <Select
-      onValueChange={(value: (typeof plans)[number]["value"]) => {
-        const selected = value ?? plans[0].value;
-        const date = new Date();
-        date.setDate(date.getDate() + Number(selected));
-        handleChange(date);
+      onValueChange={(value: string) => {
+        handleChange(value ? (parseInt(value) as Plan) : undefined);
       }}
     >
       <SelectTrigger className="w-[180px]">
@@ -34,8 +26,8 @@ const BidDurationPicker: FC<BidDurationPickerProps> = ({
       </SelectTrigger>
       <SelectContent>
         {plans.map((plan) => (
-          <SelectItem key={plan.value} value={plan.value}>
-            {plan.label}
+          <SelectItem key={plan} value={plan.toString()}>
+            {plan} days
           </SelectItem>
         ))}
       </SelectContent>

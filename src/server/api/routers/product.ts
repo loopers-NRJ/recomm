@@ -193,180 +193,182 @@ export const productRouter = createTRPCRouter({
       return product as ProductWithIsFavorite;
     }),
   // createProduct: getProcedure(AccessType.seller)
-  create: protectedProcedure
-    .input(productSchema)
-    .mutation(
-      async ({
-        input: {
+  create: protectedProcedure.input(productSchema).mutation(
+    async ({
+      input: {
+        title,
+        price,
+        description,
+        images,
+        modelId,
+        bidDuration,
+        multipleChoiceAnswers: providedChoices,
+        atomicAnswers: providedAnswers,
+        // couponCode,
+      },
+      ctx: { prisma, session, logger },
+    }) => {
+      // creating the product will not happen in the trpc router.
+      // after implementing payment gateway, the product will be created there.
+      // this is just for placeholder.
+      const closedAt = new Date();
+      closedAt.setDate(closedAt.getDate() + Number(bidDuration));
+
+      const user = session.user;
+      const model = await prisma.model.findUnique({
+        where: {
+          id: modelId,
+        },
+        include: {
+          multipleChoiceQuestions: {
+            include: {
+              choices: true,
+            },
+          },
+          category: true,
+          atomicQuestions: true,
+        },
+      });
+      if (model === null) {
+        return "Model not found";
+      }
+
+      const isValidValues = validateMultipleChoiceQuestionInput(
+        model.multipleChoiceQuestions,
+        providedChoices,
+      );
+      if (isValidValues !== true) {
+        return "Invalid option";
+      }
+
+      const choiceValueIds: string[] = [];
+      providedChoices.forEach((choice) =>
+        choice.type === MultipleChoiceQuestionType.Checkbox
+          ? choiceValueIds.push(...choice.valueIds)
+          : choice.valueId && choiceValueIds.push(choice.valueId),
+      );
+
+      const isValidAnswers = validateAtomicQuestionAnswers(
+        model.atomicQuestions,
+        providedAnswers,
+      );
+
+      if (isValidAnswers !== true) {
+        return "Invalid answers";
+      }
+
+      const product = await prisma.product.create({
+        data: {
           title,
+          slug: slugify(title),
           price,
           description,
-          images,
-          modelId,
-          closedAt,
-          multipleChoiceAnswers: providedChoices,
-          atomicAnswers: providedAnswers,
+          images: {
+            createMany: {
+              data: images,
+            },
+          },
+          seller: {
+            connect: {
+              id: user.id,
+            },
+          },
+          model: {
+            connect: {
+              id: modelId,
+            },
+          },
+          room: {
+            create: {
+              closedAt,
+            },
+          },
+          selectedChoices: {
+            connect: choiceValueIds.map((id) => ({ id })),
+          },
+          answers: {
+            createMany: {
+              data: providedAnswers.map((answer) => ({
+                answerContent:
+                  answer.answerContent instanceof Date
+                    ? answer.answerContent.getTime().toString()
+                    : `${answer.answerContent}`,
+                questionId: answer.questionId,
+                modelId,
+              })),
+            },
+          },
         },
-        ctx: { prisma, session, logger },
-      }) => {
-        if (closedAt < new Date()) {
-          return "Closed at date must be in the future";
-        }
-        const user = session.user;
-        const model = await prisma.model.findUnique({
+        include: singleProductPayload.include,
+      });
+
+      const updateWishes = async () => {
+        // Updating all the wishes with the categoryId to available
+        await prisma.wish.updateMany({
           where: {
-            id: modelId,
-          },
-          include: {
-            multipleChoiceQuestions: {
-              include: {
-                choices: true,
-              },
+            brandId: model.brandId,
+            status: WishStatus.pending,
+            lowerBound: {
+              lte: price,
             },
-            category: true,
-            atomicQuestions: true,
+            upperBound: {
+              gte: price,
+            },
           },
-        });
-        if (model === null) {
-          return "Model not found";
-        }
-
-        const isValidValues = validateMultipleChoiceQuestionInput(
-          model.multipleChoiceQuestions,
-          providedChoices,
-        );
-        if (isValidValues !== true) {
-          return "Invalid option";
-        }
-
-        const choiceValueIds: string[] = [];
-        providedChoices.forEach((choice) =>
-          choice.type === MultipleChoiceQuestionType.Checkbox
-            ? choiceValueIds.push(...choice.valueIds)
-            : choice.valueId && choiceValueIds.push(choice.valueId),
-        );
-
-        const isValidAnswers = validateAtomicQuestionAnswers(
-          model.atomicQuestions,
-          providedAnswers,
-        );
-
-        if (isValidAnswers !== true) {
-          return "Invalid answers";
-        }
-
-        const product = await prisma.product.create({
           data: {
-            title,
-            slug: slugify(title),
-            price,
-            description,
-            images: {
-              createMany: {
-                data: images,
-              },
+            status: WishStatus.available,
+          },
+        });
+        // Updating all the wishes with the brandId to available
+        await prisma.wish.updateMany({
+          where: {
+            categoryId: model.categoryId,
+            status: WishStatus.pending,
+            lowerBound: {
+              lte: price,
             },
-            seller: {
-              connect: {
-                id: user.id,
-              },
-            },
-            model: {
-              connect: {
-                id: modelId,
-              },
-            },
-            room: {
-              create: {
-                closedAt,
-              },
-            },
-            selectedChoices: {
-              connect: choiceValueIds.map((id) => ({ id })),
-            },
-            answers: {
-              createMany: {
-                data: providedAnswers.map((answer) => ({
-                  answerContent:
-                    answer.answerContent instanceof Date
-                      ? answer.answerContent.getTime().toString()
-                      : `${answer.answerContent}`,
-                  questionId: answer.questionId,
-                  modelId,
-                })),
-              },
+            upperBound: {
+              gte: price,
             },
           },
-          include: singleProductPayload.include,
+          data: {
+            status: WishStatus.available,
+          },
         });
 
-        const updateWishes = async () => {
-          // Updating all the wishes with the categoryId to available
-          await prisma.wish.updateMany({
-            where: {
-              brandId: model.brandId,
-              status: WishStatus.pending,
-              lowerBound: {
-                lte: price,
-              },
-              upperBound: {
-                gte: price,
-              },
+        // Updating all the wishes with the modelId to available
+        await prisma.wish.updateMany({
+          where: {
+            modelId,
+            status: WishStatus.pending,
+            lowerBound: {
+              lte: price,
             },
-            data: {
-              status: WishStatus.available,
+            upperBound: {
+              gte: price,
             },
-          });
-          // Updating all the wishes with the brandId to available
-          await prisma.wish.updateMany({
-            where: {
-              categoryId: model.categoryId,
-              status: WishStatus.pending,
-              lowerBound: {
-                lte: price,
-              },
-              upperBound: {
-                gte: price,
-              },
-            },
-            data: {
-              status: WishStatus.available,
-            },
-          });
+          },
+          data: {
+            status: WishStatus.available,
+          },
+        });
+      };
 
-          // Updating all the wishes with the modelId to available
-          await prisma.wish.updateMany({
-            where: {
-              modelId,
-              status: WishStatus.pending,
-              lowerBound: {
-                lte: price,
-              },
-              upperBound: {
-                gte: price,
-              },
-            },
-            data: {
-              status: WishStatus.available,
-            },
-          });
-        };
-
-        void updateWishes().catch(async (error) => {
-          await logger.error({
+      void updateWishes().catch(async (error) => {
+        await logger.error({
+          message: "cannot update wishes",
+          detail: JSON.stringify({
+            procedure: "createProduct",
             message: "cannot update wishes",
-            detail: JSON.stringify({
-              procedure: "createProduct",
-              message: "cannot update wishes",
-              error,
-            }),
-            state: "common",
-          });
+            error,
+          }),
+          state: "common",
         });
+      });
 
-        return product;
-      },
-    ),
+      return product;
+    },
+  ),
 
   delete: getProcedure([AccessType.seller, AccessType.deleteProduct])
     .input(z.object({ productId: idSchema }))

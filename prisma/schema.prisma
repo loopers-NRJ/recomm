@@ -56,6 +56,10 @@ enum AccessType {
     updateCategory // allow to update category
     deleteCategory // allow to delete category
 
+    createCoupon // allow to create coupon
+    updateCoupon // allow to update coupon
+    deleteCoupon // allow to delete coupon
+
     createBrand // allow to create brand
     updateBrand // allow to update brand
     deleteBrand // allow to delete brand
@@ -130,6 +134,8 @@ model User {
     // admin level
     createdCategories              Category[]               @relation("categoryCreate")
     updatedCategories              Category[]               @relation("categoryUpdate")
+    createdCoupons                 Coupon[]                 @relation("couponCreate")
+    updatedCoupons                 Coupon[]                 @relation("couponUpdate")
     createdFeaturedCategories      FeaturedCategory[]       @relation("featureCreate")
     updatedFeaturedCategories      FeaturedCategory[]       @relation("featureUpdate")
     createdBrands                  Brand[]                  @relation("brandCreate")
@@ -206,6 +212,7 @@ model Category {
     parentCategoryId String?
     wishes           Wish[]
     models           Model[]
+    coupons          Coupon[]
     featuredCategory FeaturedCategory?
 
     // Meta
@@ -223,6 +230,33 @@ model Category {
     @@index([parentCategoryId])
     @@index([createdById])
     @@index([updatedById])
+}
+
+enum CouponType {
+    percentage
+    fixed
+}
+
+model Coupon {
+    id          String     @id @default(cuid())
+    code        String     @unique
+    discount    Float
+    type        CouponType
+    active      Boolean    @default(true)
+    state       State
+    category    Category?  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+    categoryId  String?
+    createdAt   DateTime   @default(now())
+    updatedAt   DateTime   @updatedAt
+    createdBy   User       @relation("couponCreate", fields: [createdById], references: [id])
+    updatedBy   User?      @relation("couponUpdate", fields: [updatedById], references: [id])
+    createdById String
+    updatedById String?
+    products    Product[]
+
+    @@index([createdById])
+    @@index([updatedById])
+    @@index([categoryId])
 }
 
 model FeaturedCategory {
@@ -409,6 +443,8 @@ model Product {
     sellerId        String
     buyer           User?          @relation("purchasedProducts", fields: [buyerId], references: [id], onDelete: SetNull)
     buyerId         String?
+    couponCode      Coupon?        @relation(fields: [couponCodeId], references: [id], onDelete: SetNull)
+    couponCodeId    String?
     favoritedUsers  User[]         @relation("favoriteProducts")
     room            Room           @relation(fields: [roomId], references: [id], onDelete: Restrict)
     roomId          String         @unique
@@ -421,6 +457,7 @@ model Product {
     @@index([modelId])
     @@index([buyerId])
     @@index([addressId])
+    @@index([couponCodeId])
 }
 
 model Room {

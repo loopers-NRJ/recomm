@@ -6,7 +6,7 @@ const predefinedAdmins = [
   "karthick72002@gmail.com",
   "mynameisrizwan35@gmail.com",
   "imnaveenbharath@gmail.com",
-  "loopers.nrj@gmail.com"
+  "loopers.nrj@gmail.com",
 ];
 
 /**
@@ -21,24 +21,39 @@ export async function GET() {
     });
   }
   try {
-    await prisma.role.deleteMany({});
-    await prisma.access.deleteMany({});
-    await prisma.access.createMany({
-      data: Object.keys(AccessType).map((key) => ({
-        type: AccessType[key as AccessType],
-      })),
+    for (const type of Object.values(AccessType)) {
+      await prisma.access.upsert({
+        where: { type: type as AccessType },
+        update: {},
+        create: { type: type as AccessType },
+      });
+    }
+    let role = await prisma.role.findFirst({
+      where: { name: "super admin" },
     });
-    const role = await prisma.role.create({
-      data: {
-        name: "super admin",
-        accesses: {
-          connect: Object.values(AccessType).map((type) => ({ type })),
+    if (!role) {
+      role = await prisma.role.create({
+        data: {
+          name: "super admin",
+          accesses: {
+            connect: Object.values(AccessType).map((type) => ({ type })),
+          },
+          createdBy: {
+            connect: { id: session.user.id },
+          },
         },
-        createdBy: {
-          connect: { id: session.user.id },
+      });
+    } else {
+      await prisma.role.update({
+        where: { id: role.id },
+        data: {
+          accesses: {
+            connect: Object.values(AccessType).map((type) => ({ type })),
+          },
         },
-      },
-    });
+      });
+    }
+
     await prisma.user.updateMany({
       where: { email: { in: predefinedAdmins } },
       data: { roleId: role.id },

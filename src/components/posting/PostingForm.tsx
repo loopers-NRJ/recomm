@@ -1,3 +1,5 @@
+"use client";
+
 import Container from "../Container";
 import Loading from "../common/Loading";
 import { Button } from "../ui/button";
@@ -9,6 +11,7 @@ import { type MultipleChoiceAnswer } from "./MultipleChoiceQuestion";
 import PricingInfoSection from "./PricingInfoSection";
 import { api } from "@/trpc/react";
 import { type OptionalItem } from "@/types/custom";
+import { type Plan } from "@/utils/constants";
 import { errorHandler } from "@/utils/errorHandler";
 import { useImageUploader } from "@/utils/imageUpload";
 import {
@@ -34,7 +37,8 @@ export default function PostingForm({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
-  const [bidEndTime, setBidEndTime] = useState<Date>();
+  const [couponCode, setCouponCode] = useState<string>();
+  const [bidDuration, setBidDuration] = useState<Plan>();
   const [images, setImages] = useState<File[]>([]);
 
   const [selectedBrand, setSelectedBrand] = useState<OptionalItem>();
@@ -172,9 +176,10 @@ export default function PostingForm({
       categoryId: selectedCategory.id,
       brandId: selectedBrand?.id,
       modelId: selectedModel?.id,
-      closedAt: bidEndTime,
+      closedAt: bidDuration,
       atomicAnswers,
       multipleChoiceAnswers,
+      couponCode,
     });
     if (!result.success) {
       const errors = result.error.issues.reduceRight<ProductFormError>(
@@ -282,7 +287,9 @@ export default function PostingForm({
         <PricingInfoSection
           price={price}
           setPrice={setPrice}
-          onBidDurationChange={setBidEndTime}
+          couponCode={couponCode}
+          setCouponCode={setCouponCode}
+          onBidDurationChange={setBidDuration}
           model={modelApi.data}
           formError={formError}
         />
@@ -297,8 +304,9 @@ export default function PostingForm({
     multipleChoiceAnswers,
     images,
     price,
-    bidEndTime,
+    bidDuration,
     formError,
+    couponCode,
   ]);
 
   if (
@@ -322,7 +330,6 @@ export default function PostingForm({
   }
 
   const selectedCategory = categoryApi.data;
-
   return (
     <Container className="flex flex-col items-center justify-center pb-40">
       <h1 className="my-4 text-center text-2xl font-bold">
