@@ -11,6 +11,8 @@ import {
   MultipleChoiceQuestionType,
   AtomicQuestionType,
 } from "@prisma/client";
+import { isAlphaNumeric } from "./functions";
+import { plans, plansSchema } from "./constants";
 
 export const idSchema = z
   .string({
@@ -31,6 +33,13 @@ export const imageInputs = z.object({
 });
 
 export type Image = z.infer<typeof imageInputs>;
+
+export const couponCodeSchema = z
+  .string()
+  .trim()
+  .min(4)
+  .max(16)
+  .refine(isAlphaNumeric, { message: "Invalid coupon code" });
 
 export const productSchema = z.object({
   title: z
@@ -78,12 +87,7 @@ export const productSchema = z.object({
     })
     .trim()
     .cuid({ message: "Something went wrong, try again." }),
-  closedAt: z
-    .date()
-    .default(() => new Date(Date.now() + 60 * 60 * 24 * 7))
-    .refine((date) => date.getTime() > Date.now(), {
-      message: "Date must be in the future",
-    }),
+  bidDuration: plansSchema.default(plans[0]),
   multipleChoiceAnswers: z
     .array(
       z.union([
@@ -211,6 +215,7 @@ export const productSchema = z.object({
       }),
     ]),
   ),
+  couponCode: couponCodeSchema.optional(),
 });
 
 export type ProductSchemaKeys = keyof Omit<

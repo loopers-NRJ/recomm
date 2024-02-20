@@ -110,7 +110,14 @@ export const categoryRouter = createTRPCRouter({
         limit: z.number().int().positive().max(maxLimit).default(defaultLimit),
         sortOrder: z.enum(["asc", "desc"]).default(defaultSortOrder),
         sortBy: z
-          .enum(["name", "price", "createdAt", "updatedAt", "active", "featured"])
+          .enum([
+            "name",
+            "price",
+            "createdAt",
+            "updatedAt",
+            "active",
+            "featured",
+          ])
           .default(defaultSortBy),
         cursor: idSchema.optional(),
         parentId: idSchema.nullish(),
@@ -231,6 +238,24 @@ export const categoryRouter = createTRPCRouter({
         });
         if (existingCategory !== null) {
           return `Category with name '${existingCategory.name}' already exists` as const;
+        }
+        if (parentCategoryId) {
+          const parentCategory = await prisma.category.findUnique({
+            where: {
+              id: parentCategoryId,
+            },
+            select: {
+              id: true,
+            },
+          });
+          if (parentCategory === null) {
+            return "Parent category not found" as const;
+          }
+          await prisma.coupon.deleteMany({
+            where: {
+              categoryId: parentCategoryId,
+            },
+          });
         }
         // creating the category
         const category = await prisma.category.create({

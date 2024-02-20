@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 // functionality
 export const defaultLimit = 30 as const;
 export const maxLimit = 100 as const;
@@ -20,3 +22,12 @@ export const deviceTypeHeaderName = "x-device-type" as const;
 export const maxImageCount = 5 as const;
 export const imageFieldName = "images" as const;
 export const maxImageSizeInMB = 10 as const;
+
+// bid duration plans
+export const plans = [7, 14, 30] as const;
+export const plansSchema = z.union([
+  z.literal(7),
+  z.literal(14),
+  z.literal(30),
+]);
+export type Plan = z.infer<typeof plansSchema>;

@@ -12,9 +12,29 @@
 - credit based
 - count and duration of selling a product for subscriber.
 - price field in category for seller to pay.
+
+- address adding option
 - create coupon code functionality -> only for sub categories
 - report option (entity and route only)
 
 # notes
 
 - If Bid.user is null. display to Product.user that the Bid.user deleted his account.
+
+# Naveen's Notification
+
+## notify after
+
+- after someone bid.
+- chat
+- after someone bid one their product.
+- wished product
+
+slug
+read or unread
+title
+createdAt
+
+- create
+- delete
+- updateReadStatus

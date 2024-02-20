@@ -234,16 +234,34 @@ export default function CategoryTable() {
         ),
       },
       {
+        id: "coupons",
+        header: "Coupons",
+        cell: ({ row }) =>
+          row.original._count.subCategories === 0 ? (
+            <Link
+              href={`/admin/tables/category/${row.original.id}/coupons`}
+              className="text-blue-400 hover:text-blue-600"
+            >
+              Coupons
+            </Link>
+          ) : (
+            "N/A"
+          ),
+      },
+      {
         id: "products",
         header: "Products",
-        cell: ({ row }) => (
-          <Link
-            href={`/admin/tables/products?category=${row.original.id}`}
-            className="text-blue-400 hover:text-blue-600"
-          >
-            Products
-          </Link>
-        ),
+        cell: ({ row }) =>
+          row.original._count.subCategories === 0 ? (
+            <Link
+              href={`/admin/tables/products?category=${row.original.id}`}
+              className="text-blue-400 hover:text-blue-600"
+            >
+              Products
+            </Link>
+          ) : (
+            "N/A"
+          ),
       },
       {
         id: "brands",
@@ -263,14 +281,17 @@ export default function CategoryTable() {
       {
         id: "models",
         header: "Models",
-        cell: ({ row }) => (
-          <Link
-            href={`/admin/tables/models?category=${row.original.id}`}
-            className="text-blue-400 hover:text-blue-600"
-          >
-            Models
-          </Link>
-        ),
+        cell: ({ row }) =>
+          row.original._count.subCategories === 0 ? (
+            <Link
+              href={`/admin/tables/models?category=${row.original.id}`}
+              className="text-blue-400 hover:text-blue-600"
+            >
+              Models
+            </Link>
+          ) : (
+            "N/A"
+          ),
       },
       {
         id: "createdAt",

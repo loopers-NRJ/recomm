@@ -214,6 +214,10 @@ export const accessTypes = [
 
   AccessType.viewLogs,
   AccessType.clearLogs,
+
+  AccessType.createCoupon,
+  AccessType.updateCoupon,
+  AccessType.deleteCoupon,
 ] as const;
 
 export const hasAdminPageAccess = (accesses: AccessType[] = []) =>
