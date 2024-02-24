@@ -164,6 +164,17 @@ export const wishPayload = Prisma.validator<Prisma.WishDefaultArgs>()({
 
 export type WishPayloadIncluded = Prisma.WishGetPayload<typeof wishPayload>;
 
+export const reportPayload = Prisma.validator<Prisma.ReportDefaultArgs>()({
+  include: {
+    product: true,
+    user: true,
+  },
+});
+
+export type ReportPayloadIncluded = Prisma.ReportGetPayload<
+  typeof reportPayload
+>;
+
 export const multipleChoiceQuestionTypeArray = [
   MultipleChoiceQuestionType.Checkbox,
   MultipleChoiceQuestionType.Dropdown,
@@ -218,6 +229,9 @@ export const accessTypes = [
   AccessType.createCoupon,
   AccessType.updateCoupon,
   AccessType.deleteCoupon,
+
+  AccessType.viewReports,
+  AccessType.deleteReport,
 ] as const;
 
 export const hasAdminPageAccess = (accesses: AccessType[] = []) =>

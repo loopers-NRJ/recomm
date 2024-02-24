@@ -9,12 +9,15 @@
 
 # New Features
 
+## Future
+
 - credit based
 - count and duration of selling a product for subscriber.
 - price field in category for seller to pay.
 
+## Need to be done now
+
 - address adding option
-- create coupon code functionality -> only for sub categories
 - report option (entity and route only)
 
 # notes

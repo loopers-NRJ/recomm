@@ -12,6 +12,9 @@ export type SortBy = "name" | "createdAt";
 // featured Category
 export const maxFeaturedCategory = 12 as const;
 
+// max address per user
+export const maxAddressCount = 5 as const;
+
 // headers labels
 export const requestPathHeaderName = "x-forwarded-path" as const;
 export const adminPageRegex = /\/admin\//g;
