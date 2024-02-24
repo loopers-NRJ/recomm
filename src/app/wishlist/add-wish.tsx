@@ -12,15 +12,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTrigger } from "@/components/ui/drawer";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
 function AddWish() {
   const [selectedCategory, setSelectedCategory] = useState<OptionalItem>();
   const [selectedBrand, setSelectedBrand] = useState<OptionalItem>();
   const [selectedModel, setSelectedModel] = useState<OptionalItem>();
-  const [upperBound, setUpperbound] = useState<string>();
-  const [lowerBound, setLowerbound] = useState<string>();
+  const [upperBound, setUpperbound] = useState<string>("");
+  const [lowerBound, setLowerbound] = useState<string>("");
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const router = useRouter()
-  const { mutateAsync: createWish } = api.wish.create.useMutation();
+  const { mutateAsync: createWish, isLoading } = api.wish.create.useMutation();
 
   const handleClick = async () => {
     try {
@@ -36,7 +38,7 @@ function AddWish() {
         return toast.error("Select the Model");
       }
 
-      if (lowerBound === undefined || upperBound === undefined) {
+      if (lowerBound === "" || upperBound === "") {
         return toast.error("Enter the price range");
       }
 
@@ -48,11 +50,13 @@ function AddWish() {
 
       if (typeof result === "string") {
         toast.success(result);
-      }
-      else {
+      } else {
         toast.success("Wish added successfully");
       }
+
+      setIsOpen(false);
       router.refresh();
+
     } catch (error) {
       if (error instanceof Error)
         return toast.error(error.message);
@@ -61,7 +65,7 @@ function AddWish() {
     }
   };
   return (
-    <Drawer>
+    <Drawer open={isOpen} onOpenChange={setIsOpen}>
       <DrawerTrigger asChild>
         <Button size="sm">Create a Wish</Button>
       </DrawerTrigger>
@@ -103,7 +107,10 @@ function AddWish() {
           </Label>
         </div>
         <DrawerFooter className="flex flex-row">
-          <Button className="w-full" onClick={() => void handleClick()}>Add to List</Button>
+          <Button className="w-full" onClick={() => void handleClick()}>
+            {isLoading && <Loader2 className="animate-spin mx-1"/>}
+            Add to List
+          </Button>
           <DrawerClose className="w-full px-4 py-2 bg-secondary border rounded-lg text-sm font-medium">Close</DrawerClose>
         </DrawerFooter>
       </DrawerContent>
