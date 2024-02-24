@@ -5,7 +5,7 @@ import { AccessType } from "@prisma/client";
 import { Accordion } from "@/components/ui/accordion";
 import Container from "@/components/Container";
 import { api } from "@/trpc/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import AccordionSection, { type Processing } from "./AccordionSection";
 import type { RolePayloadIncluded } from "@/types/prisma";
 import { useRouter } from "next/navigation";
@@ -58,17 +58,6 @@ export default function EditRole({ role }: { role: RolePayloadIncluded }) {
 
   const selectedRoles = role.accesses.map((access) => access.type);
 
-  /**
-   * This is a temporary solution to prevent hydration error:
-   * Using Checkbox inside AccordionSection cause hydration error in nextjs
-   * follow this issue: https://github.com/shadcn-ui/ui/issues/1273
-   */
-  const [isMounted, setIsMounted] = useState(false);
-  useEffect(() => {
-    setIsMounted(true);
-    return () => setIsMounted(false);
-  }, []);
-  if (!isMounted) return null;
 
   return (
     <Container className="flex justify-center">
