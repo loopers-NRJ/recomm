@@ -33,9 +33,9 @@ function Wishes() {
     },
   );
 
-  useEffect(() => {
-    void wishesApi.refetch();
-  }, [wishesApi, session.status]);
+  // useEffect(() => {
+  //   void wishesApi.refetch();
+  // }, [wishesApi, session.status]);
 
   if (wishesApi.isLoading) {
     return <LoadingWishes />;
@@ -60,18 +60,18 @@ function Wishes() {
           <WishCard wish={wish} key={wish.id} />
         ))}
       </div>
-      {!wishesApi.isLoading && wishesApi.isFetching && <Loading />}
-      <Button
-        className="mt-8 self-end"
-        onClick={() => {
-          void wishesApi.fetchNextPage();
-        }}
-        disabled={!wishesApi.hasNextPage}
-        variant="ghost"
-      >
-        View More
-      </Button>
     </div>
   );
 }
+      // {!wishesApi.isLoading && wishesApi.isFetching && <Loading />}
+      // <Button
+      //   className="mt-8 self-end"
+      //   onClick={() => {
+      //     void wishesApi.fetchNextPage();
+      //   }}
+      //   disabled={!wishesApi.hasNextPage}
+      //   variant="ghost"
+      // >
+      //   View More
+      // </Button>
 export default Wishes;
