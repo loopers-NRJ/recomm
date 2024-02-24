@@ -43,7 +43,7 @@ async function ProductPage({ params }: { params: ProductPageParams }) {
   return <>
     <Carousel>
       <CarouselContent className="w-full aspect-video overflow-hidden items-center justify-center m-0">
-        {product.images && product.images.map((image, i) => (
+        {product.images?.map((image, i) => (
           <CarouselItem key={i} className="flex items-center h-full w-full p-0 bg-black">
             <Image src={image.url} width={400} height={400} className="w-full h-auto" alt="Product Image" />
           </CarouselItem>

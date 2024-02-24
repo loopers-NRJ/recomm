@@ -10,7 +10,7 @@ export type SortOrder = "asc" | "desc";
 export type SortBy = "name" | "createdAt";
 
 // featured Category
-export const maxFeaturedCategory = 12 as const;
+export const maxFeaturedCategory = 8 as const;
 
 // max address per user
 export const maxAddressCount = 5 as const;
