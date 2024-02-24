@@ -197,7 +197,6 @@ export const allQuestionTypes = [
 export type AllQuestionType = (typeof allQuestionTypes)[number];
 
 export const accessTypes = [
-  AccessType.seller,
   AccessType.primeSeller,
 
   AccessType.createCategory,
@@ -232,14 +231,17 @@ export const accessTypes = [
 
   AccessType.viewReports,
   AccessType.deleteReport,
+
+  AccessType.viewAppConfiguration,
+  AccessType.updateAppConfiguration,
 ] as const;
 
+export const [primeSeller, ...superAdminAccesses] = accessTypes;
+export type SuperAdminAccesses = (typeof superAdminAccesses)[number];
 export const hasAdminPageAccess = (accesses: AccessType[] = []) =>
   accesses.some(
     (access) =>
-      accessTypes.includes(access) &&
-      access !== AccessType.seller &&
-      access !== AccessType.primeSeller,
+      accessTypes.includes(access) && access !== AccessType.primeSeller,
   );
 
 export const states = [

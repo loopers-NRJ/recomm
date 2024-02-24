@@ -69,7 +69,7 @@ export default function EditRole({ role }: { role: RolePayloadIncluded }) {
         <Accordion type="single" collapsible>
           <AccordionSection
             title="general"
-            types={[AccessType.seller, AccessType.primeSeller]}
+            types={[AccessType.primeSeller]}
             processing={processing}
             selectedRoles={selectedRoles}
             handleCheckedChange={handleCheckedChange}
@@ -135,6 +135,23 @@ export default function EditRole({ role }: { role: RolePayloadIncluded }) {
           <AccordionSection
             title="log"
             types={[AccessType.viewLogs, AccessType.clearLogs]}
+            processing={processing}
+            selectedRoles={selectedRoles}
+            handleCheckedChange={handleCheckedChange}
+          />
+          <AccordionSection
+            title="report"
+            types={[AccessType.viewReports, AccessType.deleteReport]}
+            processing={processing}
+            selectedRoles={selectedRoles}
+            handleCheckedChange={handleCheckedChange}
+          />
+          <AccordionSection
+            title="configuration"
+            types={[
+              AccessType.viewAppConfiguration,
+              AccessType.updateAppConfiguration,
+            ]}
             processing={processing}
             selectedRoles={selectedRoles}
             handleCheckedChange={handleCheckedChange}

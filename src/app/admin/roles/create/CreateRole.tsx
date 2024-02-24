@@ -71,7 +71,7 @@ export default function CreateRole() {
         <Accordion type="single" collapsible>
           <AccordionSection
             title="general"
-            types={[AccessType.seller, AccessType.primeSeller]}
+            types={[AccessType.primeSeller]}
             selectedRoles={selectedRoles}
             handleCheckedChange={handleCheckedChange}
           />
@@ -132,6 +132,21 @@ export default function CreateRole() {
           <AccordionSection
             title="log"
             types={[AccessType.viewLogs, AccessType.clearLogs]}
+            selectedRoles={selectedRoles}
+            handleCheckedChange={handleCheckedChange}
+          />
+          <AccordionSection
+            title="report"
+            types={[AccessType.viewReports, AccessType.deleteReport]}
+            selectedRoles={selectedRoles}
+            handleCheckedChange={handleCheckedChange}
+          />
+          <AccordionSection
+            title="configuration"
+            types={[
+              AccessType.viewAppConfiguration,
+              AccessType.updateAppConfiguration,
+            ]}
             selectedRoles={selectedRoles}
             handleCheckedChange={handleCheckedChange}
           />

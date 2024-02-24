@@ -26,10 +26,20 @@ import { errorHandler } from "@/utils/errorHandler";
 import { type ReportPayloadIncluded } from "@/types/prisma";
 import TableHeader from "../../../TableHeader";
 import Searchbar from "../../../Searchbar";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 
 type SortBy = OmitUndefined<RouterInputs["report"]["all"]["sortBy"]>;
 
-export default function ReportTable() {
+export default function ReportTable({ productId }: { productId: string }) {
   const [sortBy, setSortBy] = useQueryState(
     "sortBy",
     parseAsStringEnum<SortBy>([
@@ -53,6 +63,7 @@ export default function ReportTable() {
       search,
       sortBy,
       sortOrder,
+      productId,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -109,6 +120,26 @@ export default function ReportTable() {
       {
         id: "Description",
         header: "Description",
+        cell: ({ row }) => (
+          <Drawer>
+            <DrawerTrigger asChild>
+              <Button variant="outline">View</Button>
+            </DrawerTrigger>
+            <DrawerContent>
+              <DrawerHeader>
+                <DrawerTitle>Report By {row.original.user.name}</DrawerTitle>
+                <DrawerDescription>
+                  {row.original.description}
+                </DrawerDescription>
+              </DrawerHeader>
+              <DrawerFooter>
+                <DrawerClose>
+                  <Button>Close</Button>
+                </DrawerClose>
+              </DrawerFooter>
+            </DrawerContent>
+          </Drawer>
+        ),
         accessorFn: (row) => row.description,
       },
       {

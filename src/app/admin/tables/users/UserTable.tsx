@@ -30,10 +30,15 @@ import { useMemo, useState } from "react";
 import Searchbar from "../Searchbar";
 import TableHeader from "../TableHeader";
 import { errorHandler } from "@/utils/errorHandler";
+import { AdminButtonLink } from "@/components/common/ButtonLink";
 
 type SortBy = OmitUndefined<RouterInputs["user"]["all"]["sortBy"]>;
 
-export default function UserTable() {
+export default function UserTable({
+  canAccessConfiguration = false,
+}: {
+  canAccessConfiguration: boolean;
+}) {
   const [sortOrder, setSortOrder] = useQueryState<SortOrder>(
     "sortOrder",
     parseAsStringEnum(["asc", "desc"]).withDefault(defaultSortOrder),
@@ -261,6 +266,11 @@ export default function UserTable() {
             </SelectContent>
           </Select>
         </Label>
+        {canAccessConfiguration && (
+          <AdminButtonLink href="/admin/configurations">
+            Configurations
+          </AdminButtonLink>
+        )}
       </div>
       <DataTable
         columns={columns}
