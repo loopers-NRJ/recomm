@@ -1,7 +1,6 @@
 import { states } from "@/types/prisma";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { z } from "zod";
-import { maxAddressCount } from "@/utils/constants";
 import { idSchema } from "@/utils/validation";
 
 export const addressRouter = createTRPCRouter({
@@ -49,7 +48,18 @@ export const addressRouter = createTRPCRouter({
           userId: session.user.id,
         },
       });
-      if (count > maxAddressCount) {
+      const maxAddressCount = await prisma.appConfiguration.findUnique({
+        where: {
+          key: "maxAddressCount",
+        },
+        select: {
+          value: true,
+        },
+      });
+      if (!maxAddressCount?.value || isNaN(Number(maxAddressCount?.value))) {
+        return "Invalid Max Address Count" as const;
+      }
+      if (count > Number(maxAddressCount.value)) {
         return "You can't add more than 5 addresses" as const;
       }
 
