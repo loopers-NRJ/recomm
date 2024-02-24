@@ -11,6 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Slider } from "./_components/slider";
 import { type OptionalItem } from "@/types/custom";
 import { api } from "@/trpc/react";
 import toast from "react-hot-toast";
@@ -20,10 +21,9 @@ import ModelComboBox from "@/components/combobox/ModelComboBox";
 
 const AddWish: FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<OptionalItem>();
-
   const [selectedBrand, setSelectedBrand] = useState<OptionalItem>();
-
   const [selectedModel, setSelectedModel] = useState<OptionalItem>();
+  const [sliderValue, setSliderValue] = useState<number[]>([30, 70]);
 
   const { mutateAsync: createWish } = api.wish.create.useMutation();
 
@@ -41,11 +41,10 @@ const AddWish: FC = () => {
         return toast.error("Select the Model");
       }
 
-      // TODO: @naveen create ui to get the lower and upper bound
       const result = await createWish({
         modelId: selectedModel.id,
-        lowerBound: 0,
-        upperBound: 0,
+        lowerBound: sliderValue[0]!,
+        upperBound: sliderValue[1]!,
       });
 
       console.log(result);
@@ -100,6 +99,7 @@ const AddWish: FC = () => {
             brandId={selectedBrand?.id}
             categoryId={selectedCategory?.id}
           />
+          <Slider defaultValue={sliderValue} onChange={setSliderValue} />
         </div>
         <DialogFooter>
           <Button type="submit" onClick={() => void handleClick()}>
