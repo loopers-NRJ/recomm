@@ -82,6 +82,9 @@ enum AccessType {
     viewLogs // allow to view logs
     clearLogs // allow to clear logs
 
+    viewReports // allow to view reports
+    deleteReport // allow to delete reports
+
     // update types/prisma.ts when adding new access type
 }
 
@@ -147,6 +150,7 @@ model User {
     updatedAtomicQuestions         AtomicQuestion[]         @relation("atomicQuestionUpdate")
     createdRoles                   Role[]                   @relation("roleCreate")
     updatedRoles                   Role[]                   @relation("roleUpdate")
+    reportedProducts               Report[]
 
     @@index([roleId])
 }
@@ -448,6 +452,7 @@ model Product {
     favoritedUsers  User[]         @relation("favoriteProducts")
     room            Room           @relation(fields: [roomId], references: [id], onDelete: Restrict)
     roomId          String         @unique
+    reports         Report[]
 
     // Meta
     createdAt DateTime @default(now())
@@ -458,6 +463,20 @@ model Product {
     @@index([buyerId])
     @@index([addressId])
     @@index([couponCodeId])
+}
+
+model Report {
+    id          String   @id @default(cuid())
+    product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+    productId   String
+    user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId      String
+    description String
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    @@index([productId])
+    @@index([userId])
 }
 
 model Room {

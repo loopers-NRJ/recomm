@@ -130,6 +130,18 @@ export default function ProductTable() {
         accessorFn: (row) => row.seller.name,
       },
       {
+        id: "report",
+        header: "Reports",
+        cell: ({ row }) => (
+          <Link
+            href={`/admin/tables/products/${row.original.id}/reports`}
+            className="text-blue-400 hover:text-blue-600"
+          >
+            Reports
+          </Link>
+        ),
+      },
+      {
         id: "category",
         header: "Category",
         cell: ({ row }) => (
@@ -137,7 +149,7 @@ export default function ProductTable() {
             href={`/admin/tables/category/${row.original.model.category.slug}=${row.original.model.category.id}`}
             className="text-blue-400 hover:text-blue-600"
           >
-            {row.original.model.category.name}
+            Category
           </Link>
         ),
       },
@@ -149,7 +161,7 @@ export default function ProductTable() {
             href={`/admin/tables/models/${row.original.model.id}`}
             className="text-blue-400 hover:text-blue-600"
           >
-            {row.original.model.name}
+            Models
           </Link>
         ),
       },
@@ -161,7 +173,7 @@ export default function ProductTable() {
             href={`/admin/tables/brands/${row.original.model.brand.id}`}
             className="text-blue-400 hover:text-blue-600"
           >
-            {row.original.model.brand.name}
+            Brands
           </Link>
         ),
       },

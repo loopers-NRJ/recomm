@@ -13,11 +13,23 @@ import type { State } from "@prisma/client";
 import { useAdminSelectedState } from "@/store/SelectedState";
 import { usePathname } from "next/navigation";
 
+function filterAndRenameTitle(title: string) {
+  if (title.endsWith("reports")) {
+    title = "Reports";
+  }
+  if (title.endsWith("coupons")) {
+    title = "Coupons";
+  }
+  return title;
+}
+
 export default function Titlebar() {
   const selectedState = useAdminSelectedState();
   const pathname = usePathname();
-  const selectedTitle = pathname.replace("/admin/tables/", "");
-  if (selectedTitle === "logs" || selectedTitle.endsWith("coupons")) return;
+  const selectedTitle = filterAndRenameTitle(
+    pathname.replace("/admin/tables/", ""),
+  );
+  if (selectedTitle === "logs") return;
   return (
     <div className="flex w-full items-center justify-between">
       <h1 className="pl-2 font-bold capitalize">
