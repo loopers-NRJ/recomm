@@ -151,6 +151,7 @@ model User {
     createdRoles                   Role[]                   @relation("roleCreate")
     updatedRoles                   Role[]                   @relation("roleUpdate")
     reportedProducts               Report[]
+    notifications                  Notification[]
 
     @@index([roleId])
 }
@@ -463,6 +464,20 @@ model Product {
     @@index([buyerId])
     @@index([addressId])
     @@index([couponCodeId])
+}
+
+model Notification {
+    id          String  @id @default(cuid())
+    title       String
+    description String?
+    link        String?
+    read        Boolean @default(false)
+
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId    String
+    createdAt DateTime @default(now())
+
+    @@index([userId])
 }
 
 model Report {

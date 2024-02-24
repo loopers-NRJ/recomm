@@ -26,12 +26,27 @@ import { useMemo, useState } from "react";
 import Searchbar from "../Searchbar";
 import TableHeader from "../TableHeader";
 import { errorHandler } from "@/utils/errorHandler";
+import { Switch } from "@/components/ui/switch";
 
 type SortBy = OmitUndefined<RouterInputs["product"]["all"]["sortBy"]>;
 
 export default function ProductTable() {
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
+  const [updatingProductId, setUpdatingProductId] = useState<string>();
+
+  const updateProduct = api.product.update.useMutation({
+    onMutate: (variables) => {
+      setUpdatingProductId(variables.id);
+    },
+    onSuccess: () => {
+      void productApi.refetch();
+    },
+    onError: errorHandler,
+    onSettled: () => {
+      setUpdatingProductId(undefined);
+    },
+  });
 
   const [sortBy, setSortBy] = useQueryState(
     "sortBy",
@@ -117,6 +132,31 @@ export default function ProductTable() {
         accessorFn: (row) => row.price,
       },
       {
+        id: "active",
+        header: () => (
+          <TableHeader
+            title="active"
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
+            setSortOrder={(sortOrder) => void setSortOrder(sortOrder)}
+          />
+        ),
+        cell: ({ row }) => (
+          <Switch
+            disabled={updatingProductId === row.original.id}
+            checked={row.original.active}
+            className="data-[state=checked]:bg-blue-500"
+            onCheckedChange={() => {
+              updateProduct.mutate({
+                id: row.original.id,
+                active: !row.original.active,
+              });
+            }}
+          />
+        ),
+      },
+      {
         id: "seller",
         header: () => (
           <TableHeader
@@ -130,6 +170,21 @@ export default function ProductTable() {
         accessorFn: (row) => row.seller.name,
       },
       {
+        id: "CategoryName",
+        header: "Category",
+        accessorFn: (row) => row.model.category.name,
+      },
+      {
+        id: "ModelName",
+        header: "Model",
+        accessorFn: (row) => row.model.name,
+      },
+      {
+        id: "BrandName",
+        header: "Brand",
+        accessorFn: (row) => row.model.brand.name,
+      },
+      {
         id: "report",
         header: "Reports",
         cell: ({ row }) => (
@@ -141,42 +196,42 @@ export default function ProductTable() {
           </Link>
         ),
       },
-      {
-        id: "category",
-        header: "Category",
-        cell: ({ row }) => (
-          <Link
-            href={`/admin/tables/category/${row.original.model.category.slug}=${row.original.model.category.id}`}
-            className="text-blue-400 hover:text-blue-600"
-          >
-            Category
-          </Link>
-        ),
-      },
-      {
-        id: "model",
-        header: "Model",
-        cell: ({ row }) => (
-          <Link
-            href={`/admin/tables/models/${row.original.model.id}`}
-            className="text-blue-400 hover:text-blue-600"
-          >
-            Models
-          </Link>
-        ),
-      },
-      {
-        id: "brand",
-        header: "Brand",
-        cell: ({ row }) => (
-          <Link
-            href={`/admin/tables/brands/${row.original.model.brand.id}`}
-            className="text-blue-400 hover:text-blue-600"
-          >
-            Brands
-          </Link>
-        ),
-      },
+      // {
+      //   id: "category",
+      //   header: "Category",
+      //   cell: ({ row }) => (
+      //     <Link
+      //       href={`/admin/tables/category/${row.original.model.category.slug}=${row.original.model.category.id}`}
+      //       className="text-blue-400 hover:text-blue-600"
+      //     >
+      //       Category
+      //     </Link>
+      //   ),
+      // },
+      // {
+      //   id: "model",
+      //   header: "Model",
+      //   cell: ({ row }) => (
+      //     <Link
+      //       href={`/admin/tables/models/${row.original.model.id}`}
+      //       className="text-blue-400 hover:text-blue-600"
+      //     >
+      //       Models
+      //     </Link>
+      //   ),
+      // },
+      // {
+      //   id: "brand",
+      //   header: "Brand",
+      //   cell: ({ row }) => (
+      //     <Link
+      //       href={`/admin/tables/brands/${row.original.model.brand.id}`}
+      //       className="text-blue-400 hover:text-blue-600"
+      //     >
+      //       Brands
+      //     </Link>
+      //   ),
+      // },
       {
         id: "createdAt",
         header: () => (

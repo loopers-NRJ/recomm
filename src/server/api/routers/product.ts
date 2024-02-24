@@ -9,7 +9,7 @@ import {
 import {
   AccessType,
   MultipleChoiceQuestionType,
-  WishStatus,
+  type User,
 } from "@prisma/client";
 
 import slugify from "@/lib/slugify";
@@ -26,6 +26,8 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "../trpc";
+import { updateWishStatus } from "../updateWishStatus";
+import { api } from "@/trpc/server";
 
 export const productRouter = createTRPCRouter({
   all: publicProcedure
@@ -69,6 +71,8 @@ export const productRouter = createTRPCRouter({
         const products = await prisma.product.findMany({
           where: {
             modelId,
+            isDeleted: isAdminPage ? undefined : false,
+            active: isAdminPage ? undefined : true,
             model: {
               active: isAdminPage ? undefined : true,
               category: {
@@ -302,73 +306,49 @@ export const productRouter = createTRPCRouter({
         include: singleProductPayload.include,
       });
 
-      const updateWishes = async () => {
-        // Updating all the wishes with the categoryId to available
-        await prisma.wish.updateMany({
-          where: {
-            brandId: model.brandId,
-            status: WishStatus.pending,
-            lowerBound: {
-              lte: price,
-            },
-            upperBound: {
-              gte: price,
-            },
-          },
-          data: {
-            status: WishStatus.available,
-          },
-        });
-        // Updating all the wishes with the brandId to available
-        await prisma.wish.updateMany({
-          where: {
-            categoryId: model.categoryId,
-            status: WishStatus.pending,
-            lowerBound: {
-              lte: price,
-            },
-            upperBound: {
-              gte: price,
-            },
-          },
-          data: {
-            status: WishStatus.available,
-          },
-        });
-
-        // Updating all the wishes with the modelId to available
-        await prisma.wish.updateMany({
-          where: {
-            modelId,
-            status: WishStatus.pending,
-            lowerBound: {
-              lte: price,
-            },
-            upperBound: {
-              gte: price,
-            },
-          },
-          data: {
-            status: WishStatus.available,
-          },
-        });
-      };
-
-      void updateWishes().catch(async (error) => {
-        await logger.error({
-          message: "cannot update wishes",
-          detail: JSON.stringify({
-            procedure: "createProduct",
-            message: "cannot update wishes",
-            error,
-          }),
-          state: "common",
-        });
+      await logger.info({
+        message: `${product.seller.name} created a new product: '${product.title}'`,
+        state: product.model.createdState,
+        detail: JSON.stringify({ productId: product.id }),
       });
+
+      updateWishStatus(prisma, product);
 
       return product;
     },
   ),
+  update: protectedProcedure
+    .input(z.object({ id: idSchema, active: z.boolean() }))
+    .mutation(async ({ input: { id, active }, ctx: { prisma, session } }) => {
+      const user = session.user;
+      const existingProduct = await prisma.product.findUnique({
+        where: {
+          id,
+        },
+        include: {
+          seller: true,
+        },
+      });
+      if (existingProduct === null) {
+        return "Product not found";
+      }
+      if (!(await isAuthorizedToUpdate(existingProduct.seller, user))) {
+        return "You are not the authorized of this product";
+      }
+      if (existingProduct.buyerId !== null) {
+        return "Product is already sold";
+      }
+      const updatedProduct = await prisma.product.update({
+        where: {
+          id,
+        },
+        data: {
+          active,
+        },
+        include: singleProductPayload.include,
+      });
+      return updatedProduct;
+    }),
 
   delete: getProcedure([AccessType.seller, AccessType.deleteProduct])
     .input(z.object({ productId: idSchema }))
@@ -508,3 +488,18 @@ export const productRouter = createTRPCRouter({
       },
     ),
 });
+
+async function isAuthorizedToUpdate(productSeller: User, user: User) {
+  if (productSeller.id === user.id) {
+    return true;
+  }
+  if (!user.roleId) {
+    return false;
+  }
+  const role = await api.role.byId.query({ id: user.roleId });
+  if (role === null) {
+    return false;
+  }
+  const accessTypes = role.accesses.map((access) => access.type);
+  return accessTypes.includes(AccessType.updateProduct);
+}

@@ -21,16 +21,18 @@ export const reportRouter = createTRPCRouter({
           .enum(["productName", "userName", "createdAt", "updatedAt"])
           .default(defaultSortBy),
         cursor: idSchema.optional(),
+        productId: idSchema,
       }),
     )
     .query(
       async ({
-        input: { search, limit, sortOrder, sortBy, cursor },
+        input: { productId, search, limit, sortOrder, sortBy, cursor },
         ctx: { prisma },
       }) => {
         const reports = await prisma.report.findMany({
           where: {
             product: {
+              id: productId,
               title: {
                 contains: search,
               },
