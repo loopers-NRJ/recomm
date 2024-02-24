@@ -11,6 +11,7 @@ import { wishRouter } from "./routers/wish";
 import { RoleRouter } from "./routers/role";
 import { logRouter } from "./routers/log";
 import { couponRouter } from "./routers/coupon";
+import { reportRouter } from "./routers/report";
 
 /**
  * This is the primary router for your server.
@@ -29,6 +30,7 @@ export const appRouter = createTRPCRouter({
   search: searchRouter,
   log: logRouter,
   coupon: couponRouter,
+  report: reportRouter,
 });
 
 // export type definition of API
