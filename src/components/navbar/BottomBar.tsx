@@ -39,7 +39,7 @@ const BottomBar: FC<BottomBarProps> = () => {
         className={pathname === "/" ? highlight : ""}
       >
         <span className="text-xl">{HomeIcon}</span>
-        <span className="text-xs md:text-sm">Home</span>
+        <span className="text-xs md:text-sm">home</span>
       </ButtonLink>
       <ButtonLink
         href="/favourites"
