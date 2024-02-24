@@ -20,12 +20,7 @@ import {
   defaultSortOrder,
   maxLimit,
 } from "@/utils/constants";
-import {
-  createTRPCRouter,
-  getProcedure,
-  protectedProcedure,
-  publicProcedure,
-} from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { updateWishStatus } from "../updateWishStatus";
 import { api } from "@/trpc/server";
 
@@ -332,7 +327,7 @@ export const productRouter = createTRPCRouter({
       if (existingProduct === null) {
         return "Product not found";
       }
-      if (!(await isAuthorizedToUpdate(existingProduct.seller, user))) {
+      if (!(await isAuthorized(existingProduct.seller, user))) {
         return "You are not the authorized of this product";
       }
       if (existingProduct.buyerId !== null) {
@@ -350,7 +345,7 @@ export const productRouter = createTRPCRouter({
       return updatedProduct;
     }),
 
-  delete: getProcedure([AccessType.seller, AccessType.deleteProduct])
+  delete: protectedProcedure
     .input(z.object({ productId: idSchema }))
     .mutation(
       async ({ input: { productId: id }, ctx: { prisma, session } }) => {
@@ -359,12 +354,21 @@ export const productRouter = createTRPCRouter({
           where: {
             id,
           },
-          // include: { room: { include: { bids: { take: 1 } } } }
+          include: {
+            seller: true,
+            // room: {
+            //   include: {
+            //     bids: {
+            //       take: 1,
+            //     },
+            //   },
+            // },
+          },
         });
         if (existingProduct === null) {
           return "Product not found";
         }
-        if (existingProduct.sellerId !== user.id) {
+        if (!(await isAuthorized(existingProduct.seller, user))) {
           return "You are not the seller of this product";
         }
         if (existingProduct.buyerId !== null) {
@@ -489,7 +493,7 @@ export const productRouter = createTRPCRouter({
     ),
 });
 
-async function isAuthorizedToUpdate(productSeller: User, user: User) {
+async function isAuthorized(productSeller: User, user: User) {
   if (productSeller.id === user.id) {
     return true;
   }

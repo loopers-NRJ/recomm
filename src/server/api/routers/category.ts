@@ -16,7 +16,6 @@ import {
   defaultLimit,
   defaultSortBy,
   defaultSortOrder,
-  maxFeaturedCategory,
   maxLimit,
 } from "@/utils/constants";
 import { idSchema, imageInputs } from "@/utils/validation";
@@ -515,7 +514,21 @@ export const categoryRouter = createTRPCRouter({
         ctx: { prisma, session, logger },
       }) => {
         const totalFeaturedCategories = await prisma.featuredCategory.count();
-        if (totalFeaturedCategories >= maxFeaturedCategory) {
+        const maxFeaturedCategory = await prisma.appConfiguration.findUnique({
+          where: {
+            key: "maxFeaturedCategory",
+          },
+          select: {
+            value: true,
+          },
+        });
+        if (
+          !maxFeaturedCategory?.value ||
+          isNaN(Number(maxFeaturedCategory?.value))
+        ) {
+          return "Invalid Max Featured Category" as const;
+        }
+        if (totalFeaturedCategories >= Number(maxFeaturedCategory)) {
           return "Cannot make the category as featured. Maximum featured category limit reached";
         }
         const existingFeatured = await prisma.featuredCategory.findUnique({

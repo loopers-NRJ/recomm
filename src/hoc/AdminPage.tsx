@@ -16,7 +16,7 @@ export interface PagePropsWithAccesses<
   Params = DefaultParams,
   SearchParams = DefaultSearchParams,
 > extends PagePropsWithSession<Params, SearchParams> {
-  accesses: { type: AccessType }[];
+  accesses: AccessType[];
 }
 
 // type of the component passed to the AuthenticatedPage
@@ -58,6 +58,6 @@ export default function AdminPage<
       return permanentRedirect("/login");
     }
 
-    return <Component {...props} accesses={accesses!} />;
+    return <Component {...props} accesses={userAccessTypes!} />;
   });
 }

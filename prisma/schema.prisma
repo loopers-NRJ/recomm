@@ -47,7 +47,6 @@ model VerificationToken {
 
 enum AccessType {
     // public level
-    seller // allow to sell and buy products @map("subscriber")
     primeSeller // allow to sell and buy products in large quantity @map("retailer")
 
     // admin level
@@ -84,6 +83,9 @@ enum AccessType {
 
     viewReports // allow to view reports
     deleteReport // allow to delete reports
+
+    viewAppConfiguration // allow to view app configuration
+    updateAppConfiguration // allow to update app configuration
 
     // update types/prisma.ts when adding new access type
 }
@@ -152,6 +154,8 @@ model User {
     updatedRoles                   Role[]                   @relation("roleUpdate")
     reportedProducts               Report[]
     notifications                  Notification[]
+    createdConfigurations          AppConfiguration[]       @relation("configCreate")
+    updatedConfigurations          AppConfiguration[]       @relation("configUpdate")
 
     @@index([roleId])
 }
@@ -572,4 +576,18 @@ model Log {
     detail    String?
     level     String
     createdAt DateTime @default(now())
+}
+
+model AppConfiguration {
+    key         String   @id @unique
+    value       String
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+    createdBy   User     @relation("configCreate", fields: [createdById], references: [id])
+    updatedBy   User?    @relation("configUpdate", fields: [updatedById], references: [id])
+    createdById String
+    updatedById String?
+
+    @@index([createdById])
+    @@index([updatedById])
 }

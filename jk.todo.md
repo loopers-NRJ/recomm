@@ -43,6 +43,6 @@ createdAt
 - updateReadStatus (done)
 
 owner can able to make their product in active. (done)
-create button in user table to update duration and count of the product.
+create button in user table to update duration and count of the product. (done)
 create address selecting option in product selling page.
 move to next tab in selling page.
