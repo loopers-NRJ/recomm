@@ -15,14 +15,15 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/trpc/react";
 import type { Bid, User } from "@prisma/client";
-import { Loader2, UserIcon } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
+import BiddingList from "./BiddingList";
 
 type Bidding = Bid & {
   user: User,
 }
 
-function BiddingButton({bids, roomId }: { bids: Bidding[], roomId: string }) {
+function BiddingButton({ bids, roomId }: { bids: Bidding[], roomId: string }) {
 
   const [biddings, setBids] = useState<Bidding[]>(bids)
   const [input, setInput] = useState("")
@@ -57,23 +58,7 @@ function BiddingButton({bids, roomId }: { bids: Bidding[], roomId: string }) {
         <DrawerHeader className="text-left">
           <DrawerTitle>Bidders</DrawerTitle>
           <DrawerDescription>List of all the bids placed for this posting.</DrawerDescription>
-          <ul className="overflow-y-scroll">
-            {biddings.length === 0 && <p className="text-sm font-medium leading-none p-4">No bids yet.</p>}
-            {biddings.map((bid) => {
-              return (
-                <li key={bid.id} className="flex justify-between items-center border rounded-lg p-3">
-                  <div className="flex items-center space-x-4">
-                    <Avatar>
-                      <AvatarImage src={bid.user.image ?? undefined} />
-                      <AvatarFallback><UserIcon /></AvatarFallback>
-                    </Avatar>
-                    <p className="text-sm font-medium leading-none">{bid.user.name}</p>
-                  </div>
-                  <p className="text-sm font-medium leading-none">₹{bid.price}</p>
-                </li>
-              )
-            })}
-          </ul>
+          <BiddingList biddings={biddings} />
         </DrawerHeader>
         <DrawerFooter>
           <Input value={input} onChange={(event) => setInput(event.target.value)} type="number" placeholder="Enter your bid amount" className="flex-grow" />
@@ -88,7 +73,7 @@ function BiddingButton({bids, roomId }: { bids: Bidding[], roomId: string }) {
                 setIsLoading(false)
               }}
             >
-              {isLoading && <Loader2 />} Place Bid
+              {isLoading && <Loader2 className="animate-spin mx-1"/>} Place Bid
             </Button>
             <DrawerClose asChild className="w-full">
               <Button variant="outline" size="lg">Close</Button>
