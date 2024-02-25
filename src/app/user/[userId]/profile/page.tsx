@@ -5,7 +5,6 @@ import Container from "@/components/Container";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2, UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getServerAuthSession } from "@/server/auth";
 import UserListings from "./user-listings";
 import { Suspense } from "react";
 import LogoutButton from "./logout";
@@ -14,10 +13,10 @@ interface ProfilePageParams {
   userId: string;
 }
 
-const ProfilePage = AuthenticatedPage<ProfilePageParams>(async ({ params }) => {
+const ProfilePage = AuthenticatedPage<ProfilePageParams>(async ({ params, session }) => {
   const { userId } = params;
   const userData = await api.user.byId.query({ userId });
-  const { user: currentUser } = (await getServerAuthSession()) ?? {};
+  const { user: currentUser } = session;
   if (userData === "User not found") {
     return notFound();
   }
@@ -51,7 +50,7 @@ const ProfilePage = AuthenticatedPage<ProfilePageParams>(async ({ params }) => {
         <section className="mb-20 mt-10 text-center">
           <h2 className="p-3 font-medium">Product Listings</h2>
           <Suspense fallback={<ListLoading />}>
-            <UserListings userId={userId} />
+            <UserListings userId={userId} session={session} />
           </Suspense>
         </section>
       </main>
