@@ -33,7 +33,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
             height={150}
           />
         </div>
-        <div className="p-2">
+        <div className="px-2">
           <p className="text-lg font-semibold">{product.model.name}</p>
           <p className="font-semibold">₹ {product.price}</p>
         </div>

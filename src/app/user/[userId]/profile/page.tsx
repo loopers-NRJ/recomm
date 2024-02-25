@@ -1,77 +1,71 @@
-import Image from "next/image";
-
-import { Button } from "@/components/ui/button";
-import AuthorizedPage from "@/hoc/AuthenticatedPage";
+import AuthenticatedPage from "@/hoc/AuthenticatedPage";
 import { api } from "@/trpc/server";
-import LogoutButton from "./logout";
 import { notFound } from "next/navigation";
+import Container from "@/components/Container";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Loader2, UserIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { getServerAuthSession } from "@/server/auth";
+import UserListings from "./user-listings";
+import { Suspense } from "react";
+import { signOut } from "next-auth/react";
+import LogoutButton from "./logout";
 
 interface ProfilePageParams {
   userId: string;
 }
 
-const ProfilePage = AuthorizedPage<ProfilePageParams>(async ({ params }) => {
+const ProfilePage = AuthenticatedPage<ProfilePageParams>(async ({ params }) => {
   const { userId } = params;
   const userData = await api.user.byId.query({ userId });
+  const { user: currentUser } = (await getServerAuthSession()) || {};
   if (userData === "User not found") {
     return notFound();
   }
+
   return (
-    <div className="relative mx-auto w-full rounded-lg bg-white shadow md:w-5/6 lg:w-4/6 xl:w-3/6">
-      <Image
-        width={128}
-        height={128}
-        src={userData.image ?? "/placeholder.jpg"}
-        alt=""
-        className="mx-auto h-32 w-32 transform rounded-full border-4 border-white shadow-md transition duration-200 hover:scale-110"
-      />
-
-      <div className="mt-16 w-full">
-        <h1 className="text-center text-3xl font-bold text-gray-900">
-          {userData.name ?? "User Name"}
-        </h1>
-        <p className="text-center text-sm font-medium text-gray-400">
-          @{userData.email}
-        </p>
-        <p>
-          <span></span>
-        </p>
-        <div className="my-5 grid grid-flow-col grid-cols-2 grid-rows-1 space-x-2 px-6">
-          <Button className="col-span-1 block rounded-lg bg-gray-900 px-6 py-3 text-center font-medium leading-6 text-gray-200 hover:bg-black hover:text-white">
-            Edit Profile
-          </Button>
-          <LogoutButton />
-        </div>
-
-        <div className="w-full">
-          <h3 className="px-6 text-center font-medium text-gray-900">
-            User Info
-          </h3>
-          <div className="mt-5 flex w-full flex-col items-center overflow-hidden text-sm">
-            <a
-              href={`/favourites`}
-              className=" block w-full border-t border-gray-100 py-4 pl-6 pr-3 text-gray-600 transition duration-150 hover:bg-gray-100"
-            >
-              My Favourites
-            </a>
-
-            <a
-              href={`/user/${userId}/listings`}
-              className=" block w-full border-t border-gray-100 py-4 pl-6 pr-3 text-gray-600 transition duration-150 hover:bg-gray-100"
-            >
-              Product Listings
-            </a>
-
-            <a
-              href={`/wishlist`}
-              className=" block w-full border-t border-gray-100 py-4 pl-6 pr-3 text-gray-600 transition duration-150 hover:bg-gray-100"
-            >
-              WishList
-            </a>
+    <Container>
+      <main>
+        <header className="flex h-full w-full items-center justify-center p-3">
+          <Avatar className="h-32 w-32 border shadow-sm">
+            <AvatarImage src={userData.image ?? undefined} />
+            <AvatarFallback>
+              <UserIcon className="h-full w-full p-4" />
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex h-full w-full flex-col gap-3 p-4">
+            <div>
+              <h1 className="text-xl font-semibold">{userData.name}</h1>
+              <p className="text-sm font-medium text-muted-foreground">
+                {userData.email}
+              </p>
+            </div>
+            <div>
+              {currentUser && currentUser.id === userData.id ? (
+                <LogoutButton />
+              ) : (
+                <Button>Contact Seller</Button>
+              )}
+            </div>
           </div>
-        </div>
-      </div>
-    </div>
+        </header>
+        <section className="mb-20 mt-10 text-center">
+          <h2 className="p-3 font-medium">Product Listings</h2>
+          <Suspense fallback={<ListLoading />}>
+            <UserListings userId={userId} />
+          </Suspense>
+        </section>
+      </main>
+    </Container>
   );
 });
-export default AuthorizedPage(ProfilePage);
+
+function ListLoading() {
+  return (
+    <Container className="flex h-52 w-full items-center justify-center">
+      <Loader2 className="h-10 w-10 animate-spin" />
+    </Container>
+  );
+}
+
+export default ProfilePage;

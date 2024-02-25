@@ -1,31 +1,28 @@
 "use client";
 
-import { type FC, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { type OptionalItem } from "@/types/custom";
 import { api } from "@/trpc/react";
 import toast from "react-hot-toast";
 import CategoryComboBox from "@/components/combobox/CategoryComboBox";
 import BrandComboBox from "@/components/combobox/BrandComboBox";
 import ModelComboBox from "@/components/combobox/ModelComboBox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTrigger } from "@/components/ui/drawer";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
-const AddWish: FC = () => {
+function AddWish() {
   const [selectedCategory, setSelectedCategory] = useState<OptionalItem>();
-
   const [selectedBrand, setSelectedBrand] = useState<OptionalItem>();
-
   const [selectedModel, setSelectedModel] = useState<OptionalItem>();
-
-  const { mutateAsync: createWish } = api.wish.create.useMutation();
+  const [upperBound, setUpperbound] = useState<string>("");
+  const [lowerBound, setLowerbound] = useState<string>("");
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const router = useRouter()
+  const { mutateAsync: createWish, isLoading } = api.wish.create.useMutation();
 
   const handleClick = async () => {
     try {
@@ -41,50 +38,45 @@ const AddWish: FC = () => {
         return toast.error("Select the Model");
       }
 
-      // TODO: @naveen create ui to get the lower and upper bound
+      if (lowerBound === "" || upperBound === "") {
+        return toast.error("Enter the price range");
+      }
+
       const result = await createWish({
         modelId: selectedModel.id,
-        lowerBound: 0,
-        upperBound: 0,
+        lowerBound: +lowerBound,
+        upperBound: +upperBound,
       });
 
-      console.log(result);
+      if (typeof result === "string") {
+        toast.success(result);
+      } else {
+        toast.success("Wish added successfully");
+      }
 
-      // TODO: navigate to the wish list page
+      setIsOpen(false);
+      router.refresh();
+
     } catch (error) {
-      console.log(error);
-      return toast.error("Something went wrong");
+      if (error instanceof Error)
+        return toast.error(error.message);
+      else
+        return toast.error(error as string);
     }
   };
   return (
-    <Dialog modal>
-      <DialogTrigger asChild>
-        {/* Plus icon */}
-        <div className="flex aspect-square w-10  items-center justify-center rounded-lg bg-black text-5xl text-white">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="h-6 w-6"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M12 4.5v15m7.5-7.5h-15"
-            />
-          </svg>
-        </div>
-      </DialogTrigger>
-      <DialogContent className="w-[350px] md:w-full">
-        <DialogHeader>
-          <DialogTitle>Edit Wish Details</DialogTitle>
-          <DialogDescription>
+    <Drawer open={isOpen} onOpenChange={setIsOpen}>
+      <DrawerTrigger asChild>
+        <Button size="sm">Create a Wish</Button>
+      </DrawerTrigger>
+      <DrawerContent>
+        <DrawerHeader>
+          <h1 className="font-bold">Edit Wish Details</h1>
+          <span className="text-muted-foreground">
             Enter details below to Add a Product Wish.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
+          </span>
+        </DrawerHeader>
+        <div className="grid gap-4 px-5">
           <CategoryComboBox
             selected={selectedCategory}
             onSelect={setSelectedCategory}
@@ -100,14 +92,29 @@ const AddWish: FC = () => {
             brandId={selectedBrand?.id}
             categoryId={selectedCategory?.id}
           />
+          <Label className="flex w-full space-x-2">
+            <Input value={lowerBound}
+              className="lowerBound" 
+              type="number" 
+              onChange={(event) => setLowerbound(event.target.value)}
+              placeholder="Starting price" />
+            <Input 
+              value={upperBound}
+              onChange={(event) => setUpperbound(event.target.value)} 
+              className="upperBound" 
+              type="number" 
+              placeholder="Ending price" />
+          </Label>
         </div>
-        <DialogFooter>
-          <Button type="submit" onClick={() => void handleClick()}>
+        <DrawerFooter className="flex flex-row">
+          <Button className="w-full" onClick={() => void handleClick()}>
+            {isLoading && <Loader2 className="animate-spin mx-1"/>}
             Add to List
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          <DrawerClose className="w-full px-4 py-2 bg-secondary border rounded-lg text-sm font-medium">Close</DrawerClose>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   );
 };
 

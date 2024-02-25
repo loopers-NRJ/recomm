@@ -14,6 +14,8 @@ import {
 import { api } from "@/trpc/react";
 import { WishStatus } from "@prisma/client";
 import { type WishPayloadIncluded } from "@/types/prisma";
+import Link from "next/link";
+import { Loader2, Trash2 } from "lucide-react";
 
 interface WishCardProps {
   wish: WishPayloadIncluded;
@@ -24,44 +26,41 @@ const WishCard: FC<WishCardProps> = ({ wish }) => {
   const model = wish.model?.name;
   const brand = wish.brand?.name;
   const status = wish.status;
-  const deleteWish = api.wish.delete.useMutation();
-  const handleDelete = (id: string) => {
-    deleteWish.mutate({
-      wishId: id,
-    });
-  };
-
+  const { mutateAsync: deleteWish, isLoading } = api.wish.delete.useMutation();
   const router = useRouter();
 
+  const handleDelete = async (id: string) => {
+    await deleteWish({
+      wishId: id,
+    });
+    router.refresh();
+  };
+
   return (
-    <Card className="flex w-full items-center justify-between md:w-[500px]">
-      <div className="flex flex-col gap-0">
-        <CardHeader>
-          <CardTitle className="text-lg md:text-xl">
-            Category: {category}
-            Brand: {brand}
-            Model: {model}
+    <Card className="flex justify-between items-center">
+        <CardHeader className="p-4">
+          <CardTitle className="font-semibold text-xl">
+            {brand} {model}
           </CardTitle>
-          <CardDescription>{"Electronics"}</CardDescription>
-          <Badge
-            className="leading-0 w-fit select-none px-2 text-[10px]"
-            variant={
-              status === WishStatus.available ? "default" : "destructive"
-            }
-          >
-            {status}
-          </Badge>
+          <CardDescription>
+          <Badge variant={status===WishStatus.available ? "destructive" : "secondary"}>{status}</Badge>
+          {category}
+          </CardDescription>
         </CardHeader>
-      </div>
-      <CardFooter className="flex-col items-end gap-2 p-6">
-        <Button
-          onClick={() => router.push(`/products?category=${wish.model?.name}`)}
-          disabled={status !== WishStatus.available}
+      <CardFooter className="p-4 gap-2">
+        <Button 
+          disabled={status !== WishStatus.available} 
+          variant="default" size="sm" 
+          className="w-full disabled:text-muted-foreground disabled:bg-muted disabled:border-2"
         >
-          View
+          <Link href={`/products?category=${wish.model?.name}`}> View </Link>
         </Button>
-        <Button onClick={() => handleDelete(wish.id)} variant={"destructive"}>
-          Delete
+        <Button 
+          onClick={() => handleDelete(wish.id)} 
+          size="sm" variant={"destructive"} 
+          className="w-full"
+        >
+          { isLoading ? <Loader2 className="animate-spin w-4 h-4" /> : <Trash2 className="w-4 h-4" /> }
         </Button>
       </CardFooter>
     </Card>

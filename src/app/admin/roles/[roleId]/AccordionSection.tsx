@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export type Processing =
   | { action: "adding" | "removing"; types: [AccessType, ...AccessType[]] }
@@ -31,6 +32,19 @@ export default function AccordionSection({
     types: [AccessType, ...AccessType[]],
   ) => void | Promise<void>;
 }) {
+
+  /**
+   * This is a temporary solution to prevent hydration error:
+   * Using Checkbox inside AccordionSection cause hydration error in nextjs
+   * follow this issue: https://github.com/shadcn-ui/ui/issues/1273
+   */
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
+
+  if (!isMounted) return null;
   return (
     <AccordionItem value={title}>
       <AccordionTrigger>

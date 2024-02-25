@@ -89,7 +89,7 @@ const Products: FC<Props> = ({
 
   return (
     <>
-      <div className="product-area grid grid-cols-2 gap-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6">
+      <div className="product-area grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6 mb-32">
         {products.length === 0 ? (
           <div className="flex h-[500px] items-center justify-center font-semibold">
             No Products Available
