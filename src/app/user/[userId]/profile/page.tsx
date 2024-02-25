@@ -16,10 +16,9 @@ interface ProfilePageParams {
 }
 
 const ProfilePage = AuthenticatedPage<ProfilePageParams>(async ({ params }) => {
-
   const { userId } = params;
   const userData = await api.user.byId.query({ userId });
-  const { user: currentUser } = await getServerAuthSession() || {};
+  const { user: currentUser } = (await getServerAuthSession()) || {};
   if (userData === "User not found") {
     return notFound();
   }
@@ -27,42 +26,46 @@ const ProfilePage = AuthenticatedPage<ProfilePageParams>(async ({ params }) => {
   return (
     <Container>
       <main>
-        <header className="flex p-3 w-full h-full justify-center items-center">
-          <Avatar className="w-32 h-32 border shadow-sm">
+        <header className="flex h-full w-full items-center justify-center p-3">
+          <Avatar className="h-32 w-32 border shadow-sm">
             <AvatarImage src={userData.image ?? undefined} />
-            <AvatarFallback><UserIcon className="w-full h-full p-4" /></AvatarFallback>
+            <AvatarFallback>
+              <UserIcon className="h-full w-full p-4" />
+            </AvatarFallback>
           </Avatar>
-          <div className="flex flex-col gap-3 w-full h-full p-4">
+          <div className="flex h-full w-full flex-col gap-3 p-4">
             <div>
               <h1 className="text-xl font-semibold">{userData.name}</h1>
-              <p className="text-sm font-medium text-muted-foreground">{userData.email}</p>
+              <p className="text-sm font-medium text-muted-foreground">
+                {userData.email}
+              </p>
             </div>
             <div>
-              { currentUser && currentUser.id === userData.id ?
-                  <LogoutButton /> :
-                  <Button>Contact Seller</Button> }
+              {currentUser && currentUser.id === userData.id ? (
+                <LogoutButton />
+              ) : (
+                <Button>Contact Seller</Button>
+              )}
             </div>
           </div>
         </header>
-        <section className="text-center mt-10 mb-20">
-          <h2 className="font-medium p-3">Product Listings</h2>
+        <section className="mb-20 mt-10 text-center">
+          <h2 className="p-3 font-medium">Product Listings</h2>
           <Suspense fallback={<ListLoading />}>
             <UserListings userId={userId} />
           </Suspense>
         </section>
       </main>
-    </Container >
+    </Container>
   );
 });
 
-
 function ListLoading() {
   return (
-    <Container className="flex w-full h-52 items-center justify-center">
-      <Loader2 className="w-10 h-10 animate-spin" />
+    <Container className="flex h-52 w-full items-center justify-center">
+      <Loader2 className="h-10 w-10 animate-spin" />
     </Container>
-  )
+  );
 }
-
 
 export default ProfilePage;

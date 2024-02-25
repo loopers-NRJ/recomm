@@ -1,34 +1,22 @@
-import { type ProductFormError } from "@/utils/validation";
-import AtomicQuestionInputField, { type AtomicAnswer } from "./AtomicQuestion";
-import MultipleChoiceQuestionInputField, {
-  type MultipleChoiceAnswer,
-} from "./MultipleChoiceQuestion";
+import AtomicQuestionInputField from "./AtomicQuestion";
+import MultipleChoiceQuestionInputField from "./MultipleChoiceQuestion";
 import { type SingleModelPayloadIncluded } from "@/types/prisma";
 import React from "react";
+import { usePostingState } from "@/app/sell/PostingState";
 
 interface AdditionalInfoSectionProps {
   model: SingleModelPayloadIncluded;
-  atomicAnswers: AtomicAnswer[];
-  setAtomicAnswers: (
-    value: AtomicAnswer[] | ((prev: AtomicAnswer[]) => AtomicAnswer[]),
-  ) => void;
-  multipleChoiceAnswers: MultipleChoiceAnswer[];
-  setMultipleChoiceAnswers: (
-    value:
-      | MultipleChoiceAnswer[]
-      | ((prev: MultipleChoiceAnswer[]) => MultipleChoiceAnswer[]),
-  ) => void;
-  formError: ProductFormError;
 }
 
-function AdditionalInfoSection({
-  model,
-  atomicAnswers,
-  setAtomicAnswers,
-  multipleChoiceAnswers,
-  setMultipleChoiceAnswers,
-  formError,
-}: AdditionalInfoSectionProps) {
+function AdditionalInfoSection({ model }: AdditionalInfoSectionProps) {
+  const {
+    atomicAnswers,
+    setAtomicAnswers,
+    multipleChoiceAnswers,
+    setMultipleChoiceAnswers,
+    formError,
+  } = usePostingState();
+
   if (
     model.atomicQuestions.length === 0 &&
     model.multipleChoiceQuestions.length === 0
@@ -55,14 +43,14 @@ function AdditionalInfoSection({
               }
               index={i + 1}
               onChange={(value) => {
-                setAtomicAnswers((prev) => {
-                  return prev.map((prevAnswer) => {
+                setAtomicAnswers(
+                  atomicAnswers.map((prevAnswer) => {
                     if (prevAnswer.questionId === question.id) {
                       return value;
                     }
                     return prevAnswer;
-                  });
-                });
+                  }),
+                );
               }}
               error={formError.atomicAnswers?.[i]}
             />
@@ -79,14 +67,14 @@ function AdditionalInfoSection({
                 )!
               }
               onChange={(answer) => {
-                setMultipleChoiceAnswers((prev) => {
-                  return prev.map((prevAnswer) => {
+                setMultipleChoiceAnswers(
+                  multipleChoiceAnswers.map((prevAnswer) => {
                     if (prevAnswer.questionId === question.id) {
                       return answer;
                     }
                     return prevAnswer;
-                  });
-                });
+                  }),
+                );
               }}
               error={formError.multipleChoiceAnswers?.[i]}
             />

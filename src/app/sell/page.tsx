@@ -1,6 +1,6 @@
 import Sellit from "./SellIt";
-import AuthenticatedPage from "@/hoc/AuthenticatedPage";
+import AuthorizedPage from "@/hoc/AuthenticatedPage";
 
-const SellitPage = AuthenticatedPage(Sellit);
+const SellitPage = AuthorizedPage(Sellit);
 
 export default SellitPage;

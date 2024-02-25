@@ -1,61 +1,132 @@
 "use client";
 
-import Container from "../Container";
-import Loading from "../common/Loading";
-import { Button } from "../ui/button";
+import { usePostingState } from "@/app/sell/PostingState";
+import Container from "../../../components/Container";
+import Loading from "../../../components/common/Loading";
 import AdditionalInfoSection from "./AdditionalInfoSection";
-import { type AtomicAnswer } from "./AtomicQuestion";
 import BasicInfoSection from "./BasicInfoSection";
 import ImageUploadSection from "./ImageUploadSection";
-import { type MultipleChoiceAnswer } from "./MultipleChoiceQuestion";
-import PricingInfoSection from "./PricingInfoSection";
 import { api } from "@/trpc/react";
-import { type OptionalItem } from "@/types/custom";
-import { type Plan } from "@/utils/constants";
 import { errorHandler } from "@/utils/errorHandler";
-import { useImageUploader } from "@/utils/imageUpload";
+import { AtomicQuestionType, MultipleChoiceQuestionType } from "@prisma/client";
+import { notFound, useRouter } from "next/navigation";
+import { useCallback } from "react";
+import toast from "react-hot-toast";
+import { Button } from "../../../components/ui/button";
 import {
   type ProductFormError,
   type ProductSchemaKeys,
   productSchema,
 } from "@/utils/validation";
-import { AtomicQuestionType, MultipleChoiceQuestionType } from "@prisma/client";
-import { notFound, useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
-import toast from "react-hot-toast";
-import { makeIssue } from "zod";
+import { z } from "zod";
+import { type AtomicAnswer } from "./AtomicQuestion";
+import { type MultipleChoiceAnswer } from "./MultipleChoiceQuestion";
+
+export const validatePostingPage1Inputs = ({
+  title,
+  description,
+  categoryId,
+  brandId,
+  modelId,
+  atomicAnswers,
+  multipleChoiceAnswers,
+  images,
+}: {
+  title: string;
+  description: string;
+  categoryId?: string;
+  brandId?: string;
+  modelId?: string;
+  atomicAnswers: AtomicAnswer[];
+  multipleChoiceAnswers: MultipleChoiceAnswer[];
+  images: File[];
+}) => {
+  const result = productSchema
+    .omit({
+      images: true,
+      price: true,
+      couponCode: true,
+      bidDuration: true,
+    })
+    .extend({
+      images: z
+        .array(z.instanceof(File))
+        .min(1, { message: "Oops! you need to upload at least 1 images" }),
+    })
+    .safeParse({
+      title,
+      description,
+      categoryId,
+      brandId,
+      modelId,
+      atomicAnswers,
+      multipleChoiceAnswers,
+      images,
+    });
+  if (!result.success) {
+    const errors = result.error.issues.reduceRight<ProductFormError>(
+      (acc, issue) => {
+        if (
+          issue.path[0] === "atomicAnswers" ||
+          issue.path[0] === "multipleChoiceAnswers"
+        ) {
+          const atomicAnswerErrors = acc[issue.path[0]];
+          if (atomicAnswerErrors) {
+            atomicAnswerErrors[issue.path[1] as number] = issue;
+          } else {
+            acc[issue.path[0]] = [];
+            acc[issue.path[0]]![issue.path[1] as number] = issue;
+          }
+        } else if (issue.path[0]) {
+          acc[issue.path[0] as ProductSchemaKeys] = issue;
+        }
+        return acc;
+      },
+      {},
+    );
+    return { data: undefined, errors };
+  } else {
+    return { data: result.data, errors: undefined };
+  }
+};
 
 export default function PostingForm({
   selectedCategorySlug,
 }: {
   selectedCategorySlug: string;
 }) {
-  const categoryApi = api.category.bySlug.useQuery({
-    categorySlug: selectedCategorySlug,
-  });
+  const categoryApi = api.category.bySlug.useQuery(
+    {
+      categorySlug: selectedCategorySlug,
+    },
+    {
+      onError: errorHandler,
+      onSuccess(data) {
+        if (data === "Category not found") {
+          return notFound();
+        }
+        setSelectedCategory(data);
+      },
+    },
+  );
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-  const [couponCode, setCouponCode] = useState<string>();
-  const [bidDuration, setBidDuration] = useState<Plan>();
-  const [images, setImages] = useState<File[]>([]);
+  const {
+    title,
+    description,
+    selectedModel,
+    selectedBrand,
+    atomicAnswers,
+    setAtomicAnswers,
+    multipleChoiceAnswers,
+    setMultipleChoiceAnswers,
+    formError,
+    setModelDetails,
+    setSelectedCategory,
+    images,
+    setFormError,
+  } = usePostingState();
 
-  const [selectedBrand, setSelectedBrand] = useState<OptionalItem>();
-  const [selectedModel, setSelectedModel] = useState<OptionalItem>();
-
-  const [atomicAnswers, setAtomicAnswers] = useState<AtomicAnswer[]>([]);
-  const [multipleChoiceAnswers, setMultipleChoiceAnswers] = useState<
-    MultipleChoiceAnswer[]
-  >([]);
-
-  const [formError, setFormError] = useState<
-    ProductFormError & {
-      serverError?: string;
-    }
-  >({});
-
-  const { isLoading, upload } = useImageUploader();
+  // const { isLoading, upload } = useImageUploader();
   const router = useRouter();
   const productApi = api.product.create.useMutation({
     onSuccess: (result) => {
@@ -82,7 +153,7 @@ export default function PostingForm({
           data.multipleChoiceQuestions.length === multipleChoiceAnswers.length
         )
           return;
-
+        setModelDetails(data);
         setAtomicAnswers(
           data.atomicQuestions.map((question) => {
             if (
@@ -168,70 +239,6 @@ export default function PostingForm({
     },
   );
 
-  const handleSubmit = async () => {
-    const result = productSchema.omit({ images: true }).safeParse({
-      title,
-      description,
-      price: Number(price),
-      categoryId: selectedCategory.id,
-      brandId: selectedBrand?.id,
-      modelId: selectedModel?.id,
-      closedAt: bidDuration,
-      atomicAnswers,
-      multipleChoiceAnswers,
-      couponCode,
-    });
-    if (!result.success) {
-      const errors = result.error.issues.reduceRight<ProductFormError>(
-        (acc, issue) => {
-          if (
-            issue.path[0] === "atomicAnswers" ||
-            issue.path[0] === "multipleChoiceAnswers"
-          ) {
-            const atomicAnswerErrors = acc[issue.path[0]];
-            if (atomicAnswerErrors) {
-              atomicAnswerErrors[issue.path[1] as number] = issue;
-            } else {
-              acc[issue.path[0]] = [];
-              acc[issue.path[0]]![issue.path[1] as number] = issue;
-            }
-          } else if (issue.path[0]) {
-            acc[issue.path[0] as ProductSchemaKeys] = issue;
-          }
-          return acc;
-        },
-        {},
-      );
-      if (images.length < 1) {
-        errors.images = makeIssue({
-          path: ["images"],
-          errorMaps: [],
-          issueData: {
-            code: "custom",
-            message: "Oops! you need to upload at least 5 images",
-          },
-          data: {
-            code: "custom",
-            message: "Oops! you need to upload at least 5 images",
-          },
-        });
-      }
-      return setFormError(errors);
-    }
-    const uploadedImages = await upload(images);
-    if (uploadedImages instanceof Error) {
-      return setFormError({
-        ...formError,
-        serverError: uploadedImages.message,
-      });
-    }
-
-    productApi.mutate({
-      ...result.data,
-      images: uploadedImages,
-    });
-  };
-
   const getAdditionalSection = useCallback(() => {
     if (!selectedModel?.id) {
       return;
@@ -269,30 +276,8 @@ export default function PostingForm({
     }
     return (
       <>
-        <AdditionalInfoSection
-          model={modelApi.data}
-          atomicAnswers={atomicAnswers}
-          setAtomicAnswers={setAtomicAnswers}
-          multipleChoiceAnswers={multipleChoiceAnswers}
-          setMultipleChoiceAnswers={setMultipleChoiceAnswers}
-          formError={formError}
-        />
-        <ImageUploadSection
-          images={images}
-          setImages={setImages}
-          maxImages={10}
-          model={modelApi.data}
-          formError={formError}
-        />
-        <PricingInfoSection
-          price={price}
-          setPrice={setPrice}
-          couponCode={couponCode}
-          setCouponCode={setCouponCode}
-          onBidDurationChange={setBidDuration}
-          model={modelApi.data}
-          formError={formError}
-        />
+        <AdditionalInfoSection model={modelApi.data} />
+        <ImageUploadSection model={modelApi.data} />
       </>
     );
   }, [
@@ -302,11 +287,6 @@ export default function PostingForm({
     modelApi.isError,
     atomicAnswers,
     multipleChoiceAnswers,
-    images,
-    price,
-    bidDuration,
-    formError,
-    couponCode,
   ]);
 
   if (
@@ -337,31 +317,32 @@ export default function PostingForm({
       </h1>
 
       <div className="flex w-full max-w-2xl flex-col">
-        <BasicInfoSection
-          title={title}
-          setTitle={setTitle}
-          description={description}
-          setDescription={setDescription}
-          selectedCategory={selectedCategory}
-          selectedBrand={selectedBrand}
-          setSelectedBrand={setSelectedBrand}
-          selectedModel={selectedModel}
-          setSelectedModel={setSelectedModel}
-          formError={formError}
-        />
+        <BasicInfoSection />
 
         {getAdditionalSection()}
 
-        <Button
-          onClick={() => void handleSubmit()}
-          disabled={productApi.isLoading || isLoading || modelApi.isLoading}
-        >
-          {productApi.isLoading || isLoading || modelApi.isLoading ? (
-            <Loading color="white" size={24} />
-          ) : (
-            "Post"
-          )}
-        </Button>
+        {modelApi.data && typeof modelApi.data !== "string" && (
+          <Button
+            className="mt-4"
+            onClick={() => {
+              if (!modelApi.data || typeof modelApi.data === "string") return;
+              const result = validatePostingPage1Inputs({
+                title,
+                description,
+                categoryId: selectedCategory.id,
+                brandId: selectedBrand?.id,
+                modelId: modelApi.data.id,
+                atomicAnswers,
+                multipleChoiceAnswers,
+                images,
+              });
+              if (result.errors) setFormError(result.errors);
+              else router.push(`/sell/pricing`);
+            }}
+          >
+            Enter Pricing
+          </Button>
+        )}
       </div>
     </Container>
   );
