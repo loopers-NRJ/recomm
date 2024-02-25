@@ -1,33 +1,21 @@
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import BidDurationPicker from "../common/BidDurationPicker";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import BidDurationPicker from "@/components/common/BidDurationPicker";
 import { type SingleModelPayloadIncluded } from "@/types/prisma";
-import { type ProductFormError } from "@/utils/validation";
-import { type Plan } from "@/utils/constants";
 import * as React from "react";
 import { CouponCodeButton } from "./CouponCodeButton";
+import { usePostingState } from "@/app/sell/PostingState";
 
 interface PricingInfoSectionProps {
-  price: string;
-  setPrice: (value: string) => void;
-  couponCode?: string;
-  setCouponCode: (value?: string) => void;
-  onBidDurationChange: (value?: Plan) => void;
   model: SingleModelPayloadIncluded;
-  formError: ProductFormError;
 }
 
-export default function PricingInfoSection({
-  price,
-  setPrice,
-  couponCode,
-  setCouponCode,
-  onBidDurationChange,
-  model,
-  formError,
-}: PricingInfoSectionProps) {
+export default function PricingInfoSection({ model }: PricingInfoSectionProps) {
+  const { price, setPrice, formError, setBidDuration } = usePostingState();
+
   return (
-    <section className="mb-16">
+    <section className="mb-16 flex w-full max-w-2xl flex-col">
+      <h1 className="my-4 text-center text-2xl font-bold">Pricing Section</h1>
       <h2 className="my-4 text-xl font-bold">Price Information</h2>
       {/* Show the price suggestion */}
       <div className="flex flex-col gap-6">
@@ -49,13 +37,9 @@ export default function PricingInfoSection({
           title="The bid will be closed after the duration"
         >
           Select the Bidding duration
-          <BidDurationPicker onChange={onBidDurationChange} />
+          <BidDurationPicker onChange={setBidDuration} />
         </Label>
-        <CouponCodeButton
-          couponCode={couponCode}
-          setCouponCode={setCouponCode}
-          formError={formError}
-        />
+        <CouponCodeButton />
       </div>
     </section>
   );
