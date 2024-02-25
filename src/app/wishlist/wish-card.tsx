@@ -53,6 +53,7 @@ const WishCard: FC<WishCardProps> = ({ wish }) => {
           variant="default" size="sm" 
           className="w-full disabled:text-muted-foreground disabled:bg-muted disabled:border-2"
         >
+           {/* TODO: redirect to exact product group */} 
           <Link href={`/products?category=${wish.model?.name}`}> View </Link>
         </Button>
         <Button 

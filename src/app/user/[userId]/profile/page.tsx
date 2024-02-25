@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { getServerAuthSession } from "@/server/auth";
 import UserListings from "./user-listings";
 import { Suspense } from "react";
-import { signOut } from "next-auth/react";
 import LogoutButton from "./logout";
 
 interface ProfilePageParams {
@@ -18,7 +17,7 @@ interface ProfilePageParams {
 const ProfilePage = AuthenticatedPage<ProfilePageParams>(async ({ params }) => {
   const { userId } = params;
   const userData = await api.user.byId.query({ userId });
-  const { user: currentUser } = (await getServerAuthSession()) || {};
+  const { user: currentUser } = (await getServerAuthSession()) ?? {};
   if (userData === "User not found") {
     return notFound();
   }

@@ -5,22 +5,21 @@ import AuthenticatedPage from "@/hoc/AuthenticatedPage";
 import { api } from "@/trpc/server";
 import WishCard from "./wish-card";
 
-import {
-  defaultSearch,
-  type SortOrder,
-  defaultSortOrder,
-} from "@/utils/constants";
+// import {
+//   defaultSearch,
+//   type SortOrder,
+//   defaultSortOrder,
+// } from "@/utils/constants";
+//
+// interface WishesPageParams {
+//   search?: string;
+//   sortOrder?: SortOrder;
+// }
 
-interface WishesPageParams {
-  search?: string;
-  sortOrder?: SortOrder;
-}
-
-const WishesPage = AuthenticatedPage<undefined, WishesPageParams>(
-  async ({ searchParams }) => {
-    const search = searchParams.search ?? defaultSearch;
-    const sortOrder = (searchParams.sortOrder as SortOrder) ?? defaultSortOrder;
-    const { wishes } = await api.user.wishes.query({ search, sortOrder });
+const WishesPage = AuthenticatedPage(async () => {
+    // const search = searchParams.search ?? defaultSearch;
+    // const sortOrder = (searchParams.sortOrder as SortOrder) ?? defaultSortOrder;
+    const { wishes } = await api.user.wishes.query({});
 
     if (wishes.length === 0) {
       return (

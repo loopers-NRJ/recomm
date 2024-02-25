@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Bid, User } from '@prisma/client'
+import type { Bid, User } from '@prisma/client'
 import { UserIcon } from 'lucide-react'
 import React from 'react'
 
