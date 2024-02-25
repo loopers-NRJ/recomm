@@ -1,8 +1,11 @@
+"use client";
+
 import { type AppRouter } from "@/server/api/root";
 import { type TRPCClientErrorLike } from "@trpc/client";
 import toast from "react-hot-toast";
 
 export function errorHandler(error: TRPCClientErrorLike<AppRouter>) {
+  console.error(error);
   if (error.data) {
     if (error.data.code === "BAD_REQUEST" && error.data.zodError) {
       for (const [, errorMessages] of Object.entries(

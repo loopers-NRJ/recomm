@@ -1,41 +1,30 @@
-import BrandComboBox from "../combobox/BrandComboBox";
-import ModelComboBox from "../combobox/ModelComboBox";
+import BrandComboBox from "../../../components/combobox/BrandComboBox";
+import ModelComboBox from "../../../components/combobox/ModelComboBox";
 import { useEffect } from "react";
-import { type OptionalItem } from "@/types/custom";
-import { type Category } from "@prisma/client";
 import { Label } from "@radix-ui/react-label";
-import { Input } from "../ui/input";
-import Textarea from "../common/Textarea";
-import { type ProductFormError } from "@/utils/validation";
+import { Input } from "../../../components/ui/input";
+import Textarea from "../../../components/common/Textarea";
+import { usePostingState } from "@/app/sell/PostingState";
 
-interface BasicInfoSectionProps {
-  title: string;
-  setTitle: (value: string) => void;
-  description: string;
-  setDescription: (value: string) => void;
-  selectedCategory: Category;
-  selectedBrand: OptionalItem;
-  setSelectedBrand: (value: OptionalItem) => void;
-  selectedModel: OptionalItem;
-  setSelectedModel: (value: OptionalItem) => void;
-  formError: ProductFormError;
-}
+export default function BasicInfoSection() {
+  const {
+    title,
+    setTitle,
+    description,
+    setDescription,
+    selectedBrand,
+    setSelectedBrand,
+    selectedModel,
+    setSelectedModel,
+    selectedCategory,
+    formError,
+  } = usePostingState();
 
-export default function BasicInfoSection({
-  title,
-  setTitle,
-  description,
-  setDescription,
-  selectedCategory,
-  selectedBrand,
-  setSelectedBrand,
-  selectedModel,
-  setSelectedModel,
-  formError,
-}: BasicInfoSectionProps) {
   useEffect(() => {
     setSelectedModel(undefined);
   }, [selectedBrand, setSelectedModel]);
+
+  if (!selectedCategory) return null;
 
   return (
     <>

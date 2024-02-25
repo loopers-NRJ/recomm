@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
-import AuthenticatedPage from "@/hoc/AuthenticatedPage";
+import AuthorizedPage from "@/hoc/AuthenticatedPage";
 import { api } from "@/trpc/server";
 import LogoutButton from "./logout";
 import { notFound } from "next/navigation";
@@ -10,7 +10,7 @@ interface ProfilePageParams {
   userId: string;
 }
 
-const ProfilePage = AuthenticatedPage<ProfilePageParams>(async ({ params }) => {
+const ProfilePage = AuthorizedPage<ProfilePageParams>(async ({ params }) => {
   const { userId } = params;
   const userData = await api.user.byId.query({ userId });
   if (userData === "User not found") {
@@ -74,4 +74,4 @@ const ProfilePage = AuthenticatedPage<ProfilePageParams>(async ({ params }) => {
     </div>
   );
 });
-export default AuthenticatedPage(ProfilePage);
+export default AuthorizedPage(ProfilePage);

@@ -2,9 +2,7 @@ import "server-only";
 
 import type { DefaultParams, DefaultSearchParams, Page } from "@/types/custom";
 
-import AuthenticatedPage, {
-  type PagePropsWithSession,
-} from "./AuthenticatedPage";
+import AuthorizedPage, { type PagePropsWithSession } from "./AuthenticatedPage";
 
 import { permanentRedirect } from "next/navigation";
 import { api } from "@/trpc/server";
@@ -37,7 +35,7 @@ export default function AdminPage<
     | [AccessType, AccessType, ...AccessType[]]
     | ((access: AccessType[]) => boolean),
 ): Page<Params, SearchParams> {
-  return AuthenticatedPage(async (props) => {
+  return AuthorizedPage(async (props) => {
     const roleId = props.session?.user.roleId;
     if (!roleId) {
       return permanentRedirect("/login");

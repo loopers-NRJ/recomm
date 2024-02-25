@@ -2,9 +2,9 @@ import AddWish from "./add-wish";
 import Container from "@/components/Container";
 import Heading from "@/components/Heading";
 import WishList from "./wish-list";
-import AuthenticatedPage from "@/hoc/AuthenticatedPage";
+import AuthorizedPage from "@/hoc/AuthenticatedPage";
 
-const WishesPage = AuthenticatedPage(() => {
+const WishesPage = AuthorizedPage(() => {
   return (
     <Container>
       <div className="mt-5 flex justify-between">
@@ -16,4 +16,4 @@ const WishesPage = AuthenticatedPage(() => {
   );
 });
 
-export default AuthenticatedPage(WishesPage);
+export default AuthorizedPage(WishesPage);

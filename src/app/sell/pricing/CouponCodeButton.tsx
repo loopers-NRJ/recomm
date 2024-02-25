@@ -1,29 +1,28 @@
 "use client";
 
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { type ProductFormError } from "@/utils/validation";
-import { Button } from "../ui/button";
-import { useState } from "react";
+import { Input } from "../../../components/ui/input";
+import { Label } from "../../../components/ui/label";
+import { Button } from "../../../components/ui/button";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
-import { Check } from "lucide-react";
-import * as React from "react";
+import { Check, X } from "lucide-react";
 import { api } from "@/trpc/react";
 import { errorHandler } from "@/utils/errorHandler";
 import toast from "react-hot-toast";
+import { usePostingState } from "@/app/sell/PostingState";
 
-export function CouponCodeButton({
-  couponCode,
-  setCouponCode,
-  formError,
-}: {
-  couponCode?: string;
-  setCouponCode: (value?: string) => void;
-  formError: ProductFormError;
-}) {
+export function CouponCodeButton() {
+  const { couponCode, setCouponCode, formError } = usePostingState();
+
   const [couponStatus, setCouponStatus] = useState<
     "closed" | "open" | "valid" | "invalid" | "loading"
   >("closed");
+
+  useEffect(() => {
+    if (couponCode) {
+      validateCouponCode.mutate({ code: couponCode });
+    }
+  }, []);
 
   const validateCouponCode = api.coupon.validate.useMutation({
     onMutate: () => {
@@ -88,6 +87,20 @@ export function CouponCodeButton({
               disabled={couponStatus === "loading"}
             >
               <Check />
+            </Button>
+          )}
+          {couponStatus === "valid" && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-red-400"
+              title="Remove"
+              onClick={() => {
+                setCouponCode(undefined);
+                setCouponStatus("closed");
+              }}
+            >
+              <X />
             </Button>
           )}
         </div>
