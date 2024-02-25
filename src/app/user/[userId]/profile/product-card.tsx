@@ -27,7 +27,7 @@ function ProductCard({ active, listing, showSwitch }: ProductCardProps) {
 
 
      return (
-          <Card className='relative'>
+          <Card className='relative overflow-clip'>
                { showSwitch &&
                     <Switch
                          checked={isActive}

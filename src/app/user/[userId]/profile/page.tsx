@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import UserListings from "./user-listings";
 import { Suspense } from "react";
 import LogoutButton from "./logout";
+import Link from "next/link";
 
 interface ProfilePageParams {
   userId: string;
@@ -42,7 +43,7 @@ const ProfilePage = AuthenticatedPage<ProfilePageParams>(async ({ params, sessio
               {currentUser && currentUser.id === userData.id ? (
                 <LogoutButton />
               ) : (
-                <Button>Contact Seller</Button>
+                <Link href="https://wa.me/7397379958"><Button>Contact Seller</Button></Link>
               )}
             </div>
           </div>
