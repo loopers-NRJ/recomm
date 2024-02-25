@@ -2,7 +2,6 @@ import { api } from '@/trpc/server';
 import type { Session } from 'next-auth';
 import React from 'react'
 import ProductCard from './product-card';
-import toast from 'react-hot-toast';
 
 
 async function UserListings({ userId, session }: { userId: string, session: Session }) {
