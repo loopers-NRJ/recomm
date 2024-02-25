@@ -94,7 +94,7 @@ async function ProductPage({ params }: { params: ProductPageParams }) {
         })}
       </Accordion>
       <div className="flex justify-between">
-        <div className="flex items-center space-x-4">
+        <Link className="flex items-center space-x-4" href={`/user/${product.seller.id}/profile`}>
           <Avatar>
             <AvatarImage src={product.seller.image ?? undefined} />
             <AvatarFallback><UserIcon /></AvatarFallback>
@@ -103,7 +103,7 @@ async function ProductPage({ params }: { params: ProductPageParams }) {
             <p className="text-sm font-medium leading-none">{product.seller.name}</p>
             <p className="text-sm text-muted-foreground">{lastSeen(product.seller.lastActive)}</p>
           </div>
-        </div>
+        </Link>
         <a href="#" className="text-xs font-light text-gray-500">Report this Ad</a>
       </div>
     </Container>
