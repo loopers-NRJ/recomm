@@ -10,15 +10,15 @@ interface SliderProps {
 }
 
 export const Slider: React.FC<SliderProps> = ({...props}) => {
-  const thumbs = props.defaultValue || [1];
+  const thumbs = props.defaultValue ?? [1];
   return (
     <SliderPrimitive.Slider
       className="relative flex items-center user-select-none touch-action-none w-full h-20"
       defaultValue={thumbs}
       orientation="horizontal"
-      step={props.step || 10}
-      min={props.min || 100}
-      max={props.max || 100000000}
+      step={props.step ?? 10}
+      min={props.min ?? 100}
+      max={props.max ?? 100000000}
       minStepsBetweenThumbs={100}
       onValueChange={(value) => {
         if (props.onChange) {
