@@ -1,7 +1,7 @@
-import AuthorizedPage from "@/hoc/AuthenticatedPage";
+import { CompletedProfilePage } from "@/hoc/AuthenticatedPage";
 import Pricing from "./Pricing";
 
-const PostingProductPricingPage = AuthorizedPage(() => {
+const PostingProductPricingPage = CompletedProfilePage(() => {
   return <Pricing />;
 });
 

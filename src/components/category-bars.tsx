@@ -5,7 +5,7 @@ import { api } from "@/trpc/react";
 import { useClientSelectedState } from "@/store/SelectedState";
 import Image from "next/image";
 import { useState } from "react";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 
 function createQueryString(
   searchParams: ReadonlyURLSearchParams,
@@ -59,30 +59,43 @@ const MobileCategoryBar = () => {
         See All
       </div>
       <aside
-        className={`selection-box ${
-          !expanded && "hidden"
-        } fixed left-0 top-0 z-[99] h-screen w-screen bg-white`}
+        className={`selection-box ${!expanded && "hidden"
+          } fixed left-0 top-0 z-[99] h-screen w-screen bg-white`}
       >
-        <h1 className="flex">
-          <ArrowLeft onClick={() => {
-            setExpanded(false)
-            setParentId(undefined)
-          }} />
+        <h1 className="flex text-xl font-bold items-center">
+          <ArrowLeft
+            onClick={() => {
+              setExpanded(false)
+              setParentId(undefined)
+            }}
+            className="m-5"
+          />
           Categories
         </h1>
-        <ul>
+        <ul className="flex flex-col px-5 my-3 h-full w-full justify-start gap-3 overflow-scroll">
           {list.error && <div>Error</div>}
           {list.isLoading && <Loader2 />}
           {list.data?.categories.length == 0 ?
             parentId && void router.push("/products?" + createQueryString(searchParams, "category", parentId))
-            : list.data?.categories.map(category => {
-              if (category.parentCategoryId == null) {
-                return <li key={category.id} onClick={() => setParentId(category.id)}>{category.name}</li>
-              } else if (parentId == category.parentCategoryId) {
-                const url = "/products?" + createQueryString(searchParams, "category", category.id);
-                return <Link key={category.id} href={url}><li>{category.name}</li></Link>
-              }
-            })}
+            : list.data?.categories.map(category => (
+              <li className="p-3 text-md font-medium border rounded-lg">
+                {(category.parentCategoryId == null) ?
+                  <span className="flex w-full justify-between" key={category.id} onClick={() => setParentId(category.id)}>
+                    {category.name}
+                    <ArrowRight />
+                  </span> :
+                  (parentId == category.parentCategoryId) ?
+                    <Link
+                      className="flex w-full justify-between"
+                      key={category.id}
+                      href={"/products?" + createQueryString(searchParams, "category", category.id)}
+                    >
+                      {category.name}
+                      <ArrowRight />
+                    </Link> : null
+                }
+              </li>)
+            )}
         </ul>
       </aside>
     </div>

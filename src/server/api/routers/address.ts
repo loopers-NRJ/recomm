@@ -50,7 +50,7 @@ export const addressRouter = createTRPCRouter({
       });
       const maxAddressCount = await prisma.appConfiguration.findUnique({
         where: {
-          key: "maxAddressCount",
+          key: "maximumAddressPerUser",
         },
         select: {
           value: true,
