@@ -1,28 +1,38 @@
+"use client"
+
 import Link from "next/link";
 import { type ProductsPayloadIncluded } from "@/types/prisma";
 import Image from "next/image";
-import { HeartOutline, HeartSolid } from "@/components/navbar/Icons";
-import FavoriteToggle from "@/components/favorite-toggle";
+import HeartUI from "./heart";
+import { useState } from "react";
+import { api } from "@/trpc/react";
+import { refreshFavs } from "@/server/actions";
+import { useRouter } from "next/navigation";
 
 interface ListingCardProps {
-  product: ProductsPayloadIncluded & { isFav: boolean };
-  isUser: boolean;
+  product: ProductsPayloadIncluded;
+  heart: "fav" | 'not-fav' | 'not-show';
 }
 
-const ListingCard: React.FC<ListingCardProps> = ({
-  product,
-  isUser = false,
-}) => {
+const ListingCard: React.FC<ListingCardProps> = ({ product, heart }) => {
+
+  const { mutate: add } = api.product.addToFavorites.useMutation();
+  const { mutate: remove } = api.product.removeFromFavorites.useMutation();
+  const router = useRouter();
+
+  const [isFav, setIsFav] = useState(heart === "fav");
+
+  const toggle = () => {
+    if (isFav) remove({ productId: product.id });
+    else add({ productId: product.id });
+    setIsFav(!isFav);
+    router.refresh()
+    refreshFavs();
+  };
+
   return (
     <div className="relative flex w-full flex-col">
-      {isUser ? (
-        <FavoriteToggle
-          id={product.id}
-          state={product.isFav}
-          uncheckedIcon={<HeartOutline className="text-red-500" />}
-          checkedIcon={<HeartSolid className="text-red-500" />}
-        />
-      ) : null}
+      {heart != "not-show" && <HeartUI onClick={toggle} isClick={isFav} />}
       <Link href={`/products/${product.slug}`} className="group cursor-pointer">
         <div className="aspect-square w-full overflow-hidden rounded-xl border shadow-md transition-shadow duration-300 ease-in-out group-hover:shadow-lg">
           <Image
