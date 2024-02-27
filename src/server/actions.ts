@@ -1,12 +1,7 @@
-"use server";
+"use server"
 
-import { api } from "@/trpc/server";
+import { revalidatePath } from "next/cache";
 
-export async function toggleFavourite(productId: string) {
-  "use server";
-  await api.product.addToFavorites.mutate({ productId }).then(async (res) => {
-    if (res === "Product is already in favorites") {
-      await api.product.removeFromFavorites.mutate({ productId });
-    }
-  });
+export async function refreshFavs() {
+  revalidatePath("/favorites", "page")
 }

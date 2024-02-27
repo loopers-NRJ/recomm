@@ -46,8 +46,8 @@ const FavouritesPage = AuthenticatedPage<undefined, FavouritePageSearchParams>(
             return (
               <ListingCard
                 key={product.id}
-                product={{ ...product, isFav: true }}
-                isUser
+                product={product}
+                heart="fav"
               />
             );
           })}
