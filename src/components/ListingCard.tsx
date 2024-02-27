@@ -22,12 +22,12 @@ const ListingCard: React.FC<ListingCardProps> = ({ product, heart }) => {
 
   const [isFav, setIsFav] = useState(heart === "fav");
 
-  const toggle = () => {
+  const toggle = async () => {
     if (isFav) remove({ productId: product.id });
     else add({ productId: product.id });
     setIsFav(!isFav);
     router.refresh()
-    refreshFavs();
+    await refreshFavs();
   };
 
   return (

@@ -40,7 +40,7 @@ const Products: React.FC<Props> = ({
       },
     );
   const { data: favData } = api.user.favorites.useQuery({});
-  const favourites = favData?.favoritedProducts.map((product) => product.id) || [];
+  const favourites = favData?.favoritedProducts.map((product) => product.id) ?? [];
 
   if (isLoading) {
     return <LoadingProducts />;

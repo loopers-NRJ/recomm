@@ -8,7 +8,9 @@ export interface HeartProp {
   onClick: () => void;
 }
 
+/* eslint-disable */
 const HeartUI = (styled("div") as any)(({ isClick }: Partial<HeartProp>) => [
+/* eslint-enable */
   {
     width: "70px",
     height: "70px",
