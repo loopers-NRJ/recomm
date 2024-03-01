@@ -34,7 +34,8 @@ interface FormProps {
 
 const detailsFormSchema = z.object({
   fullName: z.string(),
-  addressLine: z.string(),
+  addressLine1: z.string(),
+  addressLine2: z.string().optional(),
   city: z.string(),
   state: z.enum(states),
   country: z.string(),
@@ -51,7 +52,8 @@ const DetailsForm = ({ userData, callbackUrl }: FormProps) => {
 
   const defaultValues = {
     fullName: userData?.name ?? "",
-    addressLine: "",
+    addressLine1: "",
+    addressLine2: "",
     city: "",
     state: state,
     country: "",
@@ -66,8 +68,8 @@ const DetailsForm = ({ userData, callbackUrl }: FormProps) => {
   });
 
   const onSubmit = async (data: DetailsFormValues) => {
-    const res = await createAddress.mutateAsync(data);
-    if (typeof res === "string") toast.error(res);
+    const result = await createAddress.mutateAsync(data);
+    if (typeof result === "string") toast.error(result);
     else {
       toast.success("Saved Successfully!");
       router.push(callbackUrl);
@@ -94,11 +96,26 @@ const DetailsForm = ({ userData, callbackUrl }: FormProps) => {
         />
         <FormField
           control={form.control}
-          name="addressLine"
+          name="addressLine1"
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                Address
+                Address Line 1
+                <FormControl>
+                  <Input type="text" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormLabel>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="addressLine2"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                Address Line 2
                 <FormControl>
                   <Input type="text" {...field} />
                 </FormControl>
