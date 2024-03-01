@@ -1,6 +1,5 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import BidDurationPicker from "@/components/common/BidDurationPicker";
 import { type SingleModelPayloadIncluded } from "@/types/prisma";
 import * as React from "react";
 import { CouponCodeButton } from "./CouponCodeButton";
@@ -11,7 +10,12 @@ interface PricingInfoSectionProps {
 }
 
 export default function PricingInfoSection({ model }: PricingInfoSectionProps) {
-  const { price, setPrice, formError, setBidDuration } = usePostingState();
+  const {
+    price,
+    setPrice,
+    formError,
+    // setBidDuration
+  } = usePostingState();
 
   return (
     <section className="mb-16 flex w-full max-w-2xl flex-col">
@@ -32,13 +36,13 @@ export default function PricingInfoSection({ model }: PricingInfoSectionProps) {
             <span className="text-red-500">{formError.price.message}</span>
           )}
         </Label>
-        <Label
+        {/* <Label
           className="flex items-center justify-between gap-2"
           title="The bid will be closed after the duration"
         >
           Select the Bidding duration
           <BidDurationPicker onChange={setBidDuration} />
-        </Label>
+        </Label> */}
         <CouponCodeButton />
       </div>
     </section>

@@ -12,7 +12,6 @@ import {
   AtomicQuestionType,
 } from "@prisma/client";
 import { isAlphaNumeric } from "./functions";
-import { plans, plansSchema } from "./constants";
 
 export const idSchema = z
   .string({
@@ -87,7 +86,7 @@ export const productSchema = z.object({
     })
     .trim()
     .cuid({ message: "Something went wrong, try again." }),
-  bidDuration: plansSchema.default(plans[0]),
+  // bidDuration: plansSchema.default(plans[0]),
   multipleChoiceAnswers: z
     .array(
       z.union([
