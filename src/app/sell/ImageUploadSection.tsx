@@ -1,5 +1,5 @@
 import { type ModelPayloadIncluded } from "@/types/prisma";
-import ImagePicker from "../../../components/common/ImagePicker";
+import ImagePicker from "../../components/common/ImagePicker";
 import { usePostingState } from "@/app/sell/PostingState";
 
 interface ImageUploadSectionProps {

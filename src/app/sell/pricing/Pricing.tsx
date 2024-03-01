@@ -4,7 +4,7 @@ import PricingInfoSection from "./PricingInfoSection";
 import { useLayoutEffect } from "react";
 import { usePostingState } from "../PostingState";
 import { redirect, useRouter } from "next/navigation";
-import { validatePostingPage1Inputs } from "@/app/sell/pricing/PostingForm";
+import { validatePostingPage1Inputs } from "@/app/sell/PostingForm";
 import Container from "@/components/Container";
 import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/react";

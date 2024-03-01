@@ -1,11 +1,11 @@
 import { type AtomicQuestion, AtomicQuestionType } from "@prisma/client";
-import { Input } from "../../../components/ui/input";
-import DatePicker from "../../../components/common/DatePicker";
+import { Input } from "../../components/ui/input";
+import DatePicker from "../../components/common/DatePicker";
 import * as React from "react";
-import { Label } from "../../../components/ui/label";
-import Textarea from "../../../components/common/Textarea";
+import { Label } from "../../components/ui/label";
+import Textarea from "../../components/common/Textarea";
 import { type ZodIssue } from "zod";
-import ErrorMessage from "../../../components/common/ErrorMessage";
+import ErrorMessage from "../../components/common/ErrorMessage";
 
 export type AtomicAnswer = {
   questionId: string;

@@ -13,8 +13,13 @@ async function NotificationPage() {
             {updates.length === 0 && <>No Notifications...</>}
             {updates.map((product) => (
               <div key={product.id} className="mb-2">
-                Update at - { product.room.updatedAt.toLocaleString() }
-                <Link className="text-blue-400 font-bold underline" href={ product.slug }>Click here</Link>
+                Update at - {product.room.updatedAt.toLocaleString()}
+                <Link
+                  className="font-bold text-blue-400 underline"
+                  href={product.slug}
+                >
+                  Click here
+                </Link>
               </div>
             ))}
           </div>
@@ -23,4 +28,4 @@ async function NotificationPage() {
     </main>
   );
 }
-export default AuthenticatedPage(NotificationPage);
+export default AuthenticatedPage(NotificationPage, "/notifications");

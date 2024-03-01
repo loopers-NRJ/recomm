@@ -1,9 +1,9 @@
-import BrandComboBox from "../../../components/combobox/BrandComboBox";
-import ModelComboBox from "../../../components/combobox/ModelComboBox";
+import BrandComboBox from "../../components/combobox/BrandComboBox";
+import ModelComboBox from "../../components/combobox/ModelComboBox";
 import { useEffect } from "react";
 import { Label } from "@radix-ui/react-label";
-import { Input } from "../../../components/ui/input";
-import Textarea from "../../../components/common/Textarea";
+import { Input } from "../../components/ui/input";
+import Textarea from "../../components/common/Textarea";
 import { usePostingState } from "@/app/sell/PostingState";
 
 export default function BasicInfoSection() {

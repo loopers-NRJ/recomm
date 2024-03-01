@@ -6,7 +6,7 @@ import ServerError from "@/components/common/ServerError";
 import { useClientSelectedState } from "@/store/SelectedState";
 import { api } from "@/trpc/react";
 import { parseAsString, useQueryState } from "next-usequerystate";
-import PostingForm from "@/app/sell/pricing/PostingForm";
+import PostingForm from "@/app/sell/PostingForm";
 
 export default function Sellit() {
   const [parentCategorySlug, setParentCaregorySlug] = useQueryState(

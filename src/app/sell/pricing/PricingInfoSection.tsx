@@ -2,7 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { type SingleModelPayloadIncluded } from "@/types/prisma";
 import * as React from "react";
-import { CouponCodeButton } from "./CouponCodeButton";
+import { CouponCodeButton } from "../CouponCodeButton";
 import { usePostingState } from "@/app/sell/PostingState";
 
 interface PricingInfoSectionProps {

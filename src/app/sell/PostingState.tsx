@@ -1,7 +1,7 @@
 import { type OptionalItem } from "@/types/custom";
 import { type ProductFormError } from "@/utils/validation";
-import { type AtomicAnswer } from "@/app/sell/pricing/AtomicQuestion";
-import { type MultipleChoiceAnswer } from "@/app/sell/pricing/MultipleChoiceQuestion";
+import { type AtomicAnswer } from "@/app/sell/AtomicQuestion";
+import { type MultipleChoiceAnswer } from "@/app/sell/MultipleChoiceQuestion";
 import { type SingleModelPayloadIncluded } from "@/types/prisma";
 import { type Category } from "@prisma/client";
 import { create } from "zustand";

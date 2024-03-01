@@ -34,11 +34,14 @@ export default function AuthenticatedPage<
   SearchParams = DefaultSearchParams,
 >(
   Component: PageWithSession<Params, SearchParams>,
+  callerPath = "/",
 ): Page<Params, SearchParams> {
   return async (props) => {
     const session = await getServerAuthSession();
     if (!session?.user) {
-      return permanentRedirect("/login");
+      return permanentRedirect(
+        `/login?callbackUrl=${encodeURIComponent(callerPath)}`,
+      );
     }
 
     return <Component {...props} session={session} />;
@@ -50,12 +53,22 @@ export function CompletedProfilePage<
   SearchParams = DefaultSearchParams,
 >(
   Component: PageWithSession<Params, SearchParams>,
+  callerPath: string,
 ): Page<Params, SearchParams> {
   return async (props) => {
     const session = await getServerAuthSession();
+    if (!session?.user) {
+      return permanentRedirect(
+        `/login?callbackUrl=${encodeURIComponent(callerPath)}`,
+      );
+    }
+
     const addresses = await api.address.all.query();
-    if (!session?.user) return permanentRedirect("/login");
-    if(addresses.length === 0) return permanentRedirect("/login/details");
+    if (addresses.length === 0) {
+      return permanentRedirect(
+        `/login/details?callbackUrl=${encodeURIComponent(callerPath)}`,
+      );
+    }
 
     return <Component {...props} session={session} />;
   };
