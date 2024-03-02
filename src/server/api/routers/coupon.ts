@@ -9,7 +9,6 @@ import {
 } from "@/utils/constants";
 import { couponCodeSchema, idSchema } from "@/utils/validation";
 import { states } from "@/types/prisma";
-import { isAlphaNumeric } from "@/utils/functions";
 
 export const couponRouter = createTRPCRouter({
   all: getProcedure((accesses) =>
@@ -36,7 +35,7 @@ export const couponRouter = createTRPCRouter({
             "updatedAt",
           ])
           .default(defaultSortBy),
-        cursor: idSchema.optional(),
+        cursor: z.object({ code: z.string(), categoryId: idSchema }).optional(),
         state: z.enum(states),
         categoryId: idSchema,
       }),
@@ -45,7 +44,6 @@ export const couponRouter = createTRPCRouter({
       const coupons = await prisma.coupon.findMany({
         where: {
           code: { contains: input.search },
-          state: input.state,
           category: { createdState: input.state, id: input.categoryId },
         },
         orderBy: { [input.sortBy]: input.sortOrder },
@@ -55,16 +53,21 @@ export const couponRouter = createTRPCRouter({
       });
       return {
         coupons,
-        nextCursor: coupons[input.limit - 1]?.id,
+        nextCursor: coupons[input.limit - 1]
+          ? {
+              code: coupons[input.limit - 1]!.code,
+              categoryId: coupons[input.limit - 1]!.categoryId,
+            }
+          : undefined,
       };
     }),
   validate: publicProcedure
-    .input(z.object({ code: couponCodeSchema }))
-    .mutation(async ({ input: { code }, ctx: { prisma } }) => {
+    .input(z.object({ code: couponCodeSchema, categoryId: idSchema }))
+    .mutation(async ({ input, ctx: { prisma } }) => {
       const coupon = await prisma.coupon.findUnique({
-        where: { code },
+        where: { id: input },
       });
-      return !!coupon;
+      return coupon;
     }),
   byId: getProcedure((accesses) =>
     accesses.some(
@@ -74,10 +77,10 @@ export const couponRouter = createTRPCRouter({
         access === AccessType.deleteCoupon,
     ),
   )
-    .input(z.object({ id: idSchema }))
-    .query(async ({ input: { id }, ctx: { prisma } }) => {
+    .input(z.object({ code: couponCodeSchema, categoryId: z.string() }))
+    .query(async ({ input, ctx: { prisma } }) => {
       const coupon = await prisma.coupon.findUnique({
-        where: { id },
+        where: { id: input },
       });
       if (!coupon) {
         return "Coupon not found";
@@ -94,12 +97,7 @@ export const couponRouter = createTRPCRouter({
           categoryId: idSchema,
         }),
         z.object({
-          code: z
-            .string()
-            .trim()
-            .min(4)
-            .max(16)
-            .refine(isAlphaNumeric, { message: "Invalid coupon code" }),
+          code: couponCodeSchema,
           type: z.enum([CouponType.percentage]),
           discount: z.number().int().min(0).max(100),
           categoryId: idSchema,
@@ -119,88 +117,71 @@ export const couponRouter = createTRPCRouter({
           code: input.code,
           type: input.type,
           discount: input.discount,
-          state: category.createdState,
           createdBy: { connect: { id: session.user.id } },
           category: { connect: { id: category.id } },
         },
       });
       await logger.info({
         state: category.createdState,
-        message: `${session.user.name} created coupon ${coupon.code} with discount ${coupon.discount} for the category`,
+        message: `${session.user.name} created coupon ${coupon.code} with discount ${coupon.discount} for the category ${category.name}`,
       });
       return coupon;
     }),
   update: getProcedure(AccessType.updateCoupon)
     .input(
       z.object({
-        id: idSchema,
-        code: couponCodeSchema.optional(),
+        categoryId: z.string(),
+        code: couponCodeSchema,
         type: z.enum([CouponType.fixed, CouponType.percentage]).optional(),
         discount: z.number().int().min(0).optional(),
-        state: z.enum(states).optional(),
         active: z.boolean().optional(),
       }),
     )
-    .mutation(async ({ input, ctx: { prisma, session, logger } }) => {
-      const coupon = await prisma.coupon.findUnique({
-        where: { id: input.id },
-      });
-      if (!coupon) {
-        return "Coupon not found";
-      }
-      if (input.code) {
-        const existingCoupon = await prisma.coupon.findUnique({
-          where: { code: input.code },
-        });
-        if (existingCoupon) {
-          return "Coupon code already exists";
-        }
-      }
-
-      const updatedCoupon = await prisma.coupon.update({
-        where: { id: input.id },
-        data: {
-          ...input,
-          updatedBy: { connect: { id: session.user.id } },
-        },
-      });
-      if (input.code) {
-        await logger.info({
-          state: updatedCoupon.state,
-          message: `${session.user.name} updated coupon code from ${
-            coupon.code
-          } to ${updatedCoupon.code} with discount ${updatedCoupon.discount}${
-            updatedCoupon.type === CouponType.percentage ? "%" : "RS"
-          }`,
-        });
-      } else {
-        await logger.info({
-          state: updatedCoupon.state,
-          message: `${session.user.name} updated coupon ${
-            updatedCoupon.code
-          } with discount ${updatedCoupon.discount}${
-            updatedCoupon.type === CouponType.percentage ? "%" : "RS"
-          }`,
-        });
-      }
-
-      return updatedCoupon;
-    }),
-  delete: getProcedure(AccessType.deleteCoupon)
-    .input(z.object({ couponId: idSchema }))
     .mutation(
-      async ({ input: { couponId }, ctx: { prisma, session, logger } }) => {
+      async ({
+        input: { code, categoryId, ...input },
+        ctx: { prisma, session, logger },
+      }) => {
         const coupon = await prisma.coupon.findUnique({
-          where: { id: couponId },
+          where: { id: { code, categoryId } },
         });
         if (!coupon) {
           return "Coupon not found";
         }
-        await prisma.coupon.delete({ where: { id: couponId } });
-        await logger.info({
-          state: coupon.state,
-          message: `${session.user.name} deleted coupon ${coupon.code}`,
+
+        const updatedCoupon = await prisma.coupon.update({
+          where: { id: { code, categoryId } },
+          data: {
+            ...input,
+            updatedBy: { connect: { id: session.user.id } },
+          },
+          include: {
+            category: true,
+          },
         });
+
+        await logger.info({
+          state: updatedCoupon.category?.createdState ?? "common",
+          message: `${session.user.name} updated coupon ${updatedCoupon.code}`,
+        });
+
+        return updatedCoupon;
       },
     ),
+  delete: getProcedure(AccessType.deleteCoupon)
+    .input(z.object({ code: couponCodeSchema, categoryId: z.string() }))
+    .mutation(async ({ input, ctx: { prisma, session, logger } }) => {
+      const coupon = await prisma.coupon.findUnique({
+        where: { id: input },
+        include: { category: true },
+      });
+      if (!coupon) {
+        return "Coupon not found";
+      }
+      await prisma.coupon.delete({ where: { id: input } });
+      await logger.info({
+        state: coupon.category?.createdState ?? "common",
+        message: `${session.user.name} deleted coupon ${coupon.code}`,
+      });
+    }),
 });

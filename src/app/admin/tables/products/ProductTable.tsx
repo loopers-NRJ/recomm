@@ -23,7 +23,7 @@ import {
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
-import Searchbar from "../Searchbar";
+import AdminSearchbar from "../AdminSearchbar";
 import TableHeader from "../TableHeader";
 import { errorHandler } from "@/utils/errorHandler";
 import { Switch } from "@/components/ui/switch";
@@ -292,7 +292,7 @@ export default function ProductTable() {
   }
   return (
     <>
-      <Searchbar search={search} setSearch={setSearch} />
+      <AdminSearchbar search={search} setSearch={setSearch} />
       <DataTable
         columns={columns}
         data={productApi.data?.pages.flatMap((page) => page.products)}

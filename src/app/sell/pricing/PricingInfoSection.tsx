@@ -2,7 +2,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { type SingleModelPayloadIncluded } from "@/types/prisma";
 import * as React from "react";
-import { CouponCodeButton } from "../CouponCodeButton";
 import { usePostingState } from "@/app/sell/PostingState";
 
 interface PricingInfoSectionProps {
@@ -18,7 +17,7 @@ export default function PricingInfoSection({ model }: PricingInfoSectionProps) {
   } = usePostingState();
 
   return (
-    <section className="mb-16 flex w-full max-w-2xl flex-col">
+    <section className="flex w-full max-w-2xl flex-col">
       <h1 className="my-4 text-center text-2xl font-bold">Pricing Section</h1>
       <h2 className="my-4 text-xl font-bold">Price Information</h2>
       {/* Show the price suggestion */}
@@ -43,7 +42,6 @@ export default function PricingInfoSection({ model }: PricingInfoSectionProps) {
           Select the Bidding duration
           <BidDurationPicker onChange={setBidDuration} />
         </Label> */}
-        <CouponCodeButton />
       </div>
     </section>
   );

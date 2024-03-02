@@ -65,7 +65,9 @@ export default function Sellit() {
         categories={categories}
         featuredCategories={featuredCategories}
         selectedCategorySlug={parentCategorySlug ?? undefined}
-        onSelect={(category) => void setParentCaregorySlug(category.slug)}
+        onSelect={(category) =>
+          void setParentCaregorySlug(category.slug, { history: "push" })
+        }
         hasNextPage={categoryApi.hasNextPage}
         fetchNextPage={() => void categoryApi.fetchNextPage()}
       />

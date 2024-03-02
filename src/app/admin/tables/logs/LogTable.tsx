@@ -26,7 +26,7 @@ import {
   useQueryState,
 } from "next-usequerystate";
 import { useMemo, useState } from "react";
-import Searchbar from "../Searchbar";
+import AdminSearchbar from "../AdminSearchbar";
 import TableHeader from "../TableHeader";
 import { type LogLevel, logLevel } from "@/utils/logger";
 import type { Log, State } from "@prisma/client";
@@ -141,7 +141,7 @@ export default function LogTable() {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
-        <Searchbar search={search} setSearch={setSearch} />
+        <AdminSearchbar search={search} setSearch={setSearch} />
         <Label className="flex items-center gap-3">
           Level
           <Select

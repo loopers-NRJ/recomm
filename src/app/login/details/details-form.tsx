@@ -26,20 +26,16 @@ import { useClientSelectedState } from "@/store/SelectedState";
 import { api } from "@/trpc/react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { addressSchema } from "@/utils/validation";
+import { errorHandler } from "@/utils/errorHandler";
 
 interface FormProps {
   userData: User;
   callbackUrl: string;
 }
 
-const detailsFormSchema = z.object({
+const detailsFormSchema = addressSchema.extend({
   fullName: z.string(),
-  addressLine1: z.string(),
-  addressLine2: z.string().optional(),
-  city: z.string(),
-  state: z.enum(states),
-  country: z.string(),
-  postalCode: z.string(),
   phoneNumber: z.string(),
 });
 
@@ -48,7 +44,14 @@ type DetailsFormValues = z.infer<typeof detailsFormSchema>;
 const DetailsForm = ({ userData, callbackUrl }: FormProps) => {
   const { state } = useClientSelectedState();
   const router = useRouter();
-  const createAddress = api.address.create.useMutation();
+  const createAddress = api.address.create.useMutation({
+    onSuccess: (result) => {
+      if (typeof result === "string") return toast.error(result);
+      toast.success("Saved Successfully!");
+      router.push(callbackUrl);
+    },
+    onError: errorHandler,
+  });
 
   const defaultValues = {
     fullName: userData?.name ?? "",
@@ -67,18 +70,12 @@ const DetailsForm = ({ userData, callbackUrl }: FormProps) => {
     mode: "onChange",
   });
 
-  const onSubmit = async (data: DetailsFormValues) => {
-    const result = await createAddress.mutateAsync(data);
-    if (typeof result === "string") toast.error(result);
-    else {
-      toast.success("Saved Successfully!");
-      router.push(callbackUrl);
-    }
-  };
-
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+      <form
+        onSubmit={form.handleSubmit((data) => createAddress.mutate(data))}
+        className="space-y-3"
+      >
         <FormField
           control={form.control}
           name="fullName"

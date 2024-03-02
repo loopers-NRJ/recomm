@@ -248,14 +248,12 @@ enum CouponType {
 }
 
 model Coupon {
-    id          String     @id @default(cuid())
-    code        String     @unique
+    code        String
     discount    Float
     type        CouponType
     active      Boolean    @default(true)
-    state       State
-    category    Category?  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-    categoryId  String?
+    category    Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+    categoryId  String
     createdAt   DateTime   @default(now())
     updatedAt   DateTime   @updatedAt
     createdBy   User       @relation("couponCreate", fields: [createdById], references: [id])
@@ -264,6 +262,7 @@ model Coupon {
     updatedById String?
     products    Product[]
 
+    @@id(name: "id", [code, categoryId])
     @@index([createdById])
     @@index([updatedById])
     @@index([categoryId])
@@ -435,30 +434,32 @@ model AtomicAnswer {
 }
 
 model Product {
-    id              String         @id @default(cuid())
-    price           Float
-    title           String
-    slug            String         @unique
-    active          Boolean        @default(true)
-    description     String
-    images          Image[]
-    selectedChoices Choice[]
-    answers         AtomicAnswer[]
-    isDeleted       Boolean        @default(false)
-    address         Address?       @relation(fields: [addressId], references: [id], onDelete: Restrict)
-    addressId       String?
-    model           Model          @relation(fields: [modelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-    modelId         String
-    seller          User           @relation("listedProducts", fields: [sellerId], references: [id], onDelete: Cascade)
-    sellerId        String
-    buyer           User?          @relation("purchasedProducts", fields: [buyerId], references: [id], onDelete: SetNull)
-    buyerId         String?
-    couponCode      Coupon?        @relation(fields: [couponCodeId], references: [id], onDelete: SetNull)
-    couponCodeId    String?
-    favoritedUsers  User[]         @relation("favoriteProducts")
-    room            Room           @relation(fields: [roomId], references: [id], onDelete: Restrict)
-    roomId          String         @unique
-    reports         Report[]
+    id               String         @id @default(cuid())
+    price            Float
+    title            String
+    slug             String         @unique
+    active           Boolean        @default(true)
+    description      String
+    images           Image[]
+    selectedChoices  Choice[]
+    answers          AtomicAnswer[]
+    isDeleted        Boolean        @default(false)
+    address          Address?       @relation(fields: [addressId], references: [id], onDelete: Restrict)
+    addressId        String?
+    model            Model          @relation(fields: [modelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    modelId          String
+    seller           User           @relation("listedProducts", fields: [sellerId], references: [id], onDelete: Cascade)
+    sellerId         String
+    buyer            User?          @relation("purchasedProducts", fields: [buyerId], references: [id], onDelete: SetNull)
+    buyerId          String?
+    coupon           Coupon?        @relation(fields: [couponCode, couponCategoryId], references: [code, categoryId], onDelete: SetNull)
+    couponCode       String?
+    couponCategoryId String?
+
+    favoritedUsers User[]   @relation("favoriteProducts")
+    room           Room     @relation(fields: [roomId], references: [id], onDelete: Restrict)
+    roomId         String   @unique
+    reports        Report[]
 
     // Meta
     createdAt DateTime @default(now())
@@ -468,7 +469,7 @@ model Product {
     @@index([modelId])
     @@index([buyerId])
     @@index([addressId])
-    @@index([couponCodeId])
+    @@index([couponCode, couponCategoryId])
 }
 
 model Notification {

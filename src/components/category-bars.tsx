@@ -1,6 +1,10 @@
-"use client"
+"use client";
 
-import { type ReadonlyURLSearchParams, useSearchParams, useRouter } from "next/navigation";
+import {
+  type ReadonlyURLSearchParams,
+  useSearchParams,
+  useRouter,
+} from "next/navigation";
 import Link from "next/link";
 import { api } from "@/trpc/react";
 import { useClientSelectedState } from "@/store/SelectedState";
@@ -19,8 +23,8 @@ function createQueryString(
 }
 
 const DesktopCategoryBar = () => {
-  return <div> Desktop </div>
-}
+  return <div> Desktop </div>;
+};
 
 const MobileCategoryBar = () => {
   const searchParams = useSearchParams();
@@ -36,13 +40,15 @@ const MobileCategoryBar = () => {
 
   const list = api.category.allWithoutPayload.useQuery({
     parentId: parentId,
-    state: selectedState
-  })
+    state: selectedState,
+  });
 
   return (
     <div className="mb-5 grid min-h-[200px] grid-cols-4 grid-rows-2 gap-2">
       {catergoriesQuery.data?.categories.map(({ category, image }) => {
-        const url = "/products/?" + createQueryString(searchParams, "category", category.slug);
+        const url =
+          "/products/?" +
+          createQueryString(searchParams, "category", category.slug);
         return (
           <CategoryBox
             key={category.id}
@@ -59,52 +65,71 @@ const MobileCategoryBar = () => {
         See All
       </div>
       <aside
-        className={`selection-box ${!expanded && "hidden"
-          } fixed left-0 top-0 z-[99] h-screen w-screen bg-white`}
+        className={`selection-box ${
+          !expanded && "hidden"
+        } fixed left-0 top-0 z-[99] h-screen w-screen bg-white`}
       >
-        <h1 className="flex text-xl font-bold items-center">
+        <h1 className="flex items-center text-xl font-bold">
           <ArrowLeft
             onClick={() => {
-              setExpanded(false)
-              setParentId(undefined)
-              setParentSlug(undefined)
+              setExpanded(false);
+              setParentId(undefined);
+              setParentSlug(undefined);
             }}
             className="m-5"
           />
           Categories
         </h1>
-        <ul className="flex flex-col px-5 my-3 h-full w-full justify-start gap-3 overflow-scroll">
+        <ul className="my-3 flex h-full w-full flex-col justify-start gap-3 overflow-scroll px-5">
           {list.error && <div>Error</div>}
           {list.isLoading && <Loader2 />}
-          {list.data?.categories.length == 0 ?
-            parentSlug && void router.push("/products?" + createQueryString(searchParams, "category", parentSlug))
+          {list.data?.categories.length == 0
+            ? parentSlug &&
+              void router.push(
+                "/products?" +
+                  createQueryString(searchParams, "category", parentSlug),
+              )
             : list.data?.categories.map((category, i) => (
-              <li key={i} className="p-3 text-md font-medium border rounded-lg">
-                {(category.parentCategoryId == null) ?
-                  <span className="flex w-full justify-between" key={category.id} onClick={() => {
-                    setParentId(category.id)
-                    setParentSlug(category.slug)
-                  }}>
-                    {category.name}
-                    <ArrowRight />
-                  </span> :
-                  (parentId == category.parentCategoryId) ?
-                    <Link
+                <li
+                  key={i}
+                  className="text-md rounded-lg border p-3 font-medium"
+                >
+                  {category.parentCategoryId == null ? (
+                    <span
                       className="flex w-full justify-between"
                       key={category.id}
-                      href={"/products?" + createQueryString(searchParams, "category", category.slug)}
+                      onClick={() => {
+                        setParentId(category.id);
+                        setParentSlug(category.slug);
+                      }}
                     >
                       {category.name}
                       <ArrowRight />
-                    </Link> : null
-                }
-              </li>)
-            )}
+                    </span>
+                  ) : parentId == category.parentCategoryId ? (
+                    <Link
+                      className="flex w-full justify-between"
+                      key={category.id}
+                      href={
+                        "/products?" +
+                        createQueryString(
+                          searchParams,
+                          "category",
+                          category.slug,
+                        )
+                      }
+                    >
+                      {category.name}
+                      <ArrowRight />
+                    </Link>
+                  ) : null}
+                </li>
+              ))}
         </ul>
       </aside>
     </div>
-  )
-}
+  );
+};
 
 interface CategoryBoxProps {
   image: string;

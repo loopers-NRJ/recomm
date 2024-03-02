@@ -516,12 +516,13 @@ export const categoryRouter = createTRPCRouter({
         const totalFeaturedCategories = await prisma.featuredCategory.count();
         const maxFeaturedCategory = await prisma.appConfiguration.findUnique({
           where: {
-            key: "maxFeaturedCategory",
+            key: "maximumFeaturedCategory",
           },
           select: {
             value: true,
           },
         });
+        console.log(maxFeaturedCategory);
         if (
           !maxFeaturedCategory?.value ||
           isNaN(Number(maxFeaturedCategory?.value))
