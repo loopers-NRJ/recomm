@@ -215,6 +215,7 @@ export const productSchema = z.object({
     ]),
   ),
   couponCode: couponCodeSchema.optional(),
+  addressId: idSchema.optional(),
 });
 
 export type ProductSchemaKeys = keyof Omit<
@@ -283,6 +284,22 @@ export const modelSchema = z.object({
   multipleChoiceQuestions: z.array(multipleChoiceQuestionSchema),
   atomicQuestions: z.array(atomicQuestionSchema),
   state: z.enum(states),
+});
+
+export const addressSchema = z.object({
+  tag: z.string().optional(),
+  addressLine1: z
+    .string({ required_error: "Address Line 1 field is required" })
+    .trim(),
+  addressLine2: z.string().optional(),
+  city: z.string({ required_error: "Enter your city" }),
+  state: z.enum(states, { required_error: "Selecy your state" }),
+  country: z.string({ required_error: "Enter your country" }),
+  postalCode: z
+    .string()
+    .trim()
+    .length(6, "Enter a valid 6 digit postal code")
+    .regex(/^[1-9][0-9]{5}$/, "Enter a valid postal code"),
 });
 
 type ProvidedMultipleChoiceQuestionAnswer = z.infer<

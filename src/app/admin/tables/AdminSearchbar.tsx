@@ -3,7 +3,7 @@ import { debounce } from "@/utils/helper";
 import { Search } from "lucide-react";
 import React from "react";
 
-function Searchbar({
+function AdminSearchbar({
   search,
   setSearch,
 }: {
@@ -25,4 +25,4 @@ function Searchbar({
   );
 }
 
-export default React.memo(Searchbar);
+export default React.memo(AdminSearchbar);

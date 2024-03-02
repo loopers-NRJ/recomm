@@ -1,12 +1,13 @@
 import { cn } from "@/lib/utils";
 import { Loader2 as Spinner, Plus } from "lucide-react";
 import Image from "next/image";
-import React, { type FC, useState } from "react";
+import React, { type FC, useState, useRef } from "react";
 import { v4 as uuid } from "uuid";
 import {
   maxImageSizeInMB as defaultMaxImageSizeInMB,
   maxImageCount,
 } from "@/utils/constants";
+import { Label } from "../ui/label";
 
 interface ImageFile {
   id: string;
@@ -49,6 +50,7 @@ const ImagePicker: FC<ImagePickerProps> = ({
       progress: 100,
     })),
   );
+  const ref = useRef<HTMLInputElement>(null);
 
   const handleImageSelect = async (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -178,7 +180,7 @@ const ImagePicker: FC<ImagePickerProps> = ({
               alt="image"
               width={150}
               height={150}
-              className="h-24 w-24 object-cover "
+              className="h-24 w-24 object-cover"
               onClick={() => {
                 setImages((prev) => {
                   const newImages = [...prev];
@@ -196,16 +198,22 @@ const ImagePicker: FC<ImagePickerProps> = ({
         ))}
 
         {maxImages - images.length > 0 && (
-          <label
+          <Label
             className={cn(
               "flex h-24 w-24 shrink-0 cursor-pointer items-center justify-center rounded-xl border object-cover",
               requiredError ? "border-red-500" : "",
               className,
             )}
             htmlFor="image-picker"
+            tabIndex={0}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                ref.current?.click();
+              }
+            }}
           >
             {children ?? <Plus />}
-          </label>
+          </Label>
         )}
         <input
           type="file"
@@ -214,6 +222,7 @@ const ImagePicker: FC<ImagePickerProps> = ({
           multiple
           className="hidden"
           accept="image/*"
+          ref={ref}
           onChange={(event) => void handleImageSelect(event)}
         />
       </div>

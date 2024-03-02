@@ -12,7 +12,7 @@ import { AdminButtonLink } from "@/components/common/ButtonLink";
 import { usePathname, useRouter } from "next/navigation";
 import { type Title } from "./titles";
 
-export default function Sidebar({ titles }: { titles: Title[] }) {
+export default function AdminSidebar({ titles }: { titles: Title[] }) {
   const router = useRouter();
   const pathname = usePathname();
   const selectedTitle = pathname.replace("/admin/tables/", "");

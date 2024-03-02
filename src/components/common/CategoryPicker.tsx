@@ -25,9 +25,9 @@ export default function CategoryPicker({
   fetchNextPage,
 }: CategoryPickerProps) {
   const router = useRouter();
-  const [viewMoreClicked, setViewMoreClicked] = useQueryState(
+  const [viewMoreClicked, setViewMoreClicked] = useQueryState<"true">(
     "view_more",
-    parseAsStringEnum(["true", "false"]).withDefault("false"),
+    parseAsStringEnum(["true"]),
   );
 
   return (
@@ -39,7 +39,7 @@ export default function CategoryPicker({
             className="absolute left-0 top-1/2 flex -translate-y-1/2 items-center justify-center"
             onClick={() =>
               viewMoreClicked === "true" && !selectedCategory
-                ? void setViewMoreClicked("false")
+                ? void setViewMoreClicked(null)
                 : router.back()
             }
           >
@@ -49,8 +49,7 @@ export default function CategoryPicker({
         <h1 className="text-lg font-semibold">Choose the category</h1>
       </div>
 
-      {selectedCategory === undefined &&
-      (!viewMoreClicked || viewMoreClicked === "false") ? (
+      {selectedCategory === undefined && !viewMoreClicked ? (
         <FeaturedCategoryList
           featuredCategories={featuredCategories}
           onSelect={onSelect}

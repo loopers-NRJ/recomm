@@ -27,7 +27,7 @@ import {
   useQueryState,
 } from "next-usequerystate";
 import { useMemo, useState } from "react";
-import Searchbar from "../Searchbar";
+import AdminSearchbar from "../AdminSearchbar";
 import TableHeader from "../TableHeader";
 import { errorHandler } from "@/utils/errorHandler";
 import { AdminButtonLink } from "@/components/common/ButtonLink";
@@ -240,7 +240,7 @@ export default function UserTable({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
-        <Searchbar search={search} setSearch={setSearch} />
+        <AdminSearchbar search={search} setSearch={setSearch} />
         <Label className="flex items-center gap-3">
           Filter
           <Select

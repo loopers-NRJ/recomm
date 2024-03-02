@@ -25,7 +25,7 @@ import toast from "react-hot-toast";
 import { errorHandler } from "@/utils/errorHandler";
 import { type ReportPayloadIncluded } from "@/types/prisma";
 import TableHeader from "../../../TableHeader";
-import Searchbar from "../../../Searchbar";
+import AdminSearchbar from "../../../AdminSearchbar";
 import {
   Drawer,
   DrawerClose,
@@ -207,7 +207,7 @@ export default function ReportTable({ productId }: { productId: string }) {
   return (
     <>
       <div className="flex items-center justify-between gap-2 rounded-lg">
-        <Searchbar search={search} setSearch={setSearch} />
+        <AdminSearchbar search={search} setSearch={setSearch} />
 
         <Link href="/admin/brands/create">
           <Button>New</Button>

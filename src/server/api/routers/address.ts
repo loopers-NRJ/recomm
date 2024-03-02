@@ -1,7 +1,7 @@
 import { states } from "@/types/prisma";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { z } from "zod";
-import { idSchema } from "@/utils/validation";
+import { addressSchema, idSchema } from "@/utils/validation";
 
 export const addressRouter = createTRPCRouter({
   all: protectedProcedure.query(async ({ ctx: { prisma, session } }) => {
@@ -23,26 +23,8 @@ export const addressRouter = createTRPCRouter({
       });
       return address;
     }),
-  /**
-    tag         String?
-    addressLine String
-    city        String
-    state       State
-    country     String
-    postalCode  String
-     */
   create: protectedProcedure
-    .input(
-      z.object({
-        tag: z.string().optional(),
-        addressLine1: z.string(),
-        addressLine2: z.string().optional(),
-        city: z.string(),
-        state: z.enum(states),
-        country: z.string(),
-        postalCode: z.string(),
-      }),
-    )
+    .input(addressSchema)
     .mutation(async ({ ctx: { prisma, session }, input }) => {
       const count = await prisma.address.count({
         where: {

@@ -27,7 +27,7 @@ import {
   useSearchParams,
 } from "next/navigation";
 import { useMemo, useState } from "react";
-import Searchbar from "../Searchbar";
+import AdminSearchbar from "../AdminSearchbar";
 import TableHeader from "../TableHeader";
 import { type RouterInputs } from "@/trpc/shared";
 import { api } from "@/trpc/react";
@@ -384,7 +384,7 @@ export default function CategoryTable() {
 
   return (
     <>
-      <Searchbar search={search} setSearch={setSearch} />
+      <AdminSearchbar search={search} setSearch={setSearch} />
       <div className="flex items-center justify-between rounded-lg">
         <div>
           <span className="px-2 font-bold">

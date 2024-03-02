@@ -1,6 +1,6 @@
 import Container from "@/components/Container";
-import Sidebar from "./Sidebar";
-import Titlebar from "./Titlebar";
+import AdminSidebar from "./AdminSidebar";
+import AdminTitlebar from "./AdminTitlebar";
 import { getServerAuthSession } from "@/server/auth";
 import { notFound } from "next/navigation";
 import { type Title } from "./titles";
@@ -76,9 +76,9 @@ export default async function layout({
 
   return (
     <Container className="pt-3 md:flex md:gap-2">
-      <Sidebar titles={filteredTitles} />
+      <AdminSidebar titles={filteredTitles} />
       <div className="my-4 flex grow flex-col gap-2 overflow-hidden md:m-0">
-        <Titlebar />
+        <AdminTitlebar />
         {children}
       </div>
     </Container>

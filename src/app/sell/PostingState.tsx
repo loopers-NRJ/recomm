@@ -3,98 +3,95 @@ import { type ProductFormError } from "@/utils/validation";
 import { type AtomicAnswer } from "@/app/sell/AtomicQuestion";
 import { type MultipleChoiceAnswer } from "@/app/sell/MultipleChoiceQuestion";
 import { type SingleModelPayloadIncluded } from "@/types/prisma";
-import { type Category } from "@prisma/client";
+import { type Address, type Category } from "@prisma/client";
 import { create } from "zustand";
 
 interface PostingState {
   title: string;
-  setTitle: (newTitle: string) => void;
-
   description: string;
-  setDescription: (newDescription: string) => void;
-
   price: string;
-  setPrice: (newPrice: string) => void;
-
   couponCode: string | undefined;
-  setCouponCode: (newCouponCode: string | undefined) => void;
-
   // bidDuration: Plan | undefined;
-  // setBidDuration: (newBidDuration: Plan | undefined) => void;
-
   images: File[];
-  setImages: (newImages: File[]) => void;
-
   selectedCategory: Category | undefined;
-  setSelectedCategory: (newSelectedCategory: Category) => void;
-
   selectedBrand: OptionalItem;
-  setSelectedBrand: (newSelectedBrand: OptionalItem) => void;
-
   selectedModel: OptionalItem;
-  setSelectedModel: (newSelectedModel: OptionalItem) => void;
   modelDetails?: SingleModelPayloadIncluded;
-  setModelDetails: (newModelDetails: SingleModelPayloadIncluded) => void;
-
+  selectedAddress: Address | undefined;
   formError: ProductFormError & {
     serverError?: string;
   };
+  atomicAnswers: AtomicAnswer[];
+  multipleChoiceAnswers: MultipleChoiceAnswer[];
+}
+
+interface PostingAction {
+  setTitle: (newTitle: string) => void;
+  setDescription: (newDescription: string) => void;
+  setPrice: (newPrice: string) => void;
+  setCouponCode: (newCouponCode: string | undefined) => void;
+  // setBidDuration: (newBidDuration: Plan | undefined) => void;
+  setImages: (newImages: File[]) => void;
+  setSelectedCategory: (newSelectedCategory: Category) => void;
+  setSelectedBrand: (newSelectedBrand: OptionalItem) => void;
+  setSelectedModel: (newSelectedModel: OptionalItem) => void;
+  setModelDetails: (newModelDetails: SingleModelPayloadIncluded) => void;
+  setSelectedAddress: (newSelectedAddress: Address) => void;
   setFormError: (
     newFormError: ProductFormError & {
       serverError?: string;
     },
   ) => void;
-
-  atomicAnswers: AtomicAnswer[];
   setAtomicAnswers: (newAtomicAnswers: AtomicAnswer[]) => void;
-
-  multipleChoiceAnswers: MultipleChoiceAnswer[];
   setMultipleChoiceAnswers: (
     newMultipleChoiceAnswers: MultipleChoiceAnswer[],
   ) => void;
+  reset: () => void;
 }
 
-export const usePostingState = create<PostingState>((set) => ({
+const defaultPostingState: PostingState = {
   title: "",
-  setTitle: (newTitle) => set({ title: newTitle }),
-
   description: "",
-  setDescription: (newDescription) => set({ description: newDescription }),
-
   price: "",
-  setPrice: (newPrice) => set({ price: newPrice }),
-
-  couponCode: "RECOMM100",
-  setCouponCode: (newCouponCode) => set({ couponCode: newCouponCode }),
-
+  couponCode: undefined,
   // bidDuration: undefined,
-  // setBidDuration: (newBidDuration) => set({ bidDuration: newBidDuration }),
-
   images: [],
-  setImages: (newImages) => set({ images: newImages }),
-
   selectedCategory: undefined,
+  selectedBrand: undefined,
+  selectedModel: undefined,
+  selectedAddress: undefined,
+  modelDetails: undefined,
+  formError: {},
+  atomicAnswers: [],
+  multipleChoiceAnswers: [],
+};
+
+export const usePostingState = create<PostingState & PostingAction>((set) => ({
+  ...defaultPostingState,
+
+  reset: () => {
+    console.debug("resetting posting state");
+    set(defaultPostingState);
+  },
+
+  setTitle: (newTitle) => set({ title: newTitle }),
+  setDescription: (newDescription) => set({ description: newDescription }),
+  setPrice: (newPrice) => set({ price: newPrice }),
+  setCouponCode: (newCouponCode) => set({ couponCode: newCouponCode }),
+  // setBidDuration: (newBidDuration) => set({ bidDuration: newBidDuration }),
+  setImages: (newImages) => set({ images: newImages }),
   setSelectedCategory: (newSelectedCategory) =>
     set({ selectedCategory: newSelectedCategory }),
-
-  selectedBrand: undefined,
   setSelectedBrand: (newSelectedBrand) =>
     set({ selectedBrand: newSelectedBrand }),
-
-  selectedModel: undefined,
   setSelectedModel: (newSelectedModel) =>
     set({ selectedModel: newSelectedModel }),
-  modelDetails: undefined,
   setModelDetails: (newModelDetails) => set({ modelDetails: newModelDetails }),
-
-  formError: {},
+  setSelectedAddress: (newSelectedAddress) =>
+    set({ selectedAddress: newSelectedAddress }),
   setFormError: (newFormError) => set({ formError: newFormError }),
-
-  atomicAnswers: [],
   setAtomicAnswers: (newAtomicAnswers) =>
     set({ atomicAnswers: newAtomicAnswers }),
-
-  multipleChoiceAnswers: [],
   setMultipleChoiceAnswers: (newMultipleChoiceAnswers) =>
     set({ multipleChoiceAnswers: newMultipleChoiceAnswers }),
 }));

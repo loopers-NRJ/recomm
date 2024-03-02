@@ -23,7 +23,7 @@ import {
 } from "next-usequerystate";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import Searchbar from "../Searchbar";
+import AdminSearchbar from "../AdminSearchbar";
 import TableHeader from "../TableHeader";
 import { AdminButtonLink } from "@/components/common/ButtonLink";
 import toast from "react-hot-toast";
@@ -211,7 +211,7 @@ export default function FeaturedCategoryTable() {
   return (
     <>
       <div className="flex items-center justify-between gap-2 rounded-lg">
-        <Searchbar search={search} setSearch={setSearch} />
+        <AdminSearchbar search={search} setSearch={setSearch} />
         <Link href="/admin/featured-category/create/new">
           <Button>New</Button>
         </Link>

@@ -208,7 +208,8 @@ export const productRouter = createTRPCRouter({
         // bidDuration,
         multipleChoiceAnswers: providedChoices,
         atomicAnswers: providedAnswers,
-        // couponCode,
+        couponCode,
+        addressId,
       },
       ctx: { prisma, session, logger },
     }) => {
@@ -268,6 +269,21 @@ export const productRouter = createTRPCRouter({
           slug: slugify(title, true),
           price,
           description,
+          address: {
+            connect: {
+              id: addressId,
+            },
+          },
+          coupon: couponCode
+            ? {
+                connect: {
+                  id: {
+                    code: couponCode,
+                    categoryId: model.categoryId,
+                  },
+                },
+              }
+            : undefined,
           images: {
             createMany: {
               data: images,
