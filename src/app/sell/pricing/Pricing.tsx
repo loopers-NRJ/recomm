@@ -4,7 +4,7 @@ import PricingInfoSection from "./PricingInfoSection";
 import { useLayoutEffect } from "react";
 import { usePostingState } from "../PostingState";
 import { redirect, useRouter } from "next/navigation";
-import { validatePostingPage1Inputs } from "@/app/sell/pricing/PostingForm";
+import { validatePostingPage1Inputs } from "@/app/sell/PostingForm";
 import Container from "@/components/Container";
 import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/react";
@@ -26,7 +26,7 @@ export default function Pricing() {
     setFormError,
     modelDetails,
     price,
-    bidDuration,
+    // bidDuration,
     couponCode,
     formError,
   } = usePostingState();
@@ -100,7 +100,7 @@ export default function Pricing() {
       images: uploadedImages,
       price: Number(price),
       couponCode,
-      bidDuration,
+      // bidDuration,
     });
   };
 
@@ -113,9 +113,7 @@ export default function Pricing() {
       <PricingInfoSection model={modelDetails} />
       <Button
         onClick={() => void handleSubmit()}
-        disabled={
-          productApi.isLoading || uploader.isLoading || !price || !bidDuration
-        }
+        disabled={productApi.isLoading || uploader.isLoading || !price}
       >
         {productApi.isLoading || uploader.isLoading ? (
           <Loading color="white" size={24} />

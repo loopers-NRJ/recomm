@@ -1,8 +1,7 @@
 import { type OptionalItem } from "@/types/custom";
-import { type Plan } from "@/utils/constants";
 import { type ProductFormError } from "@/utils/validation";
-import { type AtomicAnswer } from "@/app/sell/pricing/AtomicQuestion";
-import { type MultipleChoiceAnswer } from "@/app/sell/pricing/MultipleChoiceQuestion";
+import { type AtomicAnswer } from "@/app/sell/AtomicQuestion";
+import { type MultipleChoiceAnswer } from "@/app/sell/MultipleChoiceQuestion";
 import { type SingleModelPayloadIncluded } from "@/types/prisma";
 import { type Category } from "@prisma/client";
 import { create } from "zustand";
@@ -20,8 +19,8 @@ interface PostingState {
   couponCode: string | undefined;
   setCouponCode: (newCouponCode: string | undefined) => void;
 
-  bidDuration: Plan | undefined;
-  setBidDuration: (newBidDuration: Plan | undefined) => void;
+  // bidDuration: Plan | undefined;
+  // setBidDuration: (newBidDuration: Plan | undefined) => void;
 
   images: File[];
   setImages: (newImages: File[]) => void;
@@ -68,8 +67,8 @@ export const usePostingState = create<PostingState>((set) => ({
   couponCode: "RECOMM100",
   setCouponCode: (newCouponCode) => set({ couponCode: newCouponCode }),
 
-  bidDuration: undefined,
-  setBidDuration: (newBidDuration) => set({ bidDuration: newBidDuration }),
+  // bidDuration: undefined,
+  // setBidDuration: (newBidDuration) => set({ bidDuration: newBidDuration }),
 
   images: [],
   setImages: (newImages) => set({ images: newImages }),

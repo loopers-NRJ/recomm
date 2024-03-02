@@ -41,20 +41,17 @@ const FavouritesPage = AuthenticatedPage<undefined, FavouritePageSearchParams>(
 
     return (
       <Container>
-      <div className="product-area grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6 mb-32">
+        <div className="product-area mb-32 grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6">
           {favoritedProducts.map((product) => {
             return (
-              <ListingCard
-                key={product.id}
-                product={product}
-                heart={true}
-              />
+              <ListingCard key={product.id} product={product} heart={true} />
             );
           })}
         </div>
       </Container>
     );
   },
+  "/favorites",
 );
 
 export default FavouritesPage;

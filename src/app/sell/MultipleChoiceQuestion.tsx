@@ -1,5 +1,5 @@
-import { Label } from "../../../components/ui/label";
-import { Checkbox } from "../../../components/ui/checkbox";
+import { Label } from "../../components/ui/label";
+import { Checkbox } from "../../components/ui/checkbox";
 import { type MultipleChoiceQuestionPayloadIncluded } from "@/types/prisma";
 import {
   Select,
@@ -7,12 +7,12 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../../components/ui/select";
-import { RadioGroup, RadioGroupItem } from "../../../components/ui/radio-group";
+} from "../../components/ui/select";
+import { RadioGroup, RadioGroupItem } from "../../components/ui/radio-group";
 import { MultipleChoiceQuestionType } from "@prisma/client";
-import { Button } from "../../../components/ui/button";
+import { Button } from "../../components/ui/button";
 import { type ZodIssue } from "zod";
-import ErrorMessage from "../../../components/common/ErrorMessage";
+import ErrorMessage from "../../components/common/ErrorMessage";
 import * as React from "react";
 
 export type MultipleChoiceAnswer = {

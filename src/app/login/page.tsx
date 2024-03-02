@@ -3,17 +3,20 @@ import Link from "next/link";
 import { UserAuthForm } from "@/components/user-auth-form";
 import Container from "@/components/Container";
 import { getServerAuthSession } from "@/server/auth";
-import { redirect } from "next/navigation";
+import { permanentRedirect } from "next/navigation";
+import { type PageProps } from "@/types/custom";
 
 export const metadata: Metadata = {
   title: "Authentication",
   description: "Authentication forms built using the components.",
 };
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams: { callbackUrl = "/" },
+}: PageProps<undefined, { callbackUrl?: string }>) {
   const session = await getServerAuthSession();
   if (session && session.user) {
-    redirect(`user/${session.user.id}/profile`);
+    permanentRedirect(`user/${session.user.id}/profile`);
   }
 
   return (
@@ -27,7 +30,7 @@ export default async function LoginPage() {
             Enter your email below
           </p>
         </div>
-        <UserAuthForm />
+        <UserAuthForm callbackUrl={callbackUrl} />
         <p className="px-8 text-center text-sm text-muted-foreground">
           By clicking continue, you agree to our{" "}
           <Link

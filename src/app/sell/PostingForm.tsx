@@ -1,8 +1,8 @@
 "use client";
 
 import { usePostingState } from "@/app/sell/PostingState";
-import Container from "../../../components/Container";
-import Loading from "../../../components/common/Loading";
+import Container from "../../components/Container";
+import Loading from "../../components/common/Loading";
 import AdditionalInfoSection from "./AdditionalInfoSection";
 import BasicInfoSection from "./BasicInfoSection";
 import ImageUploadSection from "./ImageUploadSection";
@@ -12,7 +12,7 @@ import { AtomicQuestionType, MultipleChoiceQuestionType } from "@prisma/client";
 import { notFound, useRouter } from "next/navigation";
 import { useCallback } from "react";
 import toast from "react-hot-toast";
-import { Button } from "../../../components/ui/button";
+import { Button } from "../../components/ui/button";
 import {
   type ProductFormError,
   type ProductSchemaKeys,
@@ -128,16 +128,6 @@ export default function PostingForm({
 
   // const { isLoading, upload } = useImageUploader();
   const router = useRouter();
-  const productApi = api.product.create.useMutation({
-    onSuccess: (result) => {
-      if (typeof result === "string") {
-        return toast.error(result);
-      }
-      toast.success("Product created successfully");
-      router.push(`/user/${result.sellerId}/listings`);
-    },
-    onError: errorHandler,
-  });
 
   const modelApi = api.model.byId.useQuery(
     {
@@ -289,12 +279,7 @@ export default function PostingForm({
     multipleChoiceAnswers,
   ]);
 
-  if (
-    categoryApi.isError ||
-    modelApi.isError ||
-    productApi.isError ||
-    formError.serverError
-  ) {
+  if (categoryApi.isError || modelApi.isError || formError.serverError) {
     return (
       <Container className="py-20 text-center">
         Oops, Something went wrong. Try again.
