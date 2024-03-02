@@ -68,25 +68,6 @@ export default function CategoryPicker({
   );
 }
 
-const colors = [
-  "bg-red-300",
-  "bg-pink-300",
-  "bg-yellow-300",
-  "bg-green-300",
-  "bg-blue-300",
-  "bg-indigo-300",
-  "bg-purple-300",
-] as const;
-const hoverColors = [
-  "hover:bg-red-200",
-  "hover:bg-pink-200",
-  "hover:bg-yellow-200",
-  "hover:bg-green-200",
-  "hover:bg-blue-200",
-  "hover:bg-indigo-200",
-  "hover:bg-purple-200",
-] as const;
-
 type FeaturedCategoryListProps = Pick<
   CategoryPickerProps,
   "featuredCategories" | "onSelect"
@@ -101,13 +82,10 @@ function FeaturedCategoryList({
 }: FeaturedCategoryListProps) {
   return (
     <div className="grid w-full max-w-sm grid-cols-2 justify-items-center gap-3 p-3 pb-20">
-      {featuredCategories.map((fc, i) => (
+      {featuredCategories.map((fc) => (
         <Button
           variant="ghost"
-          className={`flex aspect-square h-full w-full flex-col items-center justify-center shadow-md 
-          ${colors[i % colors.length]} 
-          ${hoverColors[i % colors.length]}
-          `}
+          className="flex aspect-square h-full w-full flex-col items-center justify-center gap-2 border shadow-lg"
           onClick={() => onSelect(fc.category)}
           key={fc.categoryId}
         >
@@ -118,12 +96,12 @@ function FeaturedCategoryList({
             height={100}
           />
 
-          {fc.category.name}
+          <span className="capitalize">{fc.category.name}</span>
         </Button>
       ))}
       <Button
         variant="ghost"
-        className="flex aspect-square h-full w-full flex-col items-center justify-center shadow-md"
+        className="flex aspect-square h-full w-full flex-col items-center justify-center gap-2 border shadow-lg"
         onClick={onViewMore}
       >
         <div className="flex h-[100px] w-[100px] items-center justify-center">

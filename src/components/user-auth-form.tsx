@@ -9,10 +9,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signIn } from "next-auth/react";
 
+type UserAuthFormType = React.ComponentProps<"div"> & {
+  callbackUrl: string;
+};
+
 export function UserAuthForm({
   className,
+  callbackUrl,
   ...props
-}: React.ComponentProps<"div">) {
+}: UserAuthFormType) {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
   async function onSubmit(event: React.SyntheticEvent) {
@@ -61,7 +66,7 @@ export function UserAuthForm({
         </div>
       </div>
       <Button
-        onClick={() => void signIn("google", { callbackUrl: "/" })}
+        onClick={() => void signIn("google", { callbackUrl })}
         variant="outline"
         type="button"
         disabled={isLoading}

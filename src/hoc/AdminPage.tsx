@@ -4,7 +4,7 @@ import type { DefaultParams, DefaultSearchParams, Page } from "@/types/custom";
 
 import AuthorizedPage, { type PagePropsWithSession } from "./AuthenticatedPage";
 
-import { permanentRedirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { api } from "@/trpc/server";
 import { type AccessType } from "@prisma/client";
 import { type ReactNode } from "react";
@@ -38,7 +38,7 @@ export default function AdminPage<
   return AuthorizedPage(async (props) => {
     const roleId = props.session?.user.roleId;
     if (!roleId) {
-      return permanentRedirect("/login");
+      return notFound();
     }
 
     const accesses = (await api.role.byId.query({ id: roleId }))?.accesses;
@@ -53,7 +53,7 @@ export default function AdminPage<
           : userAccessTypes?.includes(requiredAccessTypes);
 
     if (!hasAccess) {
-      return permanentRedirect("/login");
+      return notFound();
     }
 
     return <Component {...props} accesses={userAccessTypes!} />;

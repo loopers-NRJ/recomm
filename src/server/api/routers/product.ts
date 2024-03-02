@@ -137,32 +137,38 @@ export const productRouter = createTRPCRouter({
     ),
   byId: publicProcedure
     .input(z.object({ productId: idSchema }))
-    .query(async ({ input: { productId: id }, ctx: { prisma, session } }) => {
-      const product = await prisma.product.findUnique({
-        where: {
-          id,
-        },
-        include: singleProductPayload.include,
-      });
-      type ProductWithIsFavorite = typeof product & { isFavorite?: true };
-      if (session?.user !== undefined) {
-        const favorite = await prisma.product.findUnique({
+    .query(
+      async ({
+        input: { productId: id },
+        ctx: { prisma, session, isAdminPage },
+      }) => {
+        const product = await prisma.product.findUnique({
           where: {
             id,
-            favoritedUsers: {
-              some: {
-                id: session.user.id,
+            active: isAdminPage ? undefined : true,
+          },
+          include: singleProductPayload.include,
+        });
+        type ProductWithIsFavorite = typeof product & { isFavorite?: true };
+        if (session?.user !== undefined) {
+          const favorite = await prisma.product.findUnique({
+            where: {
+              id,
+              favoritedUsers: {
+                some: {
+                  id: session.user.id,
+                },
               },
             },
-          },
-        });
+          });
 
-        if (favorite !== null) {
-          (product as ProductWithIsFavorite).isFavorite = true;
+          if (favorite !== null) {
+            (product as ProductWithIsFavorite).isFavorite = true;
+          }
         }
-      }
-      return product as ProductWithIsFavorite;
-    }),
+        return product as ProductWithIsFavorite;
+      },
+    ),
   bySlug: publicProcedure
     .input(z.object({ productSlug: z.string() }))
     .query(async ({ input: { productSlug }, ctx: { prisma, session } }) => {
@@ -191,7 +197,6 @@ export const productRouter = createTRPCRouter({
       }
       return product as ProductWithIsFavorite;
     }),
-  // createProduct: getProcedure(AccessType.seller)
   create: protectedProcedure.input(productSchema).mutation(
     async ({
       input: {
@@ -200,7 +205,7 @@ export const productRouter = createTRPCRouter({
         description,
         images,
         modelId,
-        bidDuration,
+        // bidDuration,
         multipleChoiceAnswers: providedChoices,
         atomicAnswers: providedAnswers,
         // couponCode,
@@ -210,8 +215,9 @@ export const productRouter = createTRPCRouter({
       // creating the product will not happen in the trpc router.
       // after implementing payment gateway, the product will be created there.
       // this is just for placeholder.
-      const closedAt = new Date();
-      closedAt.setDate(closedAt.getDate() + Number(bidDuration));
+
+      // const closedAt = new Date();
+      // closedAt.setDate(closedAt.getDate() + Number(bidDuration));
 
       const user = session.user;
       const model = await prisma.model.findUnique({
@@ -279,7 +285,7 @@ export const productRouter = createTRPCRouter({
           },
           room: {
             create: {
-              closedAt,
+              // closedAt,
             },
           },
           selectedChoices: {

@@ -11,7 +11,6 @@ import { getServerAuthSession } from "@/server/auth";
 import { permanentRedirect } from "next/navigation";
 import type { Session } from "next-auth";
 import { type ReactNode } from "react";
-import { api } from "@/trpc/server";
 
 // type of the props
 export interface PagePropsWithSession<
@@ -34,28 +33,15 @@ export default function AuthenticatedPage<
   SearchParams = DefaultSearchParams,
 >(
   Component: PageWithSession<Params, SearchParams>,
+  callerPath = "/",
 ): Page<Params, SearchParams> {
   return async (props) => {
     const session = await getServerAuthSession();
     if (!session?.user) {
-      return permanentRedirect("/login");
+      return permanentRedirect(
+        `/login?callbackUrl=${encodeURIComponent(callerPath)}`,
+      );
     }
-
-    return <Component {...props} session={session} />;
-  };
-}
-
-export function CompletedProfilePage<
-  Params = DefaultParams,
-  SearchParams = DefaultSearchParams,
->(
-  Component: PageWithSession<Params, SearchParams>,
-): Page<Params, SearchParams> {
-  return async (props) => {
-    const session = await getServerAuthSession();
-    const addresses = await api.address.all.query();
-    if (!session?.user) return permanentRedirect("/login");
-    if(addresses.length === 0) return permanentRedirect("/login/details");
 
     return <Component {...props} session={session} />;
   };

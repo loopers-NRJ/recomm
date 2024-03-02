@@ -161,15 +161,16 @@ model User {
 }
 
 model Address {
-    id          String  @id @default(cuid())
-    tag         String?
-    addressLine String
-    city        String
-    state       State
-    country     String
-    postalCode  String
-    user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-    userId      String
+    id           String  @id @default(cuid())
+    tag          String?
+    addressLine1 String
+    addressLine2 String?
+    city         String
+    state        State
+    country      String
+    postalCode   String
+    user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId       String
 
     // Meta
     createdAt DateTime  @default(now())
@@ -504,9 +505,9 @@ model Room {
     product Product?
 
     // Meta
-    closedAt  DateTime
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    closedAt  DateTime?
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
 }
 
 model Bid {

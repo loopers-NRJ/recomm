@@ -16,40 +16,39 @@ import WishCard from "./wish-card";
 //   sortOrder?: SortOrder;
 // }
 
-const WishesPage = AuthenticatedPage(async () => {
-    // const search = searchParams.search ?? defaultSearch;
-    // const sortOrder = (searchParams.sortOrder as SortOrder) ?? defaultSortOrder;
-    const { wishes } = await api.user.wishes.query({});
+const WishesPage = async () => {
+  // const search = searchParams.search ?? defaultSearch;
+  // const sortOrder = (searchParams.sortOrder as SortOrder) ?? defaultSortOrder;
+  const { wishes } = await api.user.wishes.query({});
 
-    if (wishes.length === 0) {
-      return (
-        <Container>
-          <header className="mt-5 flex items-center justify-between">
-            <h1 className="text-xl font-semibold">Your WishList</h1>
-            <AddWish />
-          </header>
-          <div className="flex h-[300px] w-full items-center justify-center">
-            No Data Available
-          </div>
-        </Container>
-      );
-    }
+  if (wishes.length === 0) {
     return (
       <Container>
         <header className="mt-5 flex items-center justify-between">
           <h1 className="text-xl font-semibold">Your WishList</h1>
           <AddWish />
         </header>
-        <div className="mt-10 flex w-full flex-col items-center gap-5">
-          <div className="list w-full space-y-3">
-            {wishes.map((wish) => (
-              <WishCard wish={wish} key={wish.id} />
-            ))}
-          </div>
+        <div className="flex h-[300px] w-full items-center justify-center">
+          No Data Available
         </div>
       </Container>
     );
-  },
-);
+  }
+  return (
+    <Container>
+      <header className="mt-5 flex items-center justify-between">
+        <h1 className="text-xl font-semibold">Your WishList</h1>
+        <AddWish />
+      </header>
+      <div className="mt-10 flex w-full flex-col items-center gap-5">
+        <div className="list w-full space-y-3">
+          {wishes.map((wish) => (
+            <WishCard wish={wish} key={wish.id} />
+          ))}
+        </div>
+      </div>
+    </Container>
+  );
+};
 
-export default AuthenticatedPage(WishesPage);
+export default AuthenticatedPage(WishesPage, "/wishlist");
