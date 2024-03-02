@@ -1,7 +1,5 @@
 import Container from "@/components/Container";
 import {
-  defaultSortBy,
-  defaultSortOrder,
   deviceTypeHeaderName,
 } from "@/utils/constants";
 import Products from "@/components/products-area";
@@ -17,7 +15,7 @@ export default function Home() {
     <main>
       <Container className="flex flex-col">
         {device === "mobile" ? <MobileCategoryBar /> : <DesktopCategoryBar />}
-        <Products sortBy={defaultSortBy} sortOrder={defaultSortOrder} />
+        <Products />
       </Container>
     </main>
   );

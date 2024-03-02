@@ -5,9 +5,9 @@ interface SearchParams {
   search?: string;
   sortBy: SortBy;
   sortOrder: SortOrder;
-  modelId?: string;
-  categoryId?: string;
-  brandId?: string;
+  model?: string;
+  category?: string;
+  brand?: string;
 }
 
 export default function ProductsPage({
