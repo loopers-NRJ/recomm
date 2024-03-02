@@ -265,7 +265,7 @@ export const productRouter = createTRPCRouter({
       const product = await prisma.product.create({
         data: {
           title,
-          slug: slugify(title),
+          slug: slugify(title, true),
           price,
           description,
           images: {
