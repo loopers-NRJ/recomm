@@ -33,7 +33,7 @@ export default function Pricing() {
     couponCode,
     formError,
     selectedAddress,
-    reset,
+    // reset,
   } = usePostingState();
   const [priceToPay, setPriceToPay] = useState(selectedCategory?.price ?? 0);
   const router = useRouter();
@@ -44,7 +44,7 @@ export default function Pricing() {
         toast.error(data);
         return;
       }
-      reset();
+      // reset();
       router.push(`/products/${data.slug}`);
     },
   });
@@ -119,7 +119,6 @@ export default function Pricing() {
   }
 
   const handleSuccess = (coupon: Coupon) => {
-    console.log(coupon);
     if (coupon.type === CouponType.fixed) {
       setPriceToPay(priceToPay - coupon.discount);
     } else {
