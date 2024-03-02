@@ -50,3 +50,5 @@ bun.lockb
 # vscode
 .vscode
 .vscode/*
+
+*/**/testing

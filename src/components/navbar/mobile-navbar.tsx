@@ -13,7 +13,6 @@ import { useSession } from "next-auth/react";
 const MobileNavbar = () => {
   const { data: session } = useSession();
   const pathname = usePathname();
-
   const style =
     "font-medium border text-md flex items-center justify-center w-fit p-3 rounded-md hover:bg-slate-100";
 
@@ -46,7 +45,7 @@ const MobileNavbar = () => {
             >
               <Bell className="h-5 w-5" />
             </Link>
-            <Profile session={session} />
+            {!pathname.endsWith("/profile") && <Profile session={session} />}
           </div>
         </div>
         {/* Search bar and location selector */}

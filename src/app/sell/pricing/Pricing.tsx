@@ -1,7 +1,7 @@
 "use client";
 
 import PricingInfoSection from "./PricingInfoSection";
-import { useLayoutEffect } from "react";
+import { useLayoutEffect, useState } from "react";
 import { usePostingState } from "../PostingState";
 import { redirect, useRouter } from "next/navigation";
 import { validatePostingPage1Inputs } from "@/app/sell/PostingForm";
@@ -12,6 +12,9 @@ import { errorHandler } from "@/utils/errorHandler";
 import toast from "react-hot-toast";
 import { useImageUploader } from "@/utils/imageUpload";
 import Loading from "@/components/common/Loading";
+import AddressList from "@/components/common/AddressList";
+import { CouponCodeButton } from "../CouponCodeButton";
+import { type Coupon, CouponType } from "@prisma/client";
 
 export default function Pricing() {
   const {
@@ -29,7 +32,10 @@ export default function Pricing() {
     // bidDuration,
     couponCode,
     formError,
+    selectedAddress,
+    reset,
   } = usePostingState();
+  const [priceToPay, setPriceToPay] = useState(selectedCategory?.price ?? 0);
   const router = useRouter();
   const productApi = api.product.create.useMutation({
     onError: errorHandler,
@@ -38,9 +44,12 @@ export default function Pricing() {
         toast.error(data);
         return;
       }
+      reset();
       router.push(`/products/${data.slug}`);
     },
   });
+
+  const uploader = useImageUploader();
 
   useLayoutEffect(() => {
     const result = validatePostingPage1Inputs({
@@ -101,26 +110,70 @@ export default function Pricing() {
       price: Number(price),
       couponCode,
       // bidDuration,
+      addressId: selectedAddress?.id,
     });
   };
 
-  const uploader = useImageUploader();
   if (!modelDetails) {
     return redirect("/sell");
   }
+
+  const handleSuccess = (coupon: Coupon) => {
+    console.log(coupon);
+    if (coupon.type === CouponType.fixed) {
+      setPriceToPay(priceToPay - coupon.discount);
+    } else {
+      setPriceToPay(priceToPay - (priceToPay / 100) * coupon.discount);
+    }
+  };
+
   return (
-    <Container className="flex flex-col items-center justify-center pb-40">
+    <Container className="flex w-full flex-col items-center justify-center gap-16 pb-40">
+      <AddressPicker />
       <PricingInfoSection model={modelDetails} />
+      {selectedCategory && (
+        <section className="flex w-full max-w-2xl flex-col">
+          <CouponCodeButton
+            onSuccess={handleSuccess}
+            onRemove={() => setPriceToPay(selectedCategory.price)}
+            selectedCategoryId={selectedCategory.id}
+          />
+        </section>
+      )}
       <Button
         onClick={() => void handleSubmit()}
-        disabled={productApi.isLoading || uploader.isLoading || !price}
+        disabled={
+          productApi.isLoading ||
+          uploader.isLoading ||
+          !price ||
+          priceToPay !== 0
+        }
       >
         {productApi.isLoading || uploader.isLoading ? (
           <Loading color="white" size={24} />
+        ) : priceToPay !== 0 ? (
+          `You have to pay ${priceToPay} Rs`
         ) : (
-          "Post"
+          "Sell it"
         )}
       </Button>
     </Container>
+  );
+}
+
+function AddressPicker() {
+  const [selectedAddress, setSelectedAddress] = usePostingState((state) => [
+    state.selectedAddress,
+    state.setSelectedAddress,
+  ]);
+  return (
+    <section className="flex w-full max-w-2xl flex-col">
+      <h1 className="my-4 text-center text-2xl font-bold">Address Section</h1>
+      <AddressList
+        enableSelecting
+        selectedAddress={selectedAddress}
+        onSelectedAddressChange={setSelectedAddress}
+      />
+    </section>
   );
 }

@@ -101,11 +101,14 @@ export default function PostingForm({
     },
     {
       onError: errorHandler,
-      onSuccess(data) {
-        if (data === "Category not found") {
+      onSuccess(category) {
+        if (category === "Category not found") {
           return notFound();
         }
-        setSelectedCategory(data);
+        if (category.id !== selectedCategoryState?.id) {
+          reset();
+        }
+        setSelectedCategory(category);
       },
     },
   );
@@ -121,12 +124,13 @@ export default function PostingForm({
     setMultipleChoiceAnswers,
     formError,
     setModelDetails,
+    selectedCategory: selectedCategoryState,
     setSelectedCategory,
     images,
     setFormError,
+    reset,
   } = usePostingState();
 
-  // const { isLoading, upload } = useImageUploader();
   const router = useRouter();
 
   const modelApi = api.model.byId.useQuery(
@@ -138,12 +142,12 @@ export default function PostingForm({
         if (!selectedModel?.id) return;
         if (!data || data === "Model not found")
           return toast.error("Model not found");
+        setModelDetails(data);
         if (
           data.atomicQuestions.length === atomicAnswers.length &&
           data.multipleChoiceQuestions.length === multipleChoiceAnswers.length
         )
           return;
-        setModelDetails(data);
         setAtomicAnswers(
           data.atomicQuestions.map((question) => {
             if (

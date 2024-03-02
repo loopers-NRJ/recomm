@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/select";
 import { api } from "@/trpc/react";
 import { errorHandler } from "@/utils/errorHandler";
-import { isAlphaNumeric } from "@/utils/functions";
 import { CouponType, type Coupon } from "@prisma/client";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -30,7 +29,6 @@ export default function EditCoupon({ coupon }: { coupon: Coupon }) {
     },
     onError: errorHandler,
   });
-  const [code, setCode] = useState(coupon.code);
   const [type, setCouponType] = useState<CouponType>(coupon.type);
   const [discount, setDiscount] = useState(coupon.discount.toString());
 
@@ -38,13 +36,8 @@ export default function EditCoupon({ coupon }: { coupon: Coupon }) {
 
   const getUpdateButtonDisableState = () => {
     if (updateCouponApi.isLoading) return true;
-    if (code === "") return true;
     if (discount === "") return true;
-    if (
-      code === coupon.code &&
-      discount === coupon.discount.toString() &&
-      type === coupon.type
-    )
+    if (discount === coupon.discount.toString() && type === coupon.type)
       return true;
     return false;
   };
@@ -52,21 +45,7 @@ export default function EditCoupon({ coupon }: { coupon: Coupon }) {
   return (
     <Container className="flex justify-center">
       <section className="flex h-full w-full flex-col p-4 md:h-fit md:w-4/6 lg:h-fit lg:w-3/6 xl:w-2/5">
-        <Label className="mb-4 flex flex-col justify-center gap-2">
-          Coupon Name
-          <Input
-            value={code}
-            onChange={(e) => {
-              if (e.target.value === "") return setCode("");
-              if (!isAlphaNumeric(e.target.value)) {
-                return toast.error(
-                  "Coupon code can only contain alphabets and numbers",
-                );
-              }
-              setCode(e.target.value);
-            }}
-          />
-        </Label>
+        <h1 className="mb-4 text-xl font-bold">Edit {coupon.code} Coupon</h1>
         <Label htmlFor="discount">
           Discount &nbsp;
           <span className="text-xs text-gray-500">
@@ -129,8 +108,8 @@ export default function EditCoupon({ coupon }: { coupon: Coupon }) {
           <Button
             onClick={() =>
               updateCouponApi.mutate({
-                id: coupon.id,
-                code,
+                code: coupon.code,
+                categoryId: coupon.categoryId,
                 type,
                 discount: Number(discount),
               })
@@ -142,7 +121,7 @@ export default function EditCoupon({ coupon }: { coupon: Coupon }) {
         </div>
         {updateCouponApi.isLoading && (
           <div className="flex flex-col items-center justify-center rounded-lg border p-2">
-            Updaing Coupon {code} ...
+            Updaing Coupon {coupon.code} ...
             <Loader2 className="animate-spin" />
           </div>
         )}

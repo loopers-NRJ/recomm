@@ -10,8 +10,17 @@ import { api } from "@/trpc/react";
 import { errorHandler } from "@/utils/errorHandler";
 import toast from "react-hot-toast";
 import { usePostingState } from "@/app/sell/PostingState";
+import { type Coupon } from "@prisma/client";
 
-export function CouponCodeButton() {
+export function CouponCodeButton({
+  onRemove: handleRemove,
+  onSuccess: handleSuccess,
+  selectedCategoryId,
+}: {
+  onRemove: () => void;
+  onSuccess: (discount: Coupon) => void;
+  selectedCategoryId: string;
+}) {
   const { couponCode, setCouponCode, formError } = usePostingState();
 
   const [couponStatus, setCouponStatus] = useState<
@@ -20,7 +29,10 @@ export function CouponCodeButton() {
 
   useEffect(() => {
     if (couponCode) {
-      validateCouponCode.mutate({ code: couponCode });
+      validateCouponCode.mutate({
+        code: couponCode,
+        categoryId: selectedCategoryId,
+      });
     }
   }, []);
 
@@ -30,6 +42,7 @@ export function CouponCodeButton() {
     },
     onSuccess: (result) => {
       if (result) {
+        handleSuccess(result);
         toast.success("Coupon code applied successfully");
         setCouponStatus("valid");
       } else {
@@ -82,7 +95,10 @@ export function CouponCodeButton() {
               size="sm"
               title="Apply"
               onClick={() => {
-                validateCouponCode.mutate({ code: couponCode });
+                validateCouponCode.mutate({
+                  code: couponCode,
+                  categoryId: selectedCategoryId,
+                });
               }}
               disabled={couponStatus === "loading"}
             >
@@ -96,6 +112,7 @@ export function CouponCodeButton() {
               className="text-red-400"
               title="Remove"
               onClick={() => {
+                handleRemove();
                 setCouponCode(undefined);
                 setCouponStatus("closed");
               }}

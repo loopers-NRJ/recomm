@@ -23,7 +23,7 @@ function filterAndRenameTitle(title: string) {
   return title;
 }
 
-export default function Titlebar() {
+export default function AdminTitlebar() {
   const selectedState = useAdminSelectedState();
   const pathname = usePathname();
   const selectedTitle = filterAndRenameTitle(

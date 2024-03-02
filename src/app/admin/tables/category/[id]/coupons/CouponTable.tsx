@@ -21,7 +21,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import Searchbar from "../../../Searchbar";
+import AdminSearchbar from "../../../AdminSearchbar";
 import TableHeader from "../../../TableHeader";
 import { type RouterInputs } from "@/trpc/shared";
 import { api } from "@/trpc/react";
@@ -73,7 +73,7 @@ export default function CouponTable({ category }: { category: Category }) {
 
   const deleteCouponApi = api.coupon.delete.useMutation({
     onMutate: (variables) => {
-      setDeletingCouponId(variables.couponId);
+      setDeletingCouponCode(variables.code);
     },
     onSuccess: (result) => {
       if (typeof result === "string") {
@@ -83,12 +83,12 @@ export default function CouponTable({ category }: { category: Category }) {
     },
     onError: errorHandler,
     onSettled: () => {
-      setDeletingCouponId(undefined);
+      setDeletingCouponCode(undefined);
     },
   });
   const updateCouponById = api.coupon.update.useMutation({
     onMutate: (variables) => {
-      setUpdatingCouponId(variables.id);
+      setUpdatingCouponCode(variables.code);
     },
     onSuccess: (result) => {
       if (typeof result === "string") {
@@ -98,14 +98,14 @@ export default function CouponTable({ category }: { category: Category }) {
     },
     onError: errorHandler,
     onSettled: () => {
-      setUpdatingCouponId(undefined);
+      setUpdatingCouponCode(undefined);
     },
   });
 
   // this state is to disable the update button when the user clicks the update button
-  const [updatingCouponId, setUpdatingCouponId] = useState<string>();
+  const [updatingCouponCode, setUpdatingCouponCode] = useState<string>();
   // this state is to disable the delete button when the user clicks the delete button
-  const [deletingCouponId, setDeletingCouponId] = useState<string>();
+  const [deletingCouponCode, setDeletingCouponCode] = useState<string>();
 
   const columns: ColumnDef<Coupon>[] = useMemo(
     () => [
@@ -148,13 +148,14 @@ export default function CouponTable({ category }: { category: Category }) {
         ),
         cell: ({ row }) => (
           <Switch
-            disabled={updatingCouponId === row.original.id}
+            disabled={updatingCouponCode === row.original.code}
             checked={row.original.active}
             // make the switch blue when active and black when inactive
             className="data-[state=checked]:bg-blue-500"
             onCheckedChange={() => {
               updateCouponById.mutate({
-                id: row.original.id,
+                code: row.original.code,
+                categoryId: row.original.categoryId,
                 active: !row.original.active,
               });
             }}
@@ -190,13 +191,12 @@ export default function CouponTable({ category }: { category: Category }) {
       {
         id: "edit",
         header: "Edit",
-        accessorFn: (row) => row.id,
         cell: ({ row }) => (
           <AdminButtonLink
             variant="outline"
             size="sm"
             className="border-blue-400"
-            href={`/admin/category/${row.original.categoryId}/coupons/${row.original.id}/edit/`}
+            href={`/admin/category/${row.original.categoryId}/coupons/${row.original.code}/edit/`}
           >
             Edit
           </AdminButtonLink>
@@ -205,13 +205,15 @@ export default function CouponTable({ category }: { category: Category }) {
       {
         id: "delete",
         header: "Delete",
-        accessorFn: (row) => row.id,
         cell: ({ row }) => (
           <Button
             onClick={() => {
-              deleteCouponApi.mutate({ couponId: row.original.id });
+              deleteCouponApi.mutate({
+                code: row.original.code,
+                categoryId: row.original.categoryId,
+              });
             }}
-            disabled={deletingCouponId === row.original.id}
+            disabled={deletingCouponCode === row.original.code}
             size="sm"
             variant="outline"
             className="border-red-400"
@@ -224,14 +226,14 @@ export default function CouponTable({ category }: { category: Category }) {
     [
       couponApi,
       deleteCouponApi,
-      deletingCouponId,
+      deletingCouponCode,
       router,
       setSortBy,
       setSortOrder,
       sortBy,
       sortOrder,
       updateCouponById,
-      updatingCouponId,
+      updatingCouponCode,
     ],
   );
 
@@ -241,7 +243,7 @@ export default function CouponTable({ category }: { category: Category }) {
 
   return (
     <>
-      <Searchbar search={search} setSearch={setSearch} />
+      <AdminSearchbar search={search} setSearch={setSearch} />
       <div className="flex items-center justify-between rounded-lg">
         <div>
           <span className="px-2 font-bold">{category.name}'s Coupons</span>
