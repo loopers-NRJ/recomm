@@ -40,9 +40,7 @@ const MobileCategoryBar = () => {
   return (
     <div className="mb-5 grid min-h-[200px] grid-cols-4 grid-rows-2 gap-2">
       {catergoriesQuery.data?.categories.map(({ category, image }) => {
-        const url =
-          "/products/?" +
-          createQueryString(searchParams, "category", category.id);
+        const url = "/products/?" + createQueryString(searchParams, "category", category.id);
         return (
           <CategoryBox
             key={category.id}
@@ -77,8 +75,8 @@ const MobileCategoryBar = () => {
           {list.isLoading && <Loader2 />}
           {list.data?.categories.length == 0 ?
             parentId && void router.push("/products?" + createQueryString(searchParams, "category", parentId))
-            : list.data?.categories.map(category => (
-              <li className="p-3 text-md font-medium border rounded-lg">
+            : list.data?.categories.map((category, i) => (
+              <li key={i} className="p-3 text-md font-medium border rounded-lg">
                 {(category.parentCategoryId == null) ?
                   <span className="flex w-full justify-between" key={category.id} onClick={() => setParentId(category.id)}>
                     {category.name}
