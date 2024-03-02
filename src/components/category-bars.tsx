@@ -1,4 +1,5 @@
 "use client"
+
 import { type ReadonlyURLSearchParams, useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/trpc/react";
@@ -31,6 +32,7 @@ const MobileCategoryBar = () => {
 
   const [expanded, setExpanded] = useState(false);
   const [parentId, setParentId] = useState<string | undefined>(undefined);
+  const [parentSlug, setParentSlug] = useState<string | undefined>(undefined);
 
   const list = api.category.allWithoutPayload.useQuery({
     parentId: parentId,
@@ -40,7 +42,7 @@ const MobileCategoryBar = () => {
   return (
     <div className="mb-5 grid min-h-[200px] grid-cols-4 grid-rows-2 gap-2">
       {catergoriesQuery.data?.categories.map(({ category, image }) => {
-        const url = "/products/?" + createQueryString(searchParams, "category", category.id);
+        const url = "/products/?" + createQueryString(searchParams, "category", category.slug);
         return (
           <CategoryBox
             key={category.id}
@@ -65,6 +67,7 @@ const MobileCategoryBar = () => {
             onClick={() => {
               setExpanded(false)
               setParentId(undefined)
+              setParentSlug(undefined)
             }}
             className="m-5"
           />
@@ -74,11 +77,14 @@ const MobileCategoryBar = () => {
           {list.error && <div>Error</div>}
           {list.isLoading && <Loader2 />}
           {list.data?.categories.length == 0 ?
-            parentId && void router.push("/products?" + createQueryString(searchParams, "category", parentId))
+            parentSlug && void router.push("/products?" + createQueryString(searchParams, "category", parentSlug))
             : list.data?.categories.map((category, i) => (
               <li key={i} className="p-3 text-md font-medium border rounded-lg">
                 {(category.parentCategoryId == null) ?
-                  <span className="flex w-full justify-between" key={category.id} onClick={() => setParentId(category.id)}>
+                  <span className="flex w-full justify-between" key={category.id} onClick={() => {
+                    setParentId(category.id)
+                    setParentSlug(category.slug)
+                  }}>
                     {category.name}
                     <ArrowRight />
                   </span> :
@@ -86,7 +92,7 @@ const MobileCategoryBar = () => {
                     <Link
                       className="flex w-full justify-between"
                       key={category.id}
-                      href={"/products?" + createQueryString(searchParams, "category", category.id)}
+                      href={"/products?" + createQueryString(searchParams, "category", category.slug)}
                     >
                       {category.name}
                       <ArrowRight />
