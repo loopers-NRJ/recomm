@@ -4,7 +4,7 @@ import Link from "next/link";
 import { type ProductsPayloadIncluded } from "@/types/prisma";
 import Image from "next/image";
 import HeartUI from "./heart";
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import { api } from "@/trpc/react";
 import { refreshFavs } from "@/server/actions";
 import { useRouter } from "next/navigation";
@@ -47,7 +47,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ product, heart }) => {
           />
         </div>
         <div className="px-2">
-          <p className="text-lg font-semibold">{product.model.name}</p>
+          <p className="text-lg truncate font-semibold">{product.model.name}</p>
           <p className="font-semibold">₹ {product.price}</p>
         </div>
       </Link>

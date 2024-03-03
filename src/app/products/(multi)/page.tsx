@@ -1,6 +1,7 @@
 import Products from "@/components/products-area";
 import { type RouterInputs } from "@/trpc/shared";
 import { type SortOrder } from "@/utils/constants";
+import { FilterIcon, SortDesc } from "lucide-react";
 
 interface SearchParams {
   search?: string;
@@ -18,6 +19,10 @@ export default function ProductsPage({
 }) {
   return (
     <>
+      <div className="flex justify-end gap-2 my-4">
+        <SortDesc />
+        <FilterIcon />
+      </div>
       <Products {...searchParams} />
     </>
   );
