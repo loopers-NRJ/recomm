@@ -35,7 +35,6 @@ export default function Sellit() {
   );
 
   if (categoryApi.isError || featuredCategoryApi.isError) {
-    console.log(categoryApi.error ?? featuredCategoryApi.error);
     return (
       <ServerError
         message={

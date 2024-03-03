@@ -537,7 +537,6 @@ export const categoryRouter = createTRPCRouter({
             value: true,
           },
         });
-        console.log(maxFeaturedCategory);
         if (
           !maxFeaturedCategory?.value ||
           isNaN(Number(maxFeaturedCategory?.value))

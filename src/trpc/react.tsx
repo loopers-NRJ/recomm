@@ -8,6 +8,8 @@ import { useMemo } from "react";
 import { type AppRouter } from "@/server/api/root";
 import { getUrl, transformer } from "./shared";
 import { ErrorLink } from "@/utils/ErrorLink";
+import { usePathname } from "next/navigation";
+import { PATH_HEADER_NAME } from "@/utils/constants";
 
 export const api = createTRPCReact<AppRouter>();
 const queryClient = new QueryClient();
@@ -16,6 +18,7 @@ export function TRPCReactProvider(props: {
   children: React.ReactNode;
   cookies: string;
 }) {
+  const pathname = usePathname();
   const trpcClient = useMemo(
     () =>
       api.createClient({
@@ -32,11 +35,12 @@ export function TRPCReactProvider(props: {
             headers: {
               cookie: props.cookies,
               "x-trpc-source": "react",
+              [PATH_HEADER_NAME]: pathname,
             },
           }),
         ],
       }),
-    [props.cookies],
+    [pathname, props.cookies],
   );
 
   return (
