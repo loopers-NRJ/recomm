@@ -14,8 +14,8 @@ function BiddingList({ biddings }: { biddings: Bidding[] }) {
       {biddings.length === 0 && <p className="text-sm font-medium leading-none p-4">No bids yet.</p>}
       {biddings.map((bid) => {
         return (
-          <Link href={`/user/${bid.userId}/profile`}>
-            <li key={bid.id} className="flex justify-between items-center border rounded-lg p-3">
+          <Link key={bid.id} href={`/user/${bid.userId}/profile`}>
+            <li className="flex justify-between items-center border rounded-lg p-3">
               <div className="flex items-center space-x-4">
                 <Avatar>
                   <AvatarImage src={bid.user.image ?? undefined} />

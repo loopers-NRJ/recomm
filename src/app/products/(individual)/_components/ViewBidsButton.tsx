@@ -11,7 +11,7 @@ type Bidding = Bid & {
 async function ViewBidsButton({ bids }: { bids: Bidding[] }) {
   return (
     <Drawer>
-      <DrawerTrigger>
+      <DrawerTrigger asChild>
         <Button>View Bids</Button>
       </DrawerTrigger>
       <DrawerContent>

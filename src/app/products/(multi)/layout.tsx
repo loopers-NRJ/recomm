@@ -12,7 +12,7 @@ const Layout = ({ children }: ProductPageLayoutProps) => {
   const device = headers().get(DEVICE_TYPE_HEADER_NAME);
   return (
     <Container>
-      {device === "mobile" ? <FilterBarMobile /> : "world"}
+      {device === "mobile" ? <FilterBarMobile /> : "desktop filter bar here"}
       {children}
     </Container>
   );
