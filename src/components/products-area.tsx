@@ -26,13 +26,14 @@ const Products: React.FC<Props> = ({
 }) => {
   const selectedState = useClientSelectedState((selected) => selected.state);
 
-  const { useQuery: getCategoryId } = api.category.bySlug;
+  const { useQuery: getCategoryId } = api.category.bySlug
   const { useQuery: getBrandId } = api.brand.bySlug;
   const { useQuery: getModelId } = api.model.bySlug;
 
   let modelId = undefined;
   let categoryId = undefined;
   let brandId = undefined;
+
   if (category) {
     const { data: categoryData } = getCategoryId({ categorySlug: category });
     if (typeof categoryData !== "string") categoryId = categoryData?.id;
@@ -62,45 +63,48 @@ const Products: React.FC<Props> = ({
       getNextPageParam: (lastItem) => lastItem.nextCursor,
     },
   );
-  const { data: favData, isLoading: isFavLoading } =
-    api.user.favorites.useQuery({});
-  const favourites =
-    favData?.favoritedProducts.map((product) => product.id) ?? [];
 
-  if (isError) {
-    return <div>Error</div>;
+  const { data: favData, isLoading: isFavLoading, isError: favError } = api.user.favorites.useQuery(
+    {
+      search,
+      sortOrder,
+      modelId,
+      categoryId,
+      brandId,
+    },
+    {
+      getNextPageParam: (lastItem) => lastItem.nextCursor,
+    },
+  );
+
+  const favourites = favData?.favoritedProducts.map((product) => product.id) ?? [];
+
+  const products = data?.pages.map((page) => page.products).flat() ?? [];
+
+  if (isError){
+    return <div>Something went wrong</div>;
+  } 
+
+  if (isLoading) {
+    return <LoadingProducts />; 
   }
 
+  if (!isLoading && products.length == 0){
+    return (
+      <div className="flex h-[500px] justify-center pt-10 font-semibold" >
+        No Products Available
+      </div>
+    );
+  } 
   return (
-    <>
-      {!isLoading && !isFavLoading ? (
-        data.pages.map((page) => {
-          if (page.products.length == 0)
-            return (
-              <div
-                key="0"
-                className="flex h-[500px] justify-center pt-10 font-semibold"
-              >
-                No Products Available
-              </div>
-            );
-          else
-            return (
-              <div className="product-area mb-32 grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6">
-                {page.products.map((product) => (
-                  <ListingCard
-                    key={product.id}
-                    heart={favourites.includes(product.id)}
-                    product={product}
-                  />
-                ))}
-              </div>
-            );
-        })
-      ) : (
-        <LoadingProducts />
-      )}
-    </>
+      <div className="product-area mb-32 grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6">
+        {products.map((product) => (
+          <ListingCard 
+            key={product.id} 
+            heart={favourites.includes(product.id)} 
+            product={product} />)) 
+        }
+      </div>
   );
 };
 

@@ -136,11 +136,9 @@ export const modelRouter = createTRPCRouter({
     .input(z.object({ modelSlug: z.string().min(1).max(255) }))
     .query(async ({ input: { modelSlug: slug }, ctx: { prisma } }) => {
       return await prisma.model.findUnique({
-        select: {
-          id: true,
-        },
         where: {
-          slug,
+          slug: slug,
+          active: true,
         },
       });
     }),
