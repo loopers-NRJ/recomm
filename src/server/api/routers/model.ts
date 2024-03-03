@@ -81,25 +81,25 @@ export const modelRouter = createTRPCRouter({
           skip: cursor ? 1 : undefined,
           cursor: cursor
             ? {
-                id: cursor,
-              }
+              id: cursor,
+            }
             : undefined,
           orderBy: [
             sortBy === "brand"
               ? {
-                  brand: {
+                brand: {
+                  name: sortOrder,
+                },
+              }
+              : sortBy === "category"
+                ? {
+                  category: {
                     name: sortOrder,
                   },
                 }
-              : sortBy === "category"
-                ? {
-                    category: {
-                      name: sortOrder,
-                    },
-                  }
                 : {
-                    [sortBy]: sortOrder,
-                  },
+                  [sortBy]: sortOrder,
+                },
           ],
           include: modelsPayload.include,
         });
@@ -125,6 +125,19 @@ export const modelRouter = createTRPCRouter({
         return "Model not found";
       }
       return model;
+    }),
+
+  bySlug: publicProcedure
+    .input(z.object({ modelSlug: z.string().min(1).max(255) }))
+    .query(async ({ input: { modelSlug: slug }, ctx: { prisma } }) => {
+      return await prisma.model.findUnique({
+        select: {
+          id: true,
+        },
+        where: {
+          slug,
+        },
+      });
     }),
 
   create: getProcedure(AccessType.createModel)
@@ -293,17 +306,17 @@ export const modelRouter = createTRPCRouter({
             category:
               categoryId !== undefined
                 ? {
-                    connect: {
-                      id: categoryId,
-                    },
-                  }
+                  connect: {
+                    id: categoryId,
+                  },
+                }
                 : undefined,
             brand: brandId
               ? {
-                  connect: {
-                    id: brandId,
-                  },
-                }
+                connect: {
+                  id: brandId,
+                },
+              }
               : undefined,
             active,
             createdState: createdState,

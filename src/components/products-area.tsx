@@ -1,4 +1,5 @@
 "use client";
+
 import { useClientSelectedState } from "@/store/SelectedState";
 import { api } from "@/trpc/react";
 import { type SortBy, type SortOrder } from "@/utils/constants";
@@ -23,14 +24,39 @@ const Products: React.FC<Props> = ({
   brand,
 }) => {
   const selectedState = useClientSelectedState((selected) => selected.state);
+
+  const {useQuery: getCategoryId} = api.category.bySlug;
+  const {useQuery: getBrandId} = api.brand.bySlug;
+  const {useQuery: getModelId} = api.model.bySlug;
+
+  let modelId = undefined
+  let categoryId = undefined
+  let brandId = undefined
+  if (category) {
+    const { data: categoryData } = getCategoryId({categorySlug: category});
+    if(typeof categoryData !== 'string')
+      categoryId = categoryData?.id;
+  }
+
+  if (brand) {
+    const {data} = getBrandId({brandSlug: brand});
+    brandId = data?.id ?? undefined;
+  }
+
+  if (model) {
+    const {data} = getModelId({modelSlug: model});
+    modelId = data?.id ?? undefined;
+  }
+
+
   const { data, isLoading, isError } = api.product.all.useInfiniteQuery(
     {
       search,
       sortBy,
       sortOrder,
-      modelId: model,
-      categoryId: category,
-      brandId: brand,
+      modelId,
+      categoryId,
+      brandId,
       state: selectedState,
     },
     {
