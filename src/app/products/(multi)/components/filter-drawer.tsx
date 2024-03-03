@@ -5,7 +5,7 @@ import { Drawer, DrawerContent, DrawerFooter, DrawerHeader, DrawerTrigger } from
 import { api } from "@/trpc/react"
 import * as Tabs from "@radix-ui/react-tabs"
 import { FilterIcon } from "lucide-react"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useMemo, useState } from "react"
 import { useClientSelectedState } from "@/store/SelectedState"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
@@ -64,8 +64,7 @@ export default function FilterDrawer() {
           <div className="overflow-scroll h-72">
             <Tabs.Content value="model">
               <RadioGroup defaultValue={model} onValueChange={(value) => setModel(value)}>
-                {!modelQuery.isLoading && modelQuery.data &&
-                  modelQuery.data.models.map((model, i) => (
+                {!modelQuery.isLoading && modelQuery.data?.models.map((model, i) => (
                     <label htmlFor={model.id} key={i} className="flex items-center gap-2 border px-4 py-2">
                       <RadioGroupItem id={model.id} value={model.slug} />
                       {model.name}
@@ -75,8 +74,8 @@ export default function FilterDrawer() {
             </Tabs.Content>
             <Tabs.Content value="brand">
               <RadioGroup defaultValue={brand} onValueChange={(value) => setBrand(value)}>
-                {!brandQuery.isLoading && brandQuery.data &&
-                  brandQuery.data.brands.map((brand, i) => (
+                {!brandQuery.isLoading && 
+                  brandQuery.data?.brands.map((brand, i) => (
                     <label htmlFor={brand.id} key={i} className="flex items-center gap-2 border px-4 py-2">
                       <RadioGroupItem id={brand.id} value={brand.slug} />
                       {brand.name}
@@ -86,8 +85,8 @@ export default function FilterDrawer() {
             </Tabs.Content>
             <Tabs.Content value="category">
               <RadioGroup defaultValue={category} onValueChange={(value) => setCategory(value)}>
-                {!categoryQuery.isLoading && categoryQuery.data &&
-                  categoryQuery.data.categories.map((category, i) => (
+                {!categoryQuery.isLoading &&
+                  categoryQuery.data?.categories.map((category, i) => (
                     <label htmlFor={category.id} key={i} className="flex items-center gap-2 border px-4 py-2">
                       <RadioGroupItem id={category.id} value={category.slug} />
                       {category.name}

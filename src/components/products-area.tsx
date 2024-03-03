@@ -64,7 +64,7 @@ const Products: React.FC<Props> = ({
     },
   );
 
-  const { data: favData, isLoading: isFavLoading, isError: favError } = api.user.favorites.useQuery(
+  const { data: favData } = api.user.favorites.useQuery(
     {
       search,
       sortOrder,
