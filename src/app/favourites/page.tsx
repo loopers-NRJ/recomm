@@ -31,7 +31,7 @@ const FavouritesPage = AuthenticatedPage<undefined, FavouritePageSearchParams>(
 
     if (favoritedProducts.length === 0) {
       return (
-        <Container>
+        <Container className="mb-32">
           <div className="flex h-[500px] items-center justify-center font-semibold">
             No Products Available
           </div>
