@@ -43,8 +43,8 @@ const WishCard: FC<WishCardProps> = ({ wish }) => {
             {brand} {model}
           </CardTitle>
           <CardDescription>
-          <p className={cn("bg-muted w-fit leading-none px-2.5 py-[2px] border rounded-full", status===WishStatus.available&&"bg-green-400 text-black border-none")}>{status}</p>
-          {category}
+            <span className={cn("bg-muted text-xs w-fit px-2.5 py-[2px] border rounded-full", status===WishStatus.available&&"bg-green-400 text-black border-none")}>{status}</span>
+            {category}
           </CardDescription>
         </CardHeader>
       <CardFooter className="p-4 gap-2">

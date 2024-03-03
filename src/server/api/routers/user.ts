@@ -53,8 +53,8 @@ export const userRouter = createTRPCRouter({
 
           cursor: cursor
             ? {
-                id: cursor,
-              }
+              id: cursor,
+            }
             : undefined,
           where: {
             OR: [
@@ -71,20 +71,20 @@ export const userRouter = createTRPCRouter({
             ],
             role: role
               ? {
-                  id: role,
-                }
+                id: role,
+              }
               : undefined,
           },
           orderBy: [
             sortBy === "role"
               ? {
-                  role: {
-                    name: sortOrder,
-                  },
-                }
-              : {
-                  [sortBy]: sortOrder,
+                role: {
+                  name: sortOrder,
                 },
+              }
+              : {
+                [sortBy]: sortOrder,
+              },
           ],
           skip: cursor ? 1 : undefined,
           include: {
@@ -129,13 +129,13 @@ export const userRouter = createTRPCRouter({
           data: {
             role: roleId
               ? {
-                  connect: {
-                    id: roleId,
-                  },
-                }
-              : {
-                  disconnect: true,
+                connect: {
+                  id: roleId,
                 },
+              }
+              : {
+                disconnect: true,
+              },
           },
           include: { role: true },
         });
@@ -201,8 +201,8 @@ export const userRouter = createTRPCRouter({
           skip: cursor ? 1 : undefined,
           cursor: cursor
             ? {
-                id: cursor,
-              }
+              id: cursor,
+            }
             : undefined,
           orderBy: [
             {
@@ -249,27 +249,12 @@ export const userRouter = createTRPCRouter({
                 id,
               },
             },
+            active: true,
             model: {
-              OR: [
-                {
-                  name: {
-                    contains: search,
-                  },
-                },
-                {
-                  brand: {
-                    name: {
-                      contains: search,
-                    },
-                  },
-                },
-                {
-                  category: {
-                    name: {
-                      contains: search,
-                    },
-                  },
-                },
+              OR: [ 
+                { name: { contains: search, }, },
+                { brand: { name: { contains: search, } } },
+                { category: { name: { contains: search, }, }, },
               ],
             },
           },
@@ -277,25 +262,25 @@ export const userRouter = createTRPCRouter({
           skip: cursor ? 1 : undefined,
           cursor: cursor
             ? {
-                id: cursor,
-              }
+              id: cursor,
+            }
             : undefined,
           orderBy: [
             sortBy === "name"
               ? {
-                  model: {
+                model: {
+                  name: sortOrder,
+                },
+              }
+              : sortBy === "sellerName"
+                ? {
+                  seller: {
                     name: sortOrder,
                   },
                 }
-              : sortBy === "sellerName"
-                ? {
-                    seller: {
-                      name: sortOrder,
-                    },
-                  }
                 : {
-                    [sortBy]: sortOrder,
-                  },
+                  [sortBy]: sortOrder,
+                },
           ],
           include: productsPayload.include,
         });
@@ -363,25 +348,25 @@ export const userRouter = createTRPCRouter({
           skip: cursor ? 1 : undefined,
           cursor: cursor
             ? {
-                id: cursor,
-              }
+              id: cursor,
+            }
             : undefined,
           orderBy: [
             sortBy === "name"
               ? {
-                  model: {
+                model: {
+                  name: sortOrder,
+                },
+              }
+              : sortBy === "sellerName"
+                ? {
+                  seller: {
                     name: sortOrder,
                   },
                 }
-              : sortBy === "sellerName"
-                ? {
-                    seller: {
-                      name: sortOrder,
-                    },
-                  }
                 : {
-                    [sortBy]: sortOrder,
-                  },
+                  [sortBy]: sortOrder,
+                },
           ],
           include: productsPayload.include,
         });
@@ -448,25 +433,25 @@ export const userRouter = createTRPCRouter({
           skip: cursor ? 1 : undefined,
           cursor: cursor
             ? {
-                id: cursor,
-              }
+              id: cursor,
+            }
             : undefined,
           orderBy: [
             sortBy === "name"
               ? {
-                  model: {
+                model: {
+                  name: sortOrder,
+                },
+              }
+              : sortBy === "sellerName"
+                ? {
+                  seller: {
                     name: sortOrder,
                   },
                 }
-              : sortBy === "sellerName"
-                ? {
-                    seller: {
-                      name: sortOrder,
-                    },
-                  }
                 : {
-                    [sortBy]: sortOrder,
-                  },
+                  [sortBy]: sortOrder,
+                },
           ],
           include: productsPayload.include,
         });
@@ -540,31 +525,31 @@ export const userRouter = createTRPCRouter({
           skip: cursor ? 1 : undefined,
           cursor: cursor
             ? {
-                id: cursor,
-              }
+              id: cursor,
+            }
             : undefined,
           orderBy: [
             sortBy === "brandName"
               ? {
-                  brand: {
+                brand: {
+                  name: sortOrder,
+                },
+              }
+              : sortBy === "categoryName"
+                ? {
+                  category: {
                     name: sortOrder,
                   },
                 }
-              : sortBy === "categoryName"
-                ? {
-                    category: {
+                : sortBy === "modelName"
+                  ? {
+                    model: {
                       name: sortOrder,
                     },
                   }
-                : sortBy === "modelName"
-                  ? {
-                      model: {
-                        name: sortOrder,
-                      },
-                    }
                   : {
-                      [sortBy]: sortOrder,
-                    },
+                    [sortBy]: sortOrder,
+                  },
           ],
           include: wishPayload.include,
         });

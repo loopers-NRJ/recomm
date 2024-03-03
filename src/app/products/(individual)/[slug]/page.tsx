@@ -57,7 +57,7 @@ async function ProductPage({ params }: { params: ProductPageParams }) {
     <>
       <Carousel opts={{ loop: true }} className="min-w-xs w-full">
         <CarouselContent>
-          {product.images?.map((image, i) => (
+          {product.images.map((image, i) => (
             <CarouselItem key={i} className="pl-0">
               <Image
                 src={image.url}
@@ -120,6 +120,16 @@ async function ProductPage({ params }: { params: ProductPageParams }) {
                   {choice.question.questionContent}
                 </AccordionTrigger>
                 <AccordionContent>{choice.value}</AccordionContent>
+              </AccordionItem>
+            );
+          })}
+          {product.answers.map((answer, i) => {
+            return (
+              <AccordionItem value={answer.id} key={i}>
+                <AccordionTrigger>
+                  {answer.question.questionContent}
+                </AccordionTrigger>
+                <AccordionContent>{answer.answerContent}</AccordionContent>
               </AccordionItem>
             );
           })}
