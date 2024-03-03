@@ -90,6 +90,19 @@ export const brandRouter = createTRPCRouter({
       return brand;
     }),
 
+  bySlug: publicProcedure
+    .input(z.object({ brandSlug: z.string().min(1).max(255) }))
+    .query(async ({ input: { brandSlug: slug }, ctx: { prisma } }) => {
+      return await prisma.brand.findUnique({
+        select: {
+          id: true,
+        },
+        where: {
+          slug,
+        },
+      });
+    }),
+
   create: getProcedure(AccessType.createBrand)
     .input(
       z.object({

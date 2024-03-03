@@ -30,7 +30,7 @@ const FavouritesPage = AuthenticatedPage<undefined, FavouritePageSearchParams>(
 
     if (favoritedProducts.length === 0) {
       return (
-        <Container>
+        <Container className="mb-32">
           <div className="flex h-[500px] items-center justify-center font-semibold">
             No Products Available
           </div>
@@ -40,10 +40,10 @@ const FavouritesPage = AuthenticatedPage<undefined, FavouritePageSearchParams>(
 
     return (
       <Container>
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-6">
+        <div className="product-area mb-32 grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6">
           {favoritedProducts.map((product) => {
             return (
-              <ListingCard key={product.id} product={product} heart="fav" />
+              <ListingCard key={product.id} product={product} heart={true} />
             );
           })}
         </div>

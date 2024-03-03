@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { type FC } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,6 +15,7 @@ import { WishStatus } from "@prisma/client";
 import { type WishPayloadIncluded } from "@/types/prisma";
 import Link from "next/link";
 import { Loader2, Trash2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface WishCardProps {
   wish: WishPayloadIncluded;
@@ -43,7 +43,7 @@ const WishCard: FC<WishCardProps> = ({ wish }) => {
             {brand} {model}
           </CardTitle>
           <CardDescription>
-          <Badge variant={status===WishStatus.available ? "destructive" : "secondary"}>{status}</Badge>
+          <p className={cn("bg-muted w-fit leading-none px-2.5 py-[2px] border rounded-full", status===WishStatus.available&&"bg-green-400 text-black border-none")}>{status}</p>
           {category}
           </CardDescription>
         </CardHeader>
@@ -53,8 +53,7 @@ const WishCard: FC<WishCardProps> = ({ wish }) => {
           variant="default" size="sm" 
           className="w-full disabled:text-muted-foreground disabled:bg-muted disabled:border-2"
         >
-           {/* TODO: redirect to exact product group */} 
-          <Link href={`/products?category=${wish.model?.name}`}> View </Link>
+          <Link href={`/products?model=${wish.model?.slug}`}> View </Link>
         </Button>
         <Button 
           onClick={() => handleDelete(wish.id)} 

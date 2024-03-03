@@ -25,7 +25,6 @@ function ProductCard({ active, listing, showSwitch }: ProductCardProps) {
           else setIsActive(active);
      }
 
-
      return (
           <Card className='relative overflow-clip'>
                { showSwitch &&
@@ -42,9 +41,9 @@ function ProductCard({ active, listing, showSwitch }: ProductCardProps) {
                          width={180} height={150}
                          className="h-40 w-full object-cover"
                     />
-                    <div className='flex justify-between p-2'>
-                         <p className="font-semibold truncate">{listing.model.name}</p>
-                         <p className="font-semibold">₹ {listing.price}</p>
+                    <div className='grid grid-cols-2 p-2'>
+                         <p className="font-semibold text-left truncate">{listing.model.name}</p>
+                         <p className="font-semibold text-right">₹ {listing.price}</p>
                     </div>
                </Link>
           </Card>
