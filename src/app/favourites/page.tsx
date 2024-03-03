@@ -2,26 +2,25 @@ import Container from "@/components/Container";
 import ListingCard from "@/components/ListingCard";
 import { api } from "@/trpc/server";
 import {
-  defaultSearch,
-  type SortBy,
-  defaultSortBy,
+  DEFAULT_SORT_BY,
   type SortOrder,
-  defaultSortOrder,
+  DEFAULT_SORT_ORDER,
 } from "@/utils/constants";
 
 import AuthenticatedPage from "@/hoc/AuthenticatedPage";
+import { type RouterInputs } from "@/trpc/shared";
 
 interface FavouritePageSearchParams {
   search?: string;
-  sortBy?: SortBy;
+  sortBy?: RouterInputs["user"]["favorites"]["sortBy"];
   sortOrder?: SortOrder;
 }
 
 const FavouritesPage = AuthenticatedPage<undefined, FavouritePageSearchParams>(
   async ({ searchParams }) => {
-    const search = searchParams.search ?? defaultSearch;
-    const sortBy = searchParams.sortBy ?? defaultSortBy;
-    const sortOrder = searchParams.sortOrder ?? defaultSortOrder;
+    const search = searchParams.search ?? "";
+    const sortBy = searchParams.sortBy ?? DEFAULT_SORT_BY;
+    const sortOrder = searchParams.sortOrder ?? DEFAULT_SORT_ORDER;
 
     const { favoritedProducts } = await api.user.favorites.query({
       search,

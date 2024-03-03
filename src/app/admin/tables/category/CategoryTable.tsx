@@ -8,9 +8,8 @@ import { useAdminSelectedState } from "@/store/SelectedState";
 import { type OmitUndefined } from "@/types/custom";
 import { type CategoryPayloadIncluded } from "@/types/prisma";
 import {
-  defaultSearch,
-  defaultSortBy,
-  defaultSortOrder,
+  DEFAULT_SORT_BY,
+  DEFAULT_SORT_ORDER,
   type SortOrder,
 } from "@/utils/constants";
 import { type ColumnDef } from "@tanstack/react-table";
@@ -53,16 +52,18 @@ export default function CategoryTable() {
       "updatedAt",
       "active",
       "featured",
-    ]).withDefault(defaultSortBy),
+    ]).withDefault(DEFAULT_SORT_BY),
   );
   const [sortOrder, setSortOrder] = useQueryState(
     "sortOrder",
-    parseAsStringEnum<SortOrder>(["asc", "desc"]).withDefault(defaultSortOrder),
+    parseAsStringEnum<SortOrder>(["asc", "desc"]).withDefault(
+      DEFAULT_SORT_ORDER,
+    ),
   );
 
   const [search, setSearch] = useQueryState(
     "search",
-    parseAsString.withDefault(defaultSearch),
+    parseAsString.withDefault(""),
   );
 
   const selectedState = useAdminSelectedState((selected) => selected.state);

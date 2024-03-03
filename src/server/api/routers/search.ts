@@ -2,7 +2,7 @@ import { idSchema } from "@/utils/validation";
 
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { z } from "zod";
-import { defaultLimit } from "@/utils/constants";
+import { DEFAULT_LIMIT } from "@/utils/constants";
 import { states } from "@/types/prisma";
 
 export const searchRouter = createTRPCRouter({
@@ -30,7 +30,7 @@ export const searchRouter = createTRPCRouter({
             active: true,
             createdState: state,
           },
-          take: defaultLimit,
+          take: DEFAULT_LIMIT,
           select: {
             id: true,
             name: true,
@@ -47,7 +47,7 @@ export const searchRouter = createTRPCRouter({
             active: true,
             createdState: state,
           },
-          take: defaultLimit,
+          take: DEFAULT_LIMIT,
           select: {
             id: true,
             name: true,
@@ -64,7 +64,7 @@ export const searchRouter = createTRPCRouter({
             active: true,
             createdState: state,
           },
-          take: defaultLimit,
+          take: DEFAULT_LIMIT,
           select: {
             id: true,
             name: true,
@@ -99,7 +99,7 @@ export const searchRouter = createTRPCRouter({
             active: isAdminPage ? undefined : true,
             createdState: state,
           },
-          take: defaultLimit,
+          take: DEFAULT_LIMIT,
           select: {
             id: true,
             name: true,
@@ -133,7 +133,7 @@ export const searchRouter = createTRPCRouter({
 
             createdState: state,
           },
-          take: defaultLimit,
+          take: DEFAULT_LIMIT,
           select: {
             id: true,
             name: true,
@@ -176,7 +176,7 @@ export const searchRouter = createTRPCRouter({
               : undefined,
             createdState: state,
           },
-          take: defaultLimit,
+          take: DEFAULT_LIMIT,
           select: {
             id: true,
             name: true,
@@ -222,7 +222,7 @@ export const searchRouter = createTRPCRouter({
               : undefined,
             createdState: state,
           },
-          take: defaultLimit,
+          take: DEFAULT_LIMIT,
           select: {
             id: true,
             name: true,

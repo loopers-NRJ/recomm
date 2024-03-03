@@ -11,10 +11,10 @@ import {
 import { AccessType } from "@prisma/client";
 import { productsPayload, wishPayload } from "@/types/prisma";
 import {
-  defaultLimit,
-  defaultSortBy,
-  defaultSortOrder,
-  maxLimit,
+  DEFAULT_LIMIT,
+  DEFAULT_SORT_BY,
+  DEFAULT_SORT_ORDER,
+  MAXIMUM_LIMIT,
 } from "@/utils/constants";
 
 export const userRouter = createTRPCRouter({
@@ -22,8 +22,13 @@ export const userRouter = createTRPCRouter({
     .input(
       z.object({
         search: z.string().trim().default(""),
-        limit: z.number().int().positive().max(maxLimit).default(defaultLimit),
-        sortOrder: z.enum(["asc", "desc"]).default(defaultSortOrder),
+        limit: z
+          .number()
+          .int()
+          .positive()
+          .max(MAXIMUM_LIMIT)
+          .default(DEFAULT_LIMIT),
+        sortOrder: z.enum(["asc", "desc"]).default(DEFAULT_SORT_ORDER),
         sortBy: z
           .enum([
             "name",
@@ -33,7 +38,7 @@ export const userRouter = createTRPCRouter({
             "role",
             "lastActive",
           ])
-          .default(defaultSortBy),
+          .default(DEFAULT_SORT_BY),
         cursor: idSchema.optional(),
         role: idSchema.optional(),
       }),
@@ -145,8 +150,13 @@ export const userRouter = createTRPCRouter({
     .input(
       z.object({
         search: z.string().trim().default(""),
-        limit: z.number().int().positive().max(maxLimit).default(defaultLimit),
-        sortOrder: z.enum(["asc", "desc"]).default(defaultSortOrder),
+        limit: z
+          .number()
+          .int()
+          .positive()
+          .max(MAXIMUM_LIMIT)
+          .default(DEFAULT_LIMIT),
+        sortOrder: z.enum(["asc", "desc"]).default(DEFAULT_SORT_ORDER),
         cursor: idSchema.optional(),
       }),
     )
@@ -210,11 +220,16 @@ export const userRouter = createTRPCRouter({
     .input(
       z.object({
         search: z.string().trim().default(""),
-        limit: z.number().int().positive().max(maxLimit).default(defaultLimit),
-        sortOrder: z.enum(["asc", "desc"]).default(defaultSortOrder),
+        limit: z
+          .number()
+          .int()
+          .positive()
+          .max(MAXIMUM_LIMIT)
+          .default(DEFAULT_LIMIT),
+        sortOrder: z.enum(["asc", "desc"]).default(DEFAULT_SORT_ORDER),
         sortBy: z
           .enum(["name", "createdAt", "updatedAt", "price", "sellerName"])
-          .default(defaultSortBy),
+          .default(DEFAULT_SORT_BY),
         cursor: idSchema.optional(),
         categoryId: idSchema.optional(),
         brandId: idSchema.optional(),
@@ -295,11 +310,16 @@ export const userRouter = createTRPCRouter({
     .input(
       z.object({
         search: z.string().trim().default(""),
-        limit: z.number().int().positive().max(maxLimit).default(defaultLimit),
-        sortOrder: z.enum(["asc", "desc"]).default(defaultSortOrder),
+        limit: z
+          .number()
+          .int()
+          .positive()
+          .max(MAXIMUM_LIMIT)
+          .default(DEFAULT_LIMIT),
+        sortOrder: z.enum(["asc", "desc"]).default(DEFAULT_SORT_ORDER),
         sortBy: z
           .enum(["name", "createdAt", "updatedAt", "price", "sellerName"])
-          .default(defaultSortBy),
+          .default(DEFAULT_SORT_BY),
         cursor: idSchema.optional(),
         categoryId: idSchema.optional(),
         brandId: idSchema.optional(),
@@ -375,11 +395,16 @@ export const userRouter = createTRPCRouter({
     .input(
       z.object({
         search: z.string().trim().default(""),
-        limit: z.number().int().positive().max(maxLimit).default(defaultLimit),
-        sortOrder: z.enum(["asc", "desc"]).default(defaultSortOrder),
+        limit: z
+          .number()
+          .int()
+          .positive()
+          .max(MAXIMUM_LIMIT)
+          .default(DEFAULT_LIMIT),
+        sortOrder: z.enum(["asc", "desc"]).default(DEFAULT_SORT_ORDER),
         sortBy: z
           .enum(["name", "createdAt", "updatedAt", "price", "sellerName"])
-          .default(defaultSortBy),
+          .default(DEFAULT_SORT_BY),
         cursor: idSchema.optional(),
         categoryId: idSchema.optional(),
         brandId: idSchema.optional(),
@@ -455,8 +480,13 @@ export const userRouter = createTRPCRouter({
     .input(
       z.object({
         search: z.string().trim().default(""),
-        limit: z.number().int().positive().max(maxLimit).default(defaultLimit),
-        sortOrder: z.enum(["asc", "desc"]).default(defaultSortOrder),
+        limit: z
+          .number()
+          .int()
+          .positive()
+          .max(MAXIMUM_LIMIT)
+          .default(DEFAULT_LIMIT),
+        sortOrder: z.enum(["asc", "desc"]).default(DEFAULT_SORT_ORDER),
         sortBy: z
           .enum([
             "status",
@@ -466,7 +496,7 @@ export const userRouter = createTRPCRouter({
             "brandName",
             "modelName",
           ])
-          .default(defaultSortBy),
+          .default(DEFAULT_SORT_BY),
         cursor: idSchema.optional(),
         categoryId: idSchema.optional(),
         brandId: idSchema.optional(),

@@ -5,7 +5,7 @@ import ServerError from "@/components/common/ServerError";
 import { Button } from "@/components/ui/button";
 import { type RolePayloadIncluded } from "@/types/prisma";
 import { api } from "@/trpc/react";
-import { defaultSearch, defaultSortOrder } from "@/utils/constants";
+import { DEFAULT_SORT_ORDER } from "@/utils/constants";
 import { type ColumnDef } from "@tanstack/react-table";
 import {
   parseAsString,
@@ -24,11 +24,11 @@ export default function RoleTable() {
 
   const [sortOrder, setSortOrder] = useQueryState(
     "sortOrder",
-    parseAsStringEnum(["asc", "desc"]).withDefault(defaultSortOrder),
+    parseAsStringEnum(["asc", "desc"]).withDefault(DEFAULT_SORT_ORDER),
   );
   const [search, setSearch] = useQueryState(
     "search",
-    parseAsString.withDefault(defaultSearch),
+    parseAsString.withDefault(""),
   );
 
   const rolesApi = api.role.all.useQuery({

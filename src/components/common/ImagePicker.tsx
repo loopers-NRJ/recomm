@@ -4,8 +4,8 @@ import Image from "next/image";
 import React, { type FC, useState, useRef } from "react";
 import { v4 as uuid } from "uuid";
 import {
-  maxImageSizeInMB as defaultMaxImageSizeInMB,
-  maxImageCount,
+  MAXIMUM_IMAGE_SIZE_IN_MB as defaultMaxImageSizeInMB,
+  MAXIMUM_IMAGE_COUNT,
 } from "@/utils/constants";
 import { Label } from "../ui/label";
 
@@ -29,7 +29,7 @@ export interface ImagePickerProps {
 
 const ImagePicker: FC<ImagePickerProps> = ({
   maxImageSizeInMB = defaultMaxImageSizeInMB,
-  maxImages = maxImageCount,
+  maxImages = MAXIMUM_IMAGE_COUNT,
   acceptedImageFormats = [
     "image/jpeg",
     "image/jpg",
