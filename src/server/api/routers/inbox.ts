@@ -1,10 +1,10 @@
 import { idSchema } from "@/utils/validation";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import {
-  defaultLimit,
-  defaultSortBy,
-  defaultSortOrder,
-  maxLimit,
+  DEFAULT_LIMIT,
+  DEFAULT_SORT_BY,
+  DEFAULT_SORT_ORDER,
+  MAXIMUM_LIMIT,
 } from "@/utils/constants";
 import { z } from "zod";
 
@@ -13,11 +13,16 @@ export const inboxRouter = createTRPCRouter({
     .input(
       z.object({
         search: z.string().trim().default(""),
-        limit: z.number().int().positive().max(maxLimit).default(defaultLimit),
-        sortOrder: z.enum(["asc", "desc"]).default(defaultSortOrder),
+        limit: z
+          .number()
+          .int()
+          .positive()
+          .max(MAXIMUM_LIMIT)
+          .default(DEFAULT_LIMIT),
+        sortOrder: z.enum(["asc", "desc"]).default(DEFAULT_SORT_ORDER),
         sortBy: z
           .enum(["name", "createdAt", "updatedAt", "active"])
-          .default(defaultSortBy),
+          .default(DEFAULT_SORT_BY),
         cursor: idSchema.optional(),
       }),
     )

@@ -1,9 +1,10 @@
 import Products from "@/components/products-area";
-import { type SortBy, type SortOrder } from "@/utils/constants";
+import { type RouterInputs } from "@/trpc/shared";
+import { type SortOrder } from "@/utils/constants";
 
 interface SearchParams {
   search?: string;
-  sortBy: SortBy;
+  sortBy: RouterInputs["product"]["all"]["sortBy"];
   sortOrder: SortOrder;
   model?: string;
   category?: string;

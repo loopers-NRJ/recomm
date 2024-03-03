@@ -13,7 +13,7 @@ import { ZodError } from "zod";
 import { getServerAuthSession } from "@/server/auth";
 import { prisma } from "@/server/db";
 import { userPayload } from "@/types/prisma";
-import { adminPageRegex, requestPathHeaderName } from "@/utils/constants";
+import { ADMIN_PAGE_REGEX, PATH_HEADER_NAME } from "@/utils/constants";
 import { getLogger } from "@/utils/logger";
 import type { AccessType } from "@prisma/client";
 import { TRPCError, initTRPC } from "@trpc/server";
@@ -107,8 +107,8 @@ export const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
     ctx.session.user = user;
   }
 
-  const url = ctx.headers.get(requestPathHeaderName);
-  const isAdminPage = url?.match(adminPageRegex) ?? false;
+  const url = ctx.headers.get(PATH_HEADER_NAME);
+  const isAdminPage = url?.match(ADMIN_PAGE_REGEX) ?? false;
 
   return next({
     ctx: {

@@ -7,9 +7,8 @@ import { type OmitUndefined } from "@/types/custom";
 import { api } from "@/trpc/react";
 import { type RouterInputs } from "@/trpc/shared";
 import {
-  defaultSearch,
-  defaultSortBy,
-  defaultSortOrder,
+  DEFAULT_SORT_BY,
+  DEFAULT_SORT_ORDER,
   type SortOrder,
 } from "@/utils/constants";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -47,15 +46,17 @@ export default function ReportTable({ productId }: { productId: string }) {
       "createdAt",
       "updatedAt",
       "userName",
-    ]).withDefault(defaultSortBy),
+    ]).withDefault(DEFAULT_SORT_BY),
   );
   const [sortOrder, setSortOrder] = useQueryState(
     "sortOrder",
-    parseAsStringEnum<SortOrder>(["asc", "desc"]).withDefault(defaultSortOrder),
+    parseAsStringEnum<SortOrder>(["asc", "desc"]).withDefault(
+      DEFAULT_SORT_ORDER,
+    ),
   );
   const [search, setSearch] = useQueryState(
     "search",
-    parseAsString.withDefault(defaultSearch),
+    parseAsString.withDefault(""),
   );
 
   const reportsApi = api.report.all.useInfiniteQuery(

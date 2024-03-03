@@ -15,9 +15,8 @@ import { type UserPayloadIncluded } from "@/types/prisma";
 import { api } from "@/trpc/react";
 import { type RouterInputs } from "@/trpc/shared";
 import {
-  defaultSearch,
-  defaultSortBy,
-  defaultSortOrder,
+  DEFAULT_SORT_BY,
+  DEFAULT_SORT_ORDER,
   type SortOrder,
 } from "@/utils/constants";
 import { type ColumnDef } from "@tanstack/react-table";
@@ -41,7 +40,7 @@ export default function UserTable({
 }) {
   const [sortOrder, setSortOrder] = useQueryState<SortOrder>(
     "sortOrder",
-    parseAsStringEnum(["asc", "desc"]).withDefault(defaultSortOrder),
+    parseAsStringEnum(["asc", "desc"]).withDefault(DEFAULT_SORT_ORDER),
   );
   const [sortBy, setSortBy] = useQueryState<SortBy>(
     "sortBy",
@@ -52,12 +51,12 @@ export default function UserTable({
       "updatedAt",
       "email",
       "lastActive",
-    ]).withDefault(defaultSortBy),
+    ]).withDefault(DEFAULT_SORT_BY),
   );
 
   const [search, setSearch] = useQueryState(
     "search",
-    parseAsString.withDefault(defaultSearch),
+    parseAsString.withDefault(""),
   );
 
   const rolesApi = api.role.all.useQuery({});

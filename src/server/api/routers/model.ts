@@ -16,10 +16,10 @@ import {
 } from "@/utils/validation";
 
 import {
-  defaultLimit,
-  defaultSortBy,
-  defaultSortOrder,
-  maxLimit,
+  DEFAULT_LIMIT,
+  DEFAULT_SORT_BY,
+  DEFAULT_SORT_ORDER,
+  MAXIMUM_LIMIT,
 } from "@/utils/constants";
 import { AccessType } from "@prisma/client";
 import { createTRPCRouter, getProcedure, publicProcedure } from "../trpc";
@@ -29,8 +29,13 @@ export const modelRouter = createTRPCRouter({
     .input(
       z.object({
         search: z.string().trim().default(""),
-        limit: z.number().int().positive().max(maxLimit).default(defaultLimit),
-        sortOrder: z.enum(["asc", "desc"]).default(defaultSortOrder),
+        limit: z
+          .number()
+          .int()
+          .positive()
+          .max(MAXIMUM_LIMIT)
+          .default(DEFAULT_LIMIT),
+        sortOrder: z.enum(["asc", "desc"]).default(DEFAULT_SORT_ORDER),
         sortBy: z
           .enum([
             "name",
@@ -40,7 +45,7 @@ export const modelRouter = createTRPCRouter({
             "category",
             "active",
           ])
-          .default(defaultSortBy),
+          .default(DEFAULT_SORT_BY),
         cursor: idSchema.optional(),
         categoryId: idSchema.optional(),
         brandId: idSchema.optional(),

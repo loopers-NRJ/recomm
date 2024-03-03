@@ -1,7 +1,7 @@
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { getServerAuthSession } from "@/server/auth";
 import { prisma } from "@/server/db";
-import { maxImageCount } from "@/utils/constants";
+import { MAXIMUM_IMAGE_COUNT } from "@/utils/constants";
 import { getLogger } from "@/utils/logger";
 import { type Image } from "@/utils/validation";
 
@@ -22,10 +22,13 @@ export async function POST(request: Request) {
     if (files.length === 0) {
       return new Response("No images found", { status: 400 });
     }
-    if (files.length > maxImageCount) {
-      return new Response(`Cannot upload more than ${maxImageCount} Images`, {
-        status: 400,
-      });
+    if (files.length > MAXIMUM_IMAGE_COUNT) {
+      return new Response(
+        `Cannot upload more than ${MAXIMUM_IMAGE_COUNT} Images`,
+        {
+          status: 400,
+        },
+      );
     }
   } catch (error) {
     return new Response("Invalid Request", { status: 400 });

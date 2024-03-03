@@ -2,7 +2,11 @@ import { AccessType } from "@prisma/client";
 import { createTRPCRouter, getProcedure } from "../trpc";
 import { z } from "zod";
 import { idSchema } from "@/utils/validation";
-import { defaultLimit, defaultSortOrder, maxLimit } from "@/utils/constants";
+import {
+  DEFAULT_LIMIT,
+  DEFAULT_SORT_ORDER,
+  MAXIMUM_LIMIT,
+} from "@/utils/constants";
 import { logLevel } from "@/utils/logger";
 import { states } from "@/types/prisma";
 
@@ -11,8 +15,13 @@ export const logRouter = createTRPCRouter({
     .input(
       z.object({
         search: z.string().trim().optional(),
-        limit: z.number().int().positive().max(maxLimit).default(defaultLimit),
-        sortOrder: z.enum(["asc", "desc"]).default(defaultSortOrder),
+        limit: z
+          .number()
+          .int()
+          .positive()
+          .max(MAXIMUM_LIMIT)
+          .default(DEFAULT_LIMIT),
+        sortOrder: z.enum(["asc", "desc"]).default(DEFAULT_SORT_ORDER),
         sortBy: z.enum(["level", "createdAt", "state"]).default("createdAt"),
         cursor: idSchema.optional(),
         level: z.enum(logLevel).optional(),
