@@ -6,7 +6,7 @@ import { api } from "@/trpc/server";
 import WishCard from "./wish-card";
 
 // import {
-//   defaultSearch,
+//
 //   type SortOrder,
 //   defaultSortOrder,
 // } from "@/utils/constants";
@@ -17,7 +17,7 @@ import WishCard from "./wish-card";
 // }
 
 const WishesPage = async () => {
-  // const search = searchParams.search ?? defaultSearch;
+  // const search = searchParams.search ?? "";
   // const sortOrder = (searchParams.sortOrder as SortOrder) ?? defaultSortOrder;
   const { wishes } = await api.user.wishes.query({});
 

@@ -3,7 +3,7 @@ import { createTRPCRouter, getProcedure } from "../trpc";
 import { z } from "zod";
 import { RolePayload, accessTypes } from "@/types/prisma";
 import { idSchema } from "@/utils/validation";
-import { defaultSortOrder } from "@/utils/constants";
+import { DEFAULT_SORT_ORDER } from "@/utils/constants";
 
 const hasRoleAccess = (types: AccessType[]) =>
   types.some(
@@ -18,7 +18,7 @@ export const RoleRouter = createTRPCRouter({
     .input(
       z.object({
         search: z.string().trim().default(""),
-        sortOrder: z.enum(["asc", "desc"]).default(defaultSortOrder),
+        sortOrder: z.enum(["asc", "desc"]).default(DEFAULT_SORT_ORDER),
       }),
     )
     .query(async ({ input, ctx: { prisma } }) => {

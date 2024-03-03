@@ -5,15 +5,24 @@ import { idSchema } from "@/utils/validation";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 import type { PrismaClient } from "@prisma/client";
-import { defaultLimit, defaultSortOrder, maxLimit } from "@/utils/constants";
+import {
+  DEFAULT_LIMIT,
+  DEFAULT_SORT_ORDER,
+  MAXIMUM_LIMIT,
+} from "@/utils/constants";
 import { getLogger } from "@/utils/logger";
 
 export const roomRounter = createTRPCRouter({
   getBidsByRoomId: publicProcedure
     .input(
       z.object({
-        limit: z.number().int().positive().max(maxLimit).default(defaultLimit),
-        sortOrder: z.enum(["asc", "desc"]).default(defaultSortOrder),
+        limit: z
+          .number()
+          .int()
+          .positive()
+          .max(MAXIMUM_LIMIT)
+          .default(DEFAULT_LIMIT),
+        sortOrder: z.enum(["asc", "desc"]).default(DEFAULT_SORT_ORDER),
         cursor: idSchema.optional(),
         roomId: idSchema,
       }),

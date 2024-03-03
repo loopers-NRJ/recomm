@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import type { FC } from "react";
 import Link from "next/link";
-import { adminPageRegex } from "@/utils/constants";
+import { ADMIN_PAGE_REGEX } from "@/utils/constants";
 import { Bell } from "./Icons";
 import { cn } from "@/lib/utils";
 import type { Session } from "next-auth";
@@ -16,7 +16,7 @@ interface NavItemsProps {
 
 const NavItems: FC<NavItemsProps> = ({ isAdmin, session }) => {
   const pathname = usePathname();
-  const isAdminPage = !!pathname.match(adminPageRegex);
+  const isAdminPage = !!pathname.match(ADMIN_PAGE_REGEX);
   const content = [
     { text: "Home", path: "/" },
     { text: "Favourites", path: "/favourites" },
