@@ -15,7 +15,7 @@ export default function Sellit() {
   );
   const selectedState = useClientSelectedState((selected) => selected.state);
 
-  const categoryApi = api.category.allWithoutPayload.useInfiniteQuery(
+  const categoryApi = api.category.all.useInfiniteQuery(
     {
       parentSlug: parentCategorySlug ?? undefined,
       parentId: parentCategorySlug ? undefined : null,

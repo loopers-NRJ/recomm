@@ -29,7 +29,7 @@ import { AdminButtonLink } from "@/components/common/ButtonLink";
 import toast from "react-hot-toast";
 import { errorHandler } from "@/utils/errorHandler";
 
-type SortBy = OmitUndefined<RouterInputs["model"]["all"]["sortBy"]>;
+type SortBy = OmitUndefined<RouterInputs["model"]["allForAdmin"]["sortBy"]>;
 
 export default function ModelTable() {
   const searchParams = useSearchParams();
@@ -79,7 +79,7 @@ export default function ModelTable() {
     "search",
     parseAsString.withDefault(""),
   );
-  const modelsApi = api.model.all.useInfiniteQuery(
+  const modelsApi = api.model.allForAdmin.useInfiniteQuery(
     {
       search,
       sortBy,
@@ -205,6 +205,32 @@ export default function ModelTable() {
           />
         ),
         accessorFn: (row) => row.updatedAt.toLocaleString("en-US"),
+      },
+      {
+        id: "createdBy",
+        header: () => (
+          <TableHeader
+            title="createdBy"
+            sortBy={sortBy}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
+            sortOrder={sortOrder}
+            setSortOrder={(sortOrder) => void setSortOrder(sortOrder)}
+          />
+        ),
+        accessorFn: (row) => row.createdBy.name,
+      },
+      {
+        id: "updatedBy",
+        header: () => (
+          <TableHeader
+            title="updatedBy"
+            sortBy={sortBy}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
+            sortOrder={sortOrder}
+            setSortOrder={(sortOrder) => void setSortOrder(sortOrder)}
+          />
+        ),
+        accessorFn: (row) => row.updatedBy?.name ?? "N/A",
       },
       {
         id: "edit",

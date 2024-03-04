@@ -13,7 +13,6 @@ import {
   DEFAULT_SORT_ORDER,
   type SortOrder,
 } from "@/utils/constants";
-import type { Brand } from "@prisma/client";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
   parseAsString,
@@ -28,6 +27,7 @@ import TableHeader from "../TableHeader";
 import { AdminButtonLink } from "@/components/common/ButtonLink";
 import toast from "react-hot-toast";
 import { errorHandler } from "@/utils/errorHandler";
+import { type BrandPayloadIncluded } from "@/types/prisma";
 
 type SortBy = OmitUndefined<RouterInputs["brand"]["all"]["sortBy"]>;
 
@@ -106,7 +106,7 @@ export default function BrandTable() {
   // this state is to disable the delete button when admin clicks on it
   const [deleteBrandId, setDeleteBrandId] = useState<string>();
 
-  const columns: ColumnDef<Brand>[] = useMemo(
+  const columns: ColumnDef<BrandPayloadIncluded>[] = useMemo(
     () => [
       {
         id: "Name",
@@ -189,6 +189,32 @@ export default function BrandTable() {
           />
         ),
         accessorFn: (row) => row.updatedAt.toLocaleString("en-US"),
+      },
+      {
+        id: "createdBy",
+        header: () => (
+          <TableHeader
+            title="createdBy"
+            sortBy={sortBy}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
+            sortOrder={sortOrder}
+            setSortOrder={(sortOrder) => void setSortOrder(sortOrder)}
+          />
+        ),
+        accessorFn: (row) => row.createdBy.name,
+      },
+      {
+        id: "updatedBy",
+        header: () => (
+          <TableHeader
+            title="updatedBy"
+            sortBy={sortBy}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
+            sortOrder={sortOrder}
+            setSortOrder={(sortOrder) => void setSortOrder(sortOrder)}
+          />
+        ),
+        accessorFn: (row) => row.updatedBy?.name ?? "N/A",
       },
       {
         id: "edit",

@@ -271,7 +271,7 @@ export default function PostingForm({
     return (
       <>
         <AdditionalInfoSection model={modelApi.data} />
-        <ImageUploadSection model={modelApi.data} />
+        <ImageUploadSection modelName={modelApi.data.name} />
       </>
     );
   }, [

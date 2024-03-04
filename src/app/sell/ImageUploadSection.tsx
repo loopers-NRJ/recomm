@@ -1,19 +1,20 @@
-import { type ModelPayloadIncluded } from "@/types/prisma";
 import ImagePicker from "../../components/common/ImagePicker";
 import { usePostingState } from "@/app/sell/PostingState";
 
 interface ImageUploadSectionProps {
-  model: ModelPayloadIncluded;
+  modelName: string;
 }
 
-export default function ImageUploadSection({ model }: ImageUploadSectionProps) {
+export default function ImageUploadSection({
+  modelName,
+}: ImageUploadSectionProps) {
   const { images, setImages, formError } = usePostingState();
   return (
     <>
       <section>
         {/* additional questions */}
         <h2 className="my-4 text-xl font-bold">
-          Upload your {model.name} images here
+          Upload your {modelName} images here
         </h2>
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">

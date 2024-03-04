@@ -24,7 +24,14 @@ export const brandRouter = createTRPCRouter({
           .default(DEFAULT_LIMIT),
         sortOrder: z.enum(["asc", "desc"]).default(DEFAULT_SORT_ORDER),
         sortBy: z
-          .enum(["name", "createdAt", "updatedAt", "active"])
+          .enum([
+            "name",
+            "createdAt",
+            "updatedAt",
+            "createdBy",
+            "updatedBy",
+            "active",
+          ])
           .default(DEFAULT_SORT_BY),
         cursor: idSchema.optional(),
         categoryId: idSchema.optional(),
@@ -62,10 +69,23 @@ export const brandRouter = createTRPCRouter({
               }
             : undefined,
           orderBy: [
-            {
-              [sortBy]: sortOrder,
-            },
+            sortBy === "createdBy"
+              ? {
+                  createdBy: {
+                    name: sortOrder,
+                  },
+                }
+              : sortBy === "updatedBy"
+                ? {
+                    updatedBy: {
+                      name: sortOrder,
+                    },
+                  }
+                : {
+                    [sortBy]: sortOrder,
+                  },
           ],
+          include: BrandPayload.include,
         });
 
         return {

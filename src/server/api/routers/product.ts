@@ -9,6 +9,7 @@ import {
 import {
   AccessType,
   MultipleChoiceQuestionType,
+  type PrismaClient,
   type User,
 } from "@prisma/client";
 
@@ -23,6 +24,7 @@ import {
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { updateWishStatus } from "../updateWishStatus";
 import { api } from "@/trpc/server";
+import { type Logger, getLogger } from "@/utils/logger";
 
 export const productRouter = createTRPCRouter({
   all: publicProcedure
@@ -216,7 +218,7 @@ export const productRouter = createTRPCRouter({
         couponCode,
         addressId,
       },
-      ctx: { prisma, session, logger },
+      ctx: { prisma, session },
     }) => {
       // creating the product will not happen in the trpc router.
       // after implementing payment gateway, the product will be created there.
@@ -224,118 +226,183 @@ export const productRouter = createTRPCRouter({
 
       // const closedAt = new Date();
       // closedAt.setDate(closedAt.getDate() + Number(bidDuration));
+      const { user } = session;
 
-      const user = session.user;
-      const model = await prisma.model.findUnique({
-        where: {
-          id: modelId,
-        },
-        include: {
-          multipleChoiceQuestions: {
-            include: {
-              choices: true,
-            },
+      const product = await prisma.$transaction(async (prisma) => {
+        const logger = getLogger(prisma as PrismaClient);
+        // check whether the user can sell the product
+        const userCanSellProduct = await checkUserCanSellProduct(
+          user,
+          prisma as PrismaClient,
+          logger,
+        );
+        if (typeof userCanSellProduct === "string") {
+          return userCanSellProduct;
+        }
+
+        // check for model existence
+        const model = await prisma.model.findUnique({
+          where: {
+            id: modelId,
           },
-          category: true,
-          atomicQuestions: true,
-        },
-      });
-      if (model === null) {
-        return "Model not found";
-      }
-
-      const isValidValues = validateMultipleChoiceQuestionInput(
-        model.multipleChoiceQuestions,
-        providedChoices,
-      );
-      if (isValidValues !== true) {
-        return "Invalid option";
-      }
-
-      const choiceValueIds: string[] = [];
-      providedChoices.forEach((choice) =>
-        choice.type === MultipleChoiceQuestionType.Checkbox
-          ? choiceValueIds.push(...choice.valueIds)
-          : choice.valueId && choiceValueIds.push(choice.valueId),
-      );
-
-      const isValidAnswers = validateAtomicQuestionAnswers(
-        model.atomicQuestions,
-        providedAnswers,
-      );
-
-      if (isValidAnswers !== true) {
-        return "Invalid answers";
-      }
-
-      const product = await prisma.product.create({
-        data: {
-          title,
-          slug: slugify(title, true),
-          price,
-          description,
-          address: {
-            connect: {
-              id: addressId,
+          include: {
+            multipleChoiceQuestions: {
+              include: {
+                choices: true,
+              },
             },
+            category: true,
+            atomicQuestions: true,
           },
-          coupon: couponCode
-            ? {
-                connect: {
-                  id: {
-                    code: couponCode,
-                    categoryId: model.categoryId,
+        });
+        if (model === null) {
+          return "Model not found";
+        }
+        // check for multiple choice answers validity
+        const isValidValues = validateMultipleChoiceQuestionInput(
+          model.multipleChoiceQuestions,
+          providedChoices,
+        );
+        if (isValidValues !== true) {
+          return "Invalid option";
+        }
+
+        const choiceValueIds: string[] = [];
+        providedChoices.forEach((choice) =>
+          choice.type === MultipleChoiceQuestionType.Checkbox
+            ? choiceValueIds.push(...choice.valueIds)
+            : choice.valueId && choiceValueIds.push(choice.valueId),
+        );
+
+        // check for atomic answers validity
+        const isValidAnswers = validateAtomicQuestionAnswers(
+          model.atomicQuestions,
+          providedAnswers,
+        );
+
+        if (isValidAnswers !== true) {
+          return "Invalid answers";
+        }
+
+        // check for coupon code existence
+        if (couponCode) {
+          const coupon = await prisma.coupon.findUnique({
+            where: {
+              id: {
+                code: couponCode,
+                categoryId: model.categoryId,
+              },
+            },
+          });
+          if (coupon === null) {
+            return "Coupon not found";
+          }
+        }
+
+        // check for address existence
+        const address = await prisma.address.findUnique({
+          where: {
+            id: addressId,
+            userId: user.id,
+          },
+        });
+        if (address === null) {
+          return "Address not found";
+        }
+
+        const product = await prisma.product.create({
+          data: {
+            title,
+            slug: slugify(title, true),
+            price,
+            description,
+            address: {
+              connect: {
+                id: addressId,
+              },
+            },
+            coupon: couponCode
+              ? {
+                  connect: {
+                    id: {
+                      code: couponCode,
+                      categoryId: model.categoryId,
+                    },
                   },
-                },
-              }
-            : undefined,
-          images: {
-            createMany: {
-              data: images,
+                }
+              : undefined,
+            images: {
+              createMany: {
+                data: images,
+              },
+            },
+            seller: {
+              connect: {
+                id: user.id,
+              },
+            },
+            model: {
+              connect: {
+                id: modelId,
+              },
+            },
+            room: {
+              create: {
+                // closedAt,
+              },
+            },
+            selectedChoices: {
+              connect: choiceValueIds.map((id) => ({ id })),
+            },
+            answers: {
+              createMany: {
+                data: providedAnswers.map((answer) => ({
+                  answerContent:
+                    answer.answerContent instanceof Date
+                      ? answer.answerContent.getTime().toString()
+                      : `${answer.answerContent}`,
+                  questionId: answer.questionId,
+                  modelId,
+                })),
+              },
             },
           },
-          seller: {
-            connect: {
+          include: singleProductPayload.include,
+        });
+
+        if (userCanSellProduct === 2) {
+          await prisma.user.update({
+            where: {
               id: user.id,
             },
-          },
-          model: {
-            connect: {
-              id: modelId,
+            data: {
+              firstProductCreatedAtWithinTimeFrame: new Date(),
+              productsCreatedCountWithinTimeFrame: 1,
             },
-          },
-          room: {
-            create: {
-              // closedAt,
+          });
+        }
+        if (userCanSellProduct === 1) {
+          await prisma.user.update({
+            where: {
+              id: user.id,
             },
-          },
-          selectedChoices: {
-            connect: choiceValueIds.map((id) => ({ id })),
-          },
-          answers: {
-            createMany: {
-              data: providedAnswers.map((answer) => ({
-                answerContent:
-                  answer.answerContent instanceof Date
-                    ? answer.answerContent.getTime().toString()
-                    : `${answer.answerContent}`,
-                questionId: answer.questionId,
-                modelId,
-              })),
+            data: {
+              productsCreatedCountWithinTimeFrame:
+                user.productsCreatedCountWithinTimeFrame + 1,
             },
-          },
-        },
-        include: singleProductPayload.include,
+          });
+        }
+
+        await logger.info({
+          message: `${product.seller.name} created a new product: '${product.title}'`,
+          state: product.model.createdState,
+          detail: JSON.stringify({ productId: product.id }),
+        });
+        return product;
       });
-
-      await logger.info({
-        message: `${product.seller.name} created a new product: '${product.title}'`,
-        state: product.model.createdState,
-        detail: JSON.stringify({ productId: product.id }),
-      });
-
-      updateWishStatus(prisma, product);
-
+      if (typeof product !== "string") {
+        updateWishStatus(prisma, product);
+      }
       return product;
     },
   ),
@@ -533,4 +600,77 @@ async function isAuthorized(productSeller: User, user: User) {
   }
   const accessTypes = role.accesses.map((access) => access.type);
   return accessTypes.includes(AccessType.updateProduct);
+}
+async function checkUserCanSellProduct(
+  user: User,
+  prisma: PrismaClient,
+  logger: Logger,
+) {
+  const configurations = await prisma.appConfiguration.findMany({
+    where: {
+      key: {
+        in: ["productSellingDurationInDays", "productSellingCount"],
+      },
+    },
+  });
+  const sellingDurationStr = configurations.find(
+    (config) => config.key === "productSellingDurationInDays",
+  )?.value;
+  const sellingCountStr = configurations.find(
+    (config) => config.key === "productSellingCount",
+  )?.value;
+  if (sellingDurationStr === undefined || sellingCountStr === undefined) {
+    await logger.error({
+      state: "common",
+      message:
+        "Product selling configurations not found, check the configuration names",
+      detail: JSON.stringify({ userId: user.id }),
+    });
+    return "Something went wrong" as const;
+  }
+  const sellingDuration = Number(sellingDurationStr);
+  const sellingCount = Number(sellingCountStr);
+  if (isNaN(sellingDuration) || isNaN(sellingCount)) {
+    await logger.error({
+      state: "common",
+      message:
+        "Product selling configurations are not numbers. Enter a valid configurations",
+      detail: JSON.stringify({ userId: user.id }),
+    });
+    return "Something went wrong" as const;
+  }
+
+  if (!user.firstProductCreatedAtWithinTimeFrame) {
+    // the user didn't sell any products. so this field is null
+    // in this case, the user can sell a product.
+    // so set the firstProductCreatedAtWithinTimeFrame to now and productsCreatedCountWithinTimeFrame to 1
+    return 2 as const;
+  }
+  // find the number of days between the firstProductCreatedAtWithinTimeFrame and now
+  const daysPassed = getNumberOfDaysPassed(
+    user.firstProductCreatedAtWithinTimeFrame,
+  );
+  if (daysPassed > sellingDuration) {
+    // if the number of days passed between the first product created and now is greater than the selling duration
+    // then the user can sell a product.
+    // so reset the firstProductCreatedAtWithinTimeFrame to now and productsCreatedCountWithinTimeFrame to 1
+    return 2 as const;
+  }
+
+  if (user.productsCreatedCountWithinTimeFrame < sellingCount) {
+    // if the user has not reached the selling count
+    // then the user can sell a product.
+    // so increment the productsCreatedCountWithinTimeFrame by 1
+    return 1 as const;
+  }
+
+  const daysLeft = sellingDuration - daysPassed;
+  return `You cannot sell a product now. wait for ${daysLeft} days` as const;
+}
+
+function getNumberOfDaysPassed(date: Date) {
+  const today = new Date();
+  const timeDifference = today.getTime() - date.getTime();
+  const daysDifference = Math.round(timeDifference / (1000 * 60 * 60 * 24));
+  return daysDifference;
 }

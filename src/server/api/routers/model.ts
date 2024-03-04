@@ -13,6 +13,7 @@ import {
   idSchema,
   modelSchema,
   multipleChoiceQuestionSchema,
+  priceRangeSchema,
 } from "@/utils/validation";
 
 import {
@@ -25,7 +26,7 @@ import { AccessType } from "@prisma/client";
 import { createTRPCRouter, getProcedure, publicProcedure } from "../trpc";
 
 export const modelRouter = createTRPCRouter({
-  all: publicProcedure
+  allForAdmin: publicProcedure
     .input(
       z.object({
         search: z.string().trim().default(""),
@@ -40,7 +41,9 @@ export const modelRouter = createTRPCRouter({
           .enum([
             "name",
             "createdAt",
+            "createdBy",
             "updatedAt",
+            "updatedBy",
             "brand",
             "category",
             "active",
@@ -86,25 +89,37 @@ export const modelRouter = createTRPCRouter({
           skip: cursor ? 1 : undefined,
           cursor: cursor
             ? {
-              id: cursor,
-            }
+                id: cursor,
+              }
             : undefined,
           orderBy: [
             sortBy === "brand"
               ? {
-                brand: {
-                  name: sortOrder,
-                },
-              }
-              : sortBy === "category"
-                ? {
-                  category: {
+                  brand: {
                     name: sortOrder,
                   },
                 }
-                : {
-                  [sortBy]: sortOrder,
-                },
+              : sortBy === "category"
+                ? {
+                    category: {
+                      name: sortOrder,
+                    },
+                  }
+                : sortBy === "createdBy"
+                  ? {
+                      createdBy: {
+                        name: sortOrder,
+                      },
+                    }
+                  : sortBy === "updatedBy"
+                    ? {
+                        updatedBy: {
+                          name: sortOrder,
+                        },
+                      }
+                    : {
+                        [sortBy]: sortOrder,
+                      },
           ],
           include: modelsPayload.include,
         });
@@ -151,6 +166,7 @@ export const modelRouter = createTRPCRouter({
       async ({
         input: {
           name,
+          priceRange,
           brandId,
           categoryId,
           multipleChoiceQuestions,
@@ -173,6 +189,8 @@ export const modelRouter = createTRPCRouter({
             data: {
               name,
               slug: slugify(name),
+              minimumPrice: priceRange[0],
+              maximumPrice: priceRange[1],
               createdBy: {
                 connect: {
                   id: session.user.id,
@@ -231,52 +249,27 @@ export const modelRouter = createTRPCRouter({
     ),
   update: getProcedure(AccessType.updateModel)
     .input(
-      z.union([
-        z.object({
-          id: idSchema,
-          categoryId: idSchema.optional(),
-          brandId: idSchema.optional(),
-          active: z.boolean().optional(),
-          createdState: z.enum(states).optional(),
-          name: z.string().min(1).max(255),
-        }),
-        z.object({
-          id: idSchema,
-          name: z.string().min(1).max(255).optional(),
-          brandId: idSchema.optional(),
-          active: z.boolean().optional(),
-          createdState: z.enum(states).optional(),
-          categoryId: idSchema,
-        }),
-        z.object({
-          id: idSchema,
-          name: z.string().min(1).max(255).optional(),
-          categoryId: idSchema.optional(),
-          active: z.boolean().optional(),
-          createdState: z.enum(states).optional(),
-          brandId: idSchema,
-        }),
-        z.object({
-          id: idSchema,
-          name: z.string().min(1).max(255).optional(),
-          categoryId: idSchema.optional(),
-          brandId: idSchema.optional(),
-          createdState: z.enum(states).optional(),
-          active: z.boolean(),
-        }),
-        z.object({
-          id: idSchema,
-          name: z.string().min(1).max(255).optional(),
-          categoryId: idSchema.optional(),
-          brandId: idSchema.optional(),
-          active: z.boolean().optional(),
-          createdState: z.enum(states),
-        }),
-      ]),
+      z.object({
+        id: idSchema,
+        priceRange: priceRangeSchema.optional(),
+        categoryId: idSchema.optional(),
+        brandId: idSchema.optional(),
+        active: z.boolean().optional(),
+        createdState: z.enum(states).optional(),
+        name: z.string().min(1).max(255).optional(),
+      }),
     )
     .mutation(
       async ({
-        input: { id, name: newName, categoryId, active, brandId, createdState },
+        input: {
+          id,
+          name: newName,
+          priceRange,
+          categoryId,
+          active,
+          brandId,
+          createdState,
+        },
         ctx: { prisma, session, logger },
       }) => {
         // check whether the model exists
@@ -308,20 +301,22 @@ export const modelRouter = createTRPCRouter({
           data: {
             name: newName,
             slug: newName ? slugify(newName) : undefined,
+            minimumPrice: priceRange ? priceRange[0] : undefined,
+            maximumPrice: priceRange ? priceRange[1] : undefined,
             category:
               categoryId !== undefined
                 ? {
-                  connect: {
-                    id: categoryId,
-                  },
-                }
+                    connect: {
+                      id: categoryId,
+                    },
+                  }
                 : undefined,
             brand: brandId
               ? {
-                connect: {
-                  id: brandId,
-                },
-              }
+                  connect: {
+                    id: brandId,
+                  },
+                }
               : undefined,
             active,
             createdState: createdState,
@@ -337,6 +332,12 @@ export const modelRouter = createTRPCRouter({
         if (newName) {
           await logger.info({
             message: `'${session.user.name}' updated a model's name from '${existingModel.name}' to '${model.name}'`,
+            state: model.createdState,
+          });
+        }
+        if (priceRange) {
+          await logger.info({
+            message: `'${session.user.name}' updated a model's price range from '${existingModel.minimumPrice}-${existingModel.maximumPrice}' to '${priceRange[0]}-${priceRange[1]}'`,
             state: model.createdState,
           });
         }
