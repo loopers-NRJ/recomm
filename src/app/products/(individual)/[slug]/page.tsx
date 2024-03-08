@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Interactions from "../_components/Interactions";
 import ReportButton from "../_components/ReportButton";
+import { notFound } from "next/navigation";
 
 function lastSeen(lastActive: Date | null) {
   if (!lastActive) {
@@ -51,7 +52,13 @@ interface ProductPageParams {
 async function ProductPage({ params }: { params: ProductPageParams }) {
   const session = await getServerAuthSession();
   const product = await api.product.bySlug.query({ productSlug: params.slug });
-  const fav = await api.user.favorites.query({}).then((res) => res.favoritedProducts.find((fav) => fav.id === product.id))
+
+  if (!product.active) return notFound();
+
+  let fav = undefined
+  if(session && session.user){
+      fav = await api.user.favorites.query({}).then((res) => res.favoritedProducts.find((fav) => fav.id === product.id))
+  }
 
   return (
     <>
