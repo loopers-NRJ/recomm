@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 
 interface ListingCardProps {
   product: ProductsPayloadIncluded;
-  heart: boolean;
+  heart?: boolean;
   refresh?: () => void;
 }
 
@@ -21,7 +21,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ product, heart }) => {
   const { mutate: remove } = api.product.removeFromFavorites.useMutation();
   const router = useRouter();
 
-  const [isFav, setIsFav] = useState(heart);
+  const [isFav, setIsFav] = useState(heart ?? false);
 
   const toggle = async () => {
     if (isFav) remove({ productId: product.id });
@@ -33,9 +33,10 @@ const ListingCard: React.FC<ListingCardProps> = ({ product, heart }) => {
 
   return (
     <div className="relative flex w-full flex-col">
-      <div onClick={toggle}>
-        <HeartUI clicked={isFav.toString()} />
-      </div>
+      {heart != undefined &&
+        <div onClick={toggle}>
+          <HeartUI clicked={isFav.toString()} />
+        </div>}
       <Link href={`/products/${product.slug}`} className="group cursor-pointer">
         <div className="aspect-square w-full overflow-hidden rounded-xl border shadow-md transition-shadow duration-300 ease-in-out group-hover:shadow-lg">
           <Image
