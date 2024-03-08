@@ -32,7 +32,7 @@ export const searchRouter = createTRPCRouter({
           },
           take: DEFAULT_LIMIT,
           select: {
-            id: true,
+            slug: true,
             name: true,
             // add image if needed
             // image: true,
@@ -49,7 +49,7 @@ export const searchRouter = createTRPCRouter({
           },
           take: DEFAULT_LIMIT,
           select: {
-            id: true,
+            slug: true,
             name: true,
             // add image if needed
             // image: true,
@@ -66,7 +66,7 @@ export const searchRouter = createTRPCRouter({
           },
           take: DEFAULT_LIMIT,
           select: {
-            id: true,
+            slug: true,
             name: true,
             // add image if needed
             // image: true,

@@ -57,9 +57,9 @@ const Suggestions: FC<SuggestionProps> = ({ searchKey }) => {
       <CommandGroup heading="Category">
         {categories.map((category) => (
           <CommandItem
-            key={category.id}
+            key={category.slug}
             onSelect={() => {
-              router.push(`/products/?category=${category.id}`);
+              router.push(`/products/?category=${category.slug}`);
             }}
             className="flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-200/50"
           >
@@ -71,9 +71,9 @@ const Suggestions: FC<SuggestionProps> = ({ searchKey }) => {
       <CommandGroup heading="Brand">
         {brands.map((brand) => (
           <CommandItem
-            key={brand.id}
+            key={brand.slug}
             onSelect={() => {
-              router.push(`/products/?brand=${brand.id}`);
+              router.push(`/products/?brand=${brand.slug}`);
             }}
             className="flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-200/50"
           >
@@ -85,9 +85,9 @@ const Suggestions: FC<SuggestionProps> = ({ searchKey }) => {
       <CommandGroup heading="Model">
         {models.map((modal) => (
           <CommandItem
-            key={modal.id}
+            key={modal.slug}
             onSelect={() => {
-              router.push(`/products/?model=${modal.id}`);
+              router.push(`/products/?model=${modal.slug}`);
             }}
             className="flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-200/50"
           >
