@@ -11,8 +11,8 @@ function SortDrawer() {
   const router = useRouter()
   const params = useSearchParams()
   const [isOpen, setIsOpen] = useState(false)
-  const [sortBy, setSortBy] = useState<string | undefined>(params.get('sortBy') ?? 'name')
-  const [sortOrder, setSortOrder] = useState<string | undefined>(params.get('sortOrder') ?? 'asc')
+  const [sortBy, setSortBy] = useState<string>(params.get('sortBy') ?? 'name')
+  const [sortOrder, setSortOrder] = useState<string>(params.get('sortOrder') ?? 'asc')
 
   const q = new URLSearchParams(params.toString())
   const query = useMemo(() => {
@@ -70,7 +70,6 @@ function SortDrawer() {
           </Button>
           <Button size="lg" variant="outline" className="w-full" onClick={() => {
             setIsOpen(false)
-            setSortBy(undefined)
           }}>
             Clear
           </Button>

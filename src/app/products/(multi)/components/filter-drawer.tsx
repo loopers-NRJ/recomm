@@ -99,9 +99,6 @@ export default function FilterDrawer() {
         <DrawerFooter className="w-full py-5">
           <Button size="lg" className="w-full" onClick={() => {
             router.push(`/products?${query}`)
-            setModel(undefined)
-            setBrand(undefined)
-            setCategory(undefined)
             setIsOpen(false)
           }}>
             Apply
