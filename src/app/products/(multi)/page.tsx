@@ -1,6 +1,6 @@
-import Products from "@/components/products-area";
 import { type RouterInputs } from "@/trpc/shared";
 import { type SortOrder } from "@/utils/constants";
+import MobileProductsPage from "./components/mobile-products-page";
 
 interface SearchParams {
   search?: string;
@@ -18,7 +18,7 @@ export default function ProductsPage({
 }) {
   return (
     <>
-      <Products {...searchParams} />
+      <MobileProductsPage searchParams={searchParams} />
     </>
   );
 }

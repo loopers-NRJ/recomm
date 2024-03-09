@@ -21,31 +21,45 @@ function ProductCard({ active, listing, showSwitch }: ProductCardProps) {
 
      const change = (id: string, active: boolean) => {
           changeStatus({ id, active });
-          if(!isLoading && typeof data === 'string') toast.error(data);
+          if (!isLoading && typeof data === 'string') toast.error(data);
           else setIsActive(active);
      }
 
      return (
           <Card className='relative overflow-clip'>
-               { showSwitch &&
+               {showSwitch &&
                     <Switch
                          checked={isActive}
                          onCheckedChange={(active) => change(listing.id, active)}
-                         className="absolute top-2 right-2"
+                         className="absolute scale-75 top-2 right-2 z-10"
                     />
                }
-               <Link href={`/products/${listing.slug}`} className="cursor-pointer">
-                    <Image
-                         src={listing.images[0]!.url}
-                         alt={listing.slug}
-                         width={180} height={150}
-                         className="h-40 w-full object-cover"
-                    />
-                    <div className='grid grid-cols-2 p-2'>
-                         <p className="font-semibold text-left truncate">{listing.model.name}</p>
-                         <p className="font-semibold text-right">₹ {listing.price}</p>
+               {isActive ?
+                    <Link href={`/products/${listing.slug}`} className="cursor-pointer">
+                         <Image
+                              src={listing.images[0]!.url}
+                              alt={listing.slug}
+                              width={180} height={150}
+                              className="h-40 w-full object-cover"
+                         />
+                         <div className='grid grid-cols-2 p-2'>
+                              <p className="font-semibold text-left truncate">{listing.model.name}</p>
+                              <p className="font-semibold text-right">₹ {listing.price}</p>
+                         </div>
+                    </Link> :
+                    <div className='bg-white opacity-50'>
+                         <Image
+                              src={listing.images[0]!.url}
+                              alt={listing.slug}
+                              width={180} height={150}
+                              className="h-40 w-full object-cover"
+                         />
+                         <div className='grid grid-cols-2 p-2'>
+                              <p className="font-semibold text-left truncate">{listing.model.name}</p>
+                              <p className="font-semibold text-right">₹ {listing.price}</p>
+                         </div>
                     </div>
-               </Link>
+               }
           </Card>
      )
 }

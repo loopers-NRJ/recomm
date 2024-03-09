@@ -26,28 +26,14 @@ const Products: React.FC<Props> = ({
 }) => {
   const selectedState = useClientSelectedState((selected) => selected.state);
 
-  const { useQuery: getCategoryId } = api.category.bySlug
-  const { useQuery: getBrandId } = api.brand.bySlug;
-  const { useQuery: getModelId } = api.model.bySlug;
+  const { data: categoryData } = api.category.bySlug.useQuery({ categorySlug: category ?? "dummy" });
+  const categoryId = typeof categoryData!== "string" ? categoryData?.id : undefined;
 
-  let modelId = undefined;
-  let categoryId = undefined;
-  let brandId = undefined;
+  const { data: brandData } = api.brand.bySlug.useQuery({ brandSlug: brand ?? "dummy" });
+  const brandId = brandData?.id ?? undefined;
 
-  if (category) {
-    const { data: categoryData } = getCategoryId({ categorySlug: category });
-    if (typeof categoryData !== "string") categoryId = categoryData?.id;
-  }
-
-  if (brand) {
-    const { data } = getBrandId({ brandSlug: brand });
-    brandId = data?.id ?? undefined;
-  }
-
-  if (model) {
-    const { data } = getModelId({ modelSlug: model });
-    modelId = data?.id ?? undefined;
-  }
+  const { data: modelData } = api.model.bySlug.useQuery({ modelSlug: model?? "dummy" });
+  const modelId = modelData?.id ?? undefined;
 
   const { data, isLoading, isError } = api.product.all.useInfiniteQuery(
     {
@@ -82,7 +68,7 @@ const Products: React.FC<Props> = ({
   const products = data?.pages.map((page) => page.products).flat() ?? [];
 
   if (isError){
-    return <div>Something went wrong</div>;
+    return <div>Something went wrong...</div>;
   } 
 
   if (isLoading) {
