@@ -5,7 +5,7 @@ import { cookies, headers } from "next/headers";
 
 import { TRPCReactProvider } from "@/trpc/react";
 import Providers from "./providers";
-import { Viewport, type Metadata } from "next";
+import type { Viewport, Metadata } from "next";
 import BottomBar from "@/components/navbar/BottomBar"
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import MobileNavbar from "@/components/navbar/mobile-navbar";

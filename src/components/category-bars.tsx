@@ -12,7 +12,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
-import { $Enums } from "@prisma/client";
+import type { $Enums } from "@prisma/client";
 
 function createQueryString(
   searchParams: ReadonlyURLSearchParams,
@@ -57,9 +57,8 @@ const MobileCategoryBar = () => {
             "/products/?" +
             createQueryString(searchParams, "category", category.slug);
           return (
-            <motion.div variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }} >
+            <motion.div key={category.id} variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }} >
               <CategoryBox
-                key={category.id}
                 label={category.name}
                 link={url}
                 image={image.url}
