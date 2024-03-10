@@ -28,6 +28,7 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { addressSchema } from "@/utils/validation";
 import { errorHandler } from "@/utils/errorHandler";
+import { TRPCClientError } from "@trpc/client";
 
 interface FormProps {
   userData?: User;
@@ -44,14 +45,9 @@ type DetailsFormValues = z.infer<typeof detailsFormSchema>;
 const DetailsForm = ({ userData, callbackUrl }: FormProps) => {
   const { state } = useClientSelectedState();
   const router = useRouter();
-  const createAddress = api.address.create.useMutation({
-    onSuccess: (result) => {
-      if (typeof result === "string") return toast.error(result);
-      toast.success("Saved Successfully!");
-      if(callbackUrl) router.push(callbackUrl);
-    },
-    onError: errorHandler,
-  });
+  const createAddress = api.address.create.useMutation();
+
+  const updateUserMobile = api.user.update.useMutation();
 
   const defaultValues = {
     fullName: userData?.name ?? "",
@@ -70,12 +66,29 @@ const DetailsForm = ({ userData, callbackUrl }: FormProps) => {
     mode: "onChange",
   });
 
+  const handleSubmit = form.handleSubmit(async (data) => {
+    try {
+      const [result1, result2] = await Promise.all([
+        createAddress.mutateAsync(data),
+        updateUserMobile.mutateAsync({
+          mobile: data.phoneNumber,
+        }),
+      ]);
+      if (typeof result1 === "string") return toast.error(result1);
+      if (typeof result2 === "string") return toast.error(result2);
+      toast.success("Saved Successfully!");
+      if (callbackUrl) return router.push(callbackUrl);
+      return router.push("/");
+    } catch (error) {
+      if (error instanceof TRPCClientError) {
+        errorHandler(error);
+      }
+    }
+  });
+
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit((data) => createAddress.mutate(data))}
-        className="space-y-3"
-      >
+      <form onSubmit={handleSubmit} className="space-y-3">
         <FormField
           control={form.control}
           name="fullName"
