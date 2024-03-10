@@ -1,9 +1,21 @@
-import React from 'react'
+import AuthenticatedPage from '@/hoc/AuthenticatedPage'
+import Container from '@/components/Container'
+import AddressList from '@/components/common/AddressList'
+import AddAddressButton from './add-address'
 
-function UpdatePage() {
+const UpdatePage = AuthenticatedPage(async ({params, session}) => {
+
+  const {userId} = params
+  if(session.user.id !== userId) {
+    return <div>Unauthorized</div>
+  }
+
   return (
-    <div>Update Form</div>
+    <Container>
+      <AddAddressButton />
+      <AddressList />
+    </Container>
   )
-}
+})
 
 export default UpdatePage

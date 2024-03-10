@@ -5,7 +5,7 @@ import { cookies, headers } from "next/headers";
 
 import { TRPCReactProvider } from "@/trpc/react";
 import Providers from "./providers";
-import { type Metadata } from "next";
+import type { Viewport, Metadata } from "next";
 import BottomBar from "@/components/navbar/BottomBar"
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import MobileNavbar from "@/components/navbar/mobile-navbar";
@@ -21,6 +21,13 @@ export const metadata: Metadata = {
   description: "Buy and sell your products here",
   icons: [{ rel: "icon", url: "/recomm-favicon.png" }],
 };
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+}
 
 export default function RootLayout({
   children,

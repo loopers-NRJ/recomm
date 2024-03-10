@@ -8,6 +8,7 @@ function LogoutButton() {
     <Button
       onClick={() => void signOut({ callbackUrl: "/" })}
       size="sm"
+      variant="outline"
     >
       Log Out
     </Button>
