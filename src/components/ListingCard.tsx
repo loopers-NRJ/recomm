@@ -20,7 +20,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ product }) => {
   const { mutate: remove } = api.product.removeFromFavorites.useMutation();
   const router = useRouter();
 
-  const [isFav, setIsFav] = useState(product.isFavourite);
+  const [isFav, setIsFav] = useState(product.isFavourite ?? false);
 
   const toggle = async () => {
     if (isFav) remove({ productId: product.id });
@@ -35,9 +35,10 @@ const ListingCard: React.FC<ListingCardProps> = ({ product }) => {
       variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }}
       className="relative flex w-full flex-col"
     >
-      <div className="absolute right-2 top-2 flex h-10 w-10 items-center justify-center">
-        <HeartButton onClick={toggle} starred={isFav} />
-      </div>
+      { product.isFavourite !== undefined &&
+      <div className="absolute right-2 top-2 flex h-10 w-10 scale-75 items-center justify-center">
+          <HeartButton onClick={toggle} starred={isFav} />
+      </div> }
       <Link href={`/products/${product.slug}`} className="group cursor-pointer">
         <div className="aspect-square w-full overflow-hidden rounded-xl border shadow-md transition-shadow duration-300 ease-in-out group-hover:shadow-lg">
           <Image

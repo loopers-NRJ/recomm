@@ -2,7 +2,7 @@ import "./HeartButton.css";
 import StarAnimation from "./HeartAnimation";
 import StarIcon from "./HeartIcon";
 
-function HeartButton({ starred = false, ...rest }) {
+function HeartButton({ starred, ...rest }: { starred: boolean, onClick: () => void }) {
   return (
     <button
       className={`StarButton ${starred ? "StarButton--starred" : ""}`}

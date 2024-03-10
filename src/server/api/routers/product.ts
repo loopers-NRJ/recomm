@@ -157,14 +157,14 @@ export const productRouter = createTRPCRouter({
         });
 
         type ProductWithIsFavorite = ProductsPayloadIncluded & {
-          isFavorite?: boolean;
+          isFavorite: boolean | undefined;
         };
 
         const productsWithIsFavorite = products.map<ProductWithIsFavorite>(
           (product) => {
-            if(!session.user) return product;
-            const isFavorite = favorites.includes(product.id);
-            return { ...product, isFavorite };
+          if(session.user === undefined) return {...product, isFavorite: undefined };
+          const isFavorite = favorites.includes(product.id);
+          return { ...product, isFavorite: isFavorite };
           },
         );
 

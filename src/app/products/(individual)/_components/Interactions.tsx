@@ -9,11 +9,11 @@ import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-function Interactions({ product, liked }: { product: ProductsPayloadIncluded, liked: boolean }) {
+function Interactions({ product }: { product: ProductsPayloadIncluded & {isFavourite?: boolean}, liked: boolean }) {
   const { mutate: add } = api.product.addToFavorites.useMutation();
   const { mutate: remove } = api.product.removeFromFavorites.useMutation();
 
-  const [isFav, setIsFav] = useState(liked);
+  const [isFav, setIsFav] = useState(product.isFavourite ?? false);
 
   const toggle = async () => {
     if (isFav) remove({ productId: product.id });

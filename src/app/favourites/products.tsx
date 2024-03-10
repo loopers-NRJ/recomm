@@ -1,6 +1,6 @@
 "use client"
 import ListingCard from '@/components/ListingCard';
-import { ProductsPayloadIncluded } from '@/types/prisma';
+import type { ProductsPayloadIncluded } from '@/types/prisma';
 import { motion } from 'framer-motion';
 import React from 'react'
 

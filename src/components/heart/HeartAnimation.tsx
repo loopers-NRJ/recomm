@@ -27,16 +27,16 @@ function StarAnimation({ starred, ...rest }: { starred: boolean }) {
 
 export default StarAnimation;
 
-function PulseWave({ starred = false, radius = 47 }) {
+function PulseWave({ starred, radius = 47 }: { starred: boolean, radius?: number }) {
   // Apply animation via style attribute if starred === true
   const style = starred
     ? {
-        transform: "scale(1)",
-        transformOrigin: "center center",
-        opacity: 0,
-        transition: "transform 400ms, opacity 400ms",
-        transitionDelay: "0ms, 200ms"
-      }
+      transform: "scale(1)",
+      transformOrigin: "center center",
+      opacity: 0,
+      transition: "transform 400ms, opacity 400ms",
+      transitionDelay: "0ms, 200ms"
+    }
     : { transform: "scale(0)" };
 
   return (
@@ -52,13 +52,13 @@ function PulseWave({ starred = false, radius = 47 }) {
 }
 
 function Particles({
-  starred = false,
+  starred,
   numParticles = 20,
   minParticleRadius = 1,
   maxParticleRadius = 3,
   minParticleDistance = 32,
   maxParticleDistance = 42
-}) {
+}: { starred: boolean, numParticles?: number, minParticleRadius?: number, maxParticleRadius?: number, minParticleDistance?: number, maxParticleDistance?: number }) {
   return Array.from({ length: numParticles }).map((_, i) => {
     // Calculate initial properties
     const cx = centerX;
@@ -86,11 +86,11 @@ function Particles({
     // Apply animation via style attribute if starred === true
     const style = starred
       ? {
-          transform: `translate(${translateX}px, ${translateY}px)`,
-          opacity: starred ? 0 : 1,
-          transition: `transform ${travelDuration}ms, opacity ${opacityDuration}ms`,
-          transitionDelay: `0ms, ${travelDuration * 0.8}ms`
-        }
+        transform: `translate(${translateX}px, ${translateY}px)`,
+        opacity: starred ? 0 : 1,
+        transition: `transform ${travelDuration}ms, opacity ${opacityDuration}ms`,
+        transitionDelay: `0ms, ${travelDuration * 0.8}ms`
+      }
       : {};
 
     return (

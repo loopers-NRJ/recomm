@@ -14,7 +14,7 @@ function StarIcon({ ...rest }) {
         <use xlinkHref="#heart"/>
       </clipPath>
 
-      <use xlinkHref="#heart" stroke-width="3px" fill="none" clip-path="url(#insideHeartOnly)"/>
+      <use xlinkHref="#heart" strokeWidth="3px" fill="none" clipPath="url(#insideHeartOnly)"/>
     </svg>
   );
 }
