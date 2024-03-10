@@ -2,6 +2,8 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+const restrictedKeys = ["e", "E", ".", "-"];
+
 const Input = React.forwardRef<
   HTMLInputElement,
   React.InputHTMLAttributes<HTMLInputElement>
@@ -17,11 +19,7 @@ const Input = React.forwardRef<
       inputMode={type === "number" ? "numeric" : undefined}
       {...props}
       onKeyDown={(e) => {
-        if (
-          type === "number" &&
-          isNaN(Number(e.key)) &&
-          e.key !== "Backspace"
-        ) {
+        if (type === "number" && restrictedKeys.includes(e.key)) {
           return e.preventDefault();
         }
         props.onKeyDown?.(e);
