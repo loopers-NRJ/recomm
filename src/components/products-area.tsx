@@ -58,22 +58,6 @@ const Products: React.FC<Props> = ({
     },
   );
 
-  const { data: favData } = api.user.favorites.useQuery(
-    {
-      search,
-      sortOrder,
-      modelId,
-      categoryId,
-      brandId,
-    },
-    {
-      getNextPageParam: (lastItem) => lastItem.nextCursor,
-    },
-  );
-
-  const favourites =
-    favData?.favoritedProducts.map((product) => product.id) ?? [];
-
   const products = data?.pages.map((page) => page.products).flat() ?? [];
 
   if (isError) {
@@ -91,8 +75,8 @@ const Products: React.FC<Props> = ({
       </div>
     );
   }
+
   return (
-    <>
       <motion.div
         variants={{
           hidden: { opacity: 0 },
@@ -108,12 +92,10 @@ const Products: React.FC<Props> = ({
         {products.map((product) => (
           <ListingCard
             key={product.id}
-            heart={favourites.includes(product.id)}
             product={product}
           />
         ))}
       </motion.div>
-    </>
   );
 };
 

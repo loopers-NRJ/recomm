@@ -11,17 +11,16 @@ import { motion } from "framer-motion";
 import HeartButton from "./heart/HeartButton";
 
 interface ListingCardProps {
-  product: ProductsPayloadIncluded;
-  heart?: boolean;
+  product: ProductsPayloadIncluded & { isFavourite?: boolean };
   refresh?: () => void;
 }
 
-const ListingCard: React.FC<ListingCardProps> = ({ product, heart }) => {
+const ListingCard: React.FC<ListingCardProps> = ({ product }) => {
   const { mutate: add } = api.product.addToFavorites.useMutation();
   const { mutate: remove } = api.product.removeFromFavorites.useMutation();
   const router = useRouter();
 
-  const [isFav, setIsFav] = useState(heart ?? false);
+  const [isFav, setIsFav] = useState(product.isFavourite);
 
   const toggle = async () => {
     if (isFav) remove({ productId: product.id });
@@ -36,11 +35,9 @@ const ListingCard: React.FC<ListingCardProps> = ({ product, heart }) => {
       variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }}
       className="relative flex w-full flex-col"
     >
-      {heart != undefined && (
-        <div className="absolute right-2 top-2 flex h-10 w-10 items-center justify-center">
-          <HeartButton onClick={toggle} starred={isFav} />
-        </div>
-      )}
+      <div className="absolute right-2 top-2 flex h-10 w-10 items-center justify-center">
+        <HeartButton onClick={toggle} starred={isFav} />
+      </div>
       <Link href={`/products/${product.slug}`} className="group cursor-pointer">
         <div className="aspect-square w-full overflow-hidden rounded-xl border shadow-md transition-shadow duration-300 ease-in-out group-hover:shadow-lg">
           <Image
