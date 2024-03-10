@@ -4,13 +4,16 @@ import { prisma } from "@/server/db";
 import { MAXIMUM_IMAGE_COUNT } from "@/utils/constants";
 import { getLogger } from "@/utils/logger";
 import { type Image } from "@/utils/validation";
+import { type Session } from "next-auth";
 
 export async function POST(request: Request) {
+  let session: Session;
   try {
-    const session = await getServerAuthSession();
-    if (!session) {
+    const authSession = await getServerAuthSession();
+    if (!authSession) {
       return new Response("Unauthorized", { status: 401 });
     }
+    session = authSession;
   } catch (error) {
     return new Response("Unauthorized", { status: 401 });
   }
@@ -40,9 +43,15 @@ export async function POST(request: Request) {
       if (!(file instanceof File)) {
         return new Response("Invalid File", { status: 400 });
       }
-      const image = await uploadToCloudinary(await file.arrayBuffer());
+      const image = await uploadToCloudinary(
+        await file.arrayBuffer(),
+        session.user.id,
+      );
       uploadedImages.push(image);
     }
+    await prisma.image.createMany({
+      data: uploadedImages,
+    });
     return new Response(JSON.stringify(uploadedImages));
   } catch (error) {
     await getLogger(prisma).error({
