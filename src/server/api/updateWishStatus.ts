@@ -38,6 +38,12 @@ async function updateCategoryWishes(
         some: {
           categoryId: product.model.categoryId,
           status: WishStatus.pending,
+          lowerBound: {
+            gte: product.price,
+          },
+          upperBound: {
+            lte: product.price,
+          },
         },
       },
     },
@@ -85,6 +91,12 @@ async function updateModelWishes(
         some: {
           modelId: product.modelId,
           status: WishStatus.pending,
+          lowerBound: {
+            gte: product.price,
+          },
+          upperBound: {
+            lte: product.price,
+          },
         },
       },
     },
@@ -132,6 +144,12 @@ async function updateBrandWishes(
         some: {
           brandId: product.model.brandId,
           status: WishStatus.pending,
+          lowerBound: {
+            gte: product.price,
+          },
+          upperBound: {
+            lte: product.price,
+          },
         },
       },
     },

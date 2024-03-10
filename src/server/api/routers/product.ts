@@ -58,6 +58,15 @@ export const productRouter = createTRPCRouter({
         brandId: idSchema.optional(),
         modelId: idSchema.optional(),
         state: z.enum(states),
+        price: z
+          .object({
+            min: z.number().int().positive(),
+            max: z.number().int().positive(),
+          })
+          .refine(({ min, max }) => min < max, {
+            message: "minPrice should be less than maxPrice",
+          })
+          .optional(),
       }),
     )
     .query(
@@ -72,6 +81,7 @@ export const productRouter = createTRPCRouter({
           modelId,
           cursor,
           state,
+          price,
         },
         ctx: { prisma, isAdminPage, session },
       }) => {
@@ -127,6 +137,12 @@ export const productRouter = createTRPCRouter({
               ],
               createdState: state,
             },
+            price: price
+              ? {
+                  gte: price.min,
+                  lte: price.max,
+                }
+              : undefined,
           },
 
           take: limit,
@@ -162,9 +178,10 @@ export const productRouter = createTRPCRouter({
 
         const productsWithIsFavorite = products.map<ProductWithIsFavorite>(
           (product) => {
-          if(session.user === undefined) return {...product, isFavorite: undefined };
-          const isFavorite = favorites.includes(product.id);
-          return { ...product, isFavorite: isFavorite };
+            if (session.user === undefined)
+              return { ...product, isFavorite: undefined };
+            const isFavorite = favorites.includes(product.id);
+            return { ...product, isFavorite: isFavorite };
           },
         );
 
