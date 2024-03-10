@@ -115,12 +115,16 @@ model Role {
 }
 
 model User {
-    id                String    @id @default(cuid())
-    name              String?
-    email             String?   @unique
-    emailVerified     DateTime?
-    image             String?
-    lastActive        DateTime?
+    id                                   String    @id @default(cuid())
+    name                                 String?
+    email                                String?   @unique
+    emailVerified                        DateTime?
+    image                                String?
+    lastActive                           DateTime?
+    productsCreatedCountWithinTimeFrame  Int       @default(0)
+    firstProductCreatedAtWithinTimeFrame DateTime?
+
+    // images             Image[]
     accounts          Account[]
     sessions          Session[]
     listedProducts    Product[] @relation("listedProducts")
@@ -311,10 +315,14 @@ model Brand {
 }
 
 model Model {
-    id                      String                   @id @default(cuid())
-    name                    String
-    slug                    String                   @unique
-    active                  Boolean                  @default(true)
+    id           String  @id @default(cuid())
+    name         String
+    slug         String  @unique
+    active       Boolean @default(true)
+    minimumPrice Float   @default(0)
+    maximumPrice Float   @default(0)
+
+    // relations
     category                Category                 @relation(fields: [categoryId], references: [id])
     categoryId              String
     brand                   Brand                    @relation(fields: [brandId], references: [id], onDelete: Restrict)
@@ -567,6 +575,8 @@ model Image {
     category         FeaturedCategory?
     product          Product?          @relation(fields: [productId], references: [id], onDelete: Cascade)
     productId        String?
+    // user             User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
+    // userId           String?
 
     @@index([productId])
 }

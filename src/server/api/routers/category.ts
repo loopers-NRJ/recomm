@@ -22,7 +22,7 @@ import { idSchema, imageInputs } from "@/utils/validation";
 import { AccessType } from "@prisma/client";
 
 export const categoryRouter = createTRPCRouter({
-  all: publicProcedure
+  allForAdmin: publicProcedure
     .input(
       z.object({
         search: z.string().trim().default(""),
@@ -37,10 +37,12 @@ export const categoryRouter = createTRPCRouter({
           .enum([
             "name",
             "price",
-            "createdAt",
-            "updatedAt",
             "active",
             "featured",
+            "createdAt",
+            "updatedAt",
+            "createdBy",
+            "updatedBy",
           ])
           .default(DEFAULT_SORT_BY),
         cursor: idSchema.optional(),
@@ -94,9 +96,21 @@ export const categoryRouter = createTRPCRouter({
                     },
                   },
                 }
-              : {
-                  [sortBy]: sortOrder,
-                },
+              : sortBy === "createdBy"
+                ? {
+                    createdBy: {
+                      name: sortOrder,
+                    },
+                  }
+                : sortBy === "updatedBy"
+                  ? {
+                      updatedBy: {
+                        name: sortOrder,
+                      },
+                    }
+                  : {
+                      [sortBy]: sortOrder,
+                    },
           ],
           include: CategoryPayload.include,
         });
@@ -107,7 +121,7 @@ export const categoryRouter = createTRPCRouter({
       },
     ),
 
-  allWithoutPayload: publicProcedure
+  all: publicProcedure
     .input(
       z.object({
         search: z.string().trim().default(""),
@@ -286,7 +300,6 @@ export const categoryRouter = createTRPCRouter({
                 }
               : undefined,
           },
-          include: CategoryPayload.include,
         });
 
         await logger.info({
@@ -299,36 +312,13 @@ export const categoryRouter = createTRPCRouter({
     ),
   update: getProcedure(AccessType.updateCategory)
     .input(
-      z.union([
-        z.object({
-          id: idSchema,
-          name: z.string().min(1).max(255),
-          parentCategoryId: idSchema.optional(),
-          active: z.boolean().optional(),
-          price: z.number().int().positive().optional(),
-        }),
-        z.object({
-          id: idSchema,
-          name: z.string().min(1).max(255).optional(),
-          parentCategoryId: idSchema,
-          active: z.boolean().optional(),
-          price: z.number().int().positive().optional(),
-        }),
-        z.object({
-          id: idSchema,
-          name: z.string().min(1).max(255).optional(),
-          parentCategoryId: idSchema.optional(),
-          active: z.boolean(),
-          price: z.number().int().positive().optional(),
-        }),
-        z.object({
-          id: idSchema,
-          name: z.string().min(1).max(255).optional(),
-          parentCategoryId: idSchema.optional(),
-          active: z.boolean().optional(),
-          price: z.number().int().positive(),
-        }),
-      ]),
+      z.object({
+        id: idSchema,
+        name: z.string().min(1).max(255).optional(),
+        parentCategoryId: idSchema.optional(),
+        active: z.boolean().optional(),
+        price: z.number().int().positive().optional(),
+      }),
     )
     .mutation(async ({ input, ctx: { prisma, session, logger } }) => {
       const existingCategory = await prisma.category.findUnique({
@@ -379,7 +369,6 @@ export const categoryRouter = createTRPCRouter({
             },
           },
         },
-        include: CategoryPayload.include,
       });
 
       if (input.name) {
@@ -550,12 +539,9 @@ export const categoryRouter = createTRPCRouter({
           where: {
             categoryId: id,
           },
-          select: {
-            category: { select: { name: true } },
-          },
         });
         if (existingFeatured !== null) {
-          return `Category ${existingFeatured.category.name} is already featured` as const;
+          return "Category is already featured" as const;
         }
         const data = await prisma.featuredCategory.create({
           data: {

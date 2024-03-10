@@ -2,24 +2,42 @@
 import { Button } from '@/components/ui/button'
 import { Drawer, DrawerContent, DrawerFooter, DrawerHeader, DrawerTrigger } from '@/components/ui/drawer'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import type { RouterInputs } from '@/trpc/shared'
+import { DEFAULT_SORT_BY, DEFAULT_SORT_ORDER } from '@/utils/constants'
 import { SortDesc } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 
-function SortDrawer() {
+type SortBy = RouterInputs["product"]["all"]["sortBy"]
+type SortOrder = RouterInputs["product"]["all"]["sortOrder"]
 
-  const router = useRouter()
-  const params = useSearchParams()
+interface SearchParams {
+  search?: string;
+  sortBy: SortBy;
+  sortOrder: SortOrder;
+  model?: string;
+  category?: string;
+  brand?: string;
+}
+
+function SortDrawer({
+  params,
+  onSortChange,
+}: {
+  params: SearchParams,
+  onSortChange: (sortBy: SortBy, sortOrder: SortOrder) => void
+}) {
+
   const [isOpen, setIsOpen] = useState(false)
-  const [sortBy, setSortBy] = useState<string | undefined>(params.get('sortBy') ?? 'name')
-  const [sortOrder, setSortOrder] = useState<string | undefined>(params.get('sortOrder') ?? 'asc')
+  const [sortBy, setSortBy] = useState<SortBy>(params.sortBy ?? DEFAULT_SORT_BY)
+  const [sortOrder, setSortOrder] = useState<SortOrder>(params.sortOrder ?? DEFAULT_SORT_ORDER)
 
-  const q = new URLSearchParams(params.toString())
-  const query = useMemo(() => {
-    if (sortBy) q.set('sortBy', sortBy)
-    if (sortOrder) q.set('sortOrder', sortOrder)
-    return q.toString()
-  }, [sortBy, sortOrder])
+  let s = undefined
+  if(sortBy === "createdAt" && sortOrder === "desc") s = "newest"
+  if(sortBy === "createdAt" && sortOrder === "asc") s = "oldest"
+  if(sortBy === "price" && sortOrder === "asc") s = "low-price"
+  if(sortBy === "price" && sortOrder === "desc") s = "high-price"
+
+  const [selected, setSelected] = useState(s)
 
   return (
     <Drawer open={isOpen} onOpenChange={setIsOpen}>
@@ -28,7 +46,7 @@ function SortDrawer() {
       </DrawerTrigger>
       <DrawerContent className="p-5">
         <DrawerHeader>
-            <RadioGroup onValueChange={(value) => {
+            <RadioGroup defaultValue={selected} onValueChange={(value) => {
                 if(value === 'newest'){
                   setSortOrder('desc')
                   setSortBy('createdAt')
@@ -42,6 +60,7 @@ function SortDrawer() {
                   setSortOrder('desc')
                   setSortBy('price')
                 }
+                setSelected(value)
             }}>
               <label htmlFor="newest" className="flex items-center gap-2 border px-4 py-2">
                 <RadioGroupItem id="newest" value='newest'/>
@@ -63,14 +82,15 @@ function SortDrawer() {
         </DrawerHeader>
         <DrawerFooter className="w-full py-5">
           <Button size="lg" className="w-full" onClick={() => {
-            router.push(`/products?${query}`)
+            onSortChange(sortBy, sortOrder)
             setIsOpen(false)
           }}>
             Apply
           </Button>
           <Button size="lg" variant="outline" className="w-full" onClick={() => {
+            onSortChange(undefined, undefined)
+            setSelected(undefined)
             setIsOpen(false)
-            setSortBy(undefined)
           }}>
             Clear
           </Button>

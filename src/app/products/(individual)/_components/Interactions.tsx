@@ -24,14 +24,16 @@ function Interactions({ product, liked }: { product: ProductsPayloadIncluded, li
 
   const share = async () => {
     try {
+      {/*  -------- TODO: Change the url when shifting to production ---- */}
       await navigator.share({
         title: "Check out this product on RECOMM",
         text: product.title,
-        url: `https://recomm.in/products/${product.slug}`,
+        url: `https://recomm.vercel.app/products/${product.slug}`,
       });
     } catch (err) {
       try {
-        await navigator.clipboard.writeText(`https://recomm.in/products/${product.slug}`);
+      {/*  -------- TODO: Change the url when shifting to production ---- */}
+        await navigator.clipboard.writeText(`https://recomm.vercel.app/products/${product.slug}`);
         toast.success("Link copied");
       } catch (err) {
         toast.error("Failed to copy link");

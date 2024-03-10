@@ -38,7 +38,7 @@ const MobileCategoryBar = () => {
   const [parentId, setParentId] = useState<string | undefined>(undefined);
   const [parentSlug, setParentSlug] = useState<string | undefined>(undefined);
 
-  const list = api.category.allWithoutPayload.useQuery({
+  const list = api.category.all.useQuery({
     parentId: parentId,
     state: selectedState,
   });

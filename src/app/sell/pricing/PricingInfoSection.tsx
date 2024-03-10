@@ -24,6 +24,16 @@ export default function PricingInfoSection({ model }: PricingInfoSectionProps) {
       <div className="flex flex-col gap-6">
         <Label className="flex flex-col gap-2">
           <span>Set the Selling price for your {model.name}</span>
+
+          {model.maximumPrice !== 0 && (
+            <span className="mb-4">
+              We Recommand the price between&nbsp;
+              <span className="font-bold">{model.minimumPrice}</span>
+              &nbsp;and&nbsp;
+              <span className="font-bold">{model.maximumPrice}</span>
+            </span>
+          )}
+
           <Input
             type="number"
             placeholder="Enter"

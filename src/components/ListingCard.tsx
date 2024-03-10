@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import Link from "next/link";
 import { type ProductsPayloadIncluded } from "@/types/prisma";
@@ -11,17 +11,16 @@ import { useRouter } from "next/navigation";
 
 interface ListingCardProps {
   product: ProductsPayloadIncluded;
-  heart: boolean;
+  heart?: boolean;
   refresh?: () => void;
 }
 
 const ListingCard: React.FC<ListingCardProps> = ({ product, heart }) => {
-
   const { mutate: add } = api.product.addToFavorites.useMutation();
   const { mutate: remove } = api.product.removeFromFavorites.useMutation();
   const router = useRouter();
 
-  const [isFav, setIsFav] = useState(heart);
+  const [isFav, setIsFav] = useState(heart ?? false);
 
   const toggle = async () => {
     if (isFav) remove({ productId: product.id });
@@ -33,9 +32,11 @@ const ListingCard: React.FC<ListingCardProps> = ({ product, heart }) => {
 
   return (
     <div className="relative flex w-full flex-col">
-      <div onClick={toggle}>
-        <HeartUI clicked={isFav.toString()} />
-      </div>
+      {heart !== undefined && (
+        <div onClick={toggle}>
+          <HeartUI clicked={isFav} />
+        </div>
+      )}
       <Link href={`/products/${product.slug}`} className="group cursor-pointer">
         <div className="aspect-square w-full overflow-hidden rounded-xl border shadow-md transition-shadow duration-300 ease-in-out group-hover:shadow-lg">
           <Image
@@ -47,7 +48,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ product, heart }) => {
           />
         </div>
         <div className="px-2">
-          <p className="text-lg truncate font-semibold">{product.model.name}</p>
+          <p className="truncate text-lg font-semibold">{product.model.name}</p>
           <p className="font-semibold">₹ {product.price}</p>
         </div>
       </Link>
