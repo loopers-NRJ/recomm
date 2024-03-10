@@ -58,7 +58,7 @@ const WishCard: FC<WishCardProps> = ({ wish }) => {
             variant="default" size="sm" 
             className="w-full disabled:text-muted-foreground disabled:bg-muted disabled:border-2"
           >
-            <Link href={`/products?model=${wish.model?.slug}`}> View </Link>
+            <Link href={`/products?model=${wish.model?.slug}&price=${wish.lowerBound}_${wish.upperBound}`}> View </Link>
           </Button>
           <Button 
             onClick={() => handleDelete(wish.id)} 

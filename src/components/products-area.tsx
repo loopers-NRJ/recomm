@@ -15,6 +15,7 @@ interface Props {
   model?: string;
   category?: string;
   brand?: string;
+  price?: string
 }
 
 const Products: React.FC<Props> = ({
@@ -24,6 +25,7 @@ const Products: React.FC<Props> = ({
   model,
   category,
   brand,
+  price,
 }) => {
   const selectedState = useClientSelectedState((selected) => selected.state);
 
@@ -43,11 +45,16 @@ const Products: React.FC<Props> = ({
   });
   const modelId = modelData?.id ?? undefined;
 
+  const range = price ? price.split("_") : undefined
+  const min = range ? parseInt(range[0] ?? "10"): 10
+  const max = range ? parseInt(range[1] ?? "10000"): 10000
+
   const { data, isLoading, isError } = api.product.all.useInfiniteQuery(
     {
       search,
       sortBy,
       sortOrder,
+      price: range ? { min, max } : undefined,
       modelId,
       categoryId,
       brandId,
