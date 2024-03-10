@@ -113,7 +113,7 @@ export function AddressCard({
   enableSelecting?: true;
 }) {
   return (
-    <Label className="h-32 min-w-72 shrink-0 px-1">
+    <Label className="h-32 min-w-72 w-full max-w-96 shrink-0 px-1">
       <div
         className={cn(
           "flex h-full w-full items-center justify-between gap-1 overflow-clip rounded-md border bg-gray-100 py-2 pe-4 ps-3",

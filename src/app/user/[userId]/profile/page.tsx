@@ -39,11 +39,18 @@ const ProfilePage = AuthenticatedPage<ProfilePageParams>(async ({ params, sessio
                 {userData.email}
               </p>
             </div>
-            <div>
+            <div className="flex gap-2">
               {currentUser && currentUser.id === userData.id ? (
-                <LogoutButton />
+                <>
+                  <Button size="sm" asChild>
+                    <Link href={`/user/${currentUser.id}/profile/update`}>
+                      Edit Profile
+                    </Link>
+                  </Button>
+                  <LogoutButton />
+                </>
               ) : (
-                <Link href="https://wa.me/7397379958"><Button>Contact Seller</Button></Link>
+                <Button asChild><Link href="https://wa.me/7397379958">Contact Seller</Link></Button>
               )}
             </div>
           </div>

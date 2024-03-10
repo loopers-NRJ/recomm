@@ -30,8 +30,8 @@ import { addressSchema } from "@/utils/validation";
 import { errorHandler } from "@/utils/errorHandler";
 
 interface FormProps {
-  userData: User;
-  callbackUrl: string;
+  userData?: User;
+  callbackUrl?: string;
 }
 
 const detailsFormSchema = addressSchema.extend({
@@ -48,7 +48,7 @@ const DetailsForm = ({ userData, callbackUrl }: FormProps) => {
     onSuccess: (result) => {
       if (typeof result === "string") return toast.error(result);
       toast.success("Saved Successfully!");
-      router.push(callbackUrl);
+      if(callbackUrl) router.push(callbackUrl);
     },
     onError: errorHandler,
   });
