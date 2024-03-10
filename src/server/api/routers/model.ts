@@ -129,6 +129,108 @@ export const modelRouter = createTRPCRouter({
         };
       },
     ),
+  all: publicProcedure
+    .input(
+      z.object({
+        search: z.string().trim().default(""),
+        limit: z
+          .number()
+          .int()
+          .positive()
+          .max(MAXIMUM_LIMIT)
+          .default(DEFAULT_LIMIT),
+        sortOrder: z.enum(["asc", "desc"]).default(DEFAULT_SORT_ORDER),
+        sortBy: z
+          .enum([
+            "name",
+            "createdAt",
+            "createdBy",
+            "updatedAt",
+            "updatedBy",
+            "brand",
+            "category",
+            "active",
+          ])
+          .default(DEFAULT_SORT_BY),
+        cursor: idSchema.optional(),
+        categoryId: idSchema.optional(),
+        brandId: idSchema.optional(),
+        state: z.enum(states),
+      }),
+    )
+    .query(
+      async ({
+        input: {
+          limit,
+          search,
+          sortBy,
+          sortOrder,
+          brandId,
+          categoryId,
+          cursor,
+          state,
+        },
+        ctx: { prisma, isAdminPage },
+      }) => {
+        const models = await prisma.model.findMany({
+          where: {
+            category: {
+              id: categoryId,
+              active: isAdminPage ? undefined : true,
+            },
+            active: isAdminPage ? undefined : true,
+            brandId,
+            brand: {
+              active: isAdminPage ? undefined : true,
+            },
+            name: {
+              contains: search,
+            },
+            createdState: state,
+          },
+          take: limit,
+          skip: cursor ? 1 : undefined,
+          cursor: cursor
+            ? {
+                id: cursor,
+              }
+            : undefined,
+          orderBy: [
+            sortBy === "brand"
+              ? {
+                  brand: {
+                    name: sortOrder,
+                  },
+                }
+              : sortBy === "category"
+                ? {
+                    category: {
+                      name: sortOrder,
+                    },
+                  }
+                : sortBy === "createdBy"
+                  ? {
+                      createdBy: {
+                        name: sortOrder,
+                      },
+                    }
+                  : sortBy === "updatedBy"
+                    ? {
+                        updatedBy: {
+                          name: sortOrder,
+                        },
+                      }
+                    : {
+                        [sortBy]: sortOrder,
+                      },
+          ],
+        });
+        return {
+          models,
+          nextCursor: models[limit - 1]?.id,
+        };
+      },
+    ),
   byId: publicProcedure
     .input(z.object({ modelId: idSchema.nullish() }))
     .query(async ({ input: { modelId: id }, ctx: { prisma } }) => {
@@ -151,11 +253,9 @@ export const modelRouter = createTRPCRouter({
     .input(z.object({ modelSlug: z.string().min(1).max(255) }))
     .query(async ({ input: { modelSlug: slug }, ctx: { prisma } }) => {
       return await prisma.model.findUnique({
-        select: {
-          id: true,
-        },
         where: {
-          slug,
+          slug: slug,
+          active: true,
         },
       });
     }),

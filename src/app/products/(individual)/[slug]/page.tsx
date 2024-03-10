@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Interactions from "../_components/Interactions";
 import ReportButton from "../_components/ReportButton";
+import { notFound } from "next/navigation";
 
 function lastSeen(lastActive: Date | null) {
   if (!lastActive) {
@@ -51,13 +52,19 @@ interface ProductPageParams {
 async function ProductPage({ params }: { params: ProductPageParams }) {
   const session = await getServerAuthSession();
   const product = await api.product.bySlug.query({ productSlug: params.slug });
-  const fav = await api.user.favorites.query({}).then((res) => res.favoritedProducts.find((fav) => fav.id === product.id))
+
+  if (!product.active) return notFound();
+
+  let fav = undefined
+  if(session && session.user){
+      fav = await api.user.favorites.query({}).then((res) => res.favoritedProducts.find((fav) => fav.id === product.id))
+  }
 
   return (
     <>
       <Carousel opts={{ loop: true }} className="min-w-xs w-full">
         <CarouselContent>
-          {product.images?.map((image, i) => (
+          {product.images.map((image, i) => (
             <CarouselItem key={i} className="pl-0">
               <Image
                 src={image.url}
@@ -120,6 +127,16 @@ async function ProductPage({ params }: { params: ProductPageParams }) {
                   {choice.question.questionContent}
                 </AccordionTrigger>
                 <AccordionContent>{choice.value}</AccordionContent>
+              </AccordionItem>
+            );
+          })}
+          {product.answers.map((answer, i) => {
+            return (
+              <AccordionItem value={answer.id} key={i}>
+                <AccordionTrigger>
+                  {answer.question.questionContent}
+                </AccordionTrigger>
+                <AccordionContent>{answer.answerContent}</AccordionContent>
               </AccordionItem>
             );
           })}

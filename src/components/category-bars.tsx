@@ -90,10 +90,7 @@ const MobileCategoryBar = () => {
                   createQueryString(searchParams, "category", parentSlug),
               )
             : list.data?.categories.map((category, i) => (
-                <li
-                  key={i}
-                  className="text-md rounded-lg border p-3 font-medium"
-                >
+                <li key={i} className="text-md rounded-lg border p-3 font-medium" >
                   {category.parentCategoryId == null ? (
                     <span
                       className="flex w-full justify-between"
@@ -110,14 +107,7 @@ const MobileCategoryBar = () => {
                     <Link
                       className="flex w-full justify-between"
                       key={category.id}
-                      href={
-                        "/products?" +
-                        createQueryString(
-                          searchParams,
-                          "category",
-                          category.slug,
-                        )
-                      }
+                      href={ "/products?" + createQueryString(searchParams, "category", category.slug) }
                     >
                       {category.name}
                       <ArrowRight />
