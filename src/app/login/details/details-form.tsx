@@ -88,7 +88,10 @@ const DetailsForm = ({
         if (typeof result2 === "string") return toast.error(result2);
       }
       toast.success("Saved Successfully!");
-      if (callbackUrl) return router.push(callbackUrl);
+      if (callbackUrl){
+        router.refresh();
+        return router.push(callbackUrl);
+      } 
       return router.push("/");
     } catch (error) {
       if (error instanceof TRPCClientError) {

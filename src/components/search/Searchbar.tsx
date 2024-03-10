@@ -16,7 +16,7 @@ const Search = () => {
         value={searchKey}
         onKeyDown={(e) => {
           if (e.nativeEvent.key === "Enter") {
-            router.push(`/?search=${searchKey}`);
+            router.push(`/products?search=${searchKey}`);
             setSearchKey(undefined);
           }
         }}

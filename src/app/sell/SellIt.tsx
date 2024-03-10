@@ -36,7 +36,7 @@ function Alert({ count }:{count: number}) {
     </AlertDialog>
 }
 
-export default function Sellit({count} : {count: number}) {
+export default function Sellit({count, alert} : {count: number, alert: boolean}) {
   const [parentCategorySlug, setParentCaregorySlug] = useQueryState(
     "category",
     parseAsString,
@@ -89,7 +89,7 @@ export default function Sellit({count} : {count: number}) {
   } else {
     return (
       <>
-      <Alert count={count} />
+      {alert && <Alert count={count} />}
       <CategoryPicker
         categories={categories}
         featuredCategories={featuredCategories}

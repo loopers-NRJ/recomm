@@ -4,28 +4,27 @@ import { type Address } from "@prisma/client";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
-import { Cross1Icon } from "@radix-ui/react-icons";
 import { api } from "@/trpc/react";
 import Loading from "./Loading";
 import ServerError from "./ServerError";
 import toast from "react-hot-toast";
 import { errorHandler } from "@/utils/errorHandler";
-import { Loader2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 type AddressListProps = {
   enableDeleting?: boolean;
 } & (
-  | {
+    | {
       enableSelecting?: false;
     }
-  | {
+    | {
       enableSelecting: true;
       selectedAddress: Address | undefined;
       onSelectedAddressChange: (address: Address) => void;
     }
-);
+  );
 
 export default function AddressList(props: AddressListProps) {
   const addresses = api.address.all.useQuery();
@@ -69,7 +68,7 @@ export default function AddressList(props: AddressListProps) {
             props.onSelectedAddressChange(address);
           }
         }}
-        className="flex max-h-80 overflow-auto"
+        className="flex flex-col"
       >
         {addresses.data.map((address) => (
           <AddressCard
@@ -86,7 +85,7 @@ export default function AddressList(props: AddressListProps) {
     );
   }
   return (
-    <RadioGroup className="flex max-h-80 overflow-auto">
+    <div className="flex flex-col">
       {addresses.data.map((address) => (
         <AddressCard
           address={address}
@@ -96,7 +95,7 @@ export default function AddressList(props: AddressListProps) {
           enableDeleting={props.enableDeleting ?? false}
         />
       ))}
-    </RadioGroup>
+    </div>
   );
 }
 
@@ -116,16 +115,8 @@ export function AddressCard({
   enableSelecting?: true;
 }) {
   return (
-    <Label className="h-32 w-full min-w-72 max-w-96 shrink-0 px-1">
-      <div
-        className={cn(
-          "flex h-full w-full items-center justify-between gap-1 overflow-clip rounded-md border bg-gray-100 py-2 pe-4 ps-3",
-          {
-            "shadow-xl": isSelected,
-            "shadow-md": !isSelected,
-          },
-        )}
-      >
+    <div className="flex items-center justify-between p-5 border rounded-lg bg-white mb-1 shadow-md" >
+      <Label className="flex items-center w-full">
         {enableSelecting && (
           <div className="px-3">
             <RadioGroupItem value={address.id} />
@@ -149,22 +140,22 @@ export function AddressCard({
           </div>
         </div>
 
-        {enableDeleting && (
-          <Button
-            variant="ghost"
-            size="sm"
-            title="Delete"
-            onClick={handleDelete}
-            className="h-6 w-6 p-0"
-          >
-            {isDeleting ? (
-              <Loader2 className="animate-spin" />
-            ) : (
-              <Cross1Icon className="text-red-600" />
-            )}
-          </Button>
-        )}
-      </div>
-    </Label>
+      </Label>
+      {enableDeleting && (
+        <Button
+          variant="ghost"
+          size="sm"
+          title="Delete"
+          onClick={handleDelete}
+          className="h-6 w-6 p-0"
+        >
+          {isDeleting ? (
+            <Loader2 className="animate-spin" />
+          ) : (
+            <Trash2 className="text-red-600" />
+          )}
+        </Button>
+      )}
+    </div>
   );
 }
