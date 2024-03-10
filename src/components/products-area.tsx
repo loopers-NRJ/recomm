@@ -6,6 +6,7 @@ import { type SortOrder } from "@/utils/constants";
 import ListingCard from "@/components/ListingCard";
 import LoadingProducts from "@/components/loading/LoadingProducts";
 import { type RouterInputs } from "@/trpc/shared";
+import { motion } from "framer-motion";
 
 interface Props {
   search?: string;
@@ -27,12 +28,12 @@ const Products: React.FC<Props> = ({
   const selectedState = useClientSelectedState((selected) => selected.state);
 
   const { data: categoryData } = api.category.bySlug.useQuery({ categorySlug: category ?? "dummy" });
-  const categoryId = typeof categoryData!== "string" ? categoryData?.id : undefined;
+  const categoryId = typeof categoryData !== "string" ? categoryData?.id : undefined;
 
   const { data: brandData } = api.brand.bySlug.useQuery({ brandSlug: brand ?? "dummy" });
   const brandId = brandData?.id ?? undefined;
 
-  const { data: modelData } = api.model.bySlug.useQuery({ modelSlug: model?? "dummy" });
+  const { data: modelData } = api.model.bySlug.useQuery({ modelSlug: model ?? "dummy" });
   const modelId = modelData?.id ?? undefined;
 
   const { data, isLoading, isError } = api.product.all.useInfiniteQuery(
@@ -67,30 +68,37 @@ const Products: React.FC<Props> = ({
 
   const products = data?.pages.map((page) => page.products).flat() ?? [];
 
-  if (isError){
+  if (isError) {
     return <div>Something went wrong...</div>;
-  } 
-
-  if (isLoading) {
-    return <LoadingProducts />; 
   }
 
-  if (!isLoading && products.length == 0){
+  if (isLoading) {
+    return <LoadingProducts />;
+  }
+
+  if (!isLoading && products.length == 0) {
     return (
       <div className="flex h-[500px] justify-center pt-10 font-semibold" >
         No Products Available
       </div>
     );
-  } 
+  }
   return (
-      <div className="product-area mb-32 grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6">
+    <>
+      <motion.div
+        variants={{ hidden: { opacity: 0 }, show: { opacity: 1, transition: { duration: 0.5, staggerChildren: 0.03 } } }}
+        initial="hidden"
+        animate="show"
+        className="product-area mb-32 grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6"
+      >
         {products.map((product) => (
-          <ListingCard 
-            key={product.id} 
-            heart={favourites.includes(product.id)} 
-            product={product} />)) 
+          <ListingCard
+            key={product.id}
+            heart={favourites.includes(product.id)}
+            product={product} />))
         }
-      </div>
+      </motion.div>
+    </>
   );
 };
 
