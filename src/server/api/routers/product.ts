@@ -14,7 +14,12 @@ import {
 } from "@prisma/client";
 
 import slugify from "@/lib/slugify";
-import { productsPayload, singleProductPayload, states } from "@/types/prisma";
+import {
+  type ProductsPayloadIncluded,
+  productsPayload,
+  singleProductPayload,
+  states,
+} from "@/types/prisma";
 import {
   DEFAULT_LIMIT,
   DEFAULT_SORT_BY,
@@ -68,8 +73,22 @@ export const productRouter = createTRPCRouter({
           cursor,
           state,
         },
-        ctx: { prisma, isAdminPage },
+        ctx: { prisma, isAdminPage, session },
       }) => {
+        const favorites: string[] = [];
+        if (session.user) {
+          const favoritedProducts = await prisma.product.findMany({
+            where: {
+              favoritedUsers: {
+                some: {
+                  id: session.user.id,
+                },
+              },
+              active: true,
+            },
+          });
+          favorites.push(...favoritedProducts.map((product) => product.id));
+        }
         const products = await prisma.product.findMany({
           where: {
             modelId,
@@ -136,8 +155,20 @@ export const productRouter = createTRPCRouter({
           ],
           include: productsPayload.include,
         });
+
+        type ProductWithIsFavorite = ProductsPayloadIncluded & {
+          isFavorite: boolean;
+        };
+        const productsWithIsFavorite = products.map<ProductWithIsFavorite>(
+          (product) => {
+            return favorites.includes(product.id)
+              ? { ...product, isFavorite: true }
+              : { ...product, isFavorite: false };
+          },
+        );
+
         return {
-          products,
+          products: productsWithIsFavorite,
           nextCursor: products[limit - 1]?.id,
         };
       },

@@ -4,12 +4,12 @@ import { setup, styled } from "goober";
 setup(createElement);
 
 export interface HeartProp {
-  clicked: string;
+  clicked: boolean;
 }
 
 /* eslint-disable */
 const HeartUI = (styled("div") as any)(({ clicked }: Partial<HeartProp>) => [
-/* eslint-enable */
+  /* eslint-enable */
   {
     width: "70px",
     height: "70px",
@@ -23,7 +23,7 @@ const HeartUI = (styled("div") as any)(({ clicked }: Partial<HeartProp>) => [
     zIndex: "5",
     scale: "0.7",
   },
-  clicked=="true" && {
+  clicked && {
     backgroundPosition: `-2814px center`,
     transition: "background 1s steps(28)",
   },

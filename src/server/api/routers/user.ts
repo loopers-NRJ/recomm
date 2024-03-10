@@ -53,8 +53,8 @@ export const userRouter = createTRPCRouter({
 
           cursor: cursor
             ? {
-              id: cursor,
-            }
+                id: cursor,
+              }
             : undefined,
           where: {
             OR: [
@@ -71,20 +71,20 @@ export const userRouter = createTRPCRouter({
             ],
             role: role
               ? {
-                id: role,
-              }
+                  id: role,
+                }
               : undefined,
           },
           orderBy: [
             sortBy === "role"
               ? {
-                role: {
-                  name: sortOrder,
-                },
-              }
+                  role: {
+                    name: sortOrder,
+                  },
+                }
               : {
-                [sortBy]: sortOrder,
-              },
+                  [sortBy]: sortOrder,
+                },
           ],
           skip: cursor ? 1 : undefined,
           include: {
@@ -129,13 +129,13 @@ export const userRouter = createTRPCRouter({
           data: {
             role: roleId
               ? {
-                connect: {
-                  id: roleId,
-                },
-              }
+                  connect: {
+                    id: roleId,
+                  },
+                }
               : {
-                disconnect: true,
-              },
+                  disconnect: true,
+                },
           },
           include: { role: true },
         });
@@ -201,8 +201,8 @@ export const userRouter = createTRPCRouter({
           skip: cursor ? 1 : undefined,
           cursor: cursor
             ? {
-              id: cursor,
-            }
+                id: cursor,
+              }
             : undefined,
           orderBy: [
             {
@@ -251,10 +251,10 @@ export const userRouter = createTRPCRouter({
             },
             active: true,
             model: {
-              OR: [ 
-                { name: { contains: search, }, },
-                { brand: { name: { contains: search, } } },
-                { category: { name: { contains: search, }, }, },
+              OR: [
+                { name: { contains: search } },
+                { brand: { name: { contains: search } } },
+                { category: { name: { contains: search } } },
               ],
             },
           },
@@ -262,25 +262,25 @@ export const userRouter = createTRPCRouter({
           skip: cursor ? 1 : undefined,
           cursor: cursor
             ? {
-              id: cursor,
-            }
+                id: cursor,
+              }
             : undefined,
           orderBy: [
             sortBy === "name"
               ? {
-                model: {
-                  name: sortOrder,
-                },
-              }
-              : sortBy === "sellerName"
-                ? {
-                  seller: {
+                  model: {
                     name: sortOrder,
                   },
                 }
+              : sortBy === "sellerName"
+                ? {
+                    seller: {
+                      name: sortOrder,
+                    },
+                  }
                 : {
-                  [sortBy]: sortOrder,
-                },
+                    [sortBy]: sortOrder,
+                  },
           ],
           include: productsPayload.include,
         });
@@ -348,25 +348,25 @@ export const userRouter = createTRPCRouter({
           skip: cursor ? 1 : undefined,
           cursor: cursor
             ? {
-              id: cursor,
-            }
+                id: cursor,
+              }
             : undefined,
           orderBy: [
             sortBy === "name"
               ? {
-                model: {
-                  name: sortOrder,
-                },
-              }
-              : sortBy === "sellerName"
-                ? {
-                  seller: {
+                  model: {
                     name: sortOrder,
                   },
                 }
+              : sortBy === "sellerName"
+                ? {
+                    seller: {
+                      name: sortOrder,
+                    },
+                  }
                 : {
-                  [sortBy]: sortOrder,
-                },
+                    [sortBy]: sortOrder,
+                  },
           ],
           include: productsPayload.include,
         });
@@ -433,25 +433,25 @@ export const userRouter = createTRPCRouter({
           skip: cursor ? 1 : undefined,
           cursor: cursor
             ? {
-              id: cursor,
-            }
+                id: cursor,
+              }
             : undefined,
           orderBy: [
             sortBy === "name"
               ? {
-                model: {
-                  name: sortOrder,
-                },
-              }
-              : sortBy === "sellerName"
-                ? {
-                  seller: {
+                  model: {
                     name: sortOrder,
                   },
                 }
+              : sortBy === "sellerName"
+                ? {
+                    seller: {
+                      name: sortOrder,
+                    },
+                  }
                 : {
-                  [sortBy]: sortOrder,
-                },
+                    [sortBy]: sortOrder,
+                  },
           ],
           include: productsPayload.include,
         });
@@ -525,31 +525,31 @@ export const userRouter = createTRPCRouter({
           skip: cursor ? 1 : undefined,
           cursor: cursor
             ? {
-              id: cursor,
-            }
+                id: cursor,
+              }
             : undefined,
           orderBy: [
             sortBy === "brandName"
               ? {
-                brand: {
-                  name: sortOrder,
-                },
-              }
-              : sortBy === "categoryName"
-                ? {
-                  category: {
+                  brand: {
                     name: sortOrder,
                   },
                 }
-                : sortBy === "modelName"
-                  ? {
-                    model: {
+              : sortBy === "categoryName"
+                ? {
+                    category: {
                       name: sortOrder,
                     },
                   }
+                : sortBy === "modelName"
+                  ? {
+                      model: {
+                        name: sortOrder,
+                      },
+                    }
                   : {
-                    [sortBy]: sortOrder,
-                  },
+                      [sortBy]: sortOrder,
+                    },
           ],
           include: wishPayload.include,
         });
@@ -559,4 +559,47 @@ export const userRouter = createTRPCRouter({
         };
       },
     ),
+  productSellingCount: protectedProcedure.query(
+    async ({ ctx: { prisma, session, logger } }) => {
+      const { user } = session;
+
+      const configurations = await prisma.appConfiguration.findMany({
+        where: {
+          key: {
+            in: ["productSellingDurationInDays", "productSellingCount"],
+          },
+        },
+      });
+      const sellingDurationStr = configurations.find(
+        (config) => config.key === "productSellingDurationInDays",
+      )?.value;
+      const sellingCountStr = configurations.find(
+        (config) => config.key === "productSellingCount",
+      )?.value;
+      if (sellingDurationStr === undefined || sellingCountStr === undefined) {
+        await logger.error({
+          state: "common",
+          message:
+            "Product selling configurations not found, check the configuration names",
+          detail: JSON.stringify({ userId: user.id }),
+        });
+        return "Something went wrong" as const;
+      }
+
+      const sellingDuration = Number(sellingDurationStr);
+      const sellingCount = Number(sellingCountStr);
+
+      if (isNaN(sellingDuration) || isNaN(sellingCount)) {
+        await logger.error({
+          state: "common",
+          message:
+            "Product selling configurations are not numbers. Enter a valid configurations",
+          detail: JSON.stringify({ userId: user.id }),
+        });
+        return "Something went wrong" as const;
+      }
+
+      return sellingCount - user.productsCreatedCountWithinTimeFrame;
+    },
+  ),
 });
