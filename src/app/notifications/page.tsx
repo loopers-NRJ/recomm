@@ -30,8 +30,13 @@
 // }
 // export default AuthenticatedPage(NotificationPage, "/notifications");
 
+import Container from "@/components/Container";
 import React from "react";
 
 export default function page() {
-  return <div>page</div>;
+  return <Container>
+    <main className="flex justify-center items-center font-medium text-sm h-52">
+      No notifications...
+    </main>
+  </Container>;
 }
