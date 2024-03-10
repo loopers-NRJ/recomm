@@ -96,6 +96,9 @@ export const productRouter = createTRPCRouter({
               },
               active: true,
             },
+            select: {
+              id: true,
+            },
           });
           favorites.push(...favoritedProducts.map((product) => product.id));
         }
@@ -381,9 +384,7 @@ export const productRouter = createTRPCRouter({
                 }
               : undefined,
             images: {
-              createMany: {
-                data: images,
-              },
+              connect: images,
             },
             seller: {
               connect: {

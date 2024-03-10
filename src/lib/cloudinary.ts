@@ -13,7 +13,10 @@ cloudinary.config({
   secure: true,
 });
 
-export const uploadToCloudinary = (fileArrayBuffer: ArrayBuffer) => {
+export const uploadToCloudinary = (
+  fileArrayBuffer: ArrayBuffer,
+  userId: string,
+) => {
   return new Promise<Image>((resolve, reject) => {
     cloudinary.uploader
       .upload_stream({ resource_type: "image" }, (error, response) => {
@@ -29,6 +32,7 @@ export const uploadToCloudinary = (fileArrayBuffer: ArrayBuffer) => {
           width: response.width,
           height: response.height,
           resource_type: response.resource_type,
+          userId,
         };
         return resolve(image);
       })

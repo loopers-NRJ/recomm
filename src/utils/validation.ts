@@ -29,6 +29,7 @@ export const imageInputs = z.object({
   width: z.number().int(),
   height: z.number().int(),
   resource_type: z.enum(["image", "video", "raw", "auto"]),
+  userId: idSchema,
 });
 
 export type Image = z.infer<typeof imageInputs>;

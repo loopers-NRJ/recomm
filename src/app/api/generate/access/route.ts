@@ -1,6 +1,7 @@
 import { getServerAuthSession } from "@/server/auth";
 import { prisma } from "@/server/db";
 import { AccessType } from "@prisma/client";
+import { notFound } from "next/navigation";
 
 const predefinedAdmins = [
   "karthick72002@gmail.com",
@@ -16,9 +17,7 @@ const predefinedAdmins = [
 export async function GET() {
   const session = await getServerAuthSession();
   if (!session || !predefinedAdmins.includes(session.user.email ?? "")) {
-    return new Response("Unauthorized", {
-      status: 401,
-    });
+    return notFound();
   }
   try {
     for (const type of Object.values(AccessType)) {

@@ -33,16 +33,21 @@ import { TRPCClientError } from "@trpc/client";
 interface FormProps {
   userData?: User;
   callbackUrl?: string;
+  addressOnly?: boolean;
 }
 
 const detailsFormSchema = addressSchema.extend({
-  fullName: z.string(),
-  phoneNumber: z.string(),
+  fullName: z.string().trim().optional(),
+  phoneNumber: z.string().trim().optional(),
 });
 
 type DetailsFormValues = z.infer<typeof detailsFormSchema>;
 
-const DetailsForm = ({ userData, callbackUrl }: FormProps) => {
+const DetailsForm = ({
+  userData,
+  callbackUrl,
+  addressOnly = false,
+}: FormProps) => {
   const { state } = useClientSelectedState();
   const router = useRouter();
   const createAddress = api.address.create.useMutation();
@@ -68,14 +73,20 @@ const DetailsForm = ({ userData, callbackUrl }: FormProps) => {
 
   const handleSubmit = form.handleSubmit(async (data) => {
     try {
-      const [result1, result2] = await Promise.all([
-        createAddress.mutateAsync(data),
-        updateUserMobile.mutateAsync({
-          mobile: data.phoneNumber,
-        }),
-      ]);
-      if (typeof result1 === "string") return toast.error(result1);
-      if (typeof result2 === "string") return toast.error(result2);
+      if (addressOnly) {
+        const result = await createAddress.mutateAsync(data);
+        if (typeof result === "string") return toast.error(result);
+      } else {
+        const [result1, result2] = await Promise.all([
+          createAddress.mutateAsync(data),
+          updateUserMobile.mutateAsync({
+            name: data.fullName,
+            mobile: data.phoneNumber,
+          }),
+        ]);
+        if (typeof result1 === "string") return toast.error(result1);
+        if (typeof result2 === "string") return toast.error(result2);
+      }
       toast.success("Saved Successfully!");
       if (callbackUrl) return router.push(callbackUrl);
       return router.push("/");
@@ -89,21 +100,40 @@ const DetailsForm = ({ userData, callbackUrl }: FormProps) => {
   return (
     <Form {...form}>
       <form onSubmit={handleSubmit} className="space-y-3">
-        <FormField
-          control={form.control}
-          name="fullName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Full Name
-                <FormControl>
-                  <Input type="text" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormLabel>
-            </FormItem>
-          )}
-        />
+        {!addressOnly && (
+          <>
+            <FormField
+              control={form.control}
+              name="fullName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Full Name
+                    <FormControl>
+                      <Input type="text" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormLabel>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="phoneNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Phone Number
+                    <FormControl>
+                      <Input type="tel" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormLabel>
+                </FormItem>
+              )}
+            />
+          </>
+        )}
         <FormField
           control={form.control}
           name="addressLine1"
@@ -202,21 +232,6 @@ const DetailsForm = ({ userData, callbackUrl }: FormProps) => {
                 Postal Code
                 <FormControl>
                   <Input type="number" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormLabel>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="phoneNumber"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Phone Number
-                <FormControl>
-                  <Input type="tel" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormLabel>

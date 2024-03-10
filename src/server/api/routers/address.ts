@@ -81,6 +81,14 @@ export const addressRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(z.object({ id: idSchema }))
     .mutation(async ({ ctx: { prisma, session }, input }) => {
+      const products = await prisma.product.findMany({
+        where: {
+          addressId: input.id,
+        }
+      });
+      if (products.length > 0) {
+        return "You can't delete an address that is being used by a product" as const;
+      }
       const address = await prisma.address.delete({
         where: {
           id: input.id,
