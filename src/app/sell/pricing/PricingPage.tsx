@@ -166,7 +166,7 @@ function AddressPicker() {
     state.setSelectedAddress,
   ]);
   return (
-    <section className="flex w-full max-w-2xl flex-col">
+    <section className="flex flex-col w-full max-w-2xl max-h-72 overflow-scroll">
       <h1 className="my-4 text-center text-2xl font-bold">Address Section</h1>
       <AddressList
         enableSelecting

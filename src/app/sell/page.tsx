@@ -11,7 +11,7 @@ const SellitPage = AuthorizedPage(async () => {
     return <h1>You have No listings left</h1>;
   }
 
-  return <Sellit count={count} />
+  return <Sellit count={count} alert={true} />
 }, "/sell");
 
 
