@@ -33,7 +33,10 @@ export default function AddressList(props: AddressListProps) {
     onMutate: ({ id }) => {
       setDeletingAddress(id);
     },
-    onSuccess: async () => {
+    onSuccess: async (data) => {
+      if (typeof data === "string") {
+        return toast.error(data);
+      }
       await addresses.refetch();
       toast.success("Address deleted successfully");
     },
@@ -113,7 +116,7 @@ export function AddressCard({
   enableSelecting?: true;
 }) {
   return (
-    <Label className="h-32 min-w-72 w-full max-w-96 shrink-0 px-1">
+    <Label className="h-32 w-full min-w-72 max-w-96 shrink-0 px-1">
       <div
         className={cn(
           "flex h-full w-full items-center justify-between gap-1 overflow-clip rounded-md border bg-gray-100 py-2 pe-4 ps-3",
