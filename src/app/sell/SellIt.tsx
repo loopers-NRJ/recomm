@@ -8,7 +8,35 @@ import { api } from "@/trpc/react";
 import { parseAsString, useQueryState } from "next-usequerystate";
 import PostingForm from "@/app/sell/PostingForm";
 
-export default function Sellit() {
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+
+function Alert({ count }:{count: number}) {
+  return <AlertDialog defaultOpen>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Remainder: {count} more to go...</AlertDialogTitle>
+          <AlertDialogDescription>
+            You cannot post anymore once you reach the limit
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel className="ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0">Cancel</AlertDialogCancel>
+          <AlertDialogAction className="bg-sky-500">Continue</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+}
+
+export default function Sellit({count} : {count: number}) {
   const [parentCategorySlug, setParentCaregorySlug] = useQueryState(
     "category",
     parseAsString,
@@ -60,6 +88,8 @@ export default function Sellit() {
     return <PostingForm selectedCategorySlug={parentCategorySlug} />;
   } else {
     return (
+      <>
+      <Alert count={count} />
       <CategoryPicker
         categories={categories}
         featuredCategories={featuredCategories}
@@ -70,6 +100,7 @@ export default function Sellit() {
         hasNextPage={categoryApi.hasNextPage}
         fetchNextPage={() => void categoryApi.fetchNextPage()}
       />
+      </>
     );
   }
 }
