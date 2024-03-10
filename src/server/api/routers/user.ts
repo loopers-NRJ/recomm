@@ -285,7 +285,7 @@ export const userRouter = createTRPCRouter({
           include: productsPayload.include,
         });
         return {
-          favoritedProducts,
+          favoritedProducts: favoritedProducts.map((product) => ({...product, isFavorite: true})),
           nextCursor: favoritedProducts[limit - 1]?.id,
         };
       },
