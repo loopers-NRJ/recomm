@@ -271,7 +271,7 @@ export default function PostingForm({
     return (
       <>
         <AdditionalInfoSection model={modelApi.data} />
-        <ImageUploadSection model={modelApi.data} />
+        <ImageUploadSection modelName={modelApi.data.name} />
       </>
     );
   }, [
@@ -282,6 +282,11 @@ export default function PostingForm({
     atomicAnswers,
     multipleChoiceAnswers,
   ]);
+
+  const productSellingCountApi = api.user.productSellingCount.useQuery();
+  // TODO: @iam-naveen {productSellingCountApi.data} is the count.
+  // remove this log when you finish the implementation.
+  console.log({ count: productSellingCountApi.data });
 
   if (categoryApi.isError || modelApi.isError || formError.serverError) {
     return (

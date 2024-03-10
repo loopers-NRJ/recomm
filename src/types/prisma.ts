@@ -77,6 +77,8 @@ export const modelsPayload = Prisma.validator<Prisma.ModelDefaultArgs>()({
   include: {
     brand: true,
     category: true,
+    createdBy: true,
+    updatedBy: true,
   },
 });
 
@@ -114,6 +116,8 @@ export const CategoryPayload = Prisma.validator<Prisma.CategoryDefaultArgs>()({
         image: true,
       },
     },
+    createdBy: true,
+    updatedBy: true,
     _count: {
       select: {
         subCategories: true,
@@ -129,6 +133,7 @@ export type CategoryPayloadIncluded = Prisma.CategoryGetPayload<
 export const BrandPayload = Prisma.validator<Prisma.BrandDefaultArgs>()({
   include: {
     createdBy: true,
+    updatedBy: true,
   },
 });
 

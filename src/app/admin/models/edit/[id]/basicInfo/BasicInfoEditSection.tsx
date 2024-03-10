@@ -4,6 +4,7 @@ import {
   ModelCategoryEdit,
   ModelCreatedStateEdit,
   ModelNameEdit,
+  ModelPriceRangeEdit,
 } from "./Editors";
 
 export default function BasicInfoEditSection({ model }: { model: Model }) {
@@ -15,6 +16,8 @@ export default function BasicInfoEditSection({ model }: { model: Model }) {
       <ModelCategoryEdit model={model} />
       {/* edit model brand */}
       <ModelBrandEdit model={model} />
+      {/* edit model price range */}
+      <ModelPriceRangeEdit model={model} />
       {/* edit model created State */}
       <ModelCreatedStateEdit model={model} />
     </section>

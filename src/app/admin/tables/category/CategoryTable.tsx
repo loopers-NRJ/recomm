@@ -34,7 +34,7 @@ import { AdminButtonLink } from "@/components/common/ButtonLink";
 import toast from "react-hot-toast";
 import { errorHandler } from "@/utils/errorHandler";
 
-type SortBy = OmitUndefined<RouterInputs["category"]["all"]["sortBy"]>;
+type SortBy = OmitUndefined<RouterInputs["category"]["allForAdmin"]["sortBy"]>;
 
 export default function CategoryTable() {
   const router = useRouter();
@@ -68,7 +68,7 @@ export default function CategoryTable() {
 
   const selectedState = useAdminSelectedState((selected) => selected.state);
 
-  const categoriesApi = api.category.all.useInfiniteQuery(
+  const categoriesApi = api.category.allForAdmin.useInfiniteQuery(
     {
       parentId,
       parentSlug,
@@ -319,6 +319,32 @@ export default function CategoryTable() {
           />
         ),
         accessorFn: (row) => row.updatedAt.toLocaleString("en-US"),
+      },
+      {
+        id: "createdBy",
+        header: () => (
+          <TableHeader
+            title="createdBy"
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
+            setSortOrder={(sortOrder) => void setSortOrder(sortOrder)}
+          />
+        ),
+        accessorFn: (row) => row.createdBy.name,
+      },
+      {
+        id: "updatedBy",
+        header: () => (
+          <TableHeader
+            title="updatedBy"
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            setSortBy={(sortBy) => void setSortBy(sortBy)}
+            setSortOrder={(sortOrder) => void setSortOrder(sortOrder)}
+          />
+        ),
+        accessorFn: (row) => row.updatedBy?.name ?? "N/A",
       },
       {
         id: "edit",
