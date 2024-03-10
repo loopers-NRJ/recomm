@@ -14,6 +14,7 @@ import { logRouter } from "./routers/log";
 import { couponRouter } from "./routers/coupon";
 import { reportRouter } from "./routers/report";
 import { configurationsRouter } from "./routers/configurations";
+import { inboxRouter } from "./routers/inbox";
 
 /**
  * This is the primary router for your server.
@@ -33,6 +34,7 @@ export const appRouter = createTRPCRouter({
   search: searchRouter,
   log: logRouter,
   coupon: couponRouter,
+  inbox: inboxRouter,
   report: reportRouter,
   configuration: configurationsRouter,
 });
