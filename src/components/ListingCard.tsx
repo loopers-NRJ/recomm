@@ -11,7 +11,7 @@ import { motion } from "framer-motion";
 import HeartButton from "./heart/HeartButton";
 
 interface ListingCardProps {
-  product: ProductsPayloadIncluded & { isFavourite?: boolean };
+  product: ProductsPayloadIncluded & { isFavorite?: boolean };
   refresh?: () => void;
 }
 
@@ -20,7 +20,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ product }) => {
   const { mutate: remove } = api.product.removeFromFavorites.useMutation();
   const router = useRouter();
 
-  const [isFav, setIsFav] = useState(product.isFavourite ?? false);
+  const [isFav, setIsFav] = useState(product.isFavorite ?? false);
 
   const toggle = async () => {
     if (isFav) remove({ productId: product.id });
@@ -35,7 +35,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ product }) => {
       variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }}
       className="relative flex w-full flex-col"
     >
-      { product.isFavourite !== undefined &&
+      { product.isFavorite !== undefined &&
       <div className="absolute right-2 top-2 flex h-10 w-10 scale-75 items-center justify-center">
           <HeartButton onClick={toggle} starred={isFav} />
       </div> }

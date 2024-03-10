@@ -16,6 +16,7 @@ import { type WishPayloadIncluded } from "@/types/prisma";
 import Link from "next/link";
 import { Loader2, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 interface WishCardProps {
   wish: WishPayloadIncluded;
@@ -37,7 +38,11 @@ const WishCard: FC<WishCardProps> = ({ wish }) => {
   };
 
   return (
-    <Card className="flex justify-between items-center">
+    <motion.div 
+      className="w-full"
+      variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }}
+    >
+      <Card className="flex w-full justify-between items-center">
         <CardHeader className="p-4">
           <CardTitle className="font-semibold text-xl">
             {brand} {model}
@@ -47,23 +52,24 @@ const WishCard: FC<WishCardProps> = ({ wish }) => {
             {category}
           </CardDescription>
         </CardHeader>
-      <CardFooter className="p-4 gap-2">
-        <Button 
-          disabled={status !== WishStatus.available} 
-          variant="default" size="sm" 
-          className="w-full disabled:text-muted-foreground disabled:bg-muted disabled:border-2"
-        >
-          <Link href={`/products?model=${wish.model?.slug}`}> View </Link>
-        </Button>
-        <Button 
-          onClick={() => handleDelete(wish.id)} 
-          size="sm" variant={"destructive"} 
-          className="w-full"
-        >
-          { isLoading ? <Loader2 className="animate-spin w-4 h-4" /> : <Trash2 className="w-4 h-4" /> }
-        </Button>
-      </CardFooter>
-    </Card>
+        <CardFooter className="p-4 gap-2">
+          <Button 
+            disabled={status !== WishStatus.available} 
+            variant="default" size="sm" 
+            className="w-full disabled:text-muted-foreground disabled:bg-muted disabled:border-2"
+          >
+            <Link href={`/products?model=${wish.model?.slug}`}> View </Link>
+          </Button>
+          <Button 
+            onClick={() => handleDelete(wish.id)} 
+            size="sm" variant={"destructive"} 
+            className="w-full"
+          >
+            { isLoading ? <Loader2 className="animate-spin w-4 h-4" /> : <Trash2 className="w-4 h-4" /> }
+          </Button>
+        </CardFooter>
+      </Card>
+    </motion.div>
   );
 };
 
