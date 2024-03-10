@@ -44,7 +44,7 @@ const FavouritesPage = AuthenticatedPage<undefined, FavouritePageSearchParams>(
       </Container>
     );
   },
-  "/favorites",
+  "/favourites",
 );
 
 export default FavouritesPage;
