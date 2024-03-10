@@ -124,6 +124,7 @@ model User {
     productsCreatedCountWithinTimeFrame  Int       @default(0)
     firstProductCreatedAtWithinTimeFrame DateTime?
 
+    // images             Image[]
     accounts          Account[]
     sessions          Session[]
     listedProducts    Product[] @relation("listedProducts")
@@ -574,6 +575,8 @@ model Image {
     category         FeaturedCategory?
     product          Product?          @relation(fields: [productId], references: [id], onDelete: Cascade)
     productId        String?
+    // user             User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
+    // userId           String?
 
     @@index([productId])
 }
