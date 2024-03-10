@@ -1,6 +1,6 @@
 "use client";
 
-import HeartUI from "@/components/heart";
+import HeartButton from "@/components/heart/HeartButton";
 import { refreshFavs } from "@/server/actions";
 import { api } from "@/trpc/react";
 import type { ProductsPayloadIncluded } from "@/types/prisma";
@@ -50,8 +50,8 @@ function Interactions({ product, liked }: { product: ProductsPayloadIncluded, li
         <MessageCircle />
       </Link>
       <MapPin />
-      <div className="relative w-5" onClick={toggle}>
-        <HeartUI clicked={isFav.toString()} className="translate-x-1/2 -translate-y-1/2" />
+      <div className="relative flex items-center justify-center w-6">
+        <HeartButton onClick={toggle} starred={isFav} />
       </div>
       <div onClick={share}><Share2 /></div>
     </ul>
