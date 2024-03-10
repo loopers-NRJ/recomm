@@ -42,6 +42,14 @@ function AddWish() {
         return toast.error("Enter the price range");
       }
 
+      if (+lowerBound > +upperBound) {
+        return toast.error("Lower bound should be less than upper bound");
+      }
+
+      if (+lowerBound === 0 || +upperBound === 0) {
+        return toast.error("Price input should be non zero");
+      }
+
       const result = await createWish({
         modelId: selectedModel.id,
         lowerBound: +lowerBound,
