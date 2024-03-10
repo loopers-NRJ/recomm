@@ -283,6 +283,11 @@ export default function PostingForm({
     multipleChoiceAnswers,
   ]);
 
+  const productSellingCountApi = api.user.productSellingCount.useQuery();
+  // TODO: @iam-naveen {productSellingCountApi.data} is the count.
+  // remove this log when you finish the implementation.
+  console.log({ count: productSellingCountApi.data });
+
   if (categoryApi.isError || modelApi.isError || formError.serverError) {
     return (
       <Container className="py-20 text-center">

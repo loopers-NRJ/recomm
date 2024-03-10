@@ -6,7 +6,6 @@ import { type SortOrder } from "@/utils/constants";
 import ListingCard from "@/components/ListingCard";
 import LoadingProducts from "@/components/loading/LoadingProducts";
 import { type RouterInputs } from "@/trpc/shared";
-import { useSession } from "next-auth/react";
 
 interface Props {
   search?: string;
@@ -57,23 +56,6 @@ const Products: React.FC<Props> = ({
       getNextPageParam: (lastItem) => lastItem.nextCursor,
     },
   );
-  const { data: session } = useSession();
-  const { data: favData } = api.user.favorites.useQuery(
-    {
-      search,
-      sortOrder,
-      modelId,
-      categoryId,
-      brandId,
-    },
-    {
-      enabled: !!session?.user,
-      getNextPageParam: (lastItem) => lastItem.nextCursor,
-    },
-  );
-
-  const favourites =
-    favData?.favoritedProducts.map((product) => product.id) ?? [];
 
   const products = data?.pages.map((page) => page.products).flat() ?? [];
 
@@ -97,7 +79,7 @@ const Products: React.FC<Props> = ({
       {products.map((product) => (
         <ListingCard
           key={product.id}
-          heart={favourites.includes(product.id)}
+          heart={product.isFavorite}
           product={product}
         />
       ))}
