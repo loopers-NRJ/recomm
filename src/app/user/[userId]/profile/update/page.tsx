@@ -12,7 +12,7 @@ const UpdatePage = AuthenticatedPage(async ({ params, session }) => {
   return (
     <Container>
       <AddAddressButton />
-      <AddressList enableDeleting />
+      <AddressList enableUpdate enableDeleting />
     </Container>
   );
 });
