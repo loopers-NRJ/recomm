@@ -46,7 +46,7 @@ function Interactions({ product }: { product: ProductsPayloadIncluded & {isFavou
   return (
     <ul className="interactions flex gap-3">
       {/*  -------- RIZWAN's NUMBER :) ---- */}
-      <Link href={`https://wa.me/7397379958`}>
+      <Link href={`https://wa.me/${product.seller.mobile}`}>
         <MessageCircle />
       </Link>
       <MapPin />

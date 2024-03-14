@@ -39,7 +39,7 @@ export default function ProfileCompletedPage<
     }
 
     const addresses = await api.address.all.query();
-    if (addresses.length === 0) {
+    if (addresses.length === 0 || session.user.mobile === null) {
       return permanentRedirect(
         `/login/details?callbackUrl=${encodeURIComponent(callerPath)}`,
       );

@@ -1,8 +1,8 @@
 import { api } from "@/trpc/server";
 import Sellit from "./SellIt";
-import AuthorizedPage from "@/hoc/AuthenticatedPage";
+import ProfileCompletedPage from "@/hoc/ProfileCompletedPage";
 
-const SellitPage = AuthorizedPage(async () => {
+const SellitPage = ProfileCompletedPage(async () => {
   const count = await api.user.productSellingCount.query();
 
   if (typeof count === "string") return <h1>{count}</h1>;

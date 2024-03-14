@@ -3,7 +3,7 @@ import AuthenticatedPage from "@/hoc/AuthenticatedPage";
 import DetailsForm from "./details-form";
 
 const DetailsPage = AuthenticatedPage<undefined, { callbackUrl?: string }>(
-  async ({ session, searchParams: { callbackUrl = "/" } }) => {
+  async ({ session, searchParams: { callbackUrl } }) => {
     return (
       <Container>
         <h1 className="mb-4 text-3xl font-bold">Complete Your Profile</h1>
