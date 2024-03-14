@@ -585,6 +585,32 @@ export const userRouter = createTRPCRouter({
     async ({ ctx: { prisma, session, logger } }) => {
       const { user } = session;
 
+      const role = await prisma.role.findUnique({
+        where: {
+          id: user.roleId ?? undefined,
+        },
+        select: {
+          accesses: true,
+        },
+      });
+
+      if (role === null) {
+        await logger.error({
+          state: "common",
+          message: "Role not found",
+          detail: JSON.stringify({ userId: user.id }),
+        });
+        return "Something went wrong" as const;
+      }
+
+      const hasPrimeSellerAccess = role.accesses.some(
+        (access) => access.type === AccessType.primeSeller,
+      );
+
+      if (hasPrimeSellerAccess) {
+        return { isPrimeSeller: true, count: 0 };
+      }
+
       const configurations = await prisma.appConfiguration.findMany({
         where: {
           key: {
@@ -621,7 +647,7 @@ export const userRouter = createTRPCRouter({
         return "Something went wrong" as const;
       }
 
-      return sellingCount - user.productsCreatedCountWithinTimeFrame;
+      return { isPrimeSeller: false, count: sellingCount - user.productsCreatedCountWithinTimeFrame };
     },
   ),
 });
