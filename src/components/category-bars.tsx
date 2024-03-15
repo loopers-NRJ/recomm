@@ -80,12 +80,12 @@ const MobileCategoryBar = () => {
 };
 
 export function SeeAll(
-  { 
-    state, 
+  {
+    state,
     searchParams,
     expanded,
-    setExpanded 
-  }: { 
+    setExpanded
+  }: {
     state: $Enums.State,
     searchParams: ReadonlyURLSearchParams,
     expanded: boolean,
@@ -164,8 +164,8 @@ const CategoryBox: React.FC<CategoryBoxProps> = ({ image, label, link }) => {
       href={link}
       className="flex h-full w-full flex-col items-center justify-center rounded-xl border bg-white shadow-md"
     >
-      <Image src={image} width={40} height={40} alt={label} className="m-1" />
-      <label className="text-sm font-medium text-center w-full px-2">{label}</label>
+      <Image src={image} width={50} height={50} alt={label} className="m-1" />
+      <label className="text-xs font-medium text-center w-full px-2">{label}</label>
     </Link>
   );
 };
