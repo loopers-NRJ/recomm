@@ -21,7 +21,7 @@ export type PageWithAddress<
   SearchParams = DefaultParams,
 > = (
   props: PagePropsWithAddress<Params, SearchParams>,
-) => ReactNode | Promise<ReactNode>;
+) => ReactNode;
 
 export default function ProfileCompletedPage<
   Params = DefaultParams,

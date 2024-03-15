@@ -21,4 +21,4 @@ export interface PageProps<
 
 export type Page<Params = DefaultParams, SearchParams = DefaultParams> = (
   props: PageProps<Params, SearchParams>,
-) => ReactNode | Promise<ReactNode>;
+) => ReactNode;
