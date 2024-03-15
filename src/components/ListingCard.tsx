@@ -5,7 +5,6 @@ import { type ProductsPayloadIncluded } from "@/types/prisma";
 import Image from "next/image";
 import { useState } from "react";
 import { api } from "@/trpc/react";
-import { refreshFavs } from "@/server/actions";
 import { motion } from "framer-motion";
 import HeartButton from "./heart/HeartButton";
 
@@ -24,7 +23,6 @@ const ListingCard: React.FC<ListingCardProps> = ({ product }) => {
     if (isFav) remove({ productId: product.id });
     else add({ productId: product.id });
     setIsFav(!isFav);
-    await refreshFavs();
   };
 
   return (

@@ -35,19 +35,20 @@ function ContactEditArea({ user }: { user: User }) {
                                              className="h-8"
                                         />
                                    </div>
-                                   {updateInfo.isLoading ?  
+                                   {updateInfo.isLoading ?
                                         <Loader2 className='w-6 h-6 animate-spin' /> :
                                         <Check
                                              className="text-green-800 w-6 h-6"
                                              onClick={async () => {
                                                   await updateInfo
-                                                  .mutateAsync({ mobile })
-                                                  .then(() => {
-                                                       setMobileEditing(false)
-                                                  })
-                                                  .catch((err) => {
-                                                       toast.error("Invalid input")
-                                                  })                                             }}
+                                                       .mutateAsync({ mobile })
+                                                       .then(() => {
+                                                            setMobileEditing(false)
+                                                       })
+                                                       .catch(() => {
+                                                            toast.error("Invalid input")
+                                                       })
+                                             }}
                                         />
                                    }
                               </div> :

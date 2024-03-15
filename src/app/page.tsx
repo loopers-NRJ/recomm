@@ -1,18 +1,12 @@
 import Container from "@/components/Container";
-import { DEVICE_TYPE_HEADER_NAME } from "@/utils/constants";
-import Products from "@/components/products-area";
-import { headers } from "next/headers";
-import {
-  MobileCategoryBar,
-  DesktopCategoryBar,
-} from "@/components/category-bars";
+import { MobileCategoryBar } from "@/components/category-bars";
+import Products from "./products";
 
-export default function Home() {
-  const device = headers().get(DEVICE_TYPE_HEADER_NAME);
+export default async function Home() {
   return (
     <main>
       <Container className="flex flex-col">
-        {device === "mobile" ? <MobileCategoryBar /> : <DesktopCategoryBar />}
+        <MobileCategoryBar />
         <Products />
       </Container>
     </main>

@@ -13,6 +13,7 @@ import { useState } from "react";
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import type { $Enums } from "@prisma/client";
+import LoadingFeatured from "./loading/LoadingFeatured";
 
 function createQueryString(
   searchParams: ReadonlyURLSearchParams,
@@ -37,6 +38,10 @@ const MobileCategoryBar = () => {
   const catergoriesQuery = api.category.featured.useQuery({
     state: selectedState,
   });
+
+  if (catergoriesQuery.isLoading) {
+    return <LoadingFeatured />;
+  }
 
   return (
     <>
