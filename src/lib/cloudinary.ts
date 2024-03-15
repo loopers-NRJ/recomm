@@ -5,6 +5,7 @@ import { env } from "@/env";
 import type { Image } from "@/utils/validation";
 import { getLogger } from "@/utils/logger";
 import { prisma } from "@/server/db";
+import { Readable } from "stream";
 
 cloudinary.config({
   cloud_name: env.CLOUDINARY_CLOUD_NAME,
@@ -13,30 +14,42 @@ cloudinary.config({
   secure: true,
 });
 
-export const uploadToCloudinary = (
-  fileArrayBuffer: ArrayBuffer,
-  userId: string,
-) => {
+const fileToReadableStream = async (file: File) => {
+  const arrayBuffer = await file.arrayBuffer();
+  const b64 = Buffer.from(arrayBuffer).toString("base64");
+  const dataURI = "data:" + file.type + ";base64," + b64;
+  return Readable.from(dataURI);
+};
+
+export const uploadToCloudinary = (file: File, userId: string) => {
   return new Promise<Image>((resolve, reject) => {
-    cloudinary.uploader
-      .upload_stream({ resource_type: "image" }, (error, response) => {
-        if (error ?? !response) {
-          return reject(error);
-        }
-        const image: Image = {
-          publicId: response.public_id,
-          url: response.url,
-          secureUrl: response.secure_url,
-          originalFilename: response.original_filename,
-          format: response.format,
-          width: response.width,
-          height: response.height,
-          resource_type: response.resource_type,
-          userId,
-        };
-        return resolve(image);
-      })
-      .end(Buffer.from(fileArrayBuffer));
+    try {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { resource_type: "image" },
+        (error, response) => {
+          if (error ?? !response) {
+            return reject(error);
+          }
+          const image: Image = {
+            publicId: response.public_id,
+            url: response.url,
+            secureUrl: response.secure_url,
+            originalFilename: file.name,
+            format: response.format,
+            width: response.width,
+            height: response.height,
+            resource_type: response.resource_type,
+            userId,
+          };
+          return resolve(image);
+        },
+      );
+      fileToReadableStream(file)
+        .then((readableStream) => readableStream.pipe(uploadStream))
+        .catch(reject);
+    } catch (error) {
+      return reject(error);
+    }
   });
 };
 

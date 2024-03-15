@@ -17,10 +17,13 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
+import { useRouter } from "next/navigation";
 
-function Alert({ count }:{count: number}) {
-  return <AlertDialog defaultOpen>
+function Alert({ count }: { count: number }) {
+  const router = useRouter();
+  return (
+    <AlertDialog defaultOpen>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Remainder: {count} more to go...</AlertDialogTitle>
@@ -29,11 +32,17 @@ function Alert({ count }:{count: number}) {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel className="ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0">Cancel</AlertDialogCancel>
+          <AlertDialogCancel
+            className="ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+            onClick={() => router.back()}
+          >
+            Cancel
+          </AlertDialogCancel>
           <AlertDialogAction className="bg-sky-500">Continue</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+  );
 }
 
 export default function Sellit({count, isPrimeSeller} : {count: number, isPrimeSeller: boolean}) {

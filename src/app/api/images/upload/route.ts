@@ -8,6 +8,7 @@ import { type Session } from "next-auth";
 
 export async function POST(request: Request) {
   let session: Session;
+  const logger = getLogger(prisma);
   try {
     const authSession = await getServerAuthSession();
     if (!authSession) {
@@ -18,10 +19,10 @@ export async function POST(request: Request) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  let files: File[];
+  let files;
   try {
     const form = await request.formData();
-    files = form.getAll("images") as File[];
+    files = form.getAll("images");
     if (files.length === 0) {
       return new Response("No images found", { status: 400 });
     }
@@ -38,27 +39,34 @@ export async function POST(request: Request) {
   }
 
   const uploadedImages: Image[] = [];
-  try {
-    for (const file of files) {
-      if (!(file instanceof File)) {
-        return new Response("Invalid File", { status: 400 });
-      }
-      const image = await uploadToCloudinary(
-        await file.arrayBuffer(),
-        session.user.id,
-      );
-      uploadedImages.push(image);
+  for (const file of files) {
+    if (!(file instanceof File)) {
+      return new Response("Invalid File", { status: 400 });
     }
+    try {
+      const image = await uploadToCloudinary(file, session.user.id);
+      uploadedImages.push(image);
+    } catch (error) {
+      await logger.error({
+        message: "Error uploading images",
+        detail: JSON.stringify(error),
+        state: "common",
+      });
+      return new Response("Something went wrong", { status: 500 });
+    }
+  }
+
+  try {
     await prisma.image.createMany({
       data: uploadedImages,
     });
-    return new Response(JSON.stringify(uploadedImages));
   } catch (error) {
-    await getLogger(prisma).error({
+    await logger.error({
       message: "Error uploading images",
       detail: JSON.stringify(error),
       state: "common",
     });
     return new Response("Something went wrong", { status: 500 });
   }
+  return new Response(JSON.stringify(uploadedImages));
 }
