@@ -165,13 +165,13 @@ interface CategoryBoxProps {
 
 const CategoryBox: React.FC<CategoryBoxProps> = ({ image, label, link }) => {
   return (
-    <Link
+    <a
       href={link}
       className="flex h-full w-full flex-col items-center justify-center rounded-xl border bg-white shadow-md"
     >
       <Image src={image} width={50} height={50} alt={label} className="m-1" />
       <label className="text-xs font-medium text-center w-full px-2">{label}</label>
-    </Link>
+    </a>
   );
 };
 

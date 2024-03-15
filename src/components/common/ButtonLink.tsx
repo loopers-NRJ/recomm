@@ -42,7 +42,7 @@ export interface ButtonProps
 export const ButtonLink = React.forwardRef<HTMLAnchorElement, ButtonProps>(
   ({ className, variant, size, href, ...props }, ref) => {
     return (
-      <Link
+      <a
         href={href}
         className={
           "h-full w-full min-w-max flex-col justify-center rounded-lg px-6 md:flex-row md:gap-3 " +
