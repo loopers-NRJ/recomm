@@ -9,12 +9,14 @@ import Loading from "./Loading";
 import ServerError from "./ServerError";
 import toast from "react-hot-toast";
 import { errorHandler } from "@/utils/errorHandler";
-import { Loader2, Trash2 } from "lucide-react";
+import { Edit, Loader2, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { cn } from "@/lib/utils";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTrigger } from "../ui/drawer";
+import DetailsForm from "@/app/login/details/details-form";
 
 type AddressListProps = {
   enableDeleting?: boolean;
+  enableUpdate?: boolean
 } & (
     | {
       enableSelecting?: false;
@@ -75,10 +77,10 @@ export default function AddressList(props: AddressListProps) {
             address={address}
             key={address.id}
             onDelete={() => deleteAddress.mutate({ id: address.id })}
-            isSelected={props.selectedAddress?.id === address.id}
             isDeleting={deletingAddress === address.id}
             enableDeleting={props.enableDeleting ?? false}
             enableSelecting
+            enableUpdate={props.enableUpdate ?? false}
           />
         ))}
       </RadioGroup>
@@ -93,6 +95,8 @@ export default function AddressList(props: AddressListProps) {
           onDelete={() => deleteAddress.mutate({ id: address.id })}
           isDeleting={deletingAddress === address.id}
           enableDeleting={props.enableDeleting ?? false}
+          enableUpdate={props.enableUpdate ?? false}
+          afterUpdate={() => addresses.refetch()}
         />
       ))}
     </div>
@@ -103,9 +107,10 @@ export function AddressCard({
   address,
   onDelete: handleDelete,
   isDeleting,
-  isSelected,
   enableDeleting,
   enableSelecting,
+  enableUpdate,
+  afterUpdate,
 }: {
   address: Address;
   onDelete: () => void;
@@ -113,6 +118,8 @@ export function AddressCard({
   isSelected?: boolean;
   enableDeleting: boolean;
   enableSelecting?: true;
+  enableUpdate?: boolean;
+  afterUpdate?: () => void;
 }) {
   return (
     <div className="flex items-center justify-between p-5 border rounded-lg bg-white mb-1 shadow-md" >
@@ -141,21 +148,60 @@ export function AddressCard({
         </div>
 
       </Label>
-      {enableDeleting && (
+      <div className="flex flex-col gap-3">
+        {enableUpdate && (
+          <EditAddress address={address} afterUpdate={afterUpdate} />
+        )}
+        {enableDeleting && (
+          <Button
+            variant="ghost"
+            size="sm"
+            title="Delete"
+            onClick={handleDelete}
+            className="h-6 w-6 p-0"
+          >
+            {isDeleting ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              <Trash2 className="text-red-600" />
+            )}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function EditAddress({ address, afterUpdate }: { address: Address, afterUpdate?: () => void }) {
+  const pathname = window.location.pathname;
+  const [open, setOpen] = useState(false);
+  return (
+    <Drawer open={open} onOpenChange={setOpen}>
+      <DrawerTrigger asChild>
         <Button
           variant="ghost"
           size="sm"
-          title="Delete"
-          onClick={handleDelete}
+          title="Update"
           className="h-6 w-6 p-0"
         >
-          {isDeleting ? (
-            <Loader2 className="animate-spin" />
-          ) : (
-            <Trash2 className="text-red-600" />
-          )}
+          <Edit className="text-sky-500" />
         </Button>
-      )}
-    </div>
-  );
+      </DrawerTrigger>
+      <DrawerContent>
+        <DrawerHeader>Update Address</DrawerHeader>
+        <div className="p-5">
+          <DetailsForm
+            edit
+            addressOnly
+            address={address}
+            afterSave={() => {
+              afterUpdate?.();
+              setOpen(false);
+            }}
+            callbackUrl={pathname}
+          />
+        </div>
+      </DrawerContent>
+    </Drawer>
+  )
 }

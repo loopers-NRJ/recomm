@@ -13,6 +13,7 @@ import { useState } from "react";
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import type { $Enums } from "@prisma/client";
+import LoadingFeatured from "./loading/LoadingFeatured";
 
 function createQueryString(
   searchParams: ReadonlyURLSearchParams,
@@ -37,6 +38,10 @@ const MobileCategoryBar = () => {
   const catergoriesQuery = api.category.featured.useQuery({
     state: selectedState,
   });
+
+  if (catergoriesQuery.isLoading) {
+    return <LoadingFeatured />;
+  }
 
   return (
     <>
@@ -80,12 +85,12 @@ const MobileCategoryBar = () => {
 };
 
 export function SeeAll(
-  { 
-    state, 
+  {
+    state,
     searchParams,
     expanded,
-    setExpanded 
-  }: { 
+    setExpanded
+  }: {
     state: $Enums.State,
     searchParams: ReadonlyURLSearchParams,
     expanded: boolean,
@@ -160,13 +165,13 @@ interface CategoryBoxProps {
 
 const CategoryBox: React.FC<CategoryBoxProps> = ({ image, label, link }) => {
   return (
-    <Link
+    <a
       href={link}
       className="flex h-full w-full flex-col items-center justify-center rounded-xl border bg-white shadow-md"
     >
-      <Image src={image} width={40} height={40} alt={label} className="m-1" />
-      <label className="text-sm font-medium text-center w-full px-2">{label}</label>
-    </Link>
+      <Image src={image} width={50} height={50} alt={label} className="m-1" />
+      <label className="text-xs font-medium text-center w-full px-2">{label}</label>
+    </a>
   );
 };
 

@@ -1,17 +1,18 @@
 import { api } from "@/trpc/server";
 import Sellit from "./SellIt";
-import AuthorizedPage from "@/hoc/AuthenticatedPage";
+import ProfileCompletedPage from "@/hoc/ProfileCompletedPage";
 
-const SellitPage = AuthorizedPage(async () => {
-  const count = await api.user.productSellingCount.query();
+const SellitPage = ProfileCompletedPage(async () => {
+  const data = await api.user.productSellingCount.query();
 
-  if (typeof count === "string") return <h1>{count}</h1>;
+  if (typeof data === "string") return <h1>{data}</h1>;
+  const { isPrimeSeller, count } = data;
 
-  if (count < 1) {
+  if (!isPrimeSeller && count < 1) {
     return <h1>You have No listings left</h1>;
   }
 
-  return <Sellit count={count} alert={true} />
+  return <Sellit {...data} />
 }, "/sell");
 
 

@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import type { User } from "@prisma/client";
+import type { Address, User } from "@prisma/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { states } from "@/types/prisma";
@@ -34,6 +34,9 @@ interface FormProps {
   userData?: User;
   callbackUrl?: string;
   addressOnly?: boolean;
+  afterSave?: () => void;
+  edit?: boolean,
+  address?: Address
 }
 
 const detailsFormSchema = addressSchema.extend({
@@ -45,24 +48,28 @@ type DetailsFormValues = z.infer<typeof detailsFormSchema>;
 
 const DetailsForm = ({
   userData,
+  address,
+  edit,
   callbackUrl,
   addressOnly = false,
+  afterSave,
 }: FormProps) => {
   const { state } = useClientSelectedState();
   const router = useRouter();
   const createAddress = api.address.create.useMutation();
-
   const updateUserMobile = api.user.update.useMutation();
+  const updateAddress = api.address.update.useMutation();
 
   const defaultValues = {
+    tag: address?.tag ?? "",
     fullName: userData?.name ?? "",
-    addressLine1: "",
-    addressLine2: "",
-    city: "",
-    state: state,
-    country: "",
-    postalCode: "",
-    phoneNumber: "",
+    addressLine1: address?.addressLine1 ?? "",
+    addressLine2: address?.addressLine2 ?? "",
+    city: address?.city ?? "",
+    state: address?.state ?? state,
+    country: address?.country ?? "",
+    postalCode: address?.postalCode ?? "",
+    phoneNumber: userData?.mobile ?? "",
   };
 
   const form = useForm<DetailsFormValues>({
@@ -73,8 +80,11 @@ const DetailsForm = ({
 
   const handleSubmit = form.handleSubmit(async (data) => {
     try {
-      if (addressOnly) {
+      if (addressOnly && !edit) {
         const result = await createAddress.mutateAsync(data);
+        if (typeof result === "string") return toast.error(result);
+      } else if (addressOnly && edit) {
+        const result = await updateAddress.mutateAsync({ id: address?.id!, ...data }); // eslint-disable-line
         if (typeof result === "string") return toast.error(result);
       } else {
         const [result1, result2] = await Promise.all([
@@ -88,10 +98,11 @@ const DetailsForm = ({
         if (typeof result2 === "string") return toast.error(result2);
       }
       toast.success("Saved Successfully!");
-      if (callbackUrl){
+      if (callbackUrl) {
+        if (afterSave) return afterSave();
         router.refresh();
         return router.push(callbackUrl);
-      } 
+      }
       return router.push("/");
     } catch (error) {
       if (error instanceof TRPCClientError) {
@@ -137,6 +148,21 @@ const DetailsForm = ({
             />
           </>
         )}
+        <FormField
+          control={form.control}
+          name="tag"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                Tag (Home, Work, etc) - Optional
+                <FormControl>
+                  <Input type="text" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormLabel>
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="addressLine1"
@@ -241,7 +267,7 @@ const DetailsForm = ({
             </FormItem>
           )}
         />
-        <Button type="submit">Save</Button>
+        <Button type="submit">{edit ? "Update" : "Save"}</Button>
       </form>
     </Form>
   );

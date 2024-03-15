@@ -3,7 +3,7 @@ import Container from '@/components/Container';
 import { api } from '@/trpc/server';
 import List from "./list"
 
-const NotificationPage = AuthenticatedPage( async () => {
+const NotificationPage = AuthenticatedPage(async () => {
   const { notifications } = await api.inbox.all.query({});
 
   if (notifications.length == 0) {
@@ -20,7 +20,7 @@ const NotificationPage = AuthenticatedPage( async () => {
     </main>
   </Container>;
 },
-"/notifications"
+  "/notifications"
 )
 
 export default NotificationPage;
