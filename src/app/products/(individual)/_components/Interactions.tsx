@@ -1,7 +1,6 @@
 "use client";
 
 import HeartButton from "@/components/heart/HeartButton";
-import { refreshFavs } from "@/server/actions";
 import { api } from "@/trpc/react";
 import type { ProductsPayloadIncluded } from "@/types/prisma";
 import { MapPin, MessageCircle, Share2 } from "lucide-react";
@@ -19,7 +18,6 @@ function Interactions({ product }: { product: ProductsPayloadIncluded & {isFavou
     if (isFav) remove({ productId: product.id });
     else add({ productId: product.id });
     setIsFav(!isFav);
-    await refreshFavs();
   };
 
   const share = async () => {
@@ -45,7 +43,6 @@ function Interactions({ product }: { product: ProductsPayloadIncluded & {isFavou
 
   return (
     <ul className="interactions flex gap-3">
-      {/*  -------- RIZWAN's NUMBER :) ---- */}
       <Link href={`https://wa.me/${product.seller.mobile}`}>
         <MessageCircle />
       </Link>
