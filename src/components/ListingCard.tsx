@@ -6,7 +6,6 @@ import Image from "next/image";
 import { useState } from "react";
 import { api } from "@/trpc/react";
 import { refreshFavs } from "@/server/actions";
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import HeartButton from "./heart/HeartButton";
 
@@ -18,7 +17,6 @@ interface ListingCardProps {
 const ListingCard: React.FC<ListingCardProps> = ({ product }) => {
   const { mutate: add } = api.product.addToFavorites.useMutation();
   const { mutate: remove } = api.product.removeFromFavorites.useMutation();
-  const router = useRouter();
 
   const [isFav, setIsFav] = useState(product.isFavorite ?? false);
 
@@ -27,7 +25,6 @@ const ListingCard: React.FC<ListingCardProps> = ({ product }) => {
     else add({ productId: product.id });
     setIsFav(!isFav);
     await refreshFavs();
-    router.refresh();
   };
 
   return (
@@ -51,7 +48,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ product }) => {
         </div>
         <div className="px-2">
           <p className="truncate text-lg font-semibold">{product.model.name}</p>
-          <p className="font-semibold">₹ {product.price}</p>
+          <p className="font-semibold">₹ {product.price.toLocaleString("en-in")}</p>
         </div>
       </Link>
     </motion.div>
