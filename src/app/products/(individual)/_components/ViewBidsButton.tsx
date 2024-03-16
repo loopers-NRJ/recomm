@@ -16,9 +16,9 @@ async function ViewBidsButton({ bids }: { bids: Bidding[] }) {
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>
-          <DrawerTitle>Bidders</DrawerTitle>
+          <DrawerTitle className='mb-2'>Bidders</DrawerTitle>
+          <BiddingList biddings={bids} />
         </DrawerHeader>
-        <BiddingList biddings={bids} />
         <DrawerFooter>
           <DrawerClose className='px-4 py-2 rounded-lg bg-primary w-full text-white'> Close </DrawerClose> 
         </DrawerFooter>
