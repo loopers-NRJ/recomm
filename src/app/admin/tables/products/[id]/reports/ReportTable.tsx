@@ -59,6 +59,11 @@ export default function ReportTable({ productId }: { productId: string }) {
     parseAsString.withDefault(""),
   );
 
+  const [openedReportId, setOpenedReportId] = useQueryState(
+    "open",
+    parseAsString.withDefault(""),
+  );
+
   const reportsApi = api.report.all.useInfiniteQuery(
     {
       search,
@@ -122,7 +127,12 @@ export default function ReportTable({ productId }: { productId: string }) {
         id: "Description",
         header: "Description",
         cell: ({ row }) => (
-          <Drawer>
+          <Drawer
+            open={openedReportId === row.original.id}
+            onOpenChange={(open) =>
+              setOpenedReportId(open ? row.original.id : null)
+            }
+          >
             <DrawerTrigger asChild>
               <Button variant="outline">View</Button>
             </DrawerTrigger>

@@ -5,7 +5,6 @@ import { env } from "@/env";
 import type { Image } from "@/utils/validation";
 import { getLogger } from "@/utils/logger";
 import { prisma } from "@/server/db";
-import { Readable } from "stream";
 
 cloudinary.config({
   cloud_name: env.CLOUDINARY_CLOUD_NAME,

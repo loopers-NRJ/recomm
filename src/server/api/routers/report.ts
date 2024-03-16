@@ -1,4 +1,9 @@
-import { AccessType } from "@prisma/client";
+import {
+  AccessType,
+  type PrismaClient,
+  type Report,
+  type User,
+} from "@prisma/client";
 import { createTRPCRouter, getProcedure, protectedProcedure } from "../trpc";
 import { z } from "zod";
 import {
@@ -99,6 +104,8 @@ export const reportRouter = createTRPCRouter({
         },
         include: reportPayload.include,
       });
+
+      void sendReportNotification({ prisma, report, user: session.user });
       return report;
     }),
   delete: getProcedure(AccessType.deleteReport)
@@ -112,3 +119,43 @@ export const reportRouter = createTRPCRouter({
       return true;
     }),
 });
+async function sendReportNotification({
+  prisma,
+  report,
+  user,
+}: {
+  prisma: PrismaClient;
+  report: Report;
+  user: User;
+}) {
+  const admins = await prisma.user.findMany({
+    where: {
+      role: {
+        accesses: {
+          some: {
+            OR: [
+              {
+                type: AccessType.viewReports,
+              },
+              {
+                type: AccessType.deleteReport,
+              },
+            ],
+          },
+        },
+      },
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  await prisma.notification.createMany({
+    data: admins.map((admin) => ({
+      title: "New Report",
+      link: `/admin/tables/products/clttpp6eh00015lwyx1a7ucp9/reports?open=${report.id}`,
+      description: `User '${user.name} reported to a product'`,
+      userId: admin.id,
+    })),
+  });
+}
