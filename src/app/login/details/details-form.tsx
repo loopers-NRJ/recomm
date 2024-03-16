@@ -67,7 +67,7 @@ const DetailsForm = ({
     addressLine2: address?.addressLine2 ?? "",
     city: address?.city ?? "",
     state: address?.state ?? state,
-    country: address?.country ?? "",
+    country: address?.country ?? "India",
     postalCode: address?.postalCode ?? "",
     phoneNumber: userData?.mobile ?? "",
   };
