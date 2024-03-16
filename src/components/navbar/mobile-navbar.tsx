@@ -15,13 +15,7 @@ import { Badge } from "../ui/badge";
 const MobileNavbar = () => {
   const { data: session } = useSession();
 
-  const { data } = api.inbox.all.useQuery({});
-
-  const unread = data?.notifications.filter(n => !n.read).length ?? 0;
-
   const pathname = usePathname();
-  const style =
-    "font-medium border text-md flex items-center justify-center w-fit p-3 rounded-md hover:bg-slate-100";
 
   return (
     <Container className="navbar sticky left-0 top-0 z-10 w-full bg-white">
@@ -40,24 +34,8 @@ const MobileNavbar = () => {
           </Link>
           {/* notification and profile buttons */}
           <div className="flex items-center gap-2">
-            <Link
-              href="/notifications"
-              className={cn(
-                style +
-                (pathname == "/notifications"
-                  ? "border border-sky-500 text-sky-500"
-                  : ""),
-                "rounded-full relative",
-              )}
-            >
-              {unread > 0 && (
-                <Badge className="absolute -top-2 -right-2 bg-sky-500 scale-75 p-3 w-1 h-1 flex items-center justify-center">
-                  {unread}
-                </Badge>
-              )}
-              <Bell className="h-5 w-5" />
-            </Link>
-            {!pathname.endsWith("/profile") && <Profile session={session} />}
+            {session && session.user && <Notification pathname={pathname} />}
+            <Profile session={session} />
           </div>
         </div>
         {/* Search bar and location selector */}
@@ -71,5 +49,34 @@ const MobileNavbar = () => {
     </Container>
   );
 };
+
+export const Notification = ({pathname} : {pathname: string}) => {
+
+  const { data } = api.inbox.all.useQuery({});
+  const unread = data?.notifications.filter(n => !n.read).length ?? 0;
+
+  const style =
+    "font-medium border text-md flex items-center justify-center w-fit p-3 rounded-md hover:bg-slate-100";
+
+  return (
+    <Link
+      href="/notifications"
+      className={cn(
+        style +
+          (pathname == "/notifications"
+            ? "border border-sky-500 text-sky-500"
+            : ""),
+        "rounded-full relative",
+      )}
+    >
+      {unread > 0 && (
+        <Badge className="absolute -top-2 -right-2 bg-sky-500 scale-75 p-3 w-1 h-1 flex items-center justify-center">
+          {unread}
+        </Badge>
+      )}
+      <Bell className="h-5 w-5" />
+    </Link>
+  )
+}
 
 export default MobileNavbar;

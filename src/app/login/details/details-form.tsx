@@ -40,8 +40,8 @@ interface FormProps {
 }
 
 const detailsFormSchema = addressSchema.extend({
-  fullName: z.string().trim().optional(),
-  phoneNumber: z.string().trim().optional(),
+  fullName: z.string().trim(),
+  phoneNumber: z.string().trim()
 });
 
 type DetailsFormValues = z.infer<typeof detailsFormSchema>;
@@ -73,7 +73,7 @@ const DetailsForm = ({
   };
 
   const form = useForm<DetailsFormValues>({
-    resolver: zodResolver(detailsFormSchema),
+    resolver: zodResolver(addressOnly ? addressSchema : detailsFormSchema),
     defaultValues,
     mode: "onChange",
   });

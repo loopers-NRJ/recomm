@@ -17,7 +17,7 @@ const UpdatePage = AuthenticatedPage(async ({ params, session }) => {
   }
 
   return (
-    <Container>
+    <Container className="mb-32">
       <ProfileEditArea user={user} />
       <ContactEditArea user={user} />
       <AddressEditArea />

@@ -12,7 +12,7 @@ function NotificationList({ notifications }: { notifications: Notification[] }) 
 
   const { mutate: read } = api.inbox.markAsRead.useMutation({
     onSuccess: (res) => {
-      router.push(`/products/${res.link}`)
+      router.push(res.link ?? "/")
     },
     onError: errorHandler
   })
@@ -34,7 +34,7 @@ function NotificationList({ notifications }: { notifications: Notification[] }) 
             </div>
           </div>
           <div>
-            <p className="text-sm text-gray-500">{notification.createdAt.toLocaleDateString()}</p>
+            <p className="text-sm text-gray-500">{notification.createdAt.toLocaleDateString("en-in")}</p>
           </div>
         </div>
       ))}
