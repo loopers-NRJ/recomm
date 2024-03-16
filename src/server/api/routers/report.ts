@@ -153,7 +153,7 @@ async function sendReportNotification({
   await prisma.notification.createMany({
     data: admins.map((admin) => ({
       title: "New Report",
-      link: `/admin/tables/products/clttpp6eh00015lwyx1a7ucp9/reports?open=${report.id}`,
+      link: `/admin/tables/products/${report.productId}/reports?open=${report.id}`,
       description: `User '${user.name} reported to a product'`,
       userId: admin.id,
     })),

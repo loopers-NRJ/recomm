@@ -142,6 +142,16 @@ export default function CreateRole() {
             handleCheckedChange={handleCheckedChange}
           />
           <AccordionSection
+            title="coupon"
+            types={[
+              AccessType.createCoupon,
+              AccessType.updateCoupon,
+              AccessType.deleteCoupon,
+            ]}
+            selectedRoles={selectedRoles}
+            handleCheckedChange={handleCheckedChange}
+          />
+          <AccordionSection
             title="configuration"
             types={[
               AccessType.viewAppConfiguration,
