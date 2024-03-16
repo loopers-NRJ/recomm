@@ -60,7 +60,7 @@ export const inboxRouter = createTRPCRouter({
   markAsRead: protectedProcedure
     .input(z.object({ notificationId: idSchema }))
     .mutation(async ({ input, ctx: { prisma, session } }) => {
-      await prisma.notification.update({
+      return await prisma.notification.update({
         where: {
           id: input.notificationId,
           userId: session.user.id,

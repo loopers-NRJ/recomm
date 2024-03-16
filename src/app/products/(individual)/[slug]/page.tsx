@@ -58,11 +58,6 @@ async function ProductPage({ params }: { params: ProductPageParams }) {
 
   if (!product.active) return notFound();
 
-  let fav = undefined
-  if(session && session.user){
-      fav = await api.user.favorites.query({}).then((res) => res.favoritedProducts.find((fav) => fav.id === product.id))
-  }
-
   return (
     <>
       <Carousel opts={{ loop: true }} className="min-w-xs w-full">

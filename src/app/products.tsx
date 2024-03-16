@@ -30,7 +30,7 @@ export default function Products() {
       animate="show"
       className="product-area mb-32 grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6"
     >
-      {productQuery.data?.products.map((product, i) => {
+      {productQuery.data?.products.map((product) => {
         return <ListingCard key={product.id} product={product} />
       })}
     </motion.div>
