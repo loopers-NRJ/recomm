@@ -32,11 +32,11 @@ const BottomBar: FC<BottomBarProps> = () => {
     "rounded-b-none border-b-2 border-b-black md:rounded-lg md:border-none md:bg-slate-200/50";
 
   return (
-    <div className="bottom-bar fixed bottom-0 left-0 z-30 flex h-fit w-full border bg-white p-0">
+    <div className="bottom-bar fixed bottom-0 left-0 z-30 flex w-full border bg-white p-0">
       <ButtonLink
         href="/"
         variant="ghost"
-        className={pathname === "/" ? highlight : ""}
+        className={`${pathname === "/" ? highlight : ""} rounded-none`}
       >
         <span className="text-xl">{HomeIcon}</span>
         <span className="text-xs md:text-sm">Home</span>
@@ -44,7 +44,7 @@ const BottomBar: FC<BottomBarProps> = () => {
       <ButtonLink
         href="/favourites"
         variant="ghost"
-        className={pathname === "/favourites" ? highlight : ""}
+        className={`${pathname === "/favourites" ? highlight : ""} rounded-none`}
       >
         <span className="text-xl">{HeartIcon}</span>
         <span className="text-xs md:text-sm">Favourites</span>
@@ -53,7 +53,7 @@ const BottomBar: FC<BottomBarProps> = () => {
       <ButtonLink
         href="/wishlist"
         variant="ghost"
-        className={pathname === "/wishlist" ? highlight : ""}
+        className={`${pathname === "/wishlist" ? highlight : ""} rounded-none`}
       >
         <span className="text-xl">{WishListIcon}</span>
         <span className="text-xs md:text-sm">Wish It</span>
@@ -62,7 +62,7 @@ const BottomBar: FC<BottomBarProps> = () => {
       <ButtonLink
         href="/sell"
         variant="ghost"
-        className={pathname === "/sell" ? highlight : ""}
+        className={`${pathname === "/sell" ? highlight : ""} rounded-none`}
       >
         <span className="text-xl">{SellIcon}</span>
         <span className="text-xs md:text-sm">Sell It</span>
