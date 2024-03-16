@@ -1,16 +1,13 @@
 "use client"
 import { api } from '@/trpc/react'
-import { ProductsPayloadIncluded } from '@/types/prisma'
+import type { ProductsPayloadIncluded } from '@/types/prisma'
 import { MapPin } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import React from 'react'
 
 function MapInteraction({os, product}: {os: string | null, product: ProductsPayloadIncluded } ) {
-  const router = useRouter()
 
   const { data: address } = api.address.byId.useQuery({ id: product.addressId ?? "" })
-
   if (!address) return null
   
   const location = () => {
