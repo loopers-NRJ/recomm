@@ -23,7 +23,7 @@ const ProfilePage = AuthenticatedPage<ProfilePageParams>(async ({ params, sessio
   }
 
   return (
-    <Container>
+    <Container className="mb-32">
       <main>
         <header className="flex h-full w-full items-center justify-center p-3">
           <Avatar className="h-32 w-32 border shadow-sm">
