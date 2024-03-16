@@ -1,4 +1,5 @@
 "use client"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -54,12 +55,12 @@ function BiddingButton({ bids, roomId }: { bids: Bidding[], roomId: string }) {
         <Button className="bg-sky-400 hover:bg-sky-500 font-bold" size="lg">Bid Your Price</Button>
       </DrawerTrigger>
       <DrawerContent>
-        <DrawerHeader className="text-left">
+        <DrawerHeader>
           <DrawerTitle>Bidders</DrawerTitle>
           <DrawerDescription>List of all the bids placed for this posting.</DrawerDescription>
-          <BiddingList biddings={biddings} />
         </DrawerHeader>
         <DrawerFooter>
+          <BiddingList biddings={biddings} />
           <Input value={input} onChange={(event) => setInput(event.target.value)} type="number" placeholder="Enter your bid amount" className="flex-grow" />
           <div className="flex flex-row gap-2">
             <Button
