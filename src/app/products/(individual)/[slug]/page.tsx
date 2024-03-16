@@ -25,6 +25,8 @@ import Link from "next/link";
 import Interactions from "../_components/Interactions";
 import ReportButton from "../_components/ReportButton";
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
+import { DEVICE_OS_HEADER_NAME } from "@/utils/constants";
 
 function lastSeen(lastActive: Date | null) {
   if (!lastActive) {
@@ -51,6 +53,7 @@ interface ProductPageParams {
 
 async function ProductPage({ params }: { params: ProductPageParams }) {
   const session = await getServerAuthSession();
+  const os = headers().get(DEVICE_OS_HEADER_NAME);
   const product = await api.product.bySlug.query({ productSlug: params.slug });
 
   if (!product.active) return notFound();
@@ -82,7 +85,7 @@ async function ProductPage({ params }: { params: ProductPageParams }) {
       <Container className="pb-20">
         <div className="my-3 flex items-center justify-between">
           <h1 className="price text-2xl font-bold">₹{product.price}</h1>
-          <Interactions product={product} liked={fav!=undefined} />
+          <Interactions os={os} product={product} liked={product.isFavorite ?? false} />
         </div>
         <div className="my-5 flex items-end justify-between">
           <div>
