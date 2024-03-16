@@ -11,7 +11,7 @@ import toast from "react-hot-toast";
 import { errorHandler } from "@/utils/errorHandler";
 import { Edit, Loader2, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTrigger } from "../ui/drawer";
+import { Drawer, DrawerContent, DrawerTitle, DrawerTrigger } from "../ui/drawer";
 import DetailsForm from "@/app/login/details/details-form";
 
 type AddressListProps = {
@@ -188,8 +188,8 @@ export function EditAddress({ address, afterUpdate }: { address: Address, afterU
         </Button>
       </DrawerTrigger>
       <DrawerContent>
-        <DrawerHeader>Update Address</DrawerHeader>
-        <div className="p-5">
+        <DrawerTitle className="text-center my-5">Update Address</DrawerTitle>
+        <div className="px-5 pb-5">
           <DetailsForm
             edit
             addressOnly

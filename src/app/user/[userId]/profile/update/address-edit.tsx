@@ -3,7 +3,7 @@
 import AddressList from "@/components/common/AddressList"
 import DetailsForm from "@/app/login/details/details-form";
 import { Button } from "@/components/ui/button";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import { Drawer, DrawerContent, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { usePathname } from "next/navigation";
 
 export default function AddressEditArea() {
@@ -25,8 +25,11 @@ export function AddAddressButton() {
                <DrawerTrigger asChild>
                     <Button size="sm" className="bg-sky-500 focus:bg-sky-600">New</Button>
                </DrawerTrigger>
-               <DrawerContent className="p-5">
-                    <DetailsForm addressOnly callbackUrl={pathname} />
+               <DrawerContent>
+                    <DrawerTitle className="text-center my-5">Add New Address</DrawerTitle>
+                    <div className="px-5 pb-5">
+                         <DetailsForm addressOnly callbackUrl={pathname} />
+                    </div>
                </DrawerContent>
           </Drawer>
      );
