@@ -157,64 +157,66 @@ export const productSchema = z.object({
       ]),
     )
     .default([]),
-  atomicAnswers: z.array(
-    z.union([
-      z.object({
-        questionId: idSchema,
-        required: z.literal(true),
-        type: z.enum([AtomicQuestionType.Text, AtomicQuestionType.Paragraph]),
-        answerContent: z
-          .string()
-          .trim()
-          .min(1, "Oops! Please fill out this field."),
-      }),
-      z.object({
-        questionId: idSchema,
-        required: z.literal(true),
-        type: z.enum([AtomicQuestionType.Number]),
-        answerContent: z.number().min(1, "Oops! Enter a number here."),
-      }),
-      z.object({
-        questionId: idSchema,
-        required: z.literal(true),
-        type: z.enum([AtomicQuestionType.Date]),
-        answerContent: z
-          .date({
-            required_error: "Oops! Pick a date, please.",
-            invalid_type_error: "Invalid date",
-          })
-          .refine((date) => date.getTime() > Date.now(), {
-            message: "Oops! Pick a date, please.",
-          }),
-      }),
-      z.object({
-        questionId: idSchema,
-        required: z.literal(false),
-        type: z.enum([AtomicQuestionType.Text, AtomicQuestionType.Paragraph]),
-        answerContent: z.string().trim().optional(),
-      }),
-      z.object({
-        questionId: idSchema,
-        required: z.literal(false),
-        type: z.enum([AtomicQuestionType.Number]),
-        answerContent: z.number().optional(),
-      }),
-      z.object({
-        questionId: idSchema,
-        required: z.literal(false),
-        type: z.enum([AtomicQuestionType.Date]),
-        answerContent: z
-          .date({
-            required_error: "Oops! Pick a date, please.",
-            invalid_type_error: "Invalid date",
-          })
-          .optional()
-          .refine((date) => (!date ? true : date.getTime() > Date.now()), {
-            message: "Oops! Pick a date, please.",
-          }),
-      }),
-    ]),
-  ),
+  atomicAnswers: z
+    .array(
+      z.union([
+        z.object({
+          questionId: idSchema,
+          required: z.literal(true),
+          type: z.enum([AtomicQuestionType.Text, AtomicQuestionType.Paragraph]),
+          answerContent: z
+            .string()
+            .trim()
+            .min(1, "Oops! Please fill out this field."),
+        }),
+        z.object({
+          questionId: idSchema,
+          required: z.literal(true),
+          type: z.enum([AtomicQuestionType.Number]),
+          answerContent: z.number().min(1, "Oops! Enter a number here."),
+        }),
+        z.object({
+          questionId: idSchema,
+          required: z.literal(true),
+          type: z.enum([AtomicQuestionType.Date]),
+          answerContent: z
+            .date({
+              required_error: "Oops! Pick a date, please.",
+              invalid_type_error: "Invalid date",
+            })
+            .refine((date) => date.getTime() > Date.now(), {
+              message: "Oops! Pick a date, please.",
+            }),
+        }),
+        z.object({
+          questionId: idSchema,
+          required: z.literal(false),
+          type: z.enum([AtomicQuestionType.Text, AtomicQuestionType.Paragraph]),
+          answerContent: z.string().trim().optional(),
+        }),
+        z.object({
+          questionId: idSchema,
+          required: z.literal(false),
+          type: z.enum([AtomicQuestionType.Number]),
+          answerContent: z.number().optional(),
+        }),
+        z.object({
+          questionId: idSchema,
+          required: z.literal(false),
+          type: z.enum([AtomicQuestionType.Date]),
+          answerContent: z
+            .date({
+              required_error: "Oops! Pick a date, please.",
+              invalid_type_error: "Invalid date",
+            })
+            .optional()
+            .refine((date) => (!date ? true : date.getTime() > Date.now()), {
+              message: "Oops! Pick a date, please.",
+            }),
+        }),
+      ]),
+    )
+    .default([]),
   couponCode: couponCodeSchema.optional(),
   addressId: idSchema.optional(),
 });
