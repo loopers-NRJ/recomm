@@ -69,7 +69,8 @@ export const addressRouter = createTRPCRouter({
       z.object({
         id: idSchema,
         tag: z.string().optional(),
-        addressLine: z.string().optional(),
+        addressLine1: z.string().optional(),
+        addressLine2: z.string().optional(),
         city: z.string().optional(),
         state: z.enum(states).optional(),
         country: z.string().optional(),

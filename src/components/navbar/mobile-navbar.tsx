@@ -5,12 +5,11 @@ import RecommLogo from "@/../public/recomm.png";
 import Profile from "./profile";
 import Container from "../Container";
 import Link from "next/link";
-import { Bell } from "./Icons";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { api } from "@/trpc/react";
-import { Badge } from "../ui/badge";
+import { Bell } from "lucide-react";
 
 const MobileNavbar = () => {
   const { data: session } = useSession();
@@ -18,7 +17,7 @@ const MobileNavbar = () => {
   const pathname = usePathname();
 
   return (
-    <Container className="navbar sticky left-0 top-0 z-10 w-full bg-white">
+    <Container className="navbar sticky left-0 top-0 z-30 w-full bg-white">
       <nav className="w-full space-y-5 py-5">
         <div className="flex w-full items-center justify-between">
           {/* Logo */}
@@ -34,7 +33,12 @@ const MobileNavbar = () => {
           </Link>
           {/* notification and profile buttons */}
           <div className="flex items-center gap-2">
-            {session && session.user && <Notification pathname={pathname} />}
+            {session && session.user ?
+              <Notification pathname={pathname} /> :
+              <Link href="/login" className="relative flex items-center px-2 border border-black rounded-full">
+                <Bell strokeWidth={1.5} className="h-5 w-5 my-[5px]" />
+              </Link>
+            }
             <Profile session={session} />
           </div>
         </div>
@@ -50,31 +54,24 @@ const MobileNavbar = () => {
   );
 };
 
-export const Notification = ({pathname} : {pathname: string}) => {
+export const Notification = ({ pathname }: { pathname: string }) => {
 
   const { data } = api.inbox.all.useQuery({});
   const unread = data?.notifications.filter(n => !n.read).length ?? 0;
 
-  const style =
-    "font-medium border text-md flex items-center justify-center w-fit p-3 rounded-md hover:bg-slate-100";
-
   return (
-    <Link
-      href="/notifications"
-      className={cn(
-        style +
-          (pathname == "/notifications"
-            ? "border border-sky-500 text-sky-500"
-            : ""),
-        "rounded-full relative",
-      )}
-    >
-      {unread > 0 && (
-        <Badge className="absolute -top-2 -right-2 bg-sky-500 scale-75 p-3 w-1 h-1 flex items-center justify-center">
+    <Link href="/notifications"
+      className={cn("relative flex items-center px-2 border-[1px] border-black rounded-full", {
+        "bg-sky-500 border-sky-500": pathname === "/notifications"
+      })}>
+      <Bell strokeWidth={1.5}
+        className={cn("h-5 w-5 my-[5px]", {
+          "text-white": pathname === "/notifications",
+        })} />
+      {unread > 0 &&
+        <div className="font-bold text-xs absolute -top-2 right-0 text-white leading-none bg-red-600 px-2 py-1 rounded-full">
           {unread}
-        </Badge>
-      )}
-      <Bell className="h-5 w-5" />
+        </div>}
     </Link>
   )
 }

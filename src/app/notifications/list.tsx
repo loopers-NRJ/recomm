@@ -28,6 +28,7 @@ function NotificationList({ notifications }: { notifications: Notification[] }) 
           }}
         >
           <div className="flex items-center">
+            {!notification.read && <div className="bg-sky-500 w-2 h-2 shrink-0 rounded-full"></div> }
             <div className="ml-4">
               <p className="text-sm font-medium">{notification.title}</p>
               <p className="text-sm text-gray-500">{notification.description}</p>

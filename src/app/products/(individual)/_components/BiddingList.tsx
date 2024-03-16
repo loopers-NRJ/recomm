@@ -10,7 +10,7 @@ type Bidding = Bid & {
 
 function BiddingList({ biddings }: { biddings: Bidding[] }) {
   return (
-    <ul className="overflow-y-scroll">
+    <ul className="flex flex-col gap-2 overflow-scroll">
       {biddings.length === 0 && <p className="text-sm font-medium leading-none p-4">No bids yet.</p>}
       {biddings.map((bid) => {
         return (
