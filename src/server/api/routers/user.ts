@@ -8,7 +8,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "../trpc";
-import { AccessType } from "@prisma/client";
+import { AccessType, PrismaClient } from "@prisma/client";
 import { productsPayload, wishPayload } from "@/types/prisma";
 import {
   DEFAULT_LIMIT,
@@ -16,6 +16,7 @@ import {
   DEFAULT_SORT_ORDER,
   MAXIMUM_LIMIT,
 } from "@/utils/constants";
+import { getLogger } from "@/utils/logger";
 
 export const userRouter = createTRPCRouter({
   all: publicProcedure
@@ -584,30 +585,8 @@ export const userRouter = createTRPCRouter({
   productSellingCount: protectedProcedure.query(
     async ({ ctx: { prisma, session, logger } }) => {
       const { user } = session;
-
-      const role = await prisma.role.findUnique({
-        where: {
-          id: user.roleId ?? undefined,
-        },
-        select: {
-          accesses: true,
-        },
-      });
-
-      if (role === null) {
-        await logger.error({
-          state: "common",
-          message: "Role not found",
-          detail: JSON.stringify({ userId: user.id }),
-        });
-        return "Something went wrong" as const;
-      }
-
-      const hasPrimeSellerAccess = role.accesses.some(
-        (access) => access.type === AccessType.primeSeller,
-      );
-
-      if (hasPrimeSellerAccess) {
+      
+      if (user.roleId && await isPrimeSeller(prisma, user.roleId)) {
         return { isPrimeSeller: true, count: 0 };
       }
 
@@ -651,3 +630,28 @@ export const userRouter = createTRPCRouter({
     },
   ),
 });
+
+
+async function isPrimeSeller(prisma: PrismaClient, id: string) {
+  const role = await prisma.role.findUnique({
+    where: { id },
+    select: {
+      accesses: true,
+    },
+  });
+
+  const logger = getLogger(prisma);
+
+  if (role === null) {
+    await logger.error({
+      state: "common",
+      message: "Role not found",
+      detail: JSON.stringify({ userId: id }),
+    });
+    return "Something went wrong" as const;
+  }
+
+  return role.accesses.some(
+    (access) => access.type === AccessType.primeSeller,
+  );
+}
