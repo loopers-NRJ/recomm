@@ -1,20 +1,25 @@
 import type { Session } from "next-auth";
 import Link from "next/link";
 import Image from "next/image";
+import { User2 } from "lucide-react";
 
 const Profile = ({ session }: { session: Session | null }) => {
   return (
     <Link
       href={session ? `/user/${session.user.id}/profile` : "/login"}
-      className="h-full w-fit rounded-full hover:bg-slate-100/10"
+      className="rounded-full hover:bg-slate-100/10"
     >
+      {session?.user.image ?
       <Image
-        className="h-full w-full rounded-full"
-        height={30}
-        width={30}
+        className="rounded-full"
+        height={32}
+        width={32}
         alt="Avatar"
-        src={session?.user.image ?? "/avatar.svg"}
-      />
+        src={session?.user.image}
+      /> :
+        <div className="w-8 h-8 flex items-center justify-center border rounded-full border-black" >
+          <User2 strokeWidth={1}/>
+        </div>}
     </Link>
   );
 };
