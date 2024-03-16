@@ -8,12 +8,50 @@ export function updateWishStatus(
 ) {
   void prisma
     .$transaction(async (prisma) => {
-      // Updating all the wishes with the categoryId to available
-      await updateCategoryWishes(prisma as PrismaClient, product);
-      // Updating all the wishes with the modelId to available
-      await updateModelWishes(prisma as PrismaClient, product);
-      // Updating all the wishes with the brandId to available
-      await updateBrandWishes(prisma as PrismaClient, product);
+      const { categoryWishIds, categoryWishedUserIds } =
+        await getCategoryWishedUsers(prisma as PrismaClient, product);
+
+      const { modelWisheIds, modelWishedUsersIds } = await getModelWishedUsers(
+        prisma as PrismaClient,
+        product,
+      );
+
+      const { brandWishIds, brandWishedUsersIds } = await getBrandWishedUsers(
+        prisma as PrismaClient,
+        product,
+      );
+
+      const wishIds = Array.from(
+        new Set([...categoryWishIds, ...modelWisheIds, ...brandWishIds]),
+      );
+
+      const userIds = Array.from(
+        new Set([
+          ...categoryWishedUserIds,
+          ...brandWishedUsersIds,
+          ...modelWishedUsersIds,
+        ]),
+      );
+
+      await prisma.wish.updateMany({
+        where: {
+          id: {
+            in: wishIds,
+          },
+        },
+        data: {
+          status: WishStatus.available,
+        },
+      });
+
+      await prisma.notification.createMany({
+        data: userIds.map((userId) => ({
+          link: `/products/${product.slug}`,
+          title: `Exciting News: New Product Alert!`,
+          description: `a new product matching your preferences is now available! ${product.seller.name} has posted a new in '${product.model.name}', Check it out.`,
+          userId,
+        })),
+      });
     })
     .catch(async (error) => {
       await getLogger(prisma).error({
@@ -28,7 +66,7 @@ export function updateWishStatus(
     });
 }
 
-async function updateCategoryWishes(
+async function getCategoryWishedUsers(
   prisma: PrismaClient,
   product: SingleProductPayloadIncluded,
 ) {
@@ -37,7 +75,6 @@ async function updateCategoryWishes(
       wishes: {
         some: {
           categoryId: product.model.categoryId,
-          status: WishStatus.pending,
           lowerBound: {
             lte: product.price,
           },
@@ -56,32 +93,15 @@ async function updateCategoryWishes(
       },
     },
   });
-  const categoryWishedWisheIds = categoryWishedUsers.flatMap((user) =>
+
+  const categoryWishIds = categoryWishedUsers.flatMap((user) =>
     user.wishes.map((wish) => wish.id),
   );
-  const categoryWishedUsersIds = categoryWishedUsers.map((user) => user.id);
-
-  await prisma.wish.updateMany({
-    where: {
-      id: {
-        in: categoryWishedWisheIds,
-      },
-    },
-    data: {
-      status: WishStatus.available,
-    },
-  });
-  await prisma.notification.createMany({
-    data: categoryWishedUsersIds.map((userId) => ({
-      link: `/products/${product.slug}`,
-      title: `New product in ${product.model.category.name}`,
-      description: `${product.seller.name} has posted a new product in '${product.model.category.name}' category that you wished for`,
-      userId,
-    })),
-  });
+  const categoryWishedUserIds = categoryWishedUsers.map((user) => user.id);
+  return { categoryWishedUserIds, categoryWishIds };
 }
 
-async function updateModelWishes(
+async function getModelWishedUsers(
   prisma: PrismaClient,
   product: SingleProductPayloadIncluded,
 ) {
@@ -90,7 +110,6 @@ async function updateModelWishes(
       wishes: {
         some: {
           modelId: product.modelId,
-          status: WishStatus.pending,
           lowerBound: {
             lte: product.price,
           },
@@ -109,32 +128,15 @@ async function updateModelWishes(
       },
     },
   });
-  const modelWishedWisheIds = modelWishedUsers.flatMap((user) =>
+  const modelWisheIds = modelWishedUsers.flatMap((user) =>
     user.wishes.map((wish) => wish.id),
   );
   const modelWishedUsersIds = modelWishedUsers.map((user) => user.id);
 
-  await prisma.wish.updateMany({
-    where: {
-      id: {
-        in: modelWishedWisheIds,
-      },
-    },
-    data: {
-      status: WishStatus.available,
-    },
-  });
-  await prisma.notification.createMany({
-    data: modelWishedUsersIds.map((userId) => ({
-      link: `/products/${product.slug}`,
-      title: `New product in ${product.model.name}`,
-      description: `${product.seller.name} has posted a new product in '${product.model.name}' model that you wished for`,
-      userId,
-    })),
-  });
+  return { modelWisheIds, modelWishedUsersIds };
 }
 
-async function updateBrandWishes(
+async function getBrandWishedUsers(
   prisma: PrismaClient,
   product: SingleProductPayloadIncluded,
 ) {
@@ -143,7 +145,6 @@ async function updateBrandWishes(
       wishes: {
         some: {
           brandId: product.model.brandId,
-          status: WishStatus.pending,
           lowerBound: {
             lte: product.price,
           },
@@ -162,27 +163,12 @@ async function updateBrandWishes(
       },
     },
   });
-  const brandWishedWisheIds = brandWishedUsers.flatMap((user) =>
+
+  const brandWishIds = brandWishedUsers.flatMap((user) =>
     user.wishes.map((wish) => wish.id),
   );
+
   const brandWishedUsersIds = brandWishedUsers.map((user) => user.id);
 
-  await prisma.wish.updateMany({
-    where: {
-      id: {
-        in: brandWishedWisheIds,
-      },
-    },
-    data: {
-      status: WishStatus.available,
-    },
-  });
-  await prisma.notification.createMany({
-    data: brandWishedUsersIds.map((userId) => ({
-      link: `/products/${product.slug}`,
-      title: `New product in ${product.model.brand.name}`,
-      description: `${product.seller.name} has posted a new product in '${product.model.brand.name}' brand that you wished for`,
-      userId,
-    })),
-  });
+  return { brandWishIds, brandWishedUsersIds };
 }
