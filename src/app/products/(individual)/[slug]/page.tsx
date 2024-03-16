@@ -105,13 +105,8 @@ async function ProductPage({ params }: { params: ProductPageParams }) {
               />
             )
           ) : (
-            <Button
-              className="bg-sky-400 font-bold text-white hover:bg-sky-500"
-              variant="link"
-              size="lg"
-              asChild
-            >
-              <Link href="/login">Login to Place a Bid</Link>
+            <Button className="bg-sky-400 max-w-40 font-bold text-white hover:bg-sky-500" asChild>
+              <Link className="truncate" href="/login">Login to Place a Bid</Link>
             </Button>
           )}
         </div>
