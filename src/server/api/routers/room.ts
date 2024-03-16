@@ -4,7 +4,7 @@ import { idSchema } from "@/utils/validation";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
-import type { PrismaClient } from "@prisma/client";
+import type { PrismaClient, User } from "@prisma/client";
 import {
   DEFAULT_LIMIT,
   DEFAULT_SORT_ORDER,
@@ -78,7 +78,7 @@ export const roomRounter = createTRPCRouter({
         return createABid({
           price,
           roomId,
-          userId: session.user.id,
+          user: session.user,
           prisma,
         });
       },
@@ -157,13 +157,13 @@ export const getHighestBidByRoomId = async (
 const createABid = ({
   price,
   roomId,
-  userId,
+  user,
   prisma,
 }: {
   prisma: PrismaClient;
   price: number;
   roomId: string;
-  userId: string;
+  user: User;
 }) => {
   return prisma.$transaction(async (prisma) => {
     const room = await prisma.room.findUnique({
@@ -183,7 +183,7 @@ const createABid = ({
     if (room.product.price >= price) {
       return "Bid amount too low";
     }
-    if (room.product.sellerId === userId) {
+    if (room.product.sellerId === user.id) {
       return "You cannot bid on your own product";
     }
     if (room.product.buyerId != null) {
@@ -206,7 +206,7 @@ const createABid = ({
     }
 
     // this condition block user from bidding twice
-    if (highestBid !== null && highestBid.userId === userId) {
+    if (highestBid !== null && highestBid.userId === user.id) {
       return "You are already the highest bidder";
     }
     // this condition decides whether to allow user to bid lesser than or equal to the highest bid
@@ -224,12 +224,21 @@ const createABid = ({
         },
         user: {
           connect: {
-            id: userId,
+            id: user.id,
           },
         },
       },
       include: {
         user: true,
+      },
+    });
+
+    await prisma.notification.create({
+      data: {
+        title: `New Bid`,
+        userId: room.product.sellerId,
+        description: `'${user.name}' has placed a bid on your product ${room.product.title} for ${price}`,
+        link: `/products/${room.product.slug}`,
       },
     });
 
