@@ -134,7 +134,7 @@ export function ModelPriceRangeEdit({ model }: { model: Model }) {
           </Button>
         )}
       </Label>
-      {+min !== model.minimumPrice && +max !== model.maximumPrice && (
+      {(+min !== model.minimumPrice || +max !== model.maximumPrice) && (
         <Button
           variant="ghost"
           size="sm"
@@ -145,6 +145,7 @@ export function ModelPriceRangeEdit({ model }: { model: Model }) {
               id: model.id,
               priceRange: [+min, +max],
             });
+            setPriceRangeEditEnabled(false);
           }}
         >
           <Check />

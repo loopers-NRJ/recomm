@@ -1,5 +1,5 @@
 import { states } from "@/types/prisma";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { z } from "zod";
 import { addressSchema, idSchema } from "@/utils/validation";
 
@@ -12,6 +12,16 @@ export const addressRouter = createTRPCRouter({
     });
     return address;
   }),
+  byId: publicProcedure
+    .input(z.object({ id: idSchema }))
+    .query(async ({ ctx: { prisma }, input }) => {
+      const address = await prisma.address.findUnique({
+        where: {
+          id: input.id,
+        },
+      });
+      return address;
+    }),
   byTag: protectedProcedure
     .input(z.object({ tag: z.string() }))
     .query(async ({ ctx: { prisma, session }, input }) => {

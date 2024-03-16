@@ -154,7 +154,7 @@ const DetailsForm = ({
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                Tag (Home, Work, etc) - Optional
+                Tag (Home, Work, etc)
                 <FormControl>
                   <Input type="text" {...field} />
                 </FormControl>
@@ -267,7 +267,7 @@ const DetailsForm = ({
             </FormItem>
           )}
         />
-        <Button type="submit">{edit ? "Update" : "Save"}</Button>
+        <Button type="submit" size="lg" className="w-full">{edit ? "Update" : "Save"}</Button>
       </form>
     </Form>
   );

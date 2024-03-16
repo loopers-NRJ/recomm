@@ -20,7 +20,7 @@ export default function PriceRangePicker({
   return (
     <div className="flex">
       <Input
-        className={cn("w-28 rounded-r-none border-r-0 text-center", {
+        className={cn("w-28 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-r-none border-r-0 text-center", {
           "border-red-500": requiredError,
         })}
         type="number"
@@ -29,7 +29,7 @@ export default function PriceRangePicker({
         placeholder="Min"
       />
       <Input
-        className={cn("w-28 rounded-l-none border-l-0 text-center", {
+        className={cn("w-28 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-l-none border-l-0 text-center", {
           "border-red-500": +min > +max || requiredError,
         })}
         type="number"

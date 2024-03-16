@@ -5,7 +5,7 @@ import DetailsForm from "./details-form";
 const DetailsPage = AuthenticatedPage<undefined, { callbackUrl?: string }>(
   async ({ session, searchParams: { callbackUrl } }) => {
     return (
-      <Container>
+      <Container className="mb-32">
         <h1 className="mb-4 text-3xl font-bold">Complete Your Profile</h1>
         <DetailsForm userData={session.user} callbackUrl={callbackUrl} />
       </Container>

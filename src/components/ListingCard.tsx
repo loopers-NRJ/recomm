@@ -38,7 +38,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ product }) => {
         <div className="aspect-square w-full overflow-hidden rounded-xl border shadow-md transition-shadow duration-300 ease-in-out group-hover:shadow-lg">
           <Image
             alt={product.slug}
-            src={product.images[0]!.url}
+            src={product.images[0]?.url ?? "https://via.placeholder.com/150"}
             className="h-full w-full rounded-xl object-cover"
             width={180}
             height={150}

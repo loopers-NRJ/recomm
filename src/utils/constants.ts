@@ -12,6 +12,7 @@ export type SortOrder = "asc" | "desc";
 export const ADMIN_PAGE_REGEX = /^\/admin\//g;
 export const PATH_HEADER_NAME = "X-Forwarded-Path" as const;
 export const DEVICE_TYPE_HEADER_NAME = "x-device-type" as const;
+export const DEVICE_OS_HEADER_NAME = "x-device-os" as const;
 
 // image upload
 export const MAXIMUM_IMAGE_COUNT = 5 as const;
