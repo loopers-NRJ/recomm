@@ -58,7 +58,6 @@ export default function EditRole({ role }: { role: RolePayloadIncluded }) {
 
   const selectedRoles = role.accesses.map((access) => access.type);
 
-
   return (
     <Container className="flex justify-center">
       <div className="flex h-full w-full flex-col gap-4 p-4 md:h-fit md:w-4/6 lg:h-fit lg:w-3/6 xl:w-2/5">
@@ -142,6 +141,17 @@ export default function EditRole({ role }: { role: RolePayloadIncluded }) {
           <AccordionSection
             title="report"
             types={[AccessType.viewReports, AccessType.deleteReport]}
+            processing={processing}
+            selectedRoles={selectedRoles}
+            handleCheckedChange={handleCheckedChange}
+          />
+          <AccordionSection
+            title="coupon"
+            types={[
+              AccessType.createCoupon,
+              AccessType.updateCoupon,
+              AccessType.deleteCoupon,
+            ]}
             processing={processing}
             selectedRoles={selectedRoles}
             handleCheckedChange={handleCheckedChange}
