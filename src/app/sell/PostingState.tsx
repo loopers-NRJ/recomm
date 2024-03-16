@@ -53,7 +53,7 @@ const defaultPostingState: PostingState = {
   title: "",
   description: "",
   price: "",
-  couponCode: undefined,
+  couponCode: "RECOMM100",
   // bidDuration: undefined,
   images: [],
   selectedCategory: undefined,
