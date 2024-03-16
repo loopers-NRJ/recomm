@@ -9,9 +9,16 @@ import { Bell } from "./Icons";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { api } from "@/trpc/react";
+import { Badge } from "../ui/badge";
 
 const MobileNavbar = () => {
   const { data: session } = useSession();
+
+  const { data } = api.inbox.all.useQuery({});
+
+  const unread = data?.notifications.filter(n => !n.read).length ?? 0;
+
   const pathname = usePathname();
   const style =
     "font-medium border text-md flex items-center justify-center w-fit p-3 rounded-md hover:bg-slate-100";
@@ -37,12 +44,17 @@ const MobileNavbar = () => {
               href="/notifications"
               className={cn(
                 style +
-                  (pathname == "/notifications"
-                    ? "border border-red-300 text-red-300"
-                    : ""),
-                "rounded-full",
+                (pathname == "/notifications"
+                  ? "border border-sky-500 text-sky-500"
+                  : ""),
+                "rounded-full relative",
               )}
             >
+              {unread > 0 && (
+                <Badge className="absolute -top-2 -right-2 bg-sky-500 scale-75 p-3 w-1 h-1 flex items-center justify-center">
+                  {unread}
+                </Badge>
+              )}
               <Bell className="h-5 w-5" />
             </Link>
             {!pathname.endsWith("/profile") && <Profile session={session} />}

@@ -31,9 +31,6 @@ export default function Products() {
       className="product-area mb-32 grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6"
     >
       {productQuery.data?.products.map((product, i) => {
-        if (i === 4) {
-          return <AdCard key={i} />
-        }
         return <ListingCard key={product.id} product={product} />
       })}
     </motion.div>
@@ -45,7 +42,7 @@ export function AdCard() {
     <Carousel
       opts={{loop: true}}
       plugins={[Autoplay({ delay: 3000 })]}
-      className="col-span-2 rounded-xl overflow-hidden">
+      className="rounded-xl mb-5 overflow-hidden">
       <CarouselContent>
         <CarouselItem className="rounded-xl overflow-hidden">
           <Image width={400} height={100} src="/ad/mobile.jpg" alt="ad1" className="object-cover" />

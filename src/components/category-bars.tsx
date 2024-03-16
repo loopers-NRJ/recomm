@@ -14,6 +14,7 @@ import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import type { $Enums } from "@prisma/client";
 import LoadingFeatured from "./loading/LoadingFeatured";
+import { AdCard } from "@/app/products";
 
 function createQueryString(
   searchParams: ReadonlyURLSearchParams,
@@ -45,6 +46,7 @@ const MobileCategoryBar = () => {
 
   return (
     <>
+      <AdCard />
       <motion.div
         variants={{
           hidden: { opacity: 0 },
