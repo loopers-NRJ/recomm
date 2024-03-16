@@ -24,25 +24,22 @@ const fileToDataURI = async (file: File) => {
 export const uploadToCloudinary = (file: File, userId: string) => {
   return new Promise<Image>((resolve, reject) => {
     fileToDataURI(file)
-      .then((dataURI) => {
-        cloudinary.uploader
-          .upload(dataURI)
-          .then((response) => {
-            const image: Image = {
-              publicId: response.public_id,
-              url: response.url,
-              secureUrl: response.secure_url,
-              originalFilename: file.name,
-              format: response.format,
-              width: response.width,
-              height: response.height,
-              resource_type: response.resource_type,
-              userId,
-            };
-            return resolve(image);
-          })
-          .catch(reject);
-      })
+      .then((dataURI) =>
+        cloudinary.uploader.upload(dataURI).then((response) => {
+          const image: Image = {
+            publicId: response.public_id,
+            url: response.url,
+            secureUrl: response.secure_url,
+            originalFilename: file.name,
+            format: response.format,
+            width: response.width,
+            height: response.height,
+            resource_type: response.resource_type,
+            userId,
+          };
+          return resolve(image);
+        }),
+      )
       .catch(reject);
   });
 };
