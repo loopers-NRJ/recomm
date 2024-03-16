@@ -8,7 +8,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "../trpc";
-import { AccessType, PrismaClient } from "@prisma/client";
+import { AccessType, type PrismaClient } from "@prisma/client";
 import { productsPayload, wishPayload } from "@/types/prisma";
 import {
   DEFAULT_LIMIT,

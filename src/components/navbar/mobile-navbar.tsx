@@ -35,7 +35,7 @@ const MobileNavbar = () => {
           {/* notification and profile buttons */}
           <div className="flex items-center gap-2">
             {session && session.user && <Notification pathname={pathname} />}
-            {!pathname.endsWith("/profile") && <Profile session={session} />}
+            <Profile session={session} />
           </div>
         </div>
         {/* Search bar and location selector */}

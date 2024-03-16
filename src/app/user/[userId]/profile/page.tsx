@@ -51,7 +51,7 @@ const ProfilePage = AuthenticatedPage<ProfilePageParams>(async ({ params, sessio
                 </>
               ) : (
                 <Button disabled={userData.mobile?false:true}>
-                    <Link href={`https://wa.me/${userData.mobile}`}>Contact Seller</Link>
+                    <Link target="_blank" rel="noopener" href={`https://wa.me/${userData.mobile}`}>Contact Seller</Link>
                 </Button>
               )}
             </div>
