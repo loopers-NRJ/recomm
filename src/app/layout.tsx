@@ -6,8 +6,11 @@ import { cookies, headers } from "next/headers";
 import { TRPCReactProvider } from "@/trpc/react";
 import Providers from "./providers";
 import type { Viewport, Metadata } from "next";
-import BottomBar from "@/components/navbar/BottomBar"
+import BottomBar from "@/components/navbar/BottomBar";
+
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/react";
+
 import MobileNavbar from "@/components/navbar/mobile-navbar";
 import DesktopNavbar from "@/components/navbar/desktop-navbar";
 
@@ -23,26 +26,27 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  width: 'device-width',
+  width: "device-width",
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-}
+};
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const device = headers().get("x-device-type")
+  const device = headers().get("x-device-type");
   return (
     <html lang="en">
       <head>
         <SpeedInsights />
+        <Analytics />
       </head>
       <body className={`font-sans ${inter.variable}`}>
         <TRPCReactProvider cookies={cookies().toString()}>
-          <Providers >
+          <Providers>
             {device === "mobile" ? <MobileNavbar /> : <DesktopNavbar />}
             {children}
             {device === "mobile" ? <BottomBar /> : <></>}
@@ -52,5 +56,3 @@ export default function RootLayout({
     </html>
   );
 }
-
-

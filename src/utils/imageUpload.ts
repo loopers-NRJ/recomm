@@ -17,9 +17,29 @@ const uploadImagesToBackend = async (images: File[]) => {
     });
 
     if (!result.ok) {
-      console.log(await result.text());
-      return new Error("cannot upload the images.");
+      // for debugging purpose
+      const contentType = result.headers.get("content-type");
+
+      if (contentType === null) {
+        console.log(contentType);
+        return new Error("cannot upload the images.");
+      }
+
+      if (contentType.includes("application/json")) {
+        const data = await result.json();
+        console.log(data);
+      } else if (
+        contentType.includes("text/plain") ??
+        contentType.includes("text/html")
+      ) {
+        console.log(await result.text());
+        return new Error("cannot upload the images.");
+      } else {
+        console.log(contentType);
+        return new Error("cannot upload the images.");
+      }
     }
+
     const data = await result.json();
     const image = z.array(imageInputs).safeParse(data);
     if (image.success) {

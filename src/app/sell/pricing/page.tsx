@@ -1,8 +1,8 @@
 import ProfileCompletedPage from "@/hoc/ProfileCompletedPage";
-import Pricing from "./PricingPage";
+import PricingPage from "./PricingPage";
 
 const PostingProductPricingPage = ProfileCompletedPage(
-  Pricing,
+  PricingPage,
   "/sell/pricing",
 );
 

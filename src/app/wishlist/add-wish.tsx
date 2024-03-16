@@ -10,9 +10,17 @@ import BrandComboBox from "@/components/combobox/BrandComboBox";
 import ModelComboBox from "@/components/combobox/ModelComboBox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTrigger } from "@/components/ui/drawer";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { errorHandler } from "@/utils/errorHandler";
 
 function AddWish() {
   const [selectedCategory, setSelectedCategory] = useState<OptionalItem>();
@@ -21,8 +29,19 @@ function AddWish() {
   const [upperBound, setUpperbound] = useState<string>("");
   const [lowerBound, setLowerbound] = useState<string>("");
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const router = useRouter()
-  const { mutateAsync: createWish, isLoading } = api.wish.create.useMutation();
+  const router = useRouter();
+  const { mutate: createWish, isLoading } = api.wish.create.useMutation({
+    onSuccess: (result) => {
+      if (typeof result === "string") {
+        toast.error(result);
+      } else {
+        setIsOpen(false);
+        router.refresh();
+        toast.success("Wish added successfully");
+      }
+    },
+    onError: errorHandler,
+  });
 
   const handleClick = async () => {
     try {
@@ -50,26 +69,14 @@ function AddWish() {
         return toast.error("Price input should be non zero");
       }
 
-      const result = await createWish({
+      createWish({
         modelId: selectedModel.id,
         lowerBound: +lowerBound,
         upperBound: +upperBound,
       });
-
-      if (typeof result === "string") {
-        toast.success(result);
-      } else {
-        toast.success("Wish added successfully");
-      }
-
-      setIsOpen(false);
-      router.refresh();
-
     } catch (error) {
-      if (error instanceof Error)
-        return toast.error(error.message);
-      else
-        return toast.error(error as string);
+      if (error instanceof Error) return toast.error(error.message);
+      else return toast.error(error as string);
     }
   };
   return (
@@ -101,29 +108,34 @@ function AddWish() {
             categoryId={selectedCategory?.id}
           />
           <Label className="flex w-full space-x-2">
-            <Input value={lowerBound}
-              className="lowerBound" 
-              type="number" 
+            <Input
+              value={lowerBound}
+              className="lowerBound"
+              type="number"
               onChange={(event) => setLowerbound(event.target.value)}
-              placeholder="Starting price" />
-            <Input 
+              placeholder="Starting price"
+            />
+            <Input
               value={upperBound}
-              onChange={(event) => setUpperbound(event.target.value)} 
-              className="upperBound" 
-              type="number" 
-              placeholder="Ending price" />
+              onChange={(event) => setUpperbound(event.target.value)}
+              className="upperBound"
+              type="number"
+              placeholder="Ending price"
+            />
           </Label>
         </div>
         <DrawerFooter className="flex flex-row">
           <Button className="w-full" onClick={() => void handleClick()}>
-            {isLoading && <Loader2 className="animate-spin mx-1"/>}
+            {isLoading && <Loader2 className="mx-1 animate-spin" />}
             Add to List
           </Button>
-          <DrawerClose className="w-full px-4 py-2 bg-secondary border rounded-lg text-sm font-medium">Close</DrawerClose>
+          <DrawerClose className="w-full rounded-lg border bg-secondary px-4 py-2 text-sm font-medium">
+            Close
+          </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
   );
-};
+}
 
 export default AddWish;

@@ -26,7 +26,7 @@ export type PageWithSession<
   SearchParams = DefaultParams,
 > = (
   props: PagePropsWithSession<Params, SearchParams>,
-) => ReactNode | Promise<ReactNode>;
+) => ReactNode;
 
 export default function AuthenticatedPage<
   Params = DefaultParams,

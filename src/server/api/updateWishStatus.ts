@@ -39,10 +39,10 @@ async function updateCategoryWishes(
           categoryId: product.model.categoryId,
           status: WishStatus.pending,
           lowerBound: {
-            gte: product.price,
+            lte: product.price,
           },
           upperBound: {
-            lte: product.price,
+            gte: product.price,
           },
         },
       },
@@ -92,10 +92,10 @@ async function updateModelWishes(
           modelId: product.modelId,
           status: WishStatus.pending,
           lowerBound: {
-            gte: product.price,
+            lte: product.price,
           },
           upperBound: {
-            lte: product.price,
+            gte: product.price,
           },
         },
       },
@@ -145,10 +145,10 @@ async function updateBrandWishes(
           brandId: product.model.brandId,
           status: WishStatus.pending,
           lowerBound: {
-            gte: product.price,
+            lte: product.price,
           },
           upperBound: {
-            lte: product.price,
+            gte: product.price,
           },
         },
       },

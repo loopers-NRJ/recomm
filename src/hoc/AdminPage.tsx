@@ -23,7 +23,7 @@ export type PageWithAccesses<
   SearchParams = DefaultParams,
 > = (
   props: PagePropsWithAccesses<Params, SearchParams>,
-) => ReactNode | Promise<ReactNode>;
+) => ReactNode;
 
 export default function AdminPage<
   Params = DefaultParams,

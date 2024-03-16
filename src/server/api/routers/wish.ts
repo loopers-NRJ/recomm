@@ -46,7 +46,13 @@ export const wishRouter = createTRPCRouter({
         const existingWish = await prisma.wish.findFirst({
           where: {
             userId: user.id,
-            modelId,
+            model: {
+              id: modelId,
+              brandId,
+              categoryId,
+            },
+            lowerBound,
+            upperBound,
           },
         });
 
