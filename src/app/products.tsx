@@ -42,7 +42,7 @@ export function AdCard() {
     <Carousel
       opts={{loop: true}}
       plugins={[Autoplay({ delay: 3000 })]}
-      className="rounded-xl mb-5 overflow-hidden">
+      className="sm:hidden rounded-xl mb-5 overflow-hidden">
       <CarouselContent>
         <CarouselItem className="rounded-xl overflow-hidden">
           <Image width={400} height={100} src="/ad/mobile.jpg" alt="ad1" className="object-cover" />
