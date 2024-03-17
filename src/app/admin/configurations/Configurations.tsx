@@ -8,25 +8,15 @@ import { api } from "@/trpc/react";
 import { camelOrPascalCaseToWords } from "@/utils/functions";
 import EditableText from "./EditableText";
 import { errorHandler } from "@/utils/errorHandler";
-import { useState } from "react";
 
 export default function Configurations() {
   const appConfigurations = api.configuration.all.useQuery();
 
-  const [updatingConfigurationKey, setUpdatingConfigurationKey] =
-    useState<string>("");
-
   const setConfiguration = api.configuration.set.useMutation({
-    onMutate: (config) => {
-      setUpdatingConfigurationKey(config.key);
-    },
     onSuccess: async () => {
       await appConfigurations.refetch();
     },
     onError: errorHandler,
-    onSettled: () => {
-      setUpdatingConfigurationKey("");
-    },
   });
 
   if (appConfigurations.isError)
@@ -52,7 +42,10 @@ export default function Configurations() {
                     value,
                   });
                 }}
-                loading={updatingConfigurationKey === configuration.key}
+                loading={
+                  setConfiguration.isLoading &&
+                  setConfiguration.variables?.key === configuration.key
+                }
               />
             </Label>
           ))}

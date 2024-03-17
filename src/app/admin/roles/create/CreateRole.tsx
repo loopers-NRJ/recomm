@@ -18,18 +18,11 @@ export default function CreateRole() {
   );
   const [roleName, setRoleName] = useState("");
   const createRoleApi = api.role.create.useMutation({
-    onMutate: () => {
-      setCreatingRole(true);
-    },
     onSuccess: () => {
       router.push("/admin/tables/roles");
     },
     onError: errorHandler,
-    onSettled: () => {
-      setCreatingRole(false);
-    },
   });
-  const [creatingRole, setCreatingRole] = useState(false);
   const router = useRouter();
 
   const handleCheckedChange = useCallback(
@@ -167,7 +160,7 @@ export default function CreateRole() {
           disabled={
             selectedRoles.size === 0 ||
             roleName.trim().length === 0 ||
-            creatingRole
+            createRoleApi.isLoading
           }
           onClick={() => {
             createRoleApi.mutate({

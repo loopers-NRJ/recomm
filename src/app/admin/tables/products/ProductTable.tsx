@@ -21,7 +21,7 @@ import {
 } from "next-usequerystate";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import AdminSearchbar from "../AdminSearchbar";
 import TableHeader from "../TableHeader";
 import { errorHandler } from "@/utils/errorHandler";
@@ -33,19 +33,12 @@ type SortBy = OmitUndefined<RouterInputs["product"]["all"]["sortBy"]>;
 export default function ProductTable() {
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
-  const [updatingProductId, setUpdatingProductId] = useState<string>();
 
   const updateProduct = api.product.update.useMutation({
-    onMutate: (variables) => {
-      setUpdatingProductId(variables.id);
-    },
     onSuccess: () => {
       void productApi.refetch();
     },
     onError: errorHandler,
-    onSettled: () => {
-      setUpdatingProductId(undefined);
-    },
   });
 
   const [sortBy, setSortBy] = useQueryState(
@@ -93,18 +86,12 @@ export default function ProductTable() {
     },
   );
   const deleteProduct = api.product.delete.useMutation({
-    onMutate: (variables) => {
-      setDeletingProductId(variables.productId);
-    },
     onSuccess: () => {
       void productApi.refetch();
     },
     onError: errorHandler,
-    onSettled: () => {
-      setDeletingProductId(undefined);
-    },
   });
-  const [deletingProductId, setDeletingProductId] = useState<string>();
+
   const columns: ColumnDef<Omit<ProductsPayloadIncluded, "room">>[] = useMemo(
     () => [
       {
@@ -146,7 +133,10 @@ export default function ProductTable() {
         ),
         cell: ({ row }) => (
           <Switch
-            disabled={updatingProductId === row.original.id}
+            disabled={
+              updateProduct.isLoading &&
+              updateProduct.variables?.id === row.original.id
+            }
             checked={row.original.active}
             className="data-[state=checked]:bg-blue-500"
             onCheckedChange={() => {
@@ -270,7 +260,10 @@ export default function ProductTable() {
             onClick={() => {
               deleteProduct.mutate({ productId: row.original.id });
             }}
-            disabled={deletingProductId === row.original.id}
+            disabled={
+              deleteProduct.isLoading &&
+              deleteProduct.variables?.productId === row.original.id
+            }
             className="border-red-400"
           >
             Delete
@@ -278,15 +271,7 @@ export default function ProductTable() {
         ),
       },
     ],
-    [
-      deletingProductId,
-      deleteProduct,
-      productApi,
-      setSortBy,
-      setSortOrder,
-      sortBy,
-      sortOrder,
-    ],
+    [deleteProduct, productApi, setSortBy, setSortOrder, sortBy, sortOrder],
   );
 
   if (productApi.isError) {

@@ -21,7 +21,7 @@ import {
   useQueryState,
 } from "next-usequerystate";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import AdminSearchbar from "../AdminSearchbar";
 import TableHeader from "../TableHeader";
 import { AdminButtonLink } from "@/components/common/ButtonLink";
@@ -63,9 +63,6 @@ export default function FeaturedCategoryTable() {
     },
   );
   const removeCategoryFeatured = api.category.removeFromFeatured.useMutation({
-    onMutate: (variables) => {
-      setFeaturedCategoryState(variables.categoryId);
-    },
     onSuccess: (result) => {
       if (typeof result === "string") {
         return toast.error(result);
@@ -73,12 +70,7 @@ export default function FeaturedCategoryTable() {
       void categoriesApi.refetch();
     },
     onError: errorHandler,
-    onSettled: () => {
-      setFeaturedCategoryState("");
-    },
   });
-  // this state is to disable the featured button when the user clicks the featured button
-  const [featuredCategoryState, setFeaturedCategoryState] = useState("");
 
   const columns: ColumnDef<FeaturedCategoryPayloadIncluded>[] = useMemo(
     () => [
@@ -179,7 +171,11 @@ export default function FeaturedCategoryTable() {
         header: "Delete",
         cell: ({ row }) => (
           <Button
-            disabled={featuredCategoryState === row.original.categoryId}
+            disabled={
+              removeCategoryFeatured.isLoading &&
+              removeCategoryFeatured.variables?.categoryId ===
+                row.original.categoryId
+            }
             variant="outline"
             size="sm"
             className="border-red-400"
@@ -196,7 +192,6 @@ export default function FeaturedCategoryTable() {
     ],
     [
       categoriesApi,
-      featuredCategoryState,
       removeCategoryFeatured,
       setSortBy,
       setSortOrder,

@@ -21,7 +21,7 @@ import {
 } from "next-usequerystate";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import AdminSearchbar from "../AdminSearchbar";
 import TableHeader from "../TableHeader";
 import { AdminButtonLink } from "@/components/common/ButtonLink";
@@ -55,11 +55,7 @@ export default function BrandTable() {
   );
   const categoryId = searchParams.get("category") ?? undefined;
 
-  const [updatingBrandId, setUpdatingBrandId] = useState<string>();
   const updateBrandById = api.brand.update.useMutation({
-    onMutate: (variables) => {
-      setUpdatingBrandId(variables.id);
-    },
     onSuccess: (result) => {
       if (typeof result === "string") {
         return toast.error(result);
@@ -67,9 +63,6 @@ export default function BrandTable() {
       void brandsApi.refetch();
     },
     onError: errorHandler,
-    onSettled: () => {
-      setUpdatingBrandId(undefined);
-    },
   });
 
   const selectedState = useAdminSelectedState((selected) => selected.state);
@@ -88,10 +81,6 @@ export default function BrandTable() {
   );
 
   const deleteBrandApi = api.brand.delete.useMutation({
-    onMutate: (variables) => {
-      setDeleteBrandId(variables.brandId);
-    },
-
     onSuccess: (result) => {
       if (typeof result === "string") {
         return toast.error(result);
@@ -99,12 +88,18 @@ export default function BrandTable() {
       void brandsApi.refetch();
     },
     onError: errorHandler,
-    onSettled: () => {
-      setDeleteBrandId(undefined);
-    },
   });
-  // this state is to disable the delete button when admin clicks on it
-  const [deleteBrandId, setDeleteBrandId] = useState<string>();
+
+  const createBrandApi = api.brand.create.useMutation({
+    onSuccess: (result) => {
+      if (typeof result === "string") {
+        return toast.error(result);
+      }
+      toast.success("Brand copied successfully");
+      void brandsApi.refetch();
+    },
+    onError: errorHandler,
+  });
 
   const columns: ColumnDef<BrandPayloadIncluded>[] = useMemo(
     () => [
@@ -127,7 +122,10 @@ export default function BrandTable() {
         header: "Active",
         cell: ({ row }) => (
           <Switch
-            disabled={updatingBrandId === row.original.id}
+            disabled={
+              updateBrandById.isLoading &&
+              updateBrandById.variables?.id === row.original.id
+            }
             checked={row.original.active}
             // make the switch blue when active and black when inactive
             className="data-[state=checked]:bg-blue-500"
@@ -217,6 +215,30 @@ export default function BrandTable() {
         accessorFn: (row) => row.updatedBy?.name ?? "N/A",
       },
       {
+        id: "copy",
+        header: "Copy",
+        accessorFn: (row) => row.id,
+        cell: ({ row }) => (
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-blue-400"
+            disabled={
+              createBrandApi.isLoading &&
+              createBrandApi.variables?.name === row.original.name + " copy"
+            }
+            onClick={() => {
+              createBrandApi.mutate({
+                name: row.original.name + " copy",
+                state: row.original.createdState,
+              });
+            }}
+          >
+            Copy
+          </Button>
+        ),
+      },
+      {
         id: "edit",
         header: "Edit",
         accessorFn: (row) => row.id,
@@ -242,7 +264,10 @@ export default function BrandTable() {
                 brandId: row.original.id,
               });
             }}
-            disabled={deleteBrandId === row.original.id}
+            disabled={
+              deleteBrandApi.isLoading &&
+              deleteBrandApi.variables?.brandId === row.original.id
+            }
             size="sm"
             variant="outline"
             className="border-red-400"
@@ -255,13 +280,11 @@ export default function BrandTable() {
     [
       brandsApi,
       deleteBrandApi,
-      deleteBrandId,
       setSortBy,
       setSortOrder,
       sortBy,
       sortOrder,
       updateBrandById,
-      updatingBrandId,
     ],
   );
 

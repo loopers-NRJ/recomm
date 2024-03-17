@@ -22,7 +22,7 @@ import {
 } from "next-usequerystate";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import AdminSearchbar from "../AdminSearchbar";
 import TableHeader from "../TableHeader";
 import { AdminButtonLink } from "@/components/common/ButtonLink";
@@ -56,12 +56,13 @@ export default function ModelTable() {
       DEFAULT_SORT_ORDER,
     ),
   );
+  const selectedState = useAdminSelectedState((selected) => selected.state);
+  const [search, setSearch] = useQueryState(
+    "search",
+    parseAsString.withDefault(""),
+  );
 
-  const [updatingModelId, setUpdatingModelId] = useState<string>();
   const updateModelById = api.model.update.useMutation({
-    onMutate: (variables) => {
-      setUpdatingModelId(variables.id);
-    },
     onSuccess: (result) => {
       if (typeof result === "string") {
         return toast.error(result);
@@ -69,16 +70,19 @@ export default function ModelTable() {
       void modelsApi.refetch();
     },
     onError: errorHandler,
-    onSettled: () => {
-      setUpdatingModelId(undefined);
-    },
   });
 
-  const selectedState = useAdminSelectedState((selected) => selected.state);
-  const [search, setSearch] = useQueryState(
-    "search",
-    parseAsString.withDefault(""),
-  );
+  const createModelApi = api.model.create.useMutation({
+    onSuccess: (result) => {
+      if (typeof result === "string") {
+        return toast.error(result);
+      }
+      toast.success("Model copied successfully");
+      void modelsApi.refetch();
+    },
+    onError: errorHandler,
+  });
+
   const modelsApi = api.model.allForAdmin.useInfiniteQuery(
     {
       search,
@@ -94,20 +98,13 @@ export default function ModelTable() {
   );
 
   const deleteModelApi = api.model.delete.useMutation({
-    onMutate: (variables) => {
-      setDeleteModelId(variables.modelId);
-    },
     onSuccess: (result) => {
       if (typeof result === "string") {
         return toast.error(result);
       }
       void modelsApi.refetch();
     },
-    onSettled: () => {
-      setDeleteModelId(undefined);
-    },
   });
-  const [deleteModelId, setDeleteModelId] = useState<string>();
 
   const columns: ColumnDef<ModelPayloadIncluded>[] = useMemo(
     () => [
@@ -129,7 +126,10 @@ export default function ModelTable() {
         header: "Active",
         cell: ({ row }) => (
           <Switch
-            disabled={updatingModelId === row.original.id}
+            disabled={
+              updateModelById.isLoading &&
+              updateModelById.variables?.id === row.original.id
+            }
             checked={row.original.active}
             // make the switch blue when active and black when inactive
             className="data-[state=checked]:bg-blue-500"
@@ -233,6 +233,44 @@ export default function ModelTable() {
         accessorFn: (row) => row.updatedBy?.name ?? "N/A",
       },
       {
+        id: "copy",
+        header: "Copy",
+        cell: ({ row }) => (
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-blue-400"
+            disabled={
+              createModelApi.isLoading &&
+              createModelApi.variables?.name === row.original.name + " copy"
+            }
+            onClick={() => {
+              const model = row.original;
+              createModelApi.mutate({
+                name: model.name + " copy",
+                categoryId: model.categoryId,
+                brandId: model.brandId,
+                state: model.createdState,
+                priceRange: [model.minimumPrice, model.maximumPrice],
+                atomicQuestions: model.atomicQuestions,
+                multipleChoiceQuestions: model.multipleChoiceQuestions.map(
+                  (question) => ({
+                    type: question.type,
+                    questionContent: question.questionContent,
+                    choices: question.choices.map((choice) => choice.value) as [
+                      string,
+                      ...string[],
+                    ],
+                  }),
+                ),
+              });
+            }}
+          >
+            Copy
+          </Button>
+        ),
+      },
+      {
         id: "edit",
         header: "Edit",
         cell: ({ row }) => (
@@ -254,7 +292,10 @@ export default function ModelTable() {
             onClick={() => {
               deleteModelApi.mutate({ modelId: row.original.id });
             }}
-            disabled={deleteModelId === row.id}
+            disabled={
+              deleteModelApi.isLoading &&
+              deleteModelApi.variables?.modelId === row.original.id
+            }
             size="sm"
             variant="outline"
             className="border-red-400"
@@ -266,14 +307,12 @@ export default function ModelTable() {
     ],
     [
       deleteModelApi,
-      deleteModelId,
       modelsApi,
       setSortBy,
       setSortOrder,
       sortBy,
       sortOrder,
       updateModelById,
-      updatingModelId,
     ],
   );
 

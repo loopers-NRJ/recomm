@@ -25,7 +25,7 @@ import {
   useRouter,
   useSearchParams,
 } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import AdminSearchbar from "../AdminSearchbar";
 import TableHeader from "../TableHeader";
 import { type RouterInputs } from "@/trpc/shared";
@@ -86,10 +86,18 @@ export default function CategoryTable() {
     categoryId: parentId,
   });
 
-  const deleteCategoryApi = api.category.delete.useMutation({
-    onMutate: (variables) => {
-      setDeletingCategoryId(variables.categoryId);
+  const createCategoryApi = api.category.create.useMutation({
+    onSuccess: (result) => {
+      if (typeof result === "string") {
+        return toast.error(result);
+      }
+      toast.success("Category copied successfully");
+      void categoriesApi.refetch();
     },
+    onError: errorHandler,
+  });
+
+  const deleteCategoryApi = api.category.delete.useMutation({
     onSuccess: (result) => {
       if (typeof result === "string") {
         return toast.error(result);
@@ -97,14 +105,8 @@ export default function CategoryTable() {
       void categoriesApi.refetch();
     },
     onError: errorHandler,
-    onSettled: () => {
-      setDeletingCategoryId(undefined);
-    },
   });
   const updateCategoryById = api.category.update.useMutation({
-    onMutate: (variables) => {
-      setUpdatingCategoryId(variables.id);
-    },
     onSuccess: (result) => {
       if (typeof result === "string") {
         return toast.error(result);
@@ -112,14 +114,8 @@ export default function CategoryTable() {
       void categoriesApi.refetch();
     },
     onError: errorHandler,
-    onSettled: () => {
-      setUpdatingCategoryId(undefined);
-    },
   });
   const removeCategoryFeatured = api.category.removeFromFeatured.useMutation({
-    onMutate: (variables) => {
-      setFeaturedCategoryState(variables.categoryId);
-    },
     onSuccess: (result) => {
       if (typeof result === "string") {
         return toast.error(result);
@@ -129,16 +125,7 @@ export default function CategoryTable() {
     onError: (err) => {
       console.log(err);
     },
-    onSettled: () => {
-      setFeaturedCategoryState("");
-    },
   });
-  // this state is to disable the update button when the user clicks the update button
-  const [updatingCategoryId, setUpdatingCategoryId] = useState<string>();
-  // this state is to disable the delete button when the user clicks the delete button
-  const [deletingCategoryId, setDeletingCategoryId] = useState<string>();
-  // this state is to disable the featured button when the user clicks the featured button
-  const [featuredCategoryState, setFeaturedCategoryState] = useState("");
 
   const columns: ColumnDef<CategoryPayloadIncluded>[] = useMemo(
     () => [
@@ -191,7 +178,10 @@ export default function CategoryTable() {
         ),
         cell: ({ row }) => (
           <Switch
-            disabled={updatingCategoryId === row.original.id}
+            disabled={
+              updateCategoryById.isLoading &&
+              updateCategoryById.variables?.id === row.original.id
+            }
             checked={row.original.active}
             // make the switch blue when active and black when inactive
             className="data-[state=checked]:bg-blue-500"
@@ -217,7 +207,10 @@ export default function CategoryTable() {
         ),
         cell: ({ row }) => (
           <Switch
-            disabled={featuredCategoryState === row.original.id}
+            disabled={
+              removeCategoryFeatured.isLoading &&
+              removeCategoryFeatured.variables?.categoryId === row.original.id
+            }
             checked={row.original.featuredCategory !== null}
             className="data-[state=checked]:bg-yellow-500"
             onCheckedChange={() => {
@@ -347,6 +340,32 @@ export default function CategoryTable() {
         accessorFn: (row) => row.updatedBy?.name ?? "N/A",
       },
       {
+        id: "copy",
+        header: "Copy",
+        accessorFn: (row) => row.id,
+        cell: ({ row }) => (
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-blue-400"
+            onClick={() => {
+              createCategoryApi.mutate({
+                name: row.original.name + " copy",
+                price: row.original.price,
+                state: row.original.createdState,
+                parentCategoryId: row.original.parentCategoryId ?? undefined,
+              });
+            }}
+            disabled={
+              createCategoryApi.isLoading &&
+              createCategoryApi.variables?.name === row.original.name + " copy"
+            }
+          >
+            Copy
+          </Button>
+        ),
+      },
+      {
         id: "edit",
         header: "Edit",
         accessorFn: (row) => row.id,
@@ -370,7 +389,10 @@ export default function CategoryTable() {
             onClick={() => {
               deleteCategoryApi.mutate({ categoryId: row.original.id });
             }}
-            disabled={deletingCategoryId === row.original.id}
+            disabled={
+              deleteCategoryApi.isLoading &&
+              deleteCategoryApi.variables?.categoryId === row.original.id
+            }
             size="sm"
             variant="outline"
             className="border-red-400"
@@ -383,8 +405,6 @@ export default function CategoryTable() {
     [
       categoriesApi,
       deleteCategoryApi,
-      deletingCategoryId,
-      featuredCategoryState,
       removeCategoryFeatured,
       router,
       setSortBy,
@@ -392,7 +412,6 @@ export default function CategoryTable() {
       sortBy,
       sortOrder,
       updateCategoryById,
-      updatingCategoryId,
     ],
   );
 
