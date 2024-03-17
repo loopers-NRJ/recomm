@@ -15,6 +15,7 @@ import { motion } from "framer-motion";
 import type { $Enums } from "@prisma/client";
 import LoadingFeatured from "./loading/LoadingFeatured";
 import { AdCard } from "@/app/products";
+import { cn } from "@/lib/utils";
 
 function createQueryString(
   searchParams: ReadonlyURLSearchParams,
@@ -40,7 +41,7 @@ const MobileCategoryBar = () => {
     state: selectedState,
   });
 
-  if (catergoriesQuery.isLoading) {
+  if (catergoriesQuery.isLoading || !catergoriesQuery.data) {
     return <LoadingFeatured />;
   }
 
@@ -57,8 +58,10 @@ const MobileCategoryBar = () => {
         }}
         initial="hidden"
         animate="show"
-        className="mb-5 grid min-h-[200px] grid-cols-4 grid-rows-2 gap-2"
-      >
+        className={cn("mb-5 grid gap-2 grid-cols-4", {
+            "min-h-[200px] grid-rows-2": catergoriesQuery.data.categories.length > 4,
+            "min-h-[100px] grid-rows-1": catergoriesQuery.data.categories.length <= 4
+        })}>
         {catergoriesQuery.data?.categories.map(({ category, image }) => {
           const url =
             "/products/?" +
