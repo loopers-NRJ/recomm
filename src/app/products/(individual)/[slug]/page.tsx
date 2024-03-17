@@ -79,7 +79,7 @@ async function ProductPage({ params }: { params: ProductPageParams }) {
       </Carousel>
       <Container className="pb-20">
         <div className="my-3 flex items-center justify-between">
-          <h1 className="price text-2xl font-bold">₹{product.price}</h1>
+          <h1 className="price text-2xl font-bold">₹{product.price.toLocaleString("en-in")}</h1>
           <Interactions os={os} product={product} liked={product.isFavorite ?? false} />
         </div>
         <div className="my-5 flex items-end justify-between">
@@ -154,7 +154,7 @@ async function ProductPage({ params }: { params: ProductPageParams }) {
               </p>
             </div>
           </Link>
-          <ReportButton id={product.id}/>
+          {session && session.user.id !== product.sellerId && <ReportButton id={product.id}/>}
         </div>
       </Container>
     </>

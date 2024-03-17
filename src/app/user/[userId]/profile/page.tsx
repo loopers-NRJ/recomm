@@ -33,12 +33,7 @@ const ProfilePage = AuthenticatedPage<ProfilePageParams>(async ({ params, sessio
             </AvatarFallback>
           </Avatar>
           <div className="flex h-full w-full flex-col gap-3 p-4">
-            <div>
-              <h1 className="text-xl font-semibold">{userData.name}</h1>
-              <p className="text-sm font-medium text-muted-foreground">
-                {userData.email}
-              </p>
-            </div>
+            <h1 className="text-xl mx-1 font-semibold">{userData.name}</h1>
             <div className="flex gap-2">
               {currentUser && currentUser.id === userData.id ? (
                 <>
