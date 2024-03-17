@@ -55,8 +55,8 @@ export const productRouter = createTRPCRouter({
           .default(DEFAULT_SORT_BY),
         cursor: idSchema.optional(),
         categoryId: idSchema.optional(),
-        brandId: idSchema.optional(),
-        modelId: idSchema.optional(),
+        brandId: idSchema.optional().or(z.array(idSchema)),
+        modelId: idSchema.optional().or(z.array(idSchema)),
         state: z.enum(states),
         price: z
           .object({
@@ -67,6 +67,7 @@ export const productRouter = createTRPCRouter({
             message: "minPrice should be less than maxPrice",
           })
           .optional(),
+        choiceIds: z.array(idSchema).default([]),
       }),
     )
     .query(
@@ -82,6 +83,7 @@ export const productRouter = createTRPCRouter({
           cursor,
           state,
           price,
+          choiceIds,
         },
         ctx: { prisma, isAdminPage, session },
       }) => {
@@ -104,16 +106,31 @@ export const productRouter = createTRPCRouter({
         }
         const products = await prisma.product.findMany({
           where: {
-            modelId,
+            modelId: modelId
+              ? typeof modelId === "string"
+                ? modelId
+                : {
+                    in: modelId,
+                  }
+              : undefined,
             isDeleted: isAdminPage ? undefined : false,
             active: isAdminPage ? undefined : true,
+            title: {
+              contains: search,
+            },
             model: {
               active: isAdminPage ? undefined : true,
               category: {
                 id: categoryId,
                 active: isAdminPage ? undefined : true,
               },
-              brandId,
+              brandId: brandId
+                ? typeof brandId === "string"
+                  ? brandId
+                  : {
+                      in: brandId,
+                    }
+                : undefined,
               brand: {
                 active: isAdminPage ? undefined : true,
               },
@@ -146,6 +163,11 @@ export const productRouter = createTRPCRouter({
                   lte: price.max,
                 }
               : undefined,
+            OR: choiceIds.map((id) => ({
+              selectedChoices: {
+                some: { id },
+              },
+            })),
           },
 
           take: limit,
