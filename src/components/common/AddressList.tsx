@@ -11,29 +11,31 @@ import toast from "react-hot-toast";
 import { errorHandler } from "@/utils/errorHandler";
 import { Edit, Loader2, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Drawer, DrawerContent, DrawerTitle, DrawerTrigger } from "../ui/drawer";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerTitle,
+  DrawerTrigger,
+} from "../ui/drawer";
 import DetailsForm from "@/app/login/details/details-form";
 
 type AddressListProps = {
   enableDeleting?: boolean;
-  enableUpdate?: boolean
+  enableUpdate?: boolean;
 } & (
-    | {
+  | {
       enableSelecting?: false;
     }
-    | {
+  | {
       enableSelecting: true;
       selectedAddress: Address | undefined;
       onSelectedAddressChange: (address: Address) => void;
     }
-  );
+);
 
 export default function AddressList(props: AddressListProps) {
   const addresses = api.address.all.useQuery();
   const deleteAddress = api.address.delete.useMutation({
-    onMutate: ({ id }) => {
-      setDeletingAddress(id);
-    },
     onSuccess: async (data) => {
       if (typeof data === "string") {
         return toast.error(data);
@@ -42,11 +44,7 @@ export default function AddressList(props: AddressListProps) {
       toast.success("Address deleted successfully");
     },
     onError: errorHandler,
-    onSettled: () => {
-      setDeletingAddress(undefined);
-    },
   });
-  const [deletingAddress, setDeletingAddress] = useState<string>();
 
   useEffect(() => {
     if (props.enableSelecting && addresses.data?.[0]) {
@@ -77,7 +75,10 @@ export default function AddressList(props: AddressListProps) {
             address={address}
             key={address.id}
             onDelete={() => deleteAddress.mutate({ id: address.id })}
-            isDeleting={deletingAddress === address.id}
+            isDeleting={
+              deleteAddress.isLoading &&
+              deleteAddress.variables?.id === address.id
+            }
             enableDeleting={props.enableDeleting ?? false}
             enableSelecting
             enableUpdate={props.enableUpdate ?? false}
@@ -93,7 +94,10 @@ export default function AddressList(props: AddressListProps) {
           address={address}
           key={address.id}
           onDelete={() => deleteAddress.mutate({ id: address.id })}
-          isDeleting={deletingAddress === address.id}
+          isDeleting={
+            deleteAddress.isLoading &&
+            deleteAddress.variables?.id === address.id
+          }
           enableDeleting={props.enableDeleting ?? false}
           enableUpdate={props.enableUpdate ?? false}
           afterUpdate={() => addresses.refetch()}
@@ -122,8 +126,8 @@ export function AddressCard({
   afterUpdate?: () => void;
 }) {
   return (
-    <div className="flex items-center justify-between p-5 border rounded-lg bg-white mb-1 shadow-md" >
-      <Label className="flex items-center w-full">
+    <div className="mb-1 flex items-center justify-between rounded-lg border bg-white p-5 shadow-md">
+      <Label className="flex w-full items-center">
         {enableSelecting && (
           <div className="px-3">
             <RadioGroupItem value={address.id} />
@@ -146,7 +150,6 @@ export function AddressCard({
             {address.state.replaceAll("_", " ")} {address.country}
           </div>
         </div>
-
       </Label>
       <div className="flex flex-col gap-3">
         {enableUpdate && (
@@ -172,7 +175,13 @@ export function AddressCard({
   );
 }
 
-export function EditAddress({ address, afterUpdate }: { address: Address, afterUpdate?: () => void }) {
+export function EditAddress({
+  address,
+  afterUpdate,
+}: {
+  address: Address;
+  afterUpdate?: () => void;
+}) {
   const pathname = window.location.pathname;
   const [open, setOpen] = useState(false);
   return (
@@ -188,7 +197,7 @@ export function EditAddress({ address, afterUpdate }: { address: Address, afterU
         </Button>
       </DrawerTrigger>
       <DrawerContent>
-        <DrawerTitle className="text-center my-5">Update Address</DrawerTitle>
+        <DrawerTitle className="my-5 text-center">Update Address</DrawerTitle>
         <div className="px-5 pb-5">
           <DetailsForm
             edit
@@ -203,5 +212,5 @@ export function EditAddress({ address, afterUpdate }: { address: Address, afterU
         </div>
       </DrawerContent>
     </Drawer>
-  )
+  );
 }

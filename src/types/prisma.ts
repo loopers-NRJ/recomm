@@ -79,6 +79,12 @@ export const modelsPayload = Prisma.validator<Prisma.ModelDefaultArgs>()({
     category: true,
     createdBy: true,
     updatedBy: true,
+    multipleChoiceQuestions: {
+      include: {
+        choices: true,
+      },
+    },
+    atomicQuestions: true,
   },
 });
 

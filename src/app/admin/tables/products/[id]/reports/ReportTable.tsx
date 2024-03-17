@@ -18,7 +18,7 @@ import {
   useQueryState,
 } from "next-usequerystate";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import toast from "react-hot-toast";
 import { errorHandler } from "@/utils/errorHandler";
@@ -77,10 +77,6 @@ export default function ReportTable({ productId }: { productId: string }) {
   );
 
   const deleteReportApi = api.report.delete.useMutation({
-    onMutate: (variables) => {
-      setDeleteBrandId(variables.id);
-    },
-
     onSuccess: (result) => {
       if (typeof result === "string") {
         return toast.error(result);
@@ -88,12 +84,7 @@ export default function ReportTable({ productId }: { productId: string }) {
       void reportsApi.refetch();
     },
     onError: errorHandler,
-    onSettled: () => {
-      setDeleteBrandId(undefined);
-    },
   });
-  // this state is to disable the delete button when admin clicks on it
-  const [deleteReportId, setDeleteBrandId] = useState<string>();
 
   const columns: ColumnDef<ReportPayloadIncluded>[] = useMemo(
     () => [
@@ -190,7 +181,10 @@ export default function ReportTable({ productId }: { productId: string }) {
                 id: row.original.id,
               });
             }}
-            disabled={deleteReportId === row.original.id}
+            disabled={
+              deleteReportApi.isLoading &&
+              deleteReportApi.variables?.id === row.original.id
+            }
             size="sm"
             variant="outline"
             className="border-red-400"
@@ -200,15 +194,7 @@ export default function ReportTable({ productId }: { productId: string }) {
         ),
       },
     ],
-    [
-      reportsApi,
-      deleteReportApi,
-      deleteReportId,
-      setSortBy,
-      setSortOrder,
-      sortBy,
-      sortOrder,
-    ],
+    [reportsApi, deleteReportApi, setSortBy, setSortOrder, sortBy, sortOrder],
   );
 
   if (reportsApi.isError) {
