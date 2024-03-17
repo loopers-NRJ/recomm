@@ -14,7 +14,7 @@ const NotificationPage = AuthenticatedPage(async () => {
     </Container>;
   }
 
-  return <Container>
+  return <Container className="mb-32">
     <main className="flex justify-center items-center font-medium text-sm">
       <List notifications={notifications} />
     </main>
