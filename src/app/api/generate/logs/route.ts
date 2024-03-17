@@ -5,24 +5,7 @@ import { notFound } from "next/navigation";
 
 import { Workbook } from "exceljs";
 import { type Log } from "@prisma/client";
-
-async function GetLogs() {
-  const logs: Log[] = [];
-  let cursor: string | undefined = undefined;
-  const limit = 30;
-
-  while (true) {
-    const result = await api.log.all.query({ cursor, limit });
-    logs.push(...result.logs);
-    if (result.logs.length < limit) {
-      break;
-    } else {
-      cursor = result.nextCursor;
-    }
-  }
-
-  return logs;
-}
+import { prisma } from "@/server/db";
 
 async function GenerateExcel(logs: Log[]) {
   const sheet = new Workbook();
@@ -63,7 +46,7 @@ export async function GET() {
     notFound();
   }
 
-  const logs = await GetLogs();
+  const logs = await prisma.log.findMany();
 
   const sheet = await GenerateExcel(logs);
 

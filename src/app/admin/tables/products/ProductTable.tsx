@@ -26,6 +26,7 @@ import AdminSearchbar from "../AdminSearchbar";
 import TableHeader from "../TableHeader";
 import { errorHandler } from "@/utils/errorHandler";
 import { Switch } from "@/components/ui/switch";
+import { AdminButtonLink } from "@/components/common/ButtonLink";
 
 type SortBy = OmitUndefined<RouterInputs["product"]["all"]["sortBy"]>;
 
@@ -292,8 +293,19 @@ export default function ProductTable() {
     return <ServerError message={productApi.error.message} />;
   }
   return (
-    <>
-      <AdminSearchbar search={search} setSearch={setSearch} />
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-3">
+        <AdminSearchbar search={search} setSearch={setSearch} />
+        <AdminButtonLink
+          href="/api/generate/products"
+          variant="outline"
+          size="sm"
+          className="border-blue-400"
+        >
+          EXPORT
+        </AdminButtonLink>
+      </div>
+
       <DataTable
         columns={columns}
         data={productApi.data?.pages.flatMap((page) => page.products)}
@@ -303,6 +315,6 @@ export default function ProductTable() {
         }}
         isLoading={productApi.isLoading}
       />
-    </>
+    </div>
   );
 }
