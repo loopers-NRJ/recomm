@@ -154,7 +154,7 @@ async function ProductPage({ params }: { params: ProductPageParams }) {
               </p>
             </div>
           </Link>
-          <ReportButton id={product.id}/>
+          {session && session.user.id !== product.sellerId && <ReportButton id={product.id}/>}
         </div>
       </Container>
     </>
