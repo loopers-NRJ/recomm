@@ -8,7 +8,7 @@ import {
   CheckBoxEditor,
   DropDownEditor,
   RadioGroupEditor,
-  VariantEditor,
+  SelectorEditor,
   type EditorProps,
 } from "./Editors";
 import {
@@ -44,8 +44,8 @@ export const QuestionEditor: FC<QuestionEditorProps> = ({
     case AtomicQuestionType.Number:
       Editor = AtomicQuestionEditor;
       break;
-    case MultipleChoiceQuestionType.Variant:
-      Editor = VariantEditor;
+    case MultipleChoiceQuestionType.Selector:
+      Editor = SelectorEditor;
       break;
     case MultipleChoiceQuestionType.Dropdown:
       Editor = DropDownEditor;

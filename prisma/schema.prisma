@@ -358,7 +358,7 @@ enum MultipleChoiceQuestionType {
     Dropdown
     RadioGroup
     Checkbox
-    Variant
+    Selector   @map("Variant")
 }
 
 model MultipleChoiceQuestion {

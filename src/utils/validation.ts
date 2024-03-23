@@ -96,7 +96,7 @@ export const productSchema = z.object({
           required: z.literal(true),
           type: z.enum([
             MultipleChoiceQuestionType.Dropdown,
-            MultipleChoiceQuestionType.Variant,
+            MultipleChoiceQuestionType.Selector,
             MultipleChoiceQuestionType.RadioGroup,
           ]),
           valueId: z
@@ -111,7 +111,7 @@ export const productSchema = z.object({
           required: z.literal(false),
           type: z.enum([
             MultipleChoiceQuestionType.Dropdown,
-            MultipleChoiceQuestionType.Variant,
+            MultipleChoiceQuestionType.Selector,
             MultipleChoiceQuestionType.RadioGroup,
           ]),
           valueId: z

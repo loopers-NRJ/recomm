@@ -158,7 +158,7 @@ export function ChoiceDisplay({
       </RadioGroup>
     );
   }
-  if (question.type === "Variant") {
+  if (question.type === "Selector") {
     return (
       <div className="flex flex-col gap-1 ps-4">
         {question.choices.map((choice) => (
