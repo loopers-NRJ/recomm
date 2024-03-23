@@ -67,7 +67,7 @@ export const productRouter = createTRPCRouter({
             message: "minPrice should be less than maxPrice",
           })
           .optional(),
-        choiceIds: z.array(idSchema).default([]),
+        choiceIds: z.array(idSchema).optional(),
       }),
     )
     .query(
@@ -163,11 +163,13 @@ export const productRouter = createTRPCRouter({
                   lte: price.max,
                 }
               : undefined,
-            OR: choiceIds.map((id) => ({
-              selectedChoices: {
-                some: { id },
-              },
-            })),
+            OR: choiceIds
+              ? choiceIds.map((id) => ({
+                  selectedChoices: {
+                    some: { id },
+                  },
+                }))
+              : undefined,
           },
 
           take: limit,
