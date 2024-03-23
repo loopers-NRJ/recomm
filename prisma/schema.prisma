@@ -119,27 +119,27 @@ model User {
     name                                 String?
     email                                String?   @unique
     mobile                               String?
+    mobileVerified                       Boolean   @default(false)
     emailVerified                        DateTime?
     image                                String?
     lastActive                           DateTime?
     productsCreatedCountWithinTimeFrame  Int       @default(0)
     firstProductCreatedAtWithinTimeFrame DateTime?
-
-    images            Image[]
-    accounts          Account[]
-    sessions          Session[]
-    listedProducts    Product[] @relation("listedProducts")
-    purchasedProducts Product[] @relation("purchasedProducts")
-    favoriteProducts  Product[] @relation("favoriteProducts")
-    wishes            Wish[]
-    bids              Bid[]
-    role              Role?     @relation("role", fields: [roleId], references: [id], onDelete: SetNull)
-    roleId            String?
+    images                               Image[]
+    accounts                             Account[]
+    sessions                             Session[]
+    listedProducts                       Product[] @relation("listedProducts")
+    purchasedProducts                    Product[] @relation("purchasedProducts")
+    favoriteProducts                     Product[] @relation("favoriteProducts")
+    wishes                               Wish[]
+    bids                                 Bid[]
+    role                                 Role?     @relation("role", fields: [roleId], references: [id], onDelete: SetNull)
+    roleId                               String?
     // location
-    address           Address[]
+    address                              Address[]
     // meta
-    createdAt         DateTime  @default(now())
-    updatedAt         DateTime  @updatedAt
+    createdAt                            DateTime  @default(now())
+    updatedAt                            DateTime  @updatedAt
 
     // admin level
     createdCategories              Category[]               @relation("categoryCreate")
@@ -161,6 +161,8 @@ model User {
     notifications                  Notification[]
     createdConfigurations          AppConfiguration[]       @relation("configCreate")
     updatedConfigurations          AppConfiguration[]       @relation("configUpdate")
+    updatedVariants                Variant[]                @relation("variantUpdate")
+    updatedVariantValues           VariantValue[]           @relation("variantValueUpdate")
 
     @@index([roleId])
 }
@@ -218,6 +220,48 @@ enum State {
     West_Bengal
 }
 
+model Variant {
+    id    String @id @default(cuid())
+    title String
+
+    category   Category @relation(fields: [categoryId], references: [id])
+    categoryId String
+
+    updatedBy   User?    @relation("variantUpdate", fields: [updatedById], references: [id])
+    updatedById String?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    @@unique([categoryId, title])
+    @@index([updatedById])
+    @@index([categoryId])
+}
+
+model VariantValue {
+    id                       String                         @id @default(cuid())
+    value                    String
+    participatedCombinations ModelVariantValueCombination[]
+
+    updatedBy   User?    @relation("variantValueUpdate", fields: [updatedById], references: [id])
+    updatedById String?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+    model       Model?   @relation(fields: [modelId], references: [id])
+    modelId     String?
+
+    @@index([updatedById])
+    @@index([modelId])
+}
+
+model ModelVariantValueCombination {
+    id             String         @id @default(cuid())
+    selectedValues VariantValue[]
+    price          Int
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
 model Category {
     id               String            @id @default(cuid())
     name             String
@@ -230,6 +274,7 @@ model Category {
     wishes           Wish[]
     models           Model[]
     coupons          Coupon[]
+    variants         Variant[]
     featuredCategory FeaturedCategory?
 
     // Meta
@@ -336,6 +381,7 @@ model Model {
     choices                 Choice[]
     atomicQuestions         AtomicQuestion[]
     answers                 AtomicAnswer[]
+    variantValues           VariantValue[]
 
     // Meta
     createdState State
@@ -358,7 +404,7 @@ enum MultipleChoiceQuestionType {
     Dropdown
     RadioGroup
     Checkbox
-    Variant
+    Selector   @map("Variant")
 }
 
 model MultipleChoiceQuestion {

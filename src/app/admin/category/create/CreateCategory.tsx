@@ -11,6 +11,7 @@ import { Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import VariantsTitleEditor, { type VariantsList } from "./VariantsTitleEditor";
 
 const CreateCategory = () => {
   const params = useSearchParams();
@@ -30,6 +31,7 @@ const CreateCategory = () => {
   const [categoryName, setCategoryName] = useState("");
   const [categoryPrice, setCategoryPrice] = useState("");
   const selectedState = useAdminSelectedState((selected) => selected.state);
+  const [variants, setVariants] = useState<VariantsList>();
 
   return (
     <Container className="flex justify-center">
@@ -53,6 +55,7 @@ const CreateCategory = () => {
             onChange={(e) => setCategoryPrice(e.target.value)}
           />
         </Label>
+        <VariantsTitleEditor values={variants} setValues={setVariants} />
 
         <Label className="flex items-center justify-between p-1">
           <div>Parent Category</div>
@@ -67,6 +70,7 @@ const CreateCategory = () => {
                 parentCategoryId: parentId ?? undefined,
                 state: selectedState,
                 price: +categoryPrice,
+                variants,
               })
             }
             disabled={

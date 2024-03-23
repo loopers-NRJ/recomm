@@ -36,13 +36,13 @@ export const AtomicQuestionEditor: FC<EditorProps> = ({
   );
 };
 
-export const VariantEditor: FC<EditorProps> = ({
+export const SelectorEditor: FC<EditorProps> = ({
   question,
   setQuestion,
   error,
 }) => {
   const [search, setSearch] = useState("");
-  if (question.type !== MultipleChoiceQuestionType.Variant) {
+  if (question.type !== MultipleChoiceQuestionType.Selector) {
     return null;
   }
 

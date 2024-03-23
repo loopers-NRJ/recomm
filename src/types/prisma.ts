@@ -190,7 +190,7 @@ export const multipleChoiceQuestionTypeArray = [
   MultipleChoiceQuestionType.Checkbox,
   MultipleChoiceQuestionType.Dropdown,
   MultipleChoiceQuestionType.RadioGroup,
-  MultipleChoiceQuestionType.Variant,
+  MultipleChoiceQuestionType.Selector,
 ] as const;
 
 export const atomicQuestionTypeArray = [
