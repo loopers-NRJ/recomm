@@ -161,6 +161,8 @@ model User {
     notifications                  Notification[]
     createdConfigurations          AppConfiguration[]       @relation("configCreate")
     updatedConfigurations          AppConfiguration[]       @relation("configUpdate")
+    updatedVariants                Variant[]                @relation("variantUpdate")
+    updatedVariantValues           VariantValue[]           @relation("variantValueUpdate")
 
     @@index([roleId])
 }
@@ -218,6 +220,48 @@ enum State {
     West_Bengal
 }
 
+model Variant {
+    id    String @id @default(cuid())
+    title String
+
+    category   Category @relation(fields: [categoryId], references: [id])
+    categoryId String
+
+    updatedBy   User?    @relation("variantUpdate", fields: [updatedById], references: [id])
+    updatedById String?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    @@unique([categoryId, title])
+    @@index([updatedById])
+    @@index([categoryId])
+}
+
+model VariantValue {
+    id                       String                         @id @default(cuid())
+    value                    String
+    participatedCombinations ModelVariantValueCombination[]
+
+    updatedBy   User?    @relation("variantValueUpdate", fields: [updatedById], references: [id])
+    updatedById String?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+    model       Model?   @relation(fields: [modelId], references: [id])
+    modelId     String?
+
+    @@index([updatedById])
+    @@index([modelId])
+}
+
+model ModelVariantValueCombination {
+    id             String         @id @default(cuid())
+    selectedValues VariantValue[]
+    price          Int
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
 model Category {
     id               String            @id @default(cuid())
     name             String
@@ -230,6 +274,7 @@ model Category {
     wishes           Wish[]
     models           Model[]
     coupons          Coupon[]
+    variants         Variant[]
     featuredCategory FeaturedCategory?
 
     // Meta
@@ -336,6 +381,7 @@ model Model {
     choices                 Choice[]
     atomicQuestions         AtomicQuestion[]
     answers                 AtomicAnswer[]
+    variantValues           VariantValue[]
 
     // Meta
     createdState State
