@@ -6,14 +6,6 @@ import List from "./list"
 const NotificationPage = AuthenticatedPage(async () => {
   const { notifications } = await api.inbox.all.query({});
 
-  if (notifications.length == 0) {
-    return <Container>
-      <main className="flex justify-center items-center font-medium text-sm h-52">
-        No Notifications...
-      </main>
-    </Container>;
-  }
-
   return <Container className="mb-32">
     <main className="flex justify-center items-center font-medium text-sm">
       <List notifications={notifications} />
