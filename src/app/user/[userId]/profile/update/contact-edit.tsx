@@ -29,9 +29,9 @@ function ContactEditArea({ user }: { user: User }) {
                               <span>Mobile</span>
                               <Switch checked={active} 
                                    className='scale-75' 
-                                   onCheckedChange={(mobileVerified) => {
+                                   onCheckedChange={async (mobileVerified) => {
                                         setActive(mobileVerified)
-                                        updateInfo.mutateAsync({ mobileVerified })
+                                        await updateInfo.mutateAsync({ mobileVerified })
                                    }} 
                               />
                          </h2>
