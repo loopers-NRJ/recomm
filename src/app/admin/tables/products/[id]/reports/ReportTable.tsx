@@ -135,7 +135,7 @@ export default function ReportTable({ productId }: { productId: string }) {
                 </DrawerDescription>
               </DrawerHeader>
               <DrawerFooter>
-                <DrawerClose>
+                <DrawerClose asChild>
                   <Button>Close</Button>
                 </DrawerClose>
               </DrawerFooter>

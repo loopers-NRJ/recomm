@@ -80,11 +80,11 @@ function FeaturedCategoryList({
   onViewMore,
 }: FeaturedCategoryListProps) {
   return (
-    <div className="grid w-full max-w-sm grid-cols-2 justify-items-center gap-3 p-3 pb-20">
+    <div className="grid grid-cols-2 justify-items-center gap-3 p-3 pb-20">
       {featuredCategories.map((fc) => (
         <Button
           variant="ghost"
-          className="flex aspect-square h-full w-full flex-col items-center justify-center gap-2 border shadow-lg"
+          className="flex w-full h-full flex-col items-center justify-center gap-2 border shadow-lg"
           onClick={() => onSelect(fc.category)}
           key={fc.categoryId}
         >

@@ -10,6 +10,7 @@ import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { api } from "@/trpc/react";
 import { Bell } from "lucide-react";
+import { useEffect } from "react";
 
 const MobileNavbar = () => {
   const { data: session } = useSession();
@@ -35,7 +36,7 @@ const MobileNavbar = () => {
           <div className="flex items-center gap-2">
             {session && session.user ?
               <Notification pathname={pathname} /> :
-              <Link href="/login" className="relative flex items-center px-2 border border-black rounded-full">
+              <Link href="/login" className="relative flex items-center px-[5px] border border-black rounded-full">
                 <Bell strokeWidth={1.5} className="h-5 w-5 my-[5px]" />
               </Link>
             }
@@ -56,12 +57,14 @@ const MobileNavbar = () => {
 
 export const Notification = ({ pathname }: { pathname: string }) => {
 
-  const { data } = api.inbox.all.useQuery({});
+  const { data, refetch } = api.inbox.all.useQuery({});
   const unread = data?.notifications.filter(n => !n.read).length ?? 0;
+
+  useEffect(() => void refetch(), [pathname])
 
   return (
     <Link href="/notifications"
-      className={cn("relative flex items-center px-2 border-[1px] border-black rounded-full", {
+      className={cn("relative flex items-center px-[5px] border-[1px] border-black rounded-full", {
         "bg-sky-500 border-sky-500": pathname === "/notifications"
       })}>
       <Bell strokeWidth={1.5}

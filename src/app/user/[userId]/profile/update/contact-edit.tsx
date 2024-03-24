@@ -1,6 +1,7 @@
 "use client"
 
 import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
 import { api } from '@/trpc/react'
 import type { User } from '@prisma/client'
 import { Check, Edit3, Loader2 } from 'lucide-react'
@@ -11,6 +12,7 @@ function ContactEditArea({ user }: { user: User }) {
 
      const [mobileEditing, setMobileEditing] = useState(false)
      const [mobile, setMobile] = useState(user.mobile ?? "")
+     const [active, setActive] = useState(user.mobileVerified)
 
      const updateInfo = api.user.update.useMutation()
 
@@ -23,7 +25,16 @@ function ContactEditArea({ user }: { user: User }) {
                          <p className='h-8 flex items-center'> {user.email} </p>
                     </div>
                     <div className="mobile">
-                         <h2 className='font-semibold leading-none mb-1'>Mobile</h2>
+                         <h2 className='font-semibold flex items-center leading-none mb-1'>
+                              <span>Mobile</span>
+                              <Switch checked={active} 
+                                   className='scale-75' 
+                                   onCheckedChange={async (mobileVerified) => {
+                                        setActive(mobileVerified)
+                                        await updateInfo.mutateAsync({ mobileVerified })
+                                   }} 
+                              />
+                         </h2>
                          {mobileEditing ?
                               <div className="flex items-center gap-3">
                                    <div className='flex items-center gap-2'>
