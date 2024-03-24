@@ -6,8 +6,8 @@ import Image from "next/image";
 import { useState } from "react";
 import { api } from "@/trpc/react";
 import { motion } from "framer-motion";
-import { HeartSolid } from "./navbar/Icons";
 import { cn } from "@/lib/utils";
+import { Heart } from "lucide-react";
 
 interface ListingCardProps {
   product: ProductsPayloadIncluded & { isFavorite?: boolean };
@@ -33,9 +33,8 @@ const ListingCard: React.FC<ListingCardProps> = ({ product }) => {
     >
       { product.isFavorite !== undefined &&
       <div onClick={toggle} className="absolute right-2 top-2 flex h-10 w-10 items-center justify-center">
-          <HeartSolid className={cn(
-            "w-5 h-5 text-red-600",
-            isFav ? "text-red-600" : "text-gray-400"
+          <Heart className={cn(
+            isFav ? "text-red-600 fill-red-600" : "text-gray-400 fill-gray-400"
           )} />
       </div> }
       <Link href={`/products/${product.slug}`} className="group cursor-pointer">
