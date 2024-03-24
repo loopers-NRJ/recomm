@@ -27,6 +27,8 @@ export const env = createEnv({
     CLOUDINARY_SECRET: z.string(),
     CLOUDINARY_CLOUD_NAME: z.string(),
     GEOCODE_API_KEY: z.string(),
+    EMAIL_SERVER: z.string(),
+    EMAIL_FROM: z.string().email(),
   },
 
   /**
@@ -53,6 +55,8 @@ export const env = createEnv({
     CLOUDINARY_SECRET: process.env.CLOUDINARY_SECRET,
     CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
     GEOCODE_API_KEY: process.env.GEOCODE_API_KEY,
+    EMAIL_FROM: process.env.EMAIL_FROM,
+    EMAIL_SERVER: process.env.EMAIL_SERVER,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation.

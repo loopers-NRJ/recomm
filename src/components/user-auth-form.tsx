@@ -19,14 +19,16 @@ export function UserAuthForm({
   ...props
 }: UserAuthFormType) {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
-
+  const [email, setEmail] = React.useState("");
   async function onSubmit(event: React.SyntheticEvent) {
     event.preventDefault();
     setIsLoading(true);
-
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 3000);
+    try {
+      await signIn("email", { callbackUrl }, { email });
+    } catch (error) {
+      console.log(error);
+    }
+    setIsLoading(false);
   }
 
   return (
@@ -45,6 +47,8 @@ export function UserAuthForm({
               autoComplete="email"
               autoCorrect="off"
               disabled={isLoading}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           <Button disabled={isLoading}>
