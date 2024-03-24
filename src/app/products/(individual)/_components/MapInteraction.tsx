@@ -21,7 +21,7 @@ function MapInteraction({os, product}: {os: string | null, product: ProductsPayl
     ]
     if(os === "Android"){
       return `geo:0,0?q=${details.join("+")}`
-    } else if (os == "iOS") return `http://maps.apple.com/?q=${details.join("+")}`
+    } else if (os == "iOS") return `maps:0,0?q=${details.join("+")}`
     return `https://www.google.com/maps/search/?api=1&query=${details.join("+")}`
   }
 
