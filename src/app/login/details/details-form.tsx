@@ -29,6 +29,8 @@ import { useRouter } from "next/navigation";
 import { addressSchema } from "@/utils/validation";
 import { errorHandler } from "@/utils/errorHandler";
 import { TRPCClientError } from "@trpc/client";
+import { useState } from "react";
+import { Loader2 } from "lucide-react";
 
 interface FormProps {
   userData?: User;
@@ -60,6 +62,8 @@ const DetailsForm = ({
   const updateUserMobile = api.user.update.useMutation();
   const updateAddress = api.address.update.useMutation();
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const defaultValues = {
     tag: address?.tag ?? "",
     fullName: userData?.name ?? "",
@@ -79,6 +83,7 @@ const DetailsForm = ({
   });
 
   const handleSubmit = form.handleSubmit(async (data) => {
+    setIsLoading(true);
     try {
       if (addressOnly && !edit) {
         const result = await createAddress.mutateAsync(data);
@@ -98,6 +103,7 @@ const DetailsForm = ({
         if (typeof result2 === "string") return toast.error(result2);
       }
       toast.success("Saved Successfully!");
+      setIsLoading(false);
       if (callbackUrl) {
         if (afterSave) return afterSave();
         router.refresh();
@@ -105,6 +111,7 @@ const DetailsForm = ({
       }
       return router.push("/");
     } catch (error) {
+      setIsLoading(false);
       if (error instanceof TRPCClientError) {
         errorHandler(error);
       }
@@ -141,6 +148,7 @@ const DetailsForm = ({
                     <FormControl>
                       <Input type="tel" {...field} />
                     </FormControl>
+                    <span className="text-xs text-gray-500">This will not be shared until you activate it in profile page</span>
                     <FormMessage />
                   </FormLabel>
                 </FormItem>
@@ -267,7 +275,9 @@ const DetailsForm = ({
             </FormItem>
           )}
         />
-        <Button type="submit" size="lg" className="w-full">{edit ? "Update" : "Save"}</Button>
+        <Button type="submit" disabled={isLoading} size="lg" className="w-full">{
+          edit ? "Update" : <>{isLoading && <Loader2 className="animate-spin" />}Save</>
+        }</Button>
       </form>
     </Form>
   );

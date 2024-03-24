@@ -1,13 +1,13 @@
 "use client";
 
-import HeartButton from "@/components/heart/HeartButton";
 import { api } from "@/trpc/react";
 import type { ProductsPayloadIncluded } from "@/types/prisma";
-import { MessageCircle, Share2 } from "lucide-react";
+import { Heart, MessageCircle, Share2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import MapInteraction from "./MapInteraction";
+import { cn } from "@/lib/utils";
 
 function Interactions(
   { 
@@ -50,13 +50,16 @@ function Interactions(
   }
 
   return (
-    <ul className="interactions flex gap-3">
-      <Link target="_blank" rel="noopener" href={`https://wa.me/${product.seller.mobile}`}>
-        <MessageCircle />
-      </Link>
+    <ul className="interactions flex gap-2">
+      { product.seller.mobileVerified &&
+        <Link target="_blank" rel="noopener" href={`https://wa.me/${product.seller.mobile}`}>
+          <MessageCircle />
+        </Link> }
       <MapInteraction os={os} product={product} />
-      <div className="relative flex items-center justify-center w-6">
-        <HeartButton onClick={toggle} starred={isFav} />
+      <div onClick={toggle} className="relative flex items-center justify-center w-6">
+          <Heart className={cn(
+            isFav ? "text-red-600 fill-red-600" : "text-gray-400 fill-gray-400"
+          )} />
       </div>
       <div onClick={share}><Share2 /></div>
     </ul>

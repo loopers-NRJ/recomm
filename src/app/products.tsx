@@ -55,5 +55,6 @@ export function AdCard() {
         </CarouselItem>
       </CarouselContent>
     </Carousel>
+
   )
 }

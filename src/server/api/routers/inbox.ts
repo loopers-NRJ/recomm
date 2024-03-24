@@ -57,6 +57,18 @@ export const inboxRouter = createTRPCRouter({
         },
       });
     }),
+  create: protectedProcedure
+    .input(z.object({ to: idSchema }))
+    .mutation(async ({ input, ctx: { prisma, session } }) => {
+      return await prisma.notification.create({
+        data: {
+          userId: input.to,
+          title: "You have a new message request!",
+          link: `/user/${session.user.id}/profile`,
+          description: "Someone want to connect with you!",
+        },
+      });
+    }),
   markAsRead: protectedProcedure
     .input(z.object({ notificationId: idSchema }))
     .mutation(async ({ input, ctx: { prisma, session } }) => {
