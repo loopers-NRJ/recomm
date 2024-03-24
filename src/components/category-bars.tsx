@@ -47,6 +47,7 @@ const MobileCategoryBar = () => {
       <motion.div initial={{ opacity: 0 }} animate={{ opacity:1 }}>
         <AdCard />
       </motion.div>
+      <span className="mb-2">Categories</span>
       <motion.div
         variants={{
           hidden: { opacity: 0 },
