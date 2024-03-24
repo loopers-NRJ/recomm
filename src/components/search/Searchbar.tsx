@@ -23,11 +23,11 @@ const Search = () => {
         role="search"
         placeholder="Search"
       />
-      {searchKey && (
-        <CommandList className="absolute left-0 top-11 w-full border bg-white">
+      <CommandList className="absolute left-0 top-11 w-full border bg-white">
+        {searchKey && (
           <Suggestions searchKey={searchKey} />
-        </CommandList>
-      )}
+        )}
+      </CommandList>
     </Command>
   );
 };

@@ -63,7 +63,7 @@ export const Notification = ({ pathname }: { pathname: string }) => {
   useEffect(() => void refetch(), [pathname])
 
   return (
-    <Link href="/notifications"
+    <a href="/notifications"
       className={cn("relative flex items-center px-[5px] border-[1px] border-black rounded-full", {
         "bg-sky-500 border-sky-500": pathname === "/notifications"
       })}>
@@ -75,7 +75,7 @@ export const Notification = ({ pathname }: { pathname: string }) => {
         <div className="font-bold text-xs absolute -top-2 right-0 text-white leading-none bg-red-600 px-2 py-1 rounded-full">
           {unread}
         </div>}
-    </Link>
+    </a>
   )
 }
 
