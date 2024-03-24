@@ -45,6 +45,7 @@ export default function RootLayout({
         <SpeedInsights />
         <Analytics />
         <LocationRetriever />
+        <link rel="manifest" href="/manifest.json" />
       </head>
       <body className={`font-sans ${inter.variable}`}>
         <TRPCReactProvider cookies={cookies().toString()}>
