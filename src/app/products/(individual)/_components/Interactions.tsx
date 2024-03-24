@@ -51,10 +51,11 @@ function Interactions(
   }
 
   return (
-    <ul className="interactions grid grid-cols-4 gap-2">
-      <Link target="_blank" rel="noopener" href={`https://wa.me/${product.seller.mobile}`}>
-        <MessageCircle />
-      </Link>
+    <ul className="interactions flex gap-2">
+      { product.seller.mobileVerified &&
+        <Link target="_blank" rel="noopener" href={`https://wa.me/${product.seller.mobile}`}>
+          <MessageCircle />
+        </Link> }
       <MapInteraction os={os} product={product} />
       <div onClick={toggle} className="relative flex items-center justify-center w-6">
           <HeartSolid className={cn(
