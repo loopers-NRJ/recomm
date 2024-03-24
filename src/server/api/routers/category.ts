@@ -526,24 +526,11 @@ export const categoryRouter = createTRPCRouter({
         input: { categoryId: id, image },
         ctx: { prisma, session, logger },
       }) => {
-        const totalFeaturedCategories = await prisma.featuredCategory.count();
-        const maxFeaturedCategory = await prisma.appConfiguration.findUnique({
-          where: {
-            key: "maximumFeaturedCategory",
-          },
-          select: {
-            value: true,
-          },
-        });
-        if (
-          !maxFeaturedCategory?.value ||
-          isNaN(Number(maxFeaturedCategory?.value))
-        ) {
-          return "Invalid Max Featured Category" as const;
+        const category = await prisma.category.findUnique({ where: { id } });
+        if (!category) {
+          return "Category not found";
         }
-        if (totalFeaturedCategories >= Number(maxFeaturedCategory)) {
-          return "Cannot make the category as featured. Maximum featured category limit reached";
-        }
+
         const existingFeatured = await prisma.featuredCategory.findUnique({
           where: {
             categoryId: id,
@@ -552,33 +539,32 @@ export const categoryRouter = createTRPCRouter({
         if (existingFeatured !== null) {
           return "Category is already featured" as const;
         }
-        const data = await prisma.featuredCategory.create({
-          data: {
-            category: {
-              connect: {
-                id,
+        try {
+          await prisma.featuredCategory.create({
+            data: {
+              category: {
+                connect: {
+                  id,
+                },
+              },
+              image: {
+                create: image,
+              },
+              featuredBy: {
+                connect: {
+                  id: session.user.id,
+                },
               },
             },
-            image: {
-              create: image,
-            },
-            featuredBy: {
-              connect: {
-                id: session.user.id,
-              },
-            },
-          },
-          select: {
-            category: true,
-          },
-        });
+          });
+        } catch (error) {
+          console.log(error);
+        }
 
         await logger.info({
-          message: `'${session.user.name}' promoted a category named '${data.category.name}' to featured category`,
-          city: data.category.cityValue,
+          message: `'${session.user.name}' promoted a category named '${category.name}' to featured category`,
+          city: category.cityValue,
         });
-
-        return data.category;
       },
     ),
   removeFromFeatured: getProcedure(AccessType.updateCategory)

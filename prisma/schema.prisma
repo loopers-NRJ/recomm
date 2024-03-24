@@ -322,7 +322,7 @@ model Coupon {
 
 model FeaturedCategory {
     category   Category @relation(fields: [categoryId], references: [id])
-    categoryId String   @unique
+    categoryId String   @id
     image      Image    @relation(fields: [imageId], references: [publicId])
     imageId    String   @unique
 
