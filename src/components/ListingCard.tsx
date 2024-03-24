@@ -6,7 +6,8 @@ import Image from "next/image";
 import { useState } from "react";
 import { api } from "@/trpc/react";
 import { motion } from "framer-motion";
-import HeartButton from "./heart/HeartButton";
+import { HeartSolid } from "./navbar/Icons";
+import { cn } from "@/lib/utils";
 
 interface ListingCardProps {
   product: ProductsPayloadIncluded & { isFavorite?: boolean };
@@ -31,8 +32,11 @@ const ListingCard: React.FC<ListingCardProps> = ({ product }) => {
       className="relative flex w-full flex-col"
     >
       { product.isFavorite !== undefined &&
-      <div className="absolute right-2 top-2 flex h-10 w-10 scale-75 items-center justify-center">
-          <HeartButton onClick={toggle} starred={isFav} />
+      <div onClick={toggle} className="absolute right-2 top-2 flex h-10 w-10 items-center justify-center">
+          <HeartSolid className={cn(
+            "w-5 h-5 text-red-600",
+            isFav ? "text-red-600" : "text-gray-400"
+          )} />
       </div> }
       <Link href={`/products/${product.slug}`} className="group cursor-pointer">
         <div className="aspect-square w-full overflow-hidden rounded-xl border shadow-md transition-shadow duration-300 ease-in-out group-hover:shadow-lg">
