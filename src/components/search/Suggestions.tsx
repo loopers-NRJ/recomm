@@ -31,22 +31,19 @@ const Suggestions: FC<SuggestionProps> = ({ searchKey }) => {
 
   if (suggestionsApi.isLoading)
     return (
-      <CommandItem>
-        <CommandEmpty>Searching...</CommandEmpty>
-      </CommandItem>
+      <CommandEmpty>Searching...</CommandEmpty>
     );
   if (suggestionsApi.isError)
     return (
-      <CommandItem>
-        <CommandEmpty>Suggestions not available</CommandEmpty>
-      </CommandItem>
+      <CommandEmpty>Suggestions not available</CommandEmpty>
     );
 
-  if (suggestionsApi.data === undefined) {
+  if (suggestionsApi.data === undefined ||
+    suggestionsApi.data.brands.length === 0 &&
+    suggestionsApi.data.categories.length === 0 &&
+    suggestionsApi.data.models.length === 0) {
     return (
-      <CommandGroup>
-        <CommandEmpty>No Items found</CommandEmpty>
-      </CommandGroup>
+      <CommandEmpty>No Items found</CommandEmpty>
     );
   }
 
