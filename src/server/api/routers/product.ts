@@ -55,8 +55,8 @@ export const productRouter = createTRPCRouter({
           .default(DEFAULT_SORT_BY),
         cursor: idSchema.optional(),
         categoryId: idSchema.optional(),
-        brandId: idSchema.optional(),
-        modelId: idSchema.optional(),
+        brandId: idSchema.optional().or(z.array(idSchema)),
+        modelId: idSchema.optional().or(z.array(idSchema)),
         state: z.enum(states),
         price: z
           .object({
@@ -67,6 +67,7 @@ export const productRouter = createTRPCRouter({
             message: "minPrice should be less than maxPrice",
           })
           .optional(),
+        choiceIds: z.array(idSchema).optional(),
       }),
     )
     .query(
@@ -82,6 +83,7 @@ export const productRouter = createTRPCRouter({
           cursor,
           state,
           price,
+          choiceIds,
         },
         ctx: { prisma, isAdminPage, session },
       }) => {
@@ -104,16 +106,31 @@ export const productRouter = createTRPCRouter({
         }
         const products = await prisma.product.findMany({
           where: {
-            modelId,
+            modelId: modelId
+              ? typeof modelId === "string"
+                ? modelId
+                : {
+                    in: modelId,
+                  }
+              : undefined,
             isDeleted: isAdminPage ? undefined : false,
             active: isAdminPage ? undefined : true,
+            title: {
+              contains: search,
+            },
             model: {
               active: isAdminPage ? undefined : true,
               category: {
                 id: categoryId,
                 active: isAdminPage ? undefined : true,
               },
-              brandId,
+              brandId: brandId
+                ? typeof brandId === "string"
+                  ? brandId
+                  : {
+                      in: brandId,
+                    }
+                : undefined,
               brand: {
                 active: isAdminPage ? undefined : true,
               },
@@ -145,6 +162,13 @@ export const productRouter = createTRPCRouter({
                   gte: price.min,
                   lte: price.max,
                 }
+              : undefined,
+            OR: choiceIds
+              ? choiceIds.map((id) => ({
+                  selectedChoices: {
+                    some: { id },
+                  },
+                }))
               : undefined,
           },
 
@@ -420,7 +444,10 @@ export const productRouter = createTRPCRouter({
           include: singleProductPayload.include,
         });
 
-        if (userCanSellProduct === 2) {
+        if (
+          userCanSellProduct ===
+          UserSellStatus.UserDoesNotExceededTimeFrameAndItsFirstProduct
+        ) {
           await prisma.user.update({
             where: {
               id: user.id,
@@ -431,7 +458,9 @@ export const productRouter = createTRPCRouter({
             },
           });
         }
-        if (userCanSellProduct === 1) {
+        if (
+          userCanSellProduct === UserSellStatus.UserDoesNotExceededTimeFrame
+        ) {
           await prisma.user.update({
             where: {
               id: user.id,
@@ -651,11 +680,31 @@ async function isAuthorized(productSeller: User, user: User) {
   const accessTypes = role.accesses.map((access) => access.type);
   return accessTypes.includes(AccessType.updateProduct);
 }
+
+enum UserSellStatus {
+  UserDoesNotExceededTimeFrame,
+  UserDoesNotExceededTimeFrameAndItsFirstProduct,
+  UserIsPrimeSeller,
+}
+
 async function checkUserCanSellProduct(
   user: User,
   prisma: PrismaClient,
   logger: Logger,
 ) {
+  if (user.roleId) {
+    const role = await prisma.role.findUnique({
+      where: { id: user.roleId },
+      include: { accesses: true },
+    });
+    if (role) {
+      const accessType = role.accesses.map((access) => access.type);
+      if (accessType.includes(AccessType.primeSeller)) {
+        return UserSellStatus.UserIsPrimeSeller;
+      }
+    }
+  }
+
   const configurations = await prisma.appConfiguration.findMany({
     where: {
       key: {
@@ -694,7 +743,7 @@ async function checkUserCanSellProduct(
     // the user didn't sell any products. so this field is null
     // in this case, the user can sell a product.
     // so set the firstProductCreatedAtWithinTimeFrame to now and productsCreatedCountWithinTimeFrame to 1
-    return 2 as const;
+    return UserSellStatus.UserDoesNotExceededTimeFrameAndItsFirstProduct;
   }
   // find the number of days between the firstProductCreatedAtWithinTimeFrame and now
   const daysPassed = getNumberOfDaysPassed(
@@ -704,14 +753,14 @@ async function checkUserCanSellProduct(
     // if the number of days passed between the first product created and now is greater than the selling duration
     // then the user can sell a product.
     // so reset the firstProductCreatedAtWithinTimeFrame to now and productsCreatedCountWithinTimeFrame to 1
-    return 2 as const;
+    return UserSellStatus.UserDoesNotExceededTimeFrameAndItsFirstProduct;
   }
 
   if (user.productsCreatedCountWithinTimeFrame < sellingCount) {
     // if the user has not reached the selling count
     // then the user can sell a product.
     // so increment the productsCreatedCountWithinTimeFrame by 1
-    return 1 as const;
+    return UserSellStatus.UserDoesNotExceededTimeFrame;
   }
 
   const daysLeft = sellingDuration - daysPassed;

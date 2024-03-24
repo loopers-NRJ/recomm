@@ -239,13 +239,14 @@ export const categoryRouter = createTRPCRouter({
       z.object({
         name: z.string().min(3).max(255),
         price: z.number().int().positive(),
+        variants: z.array(z.string().trim()).nonempty().optional(),
         parentCategoryId: idSchema.optional(),
         state: z.enum(states),
       }),
     )
     .mutation(
       async ({
-        input: { name, price, parentCategoryId, state },
+        input: { name, price, parentCategoryId, state, variants },
         ctx: { prisma, session, logger },
       }) => {
         // checking whether the category already exists
@@ -280,6 +281,7 @@ export const categoryRouter = createTRPCRouter({
             },
           });
         }
+
         // creating the category
         const category = await prisma.category.create({
           data: {
@@ -296,6 +298,13 @@ export const categoryRouter = createTRPCRouter({
               ? {
                   connect: {
                     id: parentCategoryId,
+                  },
+                }
+              : undefined,
+            variants: variants
+              ? {
+                  createMany: {
+                    data: variants.map((variant) => ({ title: variant })),
                   },
                 }
               : undefined,

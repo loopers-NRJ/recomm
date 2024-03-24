@@ -3,21 +3,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Check, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { type ComponentProps, useState } from "react";
 
 export default function EditableText({
   value,
   onSubmit,
   disabled,
   loading,
+  type,
 }: {
   value: string;
   onSubmit: (value: string) => void;
   disabled?: boolean;
   loading?: boolean;
+  type?: ComponentProps<"input">["type"];
 }) {
   const [status, setStatus] = useState<"closed" | "open">("closed");
-
   const [internalValue, setInternalValue] = useState(value);
 
   return (
@@ -27,6 +28,7 @@ export default function EditableText({
           variant="outline"
           onClick={() => setStatus("open")}
           className="min-w-20"
+          disabled={disabled ?? loading}
         >
           {value}
         </Button>
@@ -38,11 +40,13 @@ export default function EditableText({
             onChange={(e) => {
               setInternalValue(e.target.value);
             }}
-            onBlur={() =>
-              (internalValue === "" || internalValue === value) &&
-              setStatus("closed")
-            }
+            onBlur={() => {
+              if (internalValue === "" || internalValue === value) {
+                setStatus("closed");
+              }
+            }}
             disabled={disabled ?? loading}
+            type={type}
           />
           {internalValue && internalValue !== value && (
             <Button

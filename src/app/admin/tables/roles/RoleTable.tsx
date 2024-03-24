@@ -14,7 +14,7 @@ import {
 } from "next-usequerystate";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import AdminSearchbar from "../AdminSearchbar";
 import TableHeader from "../TableHeader";
 import { errorHandler } from "@/utils/errorHandler";
@@ -35,18 +35,11 @@ export default function RoleTable() {
     search,
     sortOrder,
   });
-  const [deletingRoleId, setDeletingRoleId] = useState<string>();
   const deleteRoleApi = api.role.delete.useMutation({
-    onMutate: (variables) => {
-      setDeletingRoleId(variables.id);
-    },
     onSuccess: () => {
       void rolesApi.refetch();
     },
     onError: errorHandler,
-    onSettled: () => {
-      setDeletingRoleId(undefined);
-    },
   });
   const columns: ColumnDef<RolePayloadIncluded>[] = useMemo(
     () => [
@@ -91,7 +84,10 @@ export default function RoleTable() {
             onClick={() => {
               deleteRoleApi.mutate({ id: row.original.id });
             }}
-            disabled={deletingRoleId === row.original.id}
+            disabled={
+              deleteRoleApi.isLoading &&
+              deleteRoleApi.variables?.id === row.original.id
+            }
             size="sm"
             variant="outline"
             className="border-red-400"
@@ -101,7 +97,7 @@ export default function RoleTable() {
         ),
       },
     ],
-    [deleteRoleApi, deletingRoleId, rolesApi, router, setSortOrder, sortOrder],
+    [deleteRoleApi, rolesApi, router, setSortOrder, sortOrder],
   );
 
   if (rolesApi.isError) {

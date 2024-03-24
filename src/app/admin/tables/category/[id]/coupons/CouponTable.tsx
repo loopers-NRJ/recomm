@@ -19,7 +19,7 @@ import {
 } from "next-usequerystate";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import AdminSearchbar from "../../../AdminSearchbar";
 import TableHeader from "../../../TableHeader";
 import { type RouterInputs } from "@/trpc/shared";
@@ -73,9 +73,6 @@ export default function CouponTable({ category }: { category: Category }) {
   );
 
   const deleteCouponApi = api.coupon.delete.useMutation({
-    onMutate: (variables) => {
-      setDeletingCouponCode(variables.code);
-    },
     onSuccess: (result) => {
       if (typeof result === "string") {
         return toast.error(result);
@@ -83,14 +80,8 @@ export default function CouponTable({ category }: { category: Category }) {
       void couponApi.refetch();
     },
     onError: errorHandler,
-    onSettled: () => {
-      setDeletingCouponCode(undefined);
-    },
   });
   const updateCouponById = api.coupon.update.useMutation({
-    onMutate: (variables) => {
-      setUpdatingCouponCode(variables.code);
-    },
     onSuccess: (result) => {
       if (typeof result === "string") {
         return toast.error(result);
@@ -98,15 +89,7 @@ export default function CouponTable({ category }: { category: Category }) {
       void couponApi.refetch();
     },
     onError: errorHandler,
-    onSettled: () => {
-      setUpdatingCouponCode(undefined);
-    },
   });
-
-  // this state is to disable the update button when the user clicks the update button
-  const [updatingCouponCode, setUpdatingCouponCode] = useState<string>();
-  // this state is to disable the delete button when the user clicks the delete button
-  const [deletingCouponCode, setDeletingCouponCode] = useState<string>();
 
   const columns: ColumnDef<Coupon>[] = useMemo(
     () => [
@@ -149,7 +132,10 @@ export default function CouponTable({ category }: { category: Category }) {
         ),
         cell: ({ row }) => (
           <Switch
-            disabled={updatingCouponCode === row.original.code}
+            disabled={
+              updateCouponById.isLoading &&
+              updateCouponById.variables?.code === row.original.code
+            }
             checked={row.original.active}
             // make the switch blue when active and black when inactive
             className="data-[state=checked]:bg-blue-500"
@@ -214,7 +200,10 @@ export default function CouponTable({ category }: { category: Category }) {
                 categoryId: row.original.categoryId,
               });
             }}
-            disabled={deletingCouponCode === row.original.code}
+            disabled={
+              deleteCouponApi.isLoading &&
+              deleteCouponApi.variables?.code === row.original.code
+            }
             size="sm"
             variant="outline"
             className="border-red-400"
@@ -227,14 +216,12 @@ export default function CouponTable({ category }: { category: Category }) {
     [
       couponApi,
       deleteCouponApi,
-      deletingCouponCode,
       router,
       setSortBy,
       setSortOrder,
       sortBy,
       sortOrder,
       updateCouponById,
-      updatingCouponCode,
     ],
   );
 

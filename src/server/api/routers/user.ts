@@ -121,17 +121,15 @@ export const userRouter = createTRPCRouter({
       z.object({
         name: z.string().trim().optional(),
         mobile: z.string().trim().length(10).optional(),
+        mobileVerified: z.boolean().optional(),
       }),
     )
-    .mutation(async ({ input: { name, mobile }, ctx: { prisma, session } }) => {
+    .mutation(async ({ input, ctx: { prisma, session } }) => {
       const user = await prisma.user.update({
         where: {
           id: session.user.id,
         },
-        data: {
-          name,
-          mobile,
-        },
+        data: input,
         include: {
           role: true,
         },
@@ -308,7 +306,10 @@ export const userRouter = createTRPCRouter({
           include: productsPayload.include,
         });
         return {
-          favoritedProducts: favoritedProducts.map((product) => ({...product, isFavorite: true})),
+          favoritedProducts: favoritedProducts.map((product) => ({
+            ...product,
+            isFavorite: true,
+          })),
           nextCursor: favoritedProducts[limit - 1]?.id,
         };
       },
@@ -585,8 +586,8 @@ export const userRouter = createTRPCRouter({
   productSellingCount: protectedProcedure.query(
     async ({ ctx: { prisma, session, logger } }) => {
       const { user } = session;
-      
-      if (user.roleId && await isPrimeSeller(prisma, user.roleId)) {
+
+      if (user.roleId && (await isPrimeSeller(prisma, user.roleId))) {
         return { isPrimeSeller: true, count: 0 };
       }
 
@@ -626,11 +627,13 @@ export const userRouter = createTRPCRouter({
         return "Something went wrong" as const;
       }
 
-      return { isPrimeSeller: false, count: sellingCount - user.productsCreatedCountWithinTimeFrame };
+      return {
+        isPrimeSeller: false,
+        count: sellingCount - user.productsCreatedCountWithinTimeFrame,
+      };
     },
   ),
 });
-
 
 async function isPrimeSeller(prisma: PrismaClient, id: string) {
   const role = await prisma.role.findUnique({
@@ -651,7 +654,5 @@ async function isPrimeSeller(prisma: PrismaClient, id: string) {
     return "Something went wrong" as const;
   }
 
-  return role.accesses.some(
-    (access) => access.type === AccessType.primeSeller,
-  );
+  return role.accesses.some((access) => access.type === AccessType.primeSeller);
 }

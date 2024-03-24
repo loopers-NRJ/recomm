@@ -20,23 +20,24 @@ export type MultipleChoiceAnswer = {
 } & (
   | {
       required: true;
-      type: "Dropdown" | "Variant" | "RadioGroup";
+      type:
+        | typeof MultipleChoiceQuestionType.Dropdown
+        | typeof MultipleChoiceQuestionType.Selector
+        | typeof MultipleChoiceQuestionType.RadioGroup;
       valueId: string;
     }
   | {
-      required: true;
+      required: boolean;
       type: "Checkbox";
       valueIds: string[];
     }
   | {
       required: false;
-      type: "Dropdown" | "Variant" | "RadioGroup";
+      type:
+        | typeof MultipleChoiceQuestionType.Dropdown
+        | typeof MultipleChoiceQuestionType.Selector
+        | typeof MultipleChoiceQuestionType.RadioGroup;
       valueId: string | undefined;
-    }
-  | {
-      required: false;
-      type: "Checkbox";
-      valueIds: string[];
     }
 );
 
@@ -177,8 +178,8 @@ function MultipleChoiceQuestionInputField({
   }
 
   if (
-    question.type === MultipleChoiceQuestionType.Variant &&
-    answer.type === MultipleChoiceQuestionType.Variant
+    question.type === MultipleChoiceQuestionType.Selector &&
+    answer.type === MultipleChoiceQuestionType.Selector
   ) {
     return (
       <Label className="flex flex-col gap-2">

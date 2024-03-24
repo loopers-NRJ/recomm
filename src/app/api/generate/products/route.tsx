@@ -1,13 +1,12 @@
 import { getServerAuthSession } from "@/server/auth";
 import { api } from "@/trpc/server";
 import {
-  ProductsPayloadIncluded,
+  type ProductsPayloadIncluded,
   hasAdminPageAccess,
   productsPayload,
 } from "@/types/prisma";
 import { notFound } from "next/navigation";
 import { Workbook } from "exceljs";
-import { User } from "@prisma/client";
 import { prisma } from "@/server/db";
 
 async function GenerateExcel(products: ProductsPayloadIncluded[]) {

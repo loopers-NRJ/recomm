@@ -15,6 +15,7 @@ import { couponRouter } from "./routers/coupon";
 import { reportRouter } from "./routers/report";
 import { configurationsRouter } from "./routers/configurations";
 import { inboxRouter } from "./routers/inbox";
+import { variantRouter } from "./routers/variant";
 
 /**
  * This is the primary router for your server.
@@ -37,6 +38,7 @@ export const appRouter = createTRPCRouter({
   inbox: inboxRouter,
   report: reportRouter,
   configuration: configurationsRouter,
+  variant: variantRouter,
 });
 
 // export type definition of API
