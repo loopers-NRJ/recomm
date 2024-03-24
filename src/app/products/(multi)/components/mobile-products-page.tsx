@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import SortDrawer from "./sort-drawer";
 import FilterDrawer from "./filter-drawer";
 import { api } from "@/trpc/react";
-import { useClientSelectedState } from "@/store/SelectedState";
+import { useClientselectedCity } from "@/store/ClientSelectedCity";
 import { useRouter } from "next/navigation";
 
 interface SearchParams {
@@ -58,10 +58,10 @@ function MobileProductsPage({ searchParams }: { searchParams: SearchParams }) {
     router.replace(makeQuery(newParams));
   };
 
-  const { state } = useClientSelectedState();
-  const { data: models } = api.model.all.useQuery({ state });
-  const { data: brands } = api.brand.all.useQuery({ state });
-  const { data: categories } = api.category.all.useQuery({ state });
+  const city = useClientselectedCity((selected) => selected.city?.value);
+  const { data: models } = api.model.all.useQuery({ city });
+  const { data: brands } = api.brand.all.useQuery({ city });
+  const { data: categories } = api.category.all.useQuery({ city });
 
   const values = {
     models: models?.models ?? [],

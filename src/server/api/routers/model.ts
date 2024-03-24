@@ -6,7 +6,6 @@ import {
   modelsPayload,
   multipleChoiceQuestionTypeArray,
   singleModelPayload,
-  states,
 } from "@/types/prisma";
 import {
   atomicQuestionSchema,
@@ -52,7 +51,7 @@ export const modelRouter = createTRPCRouter({
         cursor: idSchema.optional(),
         categoryId: idSchema.optional(),
         brandId: idSchema.optional(),
-        state: z.enum(states),
+        city: z.string().trim().min(1),
       }),
     )
     .query(
@@ -65,7 +64,7 @@ export const modelRouter = createTRPCRouter({
           brandId,
           categoryId,
           cursor,
-          state,
+          city,
         },
         ctx: { prisma, isAdminPage },
       }) => {
@@ -83,7 +82,7 @@ export const modelRouter = createTRPCRouter({
             name: {
               contains: search,
             },
-            createdState: state,
+            cityValue: city,
           },
           take: limit,
           skip: cursor ? 1 : undefined,
@@ -155,7 +154,7 @@ export const modelRouter = createTRPCRouter({
         cursor: idSchema.optional(),
         categoryId: idSchema.optional(),
         brandId: idSchema.optional(),
-        state: z.enum(states),
+        city: z.string().trim().min(1).optional(),
       }),
     )
     .query(
@@ -168,7 +167,7 @@ export const modelRouter = createTRPCRouter({
           brandId,
           categoryId,
           cursor,
-          state,
+          city,
         },
         ctx: { prisma, isAdminPage },
       }) => {
@@ -186,7 +185,7 @@ export const modelRouter = createTRPCRouter({
             name: {
               contains: search,
             },
-            createdState: state,
+            cityValue: city,
           },
           take: limit,
           skip: cursor ? 1 : undefined,
@@ -250,7 +249,7 @@ export const modelRouter = createTRPCRouter({
     }),
 
   bySlug: publicProcedure
-    .input(z.object({ modelSlug: z.string().min(1).max(255) }))
+    .input(z.object({ modelSlug: z.string().trim().min(1).max(255) }))
     .query(async ({ input: { modelSlug: slug }, ctx: { prisma } }) => {
       return await prisma.model.findUnique({
         where: {
@@ -271,14 +270,14 @@ export const modelRouter = createTRPCRouter({
           categoryId,
           multipleChoiceQuestions,
           atomicQuestions,
-          state,
+          city,
         },
         ctx: { prisma, session, logger },
       }) => {
         const existingModel = await prisma.model.findFirst({
           where: {
             name,
-            createdState: state,
+            cityValue: city,
           },
         });
         if (existingModel !== null) {
@@ -296,7 +295,11 @@ export const modelRouter = createTRPCRouter({
                   id: session.user.id,
                 },
               },
-              createdState: state,
+              createdCity: {
+                connect: {
+                  value: city,
+                },
+              },
               category: {
                 connect: {
                   id: categoryId,
@@ -340,7 +343,7 @@ export const modelRouter = createTRPCRouter({
 
           await logger.info({
             message: `'${session.user.name}' created a model named '${model.name}'`,
-            state: model.createdState,
+            city: model.cityValue,
           });
 
           return model;
@@ -355,8 +358,8 @@ export const modelRouter = createTRPCRouter({
         categoryId: idSchema.optional(),
         brandId: idSchema.optional(),
         active: z.boolean().optional(),
-        createdState: z.enum(states).optional(),
-        name: z.string().min(1).max(255).optional(),
+        city: z.string().trim().min(1).optional(),
+        name: z.string().trim().min(1).max(255).optional(),
       }),
     )
     .mutation(
@@ -368,7 +371,7 @@ export const modelRouter = createTRPCRouter({
           categoryId,
           active,
           brandId,
-          createdState,
+          city,
         },
         ctx: { prisma, session, logger },
       }) => {
@@ -386,7 +389,7 @@ export const modelRouter = createTRPCRouter({
           const existingName = await prisma.model.findFirst({
             where: {
               name: newName,
-              createdState: existingModel.createdState,
+              cityValue: existingModel.cityValue,
             },
           });
           if (existingName !== null) {
@@ -419,7 +422,11 @@ export const modelRouter = createTRPCRouter({
                 }
               : undefined,
             active,
-            createdState: createdState,
+            createdCity: {
+              connect: {
+                value: city,
+              },
+            },
             updatedBy: {
               connect: {
                 id: session.user.id,
@@ -432,37 +439,37 @@ export const modelRouter = createTRPCRouter({
         if (newName) {
           await logger.info({
             message: `'${session.user.name}' updated a model's name from '${existingModel.name}' to '${model.name}'`,
-            state: model.createdState,
+            city: model.cityValue,
           });
         }
         if (priceRange) {
           await logger.info({
             message: `'${session.user.name}' updated a model's price range from '${existingModel.minimumPrice}-${existingModel.maximumPrice}' to '${priceRange[0]}-${priceRange[1]}'`,
-            state: model.createdState,
+            city: model.cityValue,
           });
         }
         if (categoryId) {
           await logger.info({
             message: `'${session.user.name}' updated a model's name from '${existingModel.categoryId}' to '${model.categoryId}'`,
-            state: model.createdState,
+            city: model.cityValue,
           });
         }
         if (brandId) {
           await logger.info({
             message: `'${session.user.name}' updated a model's name from '${existingModel.brandId}' to '${model.brandId}'`,
-            state: model.createdState,
+            city: model.cityValue,
           });
         }
         if (active) {
           await logger.info({
             message: `'${session.user.name}' updated a model's name from '${existingModel.active}' to '${model.active}'`,
-            state: model.createdState,
+            city: model.cityValue,
           });
         }
-        if (createdState) {
+        if (city) {
           await logger.info({
-            message: `'${session.user.name}' updated a model's name from '${existingModel.createdState}' to '${model.createdState}'`,
-            state: model.createdState,
+            message: `'${session.user.name}' updated a model's name from '${existingModel.cityValue}' to '${model.cityValue}'`,
+            city: model.cityValue,
           });
         }
 
@@ -489,7 +496,7 @@ export const modelRouter = createTRPCRouter({
 
         await logger.info({
           message: `'${session.user.name}' deleted a model named '${existingModel.name}'`,
-          state: model.createdState,
+          city: model.cityValue,
         });
 
         return model;
@@ -505,7 +512,7 @@ export const modelRouter = createTRPCRouter({
         select: {
           name: true,
           atomicQuestions: true,
-          createdState: true,
+          cityValue: true,
         },
       });
       if (model === null) {
@@ -522,7 +529,7 @@ export const modelRouter = createTRPCRouter({
       });
       await logger.info({
         message: `'${session.user.name}' added a atomic Question to a model named '${model.name}'`,
-        state: model.createdState,
+        city: model.cityValue,
       });
 
       return question;
@@ -537,7 +544,7 @@ export const modelRouter = createTRPCRouter({
         select: {
           multipleChoiceQuestions: true,
           name: true,
-          createdState: true,
+          cityValue: true,
         },
       });
       if (model === null) {
@@ -574,7 +581,7 @@ export const modelRouter = createTRPCRouter({
 
       await logger.info({
         message: `'${session.user.name}' added a multipleChoice Question to a model named '${model.name}'`,
-        state: model.createdState,
+        city: model.cityValue,
       });
 
       return result;
@@ -611,7 +618,7 @@ export const modelRouter = createTRPCRouter({
           where: {
             id: questionId,
           },
-          select: { modelId: true, model: { select: { createdState: true } } },
+          select: { modelId: true, model: { select: { cityValue: true } } },
         });
         if (existingQuestion === null) {
           return "Question not found";
@@ -645,7 +652,7 @@ export const modelRouter = createTRPCRouter({
         });
         await logger.info({
           message: `'${session.user.name}' updated a atomic Question of a model named '${question.modelId}'`,
-          state: existingQuestion.model.createdState,
+          city: existingQuestion.model.cityValue,
         });
 
         return question;
@@ -800,7 +807,7 @@ export const modelRouter = createTRPCRouter({
           },
           select: {
             questionId: true,
-            model: { select: { createdState: true } },
+            model: { select: { cityValue: true } },
           },
         });
         if (existingChoice === null) {
@@ -826,7 +833,7 @@ export const modelRouter = createTRPCRouter({
 
         await logger.info({
           message: `'${session.user.name}' updated a choice to a model with id=${question.modelId}`,
-          state: existingChoice.model.createdState,
+          city: existingChoice.model.cityValue,
         });
 
         return question;
@@ -844,7 +851,7 @@ export const modelRouter = createTRPCRouter({
           where: {
             id: choiceId,
           },
-          select: { model: { select: { createdState: true } } },
+          select: { model: { select: { cityValue: true } } },
         });
         if (existingChoice === null) {
           return "Choice not found";
@@ -854,7 +861,7 @@ export const modelRouter = createTRPCRouter({
         });
         await logger.info({
           message: `'${session.user.name}' deleted a choice for a model with id=${deleted.modelId}`,
-          state: existingChoice.model.createdState,
+          city: existingChoice.model.cityValue,
         });
       },
     ),

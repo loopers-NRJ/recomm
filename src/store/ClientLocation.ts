@@ -7,6 +7,6 @@ type LocationAction = { setLocation: (state: LocationState["coords"]) => void };
 
 export const useClientLocation = create<LocationState & LocationAction>(
   (set) => ({
-    setLocation: (state) => set({ coords: state }),
+    setLocation: (coords) => set({ coords }),
   }),
 );

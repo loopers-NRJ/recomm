@@ -2,7 +2,6 @@ import type { Model } from "../types";
 import {
   ModelBrandEdit,
   ModelCategoryEdit,
-  ModelCreatedStateEdit,
   ModelNameEdit,
   ModelPriceRangeEdit,
 } from "./Editors";
@@ -18,8 +17,6 @@ export default function BasicInfoEditSection({ model }: { model: Model }) {
       <ModelBrandEdit model={model} />
       {/* edit model price range */}
       <ModelPriceRangeEdit model={model} />
-      {/* edit model created State */}
-      <ModelCreatedStateEdit model={model} />
     </section>
   );
 }

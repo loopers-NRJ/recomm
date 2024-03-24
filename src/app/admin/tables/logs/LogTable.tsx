@@ -28,10 +28,10 @@ import { useMemo, useState } from "react";
 import AdminSearchbar from "../AdminSearchbar";
 import TableHeader from "../TableHeader";
 import { type LogLevel, logLevel } from "@/utils/logger";
-import type { Log, State } from "@prisma/client";
-import { states } from "@/types/prisma";
+import type { Log } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { AdminButtonLink } from "@/components/common/ButtonLink";
+import Loading from "@/components/common/Loading";
 
 type SortBy = OmitUndefined<RouterInputs["log"]["all"]["sortBy"]>;
 
@@ -42,7 +42,7 @@ export default function LogTable() {
   );
   const [sortBy, setSortBy] = useQueryState<SortBy>(
     "sortBy",
-    parseAsStringEnum(["createdAt", "level", "state"]).withDefault(
+    parseAsStringEnum(["createdAt", "level", "city"]).withDefault(
       DEFAULT_SORT_BY,
     ),
   );
@@ -52,20 +52,21 @@ export default function LogTable() {
     parseAsString.withDefault(""),
   );
 
-  const [selectedState, setSelectedState] = useState<State | "common" | "">("");
-  const clientStateToQuery = (state: State | "common" | "") => {
-    if (state === "") return;
-    if (state === "common") return null;
-    return state;
+  const [selectedCity, setselectedCity] = useState<string>("");
+  const clientCityToQuery = (city: string) => {
+    if (city === "") return;
+    if (city === "common") return null;
+    return city;
   };
   const [selectedLevel, setSelectedLevel] = useState<LogLevel>();
+  const citiesApi = api.city.all.useQuery();
   const logsApi = api.log.all.useInfiniteQuery(
     {
       search,
       sortBy,
       sortOrder,
       level: selectedLevel,
-      state: clientStateToQuery(selectedState),
+      city: clientCityToQuery(selectedCity),
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -94,17 +95,17 @@ export default function LogTable() {
         accessorFn: (row) => row.level,
       },
       {
-        id: "state",
+        id: "city",
         header: () => (
           <TableHeader
-            title="state"
+            title="city"
             sortOrder={sortOrder}
             setSortOrder={(order) => void setSortOrder(order)}
             sortBy={sortBy}
             setSortBy={(sortBy) => void setSortBy(sortBy)}
           />
         ),
-        accessorFn: (row) => row.state ?? "common",
+        accessorFn: (row) => row.cityValue ?? "common",
       },
       {
         id: "message",
@@ -133,9 +134,19 @@ export default function LogTable() {
     [sortBy, sortOrder, logsApi],
   );
 
+  if (
+    citiesApi.isLoading ||
+    logsApi.isLoading ||
+    !citiesApi.data ||
+    !logsApi.data
+  ) {
+    return <Loading />;
+  }
+
   if (logsApi.isError) {
     return <ServerError message={logsApi.error.message} />;
   }
+  const cities = citiesApi.data;
 
   return (
     <div className="flex flex-col gap-3">
@@ -163,22 +174,21 @@ export default function LogTable() {
           </Select>
         </Label>
         <Label className="flex items-center gap-3">
-          State
-          <Select
-            onValueChange={(value) => {
-              setSelectedState(value as State);
-            }}
-            value={selectedState ?? ""}
-          >
+          City
+          <Select onValueChange={setselectedCity} value={selectedCity ?? ""}>
             <SelectTrigger className="w-[180px] capitalize">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="h-80">
               <SelectItem value="">All</SelectItem>
               <SelectItem value="common">common</SelectItem>
-              {states.map((state) => (
-                <SelectItem value={state} key={state} className="capitalize">
-                  {state}
+              {cities.map((city) => (
+                <SelectItem
+                  value={city.value}
+                  key={city.value}
+                  className="capitalize"
+                >
+                  {city.value}
                 </SelectItem>
               ))}
             </SelectContent>

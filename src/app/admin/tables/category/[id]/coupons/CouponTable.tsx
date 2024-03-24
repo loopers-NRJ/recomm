@@ -4,7 +4,6 @@ import { DataTable } from "@/app/admin/tables/Table";
 import ServerError from "@/components/common/ServerError";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { useAdminSelectedState } from "@/store/SelectedState";
 import { type OmitUndefined } from "@/types/custom";
 import {
   DEFAULT_SORT_BY,
@@ -41,7 +40,7 @@ export default function CouponTable({ category }: { category: Category }) {
       "discount",
       "type",
       "active",
-      "state",
+      "city",
       "createdAt",
     ]).withDefault(DEFAULT_SORT_BY),
   );
@@ -57,14 +56,11 @@ export default function CouponTable({ category }: { category: Category }) {
     parseAsString.withDefault(""),
   );
 
-  const selectedState = useAdminSelectedState((selected) => selected.state);
-
   const couponApi = api.coupon.all.useInfiniteQuery(
     {
       search,
       sortBy,
       sortOrder,
-      state: selectedState,
       categoryId: category.id,
     },
     {

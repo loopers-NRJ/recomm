@@ -13,7 +13,7 @@ async function GenerateExcel(logs: Log[]) {
 
   worksheet.columns = [
     { header: "Level", key: "level" },
-    { header: "State", key: "state" },
+    { header: "City", key: "city" },
     { header: "Message", key: "message" },
     { header: "Detail", key: "detail" },
     { header: "Created At", key: "createdAt" },
@@ -22,7 +22,7 @@ async function GenerateExcel(logs: Log[]) {
   for (const log of logs) {
     worksheet.addRow({
       level: log.level,
-      state: log.state,
+      city: log.cityValue,
       message: log.message,
       detail: log.detail,
       createdAt: log.createdAt,

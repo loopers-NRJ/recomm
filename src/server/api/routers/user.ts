@@ -163,7 +163,7 @@ export const userRouter = createTRPCRouter({
 
         await logger.info({
           message: `'${session.user.name}' promoted '${user.name}' as '${user.role?.name}'`,
-          state: "common",
+          city: "common",
         });
       },
     ),
@@ -606,7 +606,7 @@ export const userRouter = createTRPCRouter({
       )?.value;
       if (sellingDurationStr === undefined || sellingCountStr === undefined) {
         await logger.error({
-          state: "common",
+          city: "common",
           message:
             "Product selling configurations not found, check the configuration names",
           detail: JSON.stringify({ userId: user.id }),
@@ -619,7 +619,7 @@ export const userRouter = createTRPCRouter({
 
       if (isNaN(sellingDuration) || isNaN(sellingCount)) {
         await logger.error({
-          state: "common",
+          city: "common",
           message:
             "Product selling configurations are not numbers. Enter a valid configurations",
           detail: JSON.stringify({ userId: user.id }),
@@ -647,7 +647,7 @@ async function isPrimeSeller(prisma: PrismaClient, id: string) {
 
   if (role === null) {
     await logger.error({
-      state: "common",
+      city: "common",
       message: "Role not found",
       detail: JSON.stringify({ userId: id }),
     });

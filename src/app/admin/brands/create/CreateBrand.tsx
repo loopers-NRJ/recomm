@@ -4,7 +4,7 @@ import Container from "@/components/Container";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAdminSelectedState } from "@/store/SelectedState";
+import { useAdminselectedCity } from "@/store/AdminSelectedCity";
 import { api } from "@/trpc/react";
 import { errorHandler } from "@/utils/errorHandler";
 import { Loader2 } from "lucide-react";
@@ -26,7 +26,7 @@ export default function CreateBrand() {
 
   const router = useRouter();
 
-  const selectedState = useAdminSelectedState((selected) => selected.state);
+  const city = useAdminselectedCity((selected) => selected.city?.value);
 
   return (
     <Container className="flex justify-center">
@@ -42,12 +42,13 @@ export default function CreateBrand() {
 
         <div className="flex items-end justify-end gap-8">
           <Button
-            onClick={() =>
+            onClick={() => {
+              if (!city) return toast.error("Select a city");
               createBrandApi.mutate({
                 name: brandName,
-                state: selectedState,
-              })
-            }
+                city,
+              });
+            }}
             disabled={brandName.trim() === "" || createBrandApi.isLoading}
           >
             Create Brand

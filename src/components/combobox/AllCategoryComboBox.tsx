@@ -3,7 +3,7 @@ import { Label } from "../ui/label";
 import ComboBox from "../common/ComboBox";
 import { api } from "@/trpc/react";
 import { type Item } from "@/types/custom";
-import { useClientSelectedState } from "@/store/SelectedState";
+import { useClientselectedCity } from "@/store/ClientSelectedCity";
 
 /**
  *
@@ -24,11 +24,8 @@ function AllCategoryComboBox({
   disabled?: boolean;
 }) {
   const [search, setSearch] = useState("");
-  const selectedState = useClientSelectedState((selected) => selected.state);
-  const categorySearch = api.search.category.useQuery({
-    search,
-    state: selectedState,
-  });
+  const city = useClientselectedCity((selected) => selected.city?.value);
+  const categorySearch = api.search.category.useQuery({ search, city });
   return (
     <Label className="flex w-full cursor-pointer items-center justify-between">
       Category

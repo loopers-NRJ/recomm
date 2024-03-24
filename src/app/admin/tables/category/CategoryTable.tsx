@@ -4,7 +4,7 @@ import { DataTable } from "@/app/admin/tables/Table";
 import ServerError from "@/components/common/ServerError";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { useAdminSelectedState } from "@/store/SelectedState";
+import { useAdminselectedCity } from "@/store/AdminSelectedCity";
 import { type OmitUndefined } from "@/types/custom";
 import { type CategoryPayloadIncluded } from "@/types/prisma";
 import {
@@ -66,7 +66,7 @@ export default function CategoryTable() {
     parseAsString.withDefault(""),
   );
 
-  const selectedState = useAdminSelectedState((selected) => selected.state);
+  const city = useAdminselectedCity((selected) => selected.city?.value);
 
   const categoriesApi = api.category.allForAdmin.useInfiniteQuery(
     {
@@ -75,9 +75,10 @@ export default function CategoryTable() {
       search,
       sortBy,
       sortOrder,
-      state: selectedState,
+      city: city ?? "",
     },
     {
+      enabled: city !== undefined,
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
@@ -352,7 +353,7 @@ export default function CategoryTable() {
               createCategoryApi.mutate({
                 name: row.original.name + " copy",
                 price: row.original.price,
-                state: row.original.createdState,
+                city: row.original.cityValue,
                 parentCategoryId: row.original.parentCategoryId ?? undefined,
               });
             }}

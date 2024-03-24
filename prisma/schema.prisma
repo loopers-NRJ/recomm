@@ -87,6 +87,9 @@ enum AccessType {
     viewAppConfiguration // allow to view app configuration
     updateAppConfiguration // allow to update app configuration
 
+    createCity
+    updateCity
+    deleteCity
     // update types/prisma.ts when adding new access type
 }
 
@@ -103,13 +106,33 @@ model Role {
 
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
-    createdBy   User     @relation("roleCreate", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
-    updatedBy   User?    @relation("roleUpdate", fields: [updatedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    createdBy   User     @relation("createdRoles", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    updatedBy   User?    @relation("updatedRoles", fields: [updatedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
     createdById String
     updatedById String?
-    // createdState State
+    createdCity City[]
 
     @@index([name])
+    @@index([updatedById])
+    @@index([createdById])
+}
+
+model City {
+    value String @id
+
+    categories  Category[]
+    brands      Brand[]
+    models      Model[]
+    Addresses   Address[]
+    logs        Log[]
+    roles       Role[]
+    createdAt   DateTime   @default(now())
+    updatedAt   DateTime   @updatedAt
+    createdBy   User       @relation("createdCities", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: Cascade)
+    updatedBy   User?      @relation("updatedCities", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+    createdById String
+    updatedById String?
+
     @@index([updatedById])
     @@index([createdById])
 }
@@ -142,27 +165,29 @@ model User {
     updatedAt                            DateTime  @updatedAt
 
     // admin level
-    createdCategories              Category[]               @relation("categoryCreate")
-    updatedCategories              Category[]               @relation("categoryUpdate")
-    createdCoupons                 Coupon[]                 @relation("couponCreate")
-    updatedCoupons                 Coupon[]                 @relation("couponUpdate")
-    createdFeaturedCategories      FeaturedCategory[]       @relation("featureCreate")
-    updatedFeaturedCategories      FeaturedCategory[]       @relation("featureUpdate")
-    createdBrands                  Brand[]                  @relation("brandCreate")
-    updatedBrands                  Brand[]                  @relation("brandUpdate")
-    createdModels                  Model[]                  @relation("modelCreate")
-    updatedModels                  Model[]                  @relation("modelUpdate")
-    updatedMultipleChoiceQuestions MultipleChoiceQuestion[] @relation("multipleChoiceQuestionUpdate")
-    updatedChoice                  Choice[]                 @relation("choiceUpdate")
-    updatedAtomicQuestions         AtomicQuestion[]         @relation("atomicQuestionUpdate")
-    createdRoles                   Role[]                   @relation("roleCreate")
-    updatedRoles                   Role[]                   @relation("roleUpdate")
+    createdCategories              Category[]               @relation("createdCatgories")
+    updatedCategories              Category[]               @relation("updatedCategories")
+    createdCoupons                 Coupon[]                 @relation("createdCoupons")
+    updatedCoupons                 Coupon[]                 @relation("updatedCoupons")
+    createdFeaturedCategories      FeaturedCategory[]       @relation("createdFeaturedCategories")
+    updatedFeaturedCategories      FeaturedCategory[]       @relation("updatedFeaturedCategories")
+    createdBrands                  Brand[]                  @relation("createdBrands")
+    updatedBrands                  Brand[]                  @relation("updatedBrands")
+    createdModels                  Model[]                  @relation("createdModels")
+    updatedModels                  Model[]                  @relation("updatedModels")
+    updatedMultipleChoiceQuestions MultipleChoiceQuestion[] @relation("updatedMultipleChoiceQuestions")
+    updatedChoice                  Choice[]                 @relation("updatedChoices")
+    updatedAtomicQuestions         AtomicQuestion[]         @relation("updatedAtomicQuestions")
+    createdRoles                   Role[]                   @relation("createdRoles")
+    updatedRoles                   Role[]                   @relation("updatedRoles")
     reportedProducts               Report[]
     notifications                  Notification[]
-    createdConfigurations          AppConfiguration[]       @relation("configCreate")
-    updatedConfigurations          AppConfiguration[]       @relation("configUpdate")
-    updatedVariants                Variant[]                @relation("variantUpdate")
-    updatedVariantValues           VariantValue[]           @relation("variantValueUpdate")
+    createdConfigurations          AppConfiguration[]       @relation("createdConfigurations")
+    updatedConfigurations          AppConfiguration[]       @relation("updatedConfigurations")
+    updatedVariants                Variant[]                @relation("updatedVariants")
+    updatedVariantValues           VariantValue[]           @relation("updatedVariantValues")
+    createdCities                  City[]                   @relation("createdCities")
+    updatedCities                  City[]                   @relation("updatedCities")
 
     @@index([roleId])
 }
@@ -172,8 +197,8 @@ model Address {
     tag          String?
     addressLine1 String
     addressLine2 String?
-    city         String
-    state        State
+    state        String
+    city         City    @relation(fields: [cityValue], references: [value])
     country      String
     postalCode   String
     latitude     String?
@@ -185,39 +210,10 @@ model Address {
     createdAt DateTime  @default(now())
     updatedAt DateTime  @updatedAt
     Product   Product[]
+    cityValue String
 
     @@index([userId])
-}
-
-enum State {
-    Andhra_Pradesh
-    Arunachal_Pradesh
-    Assam
-    Bihar
-    Chhattisgarh
-    Goa
-    Gujarat
-    Haryana
-    Himachal_Pradesh
-    Jharkhand
-    Karnataka
-    Kerala
-    Madhya_Pradesh
-    Maharashtra
-    Manipur
-    Meghalaya
-    Mizoram
-    Nagaland
-    Odisha
-    Punjab
-    Rajasthan
-    Sikkim
-    Tamil_Nadu
-    Telangana
-    Tripura
-    Uttar_Pradesh
-    Uttarakhand
-    West_Bengal
+    @@index([cityValue])
 }
 
 model Variant {
@@ -227,7 +223,7 @@ model Variant {
     category   Category @relation(fields: [categoryId], references: [id])
     categoryId String
 
-    updatedBy   User?    @relation("variantUpdate", fields: [updatedById], references: [id])
+    updatedBy   User?    @relation("updatedVariants", fields: [updatedById], references: [id])
     updatedById String?
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
@@ -242,12 +238,13 @@ model VariantValue {
     value                    String
     participatedCombinations ModelVariantValueCombination[]
 
-    updatedBy   User?    @relation("variantValueUpdate", fields: [updatedById], references: [id])
+    updatedBy   User?    @relation("updatedVariantValues", fields: [updatedById], references: [id])
     updatedById String?
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
     model       Model?   @relation(fields: [modelId], references: [id])
-    modelId     String?
+
+    modelId String?
 
     @@index([updatedById])
     @@index([modelId])
@@ -278,20 +275,22 @@ model Category {
     featuredCategory FeaturedCategory?
 
     // Meta
-    createdState State
-    createdBy    User     @relation("categoryCreate", fields: [createdById], references: [id])
-    updatedBy    User?    @relation("categoryUpdate", fields: [updatedById], references: [id])
-    createdById  String
-    updatedById  String?
-    createdAt    DateTime @default(now())
-    updatedAt    DateTime @updatedAt
+    createdCity City     @relation(fields: [cityValue], references: [value])
+    cityValue   String
+    createdBy   User     @relation("createdCatgories", fields: [createdById], references: [id])
+    updatedBy   User?    @relation("updatedCategories", fields: [updatedById], references: [id])
+    createdById String
+    updatedById String?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
 
-    @@unique([name, createdState])
+    @@unique([name, cityValue])
     @@index([name])
     @@index([name, parentCategoryId])
     @@index([parentCategoryId])
     @@index([createdById])
     @@index([updatedById])
+    @@index([cityValue])
 }
 
 enum CouponType {
@@ -308,8 +307,8 @@ model Coupon {
     categoryId  String
     createdAt   DateTime   @default(now())
     updatedAt   DateTime   @updatedAt
-    createdBy   User       @relation("couponCreate", fields: [createdById], references: [id])
-    updatedBy   User?      @relation("couponUpdate", fields: [updatedById], references: [id])
+    createdBy   User       @relation("createdCoupons", fields: [createdById], references: [id])
+    updatedBy   User?      @relation("updatedCoupons", fields: [updatedById], references: [id])
     createdById String
     updatedById String?
     products    Product[]
@@ -327,11 +326,11 @@ model FeaturedCategory {
     imageId    String   @unique
 
     // Meta
-    featuredBy   User     @relation("featureCreate", fields: [featuredById], references: [id])
+    featuredBy   User     @relation("createdFeaturedCategories", fields: [featuredById], references: [id])
     featuredById String
     createdAt    DateTime @default(now())
     updatedAt    DateTime @updatedAt
-    updatedBy    User?    @relation("featureUpdate", fields: [updatedById], references: [id])
+    updatedBy    User?    @relation("updatedFeaturedCategories", fields: [updatedById], references: [id])
     updatedById  String?
 
     @@index([categoryId])
@@ -348,18 +347,20 @@ model Brand {
     wishes Wish[]
 
     // Meta
-    createdState State
-    createdBy    User     @relation("brandCreate", fields: [createdById], references: [id])
-    updatedBy    User?    @relation("brandUpdate", fields: [updatedById], references: [id])
-    createdById  String
-    updatedById  String?
-    createdAt    DateTime @default(now())
-    updatedAt    DateTime @updatedAt
+    createdCity City     @relation(fields: [cityValue], references: [value])
+    cityValue   String
+    createdBy   User     @relation("createdBrands", fields: [createdById], references: [id])
+    updatedBy   User?    @relation("updatedBrands", fields: [updatedById], references: [id])
+    createdById String
+    updatedById String?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
 
-    @@unique([name, createdState])
+    @@unique([name, cityValue])
     @@index([name])
     @@index([createdById])
     @@index([updatedById])
+    @@index([cityValue])
 }
 
 model Model {
@@ -384,20 +385,22 @@ model Model {
     variantValues           VariantValue[]
 
     // Meta
-    createdState State
-    createdBy    User     @relation("modelCreate", fields: [createdById], references: [id])
-    updatedBy    User?    @relation("modelUpdate", fields: [updatedById], references: [id])
-    createdById  String
-    updatedById  String?
-    createdAt    DateTime @default(now())
-    updatedAt    DateTime @updatedAt
+    createdCity City     @relation(fields: [cityValue], references: [value])
+    cityValue   String
+    createdBy   User     @relation("createdModels", fields: [createdById], references: [id])
+    updatedBy   User?    @relation("updatedModels", fields: [updatedById], references: [id])
+    createdById String
+    updatedById String?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
 
-    @@unique([name, categoryId, brandId, createdState])
+    @@unique([name, categoryId, brandId, cityValue])
     @@index([name])
     @@index([brandId])
     @@index([categoryId])
     @@index([createdById])
     @@index([updatedById])
+    @@index([cityValue])
 }
 
 enum MultipleChoiceQuestionType {
@@ -418,7 +421,7 @@ model MultipleChoiceQuestion {
     // Meta
 
     updatedAt   DateTime @updatedAt
-    updatedBy   User?    @relation("multipleChoiceQuestionUpdate", fields: [updatedById], references: [id])
+    updatedBy   User?    @relation("updatedMultipleChoiceQuestions", fields: [updatedById], references: [id])
     updatedById String?
 
     @@unique([questionContent, modelId])
@@ -437,7 +440,7 @@ model Choice {
 
     // Meta
     updatedAt   DateTime @updatedAt
-    updatedBy   User?    @relation("choiceUpdate", fields: [updatedById], references: [id])
+    updatedBy   User?    @relation("updatedChoices", fields: [updatedById], references: [id])
     updatedById String?
 
     @@unique([value, questionId, modelId])
@@ -464,7 +467,7 @@ model AtomicQuestion {
 
     // Meta
     updatedAt   DateTime @updatedAt
-    updatedBy   User?    @relation("atomicQuestionUpdate", fields: [updatedById], references: [id])
+    updatedBy   User?    @relation("updatedAtomicQuestions", fields: [updatedById], references: [id])
     updatedById String?
 
     @@unique([modelId, questionContent])
@@ -633,11 +636,14 @@ model Image {
 
 model Log {
     id        String   @id @default(cuid())
-    state     State?
+    state     City?    @relation(fields: [cityValue], references: [value])
     message   String
     detail    String?
     level     String
     createdAt DateTime @default(now())
+    cityValue String?
+
+    @@index([cityValue])
 }
 
 model AppConfiguration {
@@ -645,8 +651,8 @@ model AppConfiguration {
     value       String
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
-    createdBy   User     @relation("configCreate", fields: [createdById], references: [id])
-    updatedBy   User?    @relation("configUpdate", fields: [updatedById], references: [id])
+    createdBy   User     @relation("createdConfigurations", fields: [createdById], references: [id])
+    updatedBy   User?    @relation("updatedConfigurations", fields: [updatedById], references: [id])
     createdById String
     updatedById String?
 

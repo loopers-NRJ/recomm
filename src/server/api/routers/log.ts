@@ -8,7 +8,6 @@ import {
   MAXIMUM_LIMIT,
 } from "@/utils/constants";
 import { logLevel } from "@/utils/logger";
-import { states } from "@/types/prisma";
 
 export const logRouter = createTRPCRouter({
   all: getProcedure(AccessType.viewLogs)
@@ -22,10 +21,10 @@ export const logRouter = createTRPCRouter({
           .max(MAXIMUM_LIMIT)
           .default(DEFAULT_LIMIT),
         sortOrder: z.enum(["asc", "desc"]).default(DEFAULT_SORT_ORDER),
-        sortBy: z.enum(["level", "createdAt", "state"]).default("createdAt"),
+        sortBy: z.enum(["level", "createdAt", "city"]).default("createdAt"),
         cursor: idSchema.optional(),
         level: z.enum(logLevel).optional(),
-        state: z.enum(states).nullish(),
+        city: z.string().trim().min(1).nullish(),
       }),
     )
     .query(async ({ input, ctx: { prisma } }) => {
@@ -37,11 +36,11 @@ export const logRouter = createTRPCRouter({
               }
             : undefined,
           level: input.level,
-          state: input.state,
+          cityValue: input.city,
         },
         orderBy: [
-          input.sortBy === "state"
-            ? { state: input.sortOrder }
+          input.sortBy === "city"
+            ? { cityValue: input.sortOrder }
             : { [input.sortBy]: input.sortOrder },
         ],
         take: input.limit,

@@ -1,5 +1,5 @@
 import slugify from "@/lib/slugify";
-import { BrandPayload, states } from "@/types/prisma";
+import { BrandPayload } from "@/types/prisma";
 import {
   DEFAULT_LIMIT,
   DEFAULT_SORT_BY,
@@ -35,12 +35,12 @@ export const brandRouter = createTRPCRouter({
           .default(DEFAULT_SORT_BY),
         cursor: idSchema.optional(),
         categoryId: idSchema.optional(),
-        state: z.enum(states),
+        city: z.string().trim().min(1).optional(),
       }),
     )
     .query(
       async ({
-        input: { limit, search, sortBy, sortOrder, categoryId, cursor, state },
+        input: { limit, search, sortBy, sortOrder, categoryId, cursor, city },
         ctx: { prisma, isAdminPage },
       }) => {
         const brands = await prisma.brand.findMany({
@@ -59,7 +59,7 @@ export const brandRouter = createTRPCRouter({
                 }
               : undefined,
             active: isAdminPage ? undefined : true,
-            createdState: state,
+            cityValue: city,
           },
           take: limit,
           skip: cursor ? 1 : undefined,
@@ -111,7 +111,7 @@ export const brandRouter = createTRPCRouter({
     }),
 
   bySlug: publicProcedure
-    .input(z.object({ brandSlug: z.string().min(1).max(255) }))
+    .input(z.object({ brandSlug: z.string().trim().min(1).max(255) }))
     .query(async ({ input: { brandSlug: slug }, ctx: { prisma } }) => {
       return await prisma.brand.findUnique({
         where: {
@@ -124,17 +124,17 @@ export const brandRouter = createTRPCRouter({
   create: getProcedure(AccessType.createBrand)
     .input(
       z.object({
-        name: z.string(),
-        state: z.enum(states),
+        name: z.string().trim().min(1),
+        city: z.string().trim().min(1),
       }),
     )
     .mutation(
-      async ({ input: { name, state }, ctx: { prisma, session, logger } }) => {
+      async ({ input: { name, city }, ctx: { prisma, session, logger } }) => {
         // checking whether the brand exists
         const existingBrand = await prisma.brand.findFirst({
           where: {
             name,
-            createdState: state,
+            cityValue: city,
           },
         });
         if (existingBrand !== null) {
@@ -145,7 +145,11 @@ export const brandRouter = createTRPCRouter({
           data: {
             name,
             slug: slugify(name),
-            createdState: state,
+            createdCity: {
+              connect: {
+                value: city,
+              },
+            },
             createdBy: {
               connect: {
                 id: session.user.id,
@@ -155,7 +159,7 @@ export const brandRouter = createTRPCRouter({
         });
         await logger.info({
           message: `'${session.user.name}' created a brand named '${brand.name}'`,
-          state,
+          city: city,
         });
         return brand;
       },
@@ -165,12 +169,12 @@ export const brandRouter = createTRPCRouter({
       z.union([
         z.object({
           id: idSchema,
-          name: z.string().min(1).max(255),
+          name: z.string().trim().min(1).max(255),
           active: z.boolean().optional(),
         }),
         z.object({
           id: idSchema,
-          name: z.string().min(1).max(255).optional(),
+          name: z.string().trim().min(1).max(255).optional(),
           active: z.boolean(),
         }),
       ]),
@@ -187,8 +191,8 @@ export const brandRouter = createTRPCRouter({
           },
           select: {
             name: true,
-            createdState: true,
             active: true,
+            cityValue: true,
           },
         });
         if (existingBrand === null) {
@@ -201,7 +205,7 @@ export const brandRouter = createTRPCRouter({
               name: {
                 equals: newName,
               },
-              createdState: existingBrand.createdState,
+              cityValue: existingBrand.cityValue,
             },
             select: {
               id: true,
@@ -229,13 +233,13 @@ export const brandRouter = createTRPCRouter({
         if (newName) {
           await logger.info({
             message: `'${session.user.name}' updated a brand's name from '${existingBrand.name}' to '${brand.name}'`,
-            state: existingBrand.createdState,
+            city: existingBrand.cityValue,
           });
         }
         if (active !== undefined) {
           await logger.info({
             message: `'${session.user.name}' updated a brand's active state from '${existingBrand.active}' to '${brand.active}'`,
-            state: existingBrand.createdState,
+            city: existingBrand.cityValue,
           });
         }
 
@@ -262,7 +266,7 @@ export const brandRouter = createTRPCRouter({
 
         await logger.info({
           message: `'${session.user.name}' deleted a brand named '${brand.name}'`,
-          state: existingBrand.createdState,
+          city: existingBrand.cityValue,
         });
         return brand;
       },

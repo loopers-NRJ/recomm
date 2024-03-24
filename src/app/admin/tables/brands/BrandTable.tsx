@@ -4,7 +4,7 @@ import { DataTable } from "@/app/admin/tables/Table";
 import ServerError from "@/components/common/ServerError";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { useAdminSelectedState } from "@/store/SelectedState";
+import { useAdminselectedCity } from "@/store/AdminSelectedCity";
 import { type OmitUndefined } from "@/types/custom";
 import { api } from "@/trpc/react";
 import { type RouterInputs } from "@/trpc/shared";
@@ -65,7 +65,7 @@ export default function BrandTable() {
     onError: errorHandler,
   });
 
-  const selectedState = useAdminSelectedState((selected) => selected.state);
+  const city = useAdminselectedCity((selected) => selected.city?.value);
 
   const brandsApi = api.brand.all.useInfiniteQuery(
     {
@@ -73,7 +73,7 @@ export default function BrandTable() {
       sortBy,
       sortOrder,
       categoryId,
-      state: selectedState,
+      city,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -230,7 +230,7 @@ export default function BrandTable() {
             onClick={() => {
               createBrandApi.mutate({
                 name: row.original.name + " copy",
-                state: row.original.createdState,
+                city: row.original.cityValue,
               });
             }}
           >

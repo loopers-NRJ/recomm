@@ -3,17 +3,16 @@ import { idSchema } from "@/utils/validation";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { z } from "zod";
 import { DEFAULT_LIMIT } from "@/utils/constants";
-import { states } from "@/types/prisma";
 
 export const searchRouter = createTRPCRouter({
   all: publicProcedure
     .input(
       z.object({
         search: z.string().trim().default(""),
-        state: z.enum(states),
+        city: z.string().trim().min(1).optional(),
       }),
     )
-    .query(async ({ input: { search, state }, ctx: { prisma } }) => {
+    .query(async ({ input: { search, city }, ctx: { prisma } }) => {
       if (search.trim() === "") {
         return {
           categories: [],
@@ -28,8 +27,9 @@ export const searchRouter = createTRPCRouter({
               contains: search,
             },
             active: true,
-            createdState: state,
+            cityValue: city,
           },
+
           take: DEFAULT_LIMIT,
           select: {
             slug: true,
@@ -38,14 +38,13 @@ export const searchRouter = createTRPCRouter({
             // image: true,
           },
         }),
-
         prisma.brand.findMany({
           where: {
             name: {
               contains: search,
             },
             active: true,
-            createdState: state,
+            cityValue: city,
           },
           take: DEFAULT_LIMIT,
           select: {
@@ -55,14 +54,13 @@ export const searchRouter = createTRPCRouter({
             // image: true,
           },
         }),
-
         prisma.model.findMany({
           where: {
             name: {
               contains: search,
             },
             active: true,
-            createdState: state,
+            cityValue: city,
           },
           take: DEFAULT_LIMIT,
           select: {
@@ -84,11 +82,11 @@ export const searchRouter = createTRPCRouter({
     .input(
       z.object({
         search: z.string().trim().default(""),
-        state: z.enum(states),
+        city: z.string().trim().min(1).optional(),
       }),
     )
     .query(
-      async ({ input: { search, state }, ctx: { prisma, isAdminPage } }) => {
+      async ({ input: { search, city }, ctx: { prisma, isAdminPage } }) => {
         const categories = await prisma.category.findMany({
           where: {
             name: search
@@ -97,7 +95,7 @@ export const searchRouter = createTRPCRouter({
                 }
               : undefined,
             active: isAdminPage ? undefined : true,
-            createdState: state,
+            cityValue: city,
           },
           take: DEFAULT_LIMIT,
           select: {
@@ -114,11 +112,11 @@ export const searchRouter = createTRPCRouter({
     .input(
       z.object({
         search: z.string().trim().default(""),
-        state: z.enum(states),
+        city: z.string().trim().min(1).optional(),
       }),
     )
     .query(
-      async ({ input: { search, state }, ctx: { prisma, isAdminPage } }) => {
+      async ({ input: { search, city }, ctx: { prisma, isAdminPage } }) => {
         const categories = await prisma.category.findMany({
           where: {
             name: search
@@ -131,7 +129,7 @@ export const searchRouter = createTRPCRouter({
               none: {},
             },
 
-            createdState: state,
+            cityValue: city,
           },
           take: DEFAULT_LIMIT,
           select: {
@@ -148,12 +146,12 @@ export const searchRouter = createTRPCRouter({
       z.object({
         search: z.string().trim().default(""),
         categoryId: idSchema.optional(),
-        state: z.enum(states),
+        city: z.string().trim().min(1).optional(),
       }),
     )
     .query(
       async ({
-        input: { search, categoryId, state },
+        input: { search, categoryId, city },
         ctx: { prisma, isAdminPage },
       }) => {
         const brands = await prisma.brand.findMany({
@@ -174,7 +172,7 @@ export const searchRouter = createTRPCRouter({
                   },
                 }
               : undefined,
-            createdState: state,
+            cityValue: city,
           },
           take: DEFAULT_LIMIT,
           select: {
@@ -194,12 +192,12 @@ export const searchRouter = createTRPCRouter({
         search: z.string().trim().default(""),
         categoryId: idSchema.optional(),
         brandId: idSchema.optional(),
-        state: z.enum(states),
+        city: z.string().trim().min(1).optional(),
       }),
     )
     .query(
       async ({
-        input: { search, brandId, categoryId, state },
+        input: { search, brandId, categoryId, city },
         ctx: { prisma, isAdminPage },
       }) => {
         const models = await prisma.model.findMany({
@@ -220,7 +218,7 @@ export const searchRouter = createTRPCRouter({
                   contains: search,
                 }
               : undefined,
-            createdState: state,
+            cityValue: city,
           },
           take: DEFAULT_LIMIT,
           select: {

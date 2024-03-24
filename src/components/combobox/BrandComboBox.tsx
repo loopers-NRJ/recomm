@@ -4,7 +4,7 @@ import ComboBox from "../common/ComboBox";
 import { api } from "@/trpc/react";
 import { type Item } from "@/types/custom";
 import ErrorMessage from "../common/ErrorMessage";
-import { useClientSelectedState } from "@/store/SelectedState";
+import { useClientselectedCity } from "@/store/ClientSelectedCity";
 
 /**
  * A wrapper for the ComboBox component with some default props for brands
@@ -25,11 +25,11 @@ function BrandComboBox({
 }) {
   const [search, setSearch] = useState("");
 
-  const selectedState = useClientSelectedState((selected) => selected.state);
+  const city = useClientselectedCity((selected) => selected.city?.value);
   const brandsSearch = api.search.brands.useQuery({
     categoryId,
     search,
-    state: selectedState,
+    city,
   });
 
   return (

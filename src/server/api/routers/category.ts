@@ -7,11 +7,7 @@ import {
   getProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
-import {
-  CategoryPayload,
-  FeaturedCategoryPayload,
-  states,
-} from "@/types/prisma";
+import { CategoryPayload, FeaturedCategoryPayload } from "@/types/prisma";
 import {
   DEFAULT_LIMIT,
   DEFAULT_SORT_BY,
@@ -47,8 +43,8 @@ export const categoryRouter = createTRPCRouter({
           .default(DEFAULT_SORT_BY),
         cursor: idSchema.optional(),
         parentId: idSchema.nullish(),
-        parentSlug: z.string().min(1).max(255).nullish(),
-        state: z.enum(states),
+        parentSlug: z.string().trim().min(1).max(255).nullish(),
+        city: z.string().trim().min(1),
       }),
     )
     .query(
@@ -61,7 +57,7 @@ export const categoryRouter = createTRPCRouter({
           parentId,
           cursor,
           parentSlug,
-          state,
+          city,
         },
         ctx: { prisma, isAdminPage },
       }) => {
@@ -77,7 +73,7 @@ export const categoryRouter = createTRPCRouter({
                   slug: parentSlug,
                 }
               : undefined,
-            createdState: state,
+            cityValue: city,
           },
           cursor: cursor
             ? {
@@ -144,8 +140,8 @@ export const categoryRouter = createTRPCRouter({
           .default(DEFAULT_SORT_BY),
         cursor: idSchema.optional(),
         parentId: idSchema.nullish(),
-        parentSlug: z.string().min(1).max(255).nullish(),
-        state: z.enum(states),
+        parentSlug: z.string().trim().min(1).max(255).nullish(),
+        city: z.string().trim().min(1).optional(),
       }),
     )
     .query(
@@ -158,7 +154,7 @@ export const categoryRouter = createTRPCRouter({
           parentId,
           cursor,
           parentSlug,
-          state,
+          city,
         },
         ctx: { prisma, isAdminPage },
       }) => {
@@ -174,7 +170,7 @@ export const categoryRouter = createTRPCRouter({
                   slug: parentSlug,
                 }
               : undefined,
-            createdState: state,
+            cityValue: city,
           },
           cursor: cursor
             ? {
@@ -214,7 +210,7 @@ export const categoryRouter = createTRPCRouter({
       return category;
     }),
   bySlug: publicProcedure
-    .input(z.object({ categorySlug: z.string().min(1).max(255) }))
+    .input(z.object({ categorySlug: z.string().trim().min(1).max(255) }))
     .query(async ({ input: { categorySlug: slug }, ctx: { prisma } }) => {
       const category = await prisma.category.findUnique({
         where: {
@@ -239,14 +235,14 @@ export const categoryRouter = createTRPCRouter({
       z.object({
         name: z.string().min(3).max(255),
         price: z.number().int().positive(),
-        variants: z.array(z.string().trim()).nonempty().optional(),
+        variants: z.array(z.string().trim().trim()).nonempty().optional(),
         parentCategoryId: idSchema.optional(),
-        state: z.enum(states),
+        city: z.string().trim().min(1),
       }),
     )
     .mutation(
       async ({
-        input: { name, price, parentCategoryId, state, variants },
+        input: { name, price, parentCategoryId, city, variants },
         ctx: { prisma, session, logger },
       }) => {
         // checking whether the category already exists
@@ -254,7 +250,7 @@ export const categoryRouter = createTRPCRouter({
           where: {
             name,
             parentCategoryId,
-            createdState: state,
+            cityValue: city,
           },
           select: {
             name: true,
@@ -293,7 +289,11 @@ export const categoryRouter = createTRPCRouter({
                 id: session.user.id,
               },
             },
-            createdState: state,
+            createdCity: {
+              connect: {
+                value: city,
+              },
+            },
             parentCategory: parentCategoryId
               ? {
                   connect: {
@@ -313,7 +313,7 @@ export const categoryRouter = createTRPCRouter({
 
         await logger.info({
           message: `'${session.user.name}' created a category named '${category.name}'`,
-          state,
+          city: city,
         });
 
         return category;
@@ -323,7 +323,7 @@ export const categoryRouter = createTRPCRouter({
     .input(
       z.object({
         id: idSchema,
-        name: z.string().min(1).max(255).optional(),
+        name: z.string().trim().min(1).max(255).optional(),
         parentCategoryId: idSchema.optional(),
         active: z.boolean().optional(),
         price: z.number().int().positive().optional(),
@@ -345,7 +345,7 @@ export const categoryRouter = createTRPCRouter({
             name: {
               equals: input.name,
             },
-            createdState: existingCategory.createdState,
+            cityValue: existingCategory.cityValue,
           },
           select: {
             id: true,
@@ -383,19 +383,19 @@ export const categoryRouter = createTRPCRouter({
       if (input.name) {
         await logger.info({
           message: `'${session.user.name}' updated a category's name from '${existingCategory.name}' to '${updatedCategory.name}'`,
-          state: existingCategory.createdState,
+          city: existingCategory.cityValue,
         });
       }
       if (input.active !== undefined) {
         await logger.info({
           message: `'${session.user.name}' updated a category's active state from '${existingCategory.active}' to '${updatedCategory.active}'`,
-          state: existingCategory.createdState,
+          city: existingCategory.cityValue,
         });
       }
       if (input.parentCategoryId) {
         await logger.info({
           message: `'${session.user.name}' updated a category's parentId from '${existingCategory.parentCategoryId}' to '${updatedCategory.parentCategoryId}'`,
-          state: existingCategory.createdState,
+          city: existingCategory.cityValue,
         });
       }
 
@@ -416,7 +416,7 @@ export const categoryRouter = createTRPCRouter({
           },
           select: {
             name: true,
-            createdState: true,
+            cityValue: true,
             subCategories: {
               select: {
                 id: true,
@@ -455,7 +455,7 @@ export const categoryRouter = createTRPCRouter({
 
         await logger.info({
           message: `'${session.user.name}' deleted a category named '${category.name}'`,
-          state: existingCategory.createdState,
+          city: existingCategory.cityValue,
         });
 
         return category;
@@ -476,12 +476,12 @@ export const categoryRouter = createTRPCRouter({
           .enum(["name", "createdAt", "updatedAt", "active"])
           .default(DEFAULT_SORT_BY),
         cursor: idSchema.optional(),
-        state: z.enum(states),
+        city: z.string().trim().min(1).optional(),
       }),
     )
     .query(
       async ({
-        input: { search, limit, sortBy, sortOrder, cursor, state },
+        input: { search, limit, sortBy, sortOrder, cursor, city },
         ctx: { prisma, isAdminPage },
       }) => {
         const categories = await prisma.featuredCategory.findMany({
@@ -491,7 +491,7 @@ export const categoryRouter = createTRPCRouter({
                 contains: search,
               },
               active: isAdminPage ? undefined : true,
-              createdState: state,
+              cityValue: city,
             },
           },
           cursor: cursor
@@ -575,7 +575,7 @@ export const categoryRouter = createTRPCRouter({
 
         await logger.info({
           message: `'${session.user.name}' promoted a category named '${data.category.name}' to featured category`,
-          state: data.category.createdState,
+          city: data.category.cityValue,
         });
 
         return data.category;
@@ -601,7 +601,7 @@ export const categoryRouter = createTRPCRouter({
             category: {
               select: {
                 name: true,
-                createdState: true,
+                cityValue: true,
               },
             },
           },
@@ -619,7 +619,7 @@ export const categoryRouter = createTRPCRouter({
         if (error) {
           await logger.error({
             message: "cannot able delete the old image in cloudinary",
-            state: existingCategory.category.createdState,
+            city: existingCategory.category.cityValue,
             detail: JSON.stringify({
               procedure: "removeCategoryFromFeaturedById",
               message: "cannot able delete the old image in cloudinary",
@@ -631,7 +631,7 @@ export const categoryRouter = createTRPCRouter({
         }
         await logger.info({
           message: `'${session.user.name}' demoted a featured category named '${existingCategory.category.name}' to category`,
-          state: existingCategory.category.createdState,
+          city: existingCategory.category.cityValue,
         });
       },
     ),
@@ -656,7 +656,7 @@ export const categoryRouter = createTRPCRouter({
             category: {
               select: {
                 name: true,
-                createdState: true,
+                cityValue: true,
               },
             },
           },
@@ -691,13 +691,13 @@ export const categoryRouter = createTRPCRouter({
               existingCategory,
               error,
             }),
-            state: existingCategory.category.createdState,
+            city: existingCategory.category.cityValue,
           });
           return `Cannot able to delete the of the category ${existingCategory.category.name}'s Image` as const;
         }
         await logger.info({
           message: `'${session.user.name}' updated image of a featured category named '${existingCategory.category.name}'`,
-          state: existingCategory.category.createdState,
+          city: existingCategory.category.cityValue,
         });
       },
     ),

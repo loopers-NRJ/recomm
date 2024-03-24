@@ -10,6 +10,14 @@ const predefinedAdmins = [
   "loopers.nrj@gmail.com",
 ];
 
+const predefinedCities = ["Chennai", "Bengaluru"];
+const predefinedConfigurations = {
+  maximumAddressPerUser: "5",
+  maximumFeaturedCategory: "7",
+  productSellingCount: "30",
+  productSellingDurationInDays: "30",
+};
+
 /**
  * Internal API to generate access types and roles.
  * Don't forget to delete this file before deploying to production.
@@ -20,6 +28,16 @@ export async function GET() {
     return notFound();
   }
   try {
+    for (const city of predefinedCities) {
+      await prisma.city.upsert({
+        where: { value: city },
+        update: {},
+        create: {
+          value: city,
+          createdBy: { connect: { id: session.user.id } },
+        },
+      });
+    }
     for (const type of Object.values(AccessType)) {
       await prisma.access.upsert({
         where: { type: type as AccessType },
@@ -36,6 +54,9 @@ export async function GET() {
           name: "super admin",
           accesses: {
             connect: Object.values(AccessType).map((type) => ({ type })),
+          },
+          createdCity: {
+            connect: predefinedCities.map((value) => ({ value })),
           },
           createdBy: {
             connect: { id: session.user.id },
@@ -57,6 +78,16 @@ export async function GET() {
       where: { email: { in: predefinedAdmins } },
       data: { roleId: role.id },
     });
+
+    for (const key in predefinedConfigurations) {
+      const value =
+        predefinedConfigurations[key as keyof typeof predefinedConfigurations];
+      await prisma.appConfiguration.upsert({
+        where: { key },
+        update: {},
+        create: { key, value, createdBy: { connect: { id: session.user.id } } },
+      });
+    }
   } catch (error) {
     console.error(error);
     return new Response(

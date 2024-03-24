@@ -144,10 +144,10 @@ export function AddressCard({
           )}
           <div className="ps-2 text-sm">{address.addressLine2}</div>
           <div className="ps-2 text-sm">
-            {address.city} {address.postalCode}
+            {address.cityValue} {address.postalCode}
           </div>
           <div className="ps-2 text-sm">
-            {address.state.replaceAll("_", " ")} {address.country}
+            {address.cityValue.replaceAll("_", " ")} {address.country}
           </div>
         </div>
       </Label>

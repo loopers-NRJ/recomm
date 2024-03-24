@@ -92,7 +92,7 @@ export const reportRouter = createTRPCRouter({
     .input(
       z.object({
         productId: idSchema,
-        description: z.string(),
+        description: z.string().trim().min(1),
       }),
     )
     .mutation(async ({ ctx: { prisma, session }, input }) => {

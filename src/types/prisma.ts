@@ -3,7 +3,6 @@ import {
   Prisma,
   AtomicQuestionType,
   AccessType,
-  State,
 } from "@prisma/client";
 
 export const userPayload = Prisma.validator<Prisma.UserDefaultArgs>()({
@@ -160,6 +159,7 @@ export type FeaturedCategoryPayloadIncluded = Prisma.FeaturedCategoryGetPayload<
 export const RolePayload = Prisma.validator<Prisma.RoleDefaultArgs>()({
   include: {
     accesses: true,
+    createdCity: true,
   },
 });
 
@@ -245,6 +245,10 @@ export const accessTypes = [
 
   AccessType.viewAppConfiguration,
   AccessType.updateAppConfiguration,
+
+  AccessType.createCity,
+  AccessType.updateCity,
+  AccessType.deleteCity,
 ] as const;
 
 export const [primeSeller, ...superAdminAccesses] = accessTypes;
@@ -254,34 +258,3 @@ export const hasAdminPageAccess = (accesses: AccessType[] = []) =>
     (access) =>
       accessTypes.includes(access) && access !== AccessType.primeSeller,
   );
-
-export const states = [
-  State.Andhra_Pradesh,
-  State.Arunachal_Pradesh,
-  State.Assam,
-  State.Bihar,
-  State.Chhattisgarh,
-  State.Goa,
-  State.Gujarat,
-  State.Haryana,
-  State.Himachal_Pradesh,
-  State.Jharkhand,
-  State.Karnataka,
-  State.Kerala,
-  State.Madhya_Pradesh,
-  State.Maharashtra,
-  State.Manipur,
-  State.Meghalaya,
-  State.Mizoram,
-  State.Nagaland,
-  State.Odisha,
-  State.Punjab,
-  State.Rajasthan,
-  State.Sikkim,
-  State.Tamil_Nadu,
-  State.Telangana,
-  State.Tripura,
-  State.Uttar_Pradesh,
-  State.Uttarakhand,
-  State.West_Bengal,
-] as const;
