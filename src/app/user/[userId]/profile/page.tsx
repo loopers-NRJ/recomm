@@ -9,6 +9,7 @@ import UserListings from "./user-listings";
 import { Suspense } from "react";
 import LogoutButton from "./logout";
 import Link from "next/link";
+import SendRequestButton from "./request-button";
 
 interface ProfilePageParams {
   userId: string;
@@ -23,7 +24,7 @@ const ProfilePage = AuthenticatedPage<ProfilePageParams>(async ({ params, sessio
   }
 
   return (
-    <Container className="mb-32">
+    <Container>
       <main>
         <header className="flex h-full w-full items-center justify-center p-3">
           <Avatar className="h-32 w-32 border shadow-sm">
@@ -33,7 +34,12 @@ const ProfilePage = AuthenticatedPage<ProfilePageParams>(async ({ params, sessio
             </AvatarFallback>
           </Avatar>
           <div className="flex h-full w-full flex-col gap-3 p-4">
-            <h1 className="text-xl mx-1 font-semibold">{userData.name}</h1>
+            <div>
+              <h1 className="text-xl font-semibold">{userData.name}</h1>
+              <p className="text-sm font-medium text-muted-foreground">
+                {userData.email}
+              </p>
+            </div>
             <div className="flex gap-2">
               {currentUser && currentUser.id === userData.id ? (
                 <>
@@ -44,11 +50,13 @@ const ProfilePage = AuthenticatedPage<ProfilePageParams>(async ({ params, sessio
                   </Button>
                   <LogoutButton />
                 </>
-              ) : (
-                <Button disabled={userData.mobile?false:true}>
-                    <Link target="_blank" rel="noopener" href={`https://wa.me/${userData.mobile}`}>Contact Seller</Link>
-                </Button>
-              )}
+              ) :
+                  userData.mobileVerified ?
+                    <Button size="sm" asChild>
+                      <Link href={`https://wa.me/${userData.mobile}`}>Contact Seller</Link>
+                    </Button> :
+                    <SendRequestButton from={currentUser} to={userId} />
+              }
             </div>
           </div>
         </header>
