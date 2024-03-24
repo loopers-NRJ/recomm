@@ -27,20 +27,17 @@ const ProfilePage = AuthenticatedPage<ProfilePageParams>(async ({ params, sessio
     <Container>
       <main>
         <header className="flex h-full w-full items-center justify-center p-3">
-          <Avatar className="h-32 w-32 border shadow-sm">
+          <Avatar className="min-[400px]:w-32 min-[400px]:h-32 h-24 w-24 border shadow-sm">
             <AvatarImage src={userData.image ?? undefined} />
             <AvatarFallback>
-              <UserIcon className="h-full w-full p-4" />
+              <UserIcon className="p-4" />
             </AvatarFallback>
           </Avatar>
-          <div className="flex h-full w-full flex-col gap-3 p-4">
+          <div className="flex h-full w-full min-w-52 flex-col gap-3 p-4">
             <div>
               <h1 className="text-xl font-semibold">{userData.name}</h1>
-              <p className="text-sm font-medium text-muted-foreground">
-                {userData.email}
-              </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 text-sm">
               {currentUser && currentUser.id === userData.id ? (
                 <>
                   <Button size="sm">
