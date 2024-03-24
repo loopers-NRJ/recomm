@@ -4,7 +4,6 @@ import {
   type MultipleChoiceQuestionPayloadIncluded,
   multipleChoiceQuestionTypeArray,
   atomicQuestionTypeArray,
-  states,
 } from "@/types/prisma";
 import {
   type AtomicQuestion,
@@ -302,17 +301,17 @@ export const modelSchema = z.object({
   categoryId: idSchema,
   multipleChoiceQuestions: z.array(multipleChoiceQuestionSchema),
   atomicQuestions: z.array(atomicQuestionSchema),
-  state: z.enum(states),
+  city: z.string().trim().min(1),
 });
 
 export const addressSchema = z.object({
-  tag: z.string().optional(),
+  tag: z.string().trim().min(1).optional(),
   addressLine1: z
     .string({ required_error: "Address Line 1 field is required" })
     .trim(),
-  addressLine2: z.string().optional(),
-  city: z.string({ required_error: "Enter your city" }),
-  state: z.enum(states, { required_error: "Selecy your state" }),
+  addressLine2: z.string().trim().min(1).optional(),
+  state: z.string({ required_error: "Enter your city" }),
+  cityValue: z.string().trim().min(1),
   country: z.string({ required_error: "Enter your country" }),
   postalCode: z
     .string()
@@ -400,3 +399,11 @@ export const validateAtomicQuestionAnswers = (
   }
   return true;
 };
+
+export const citySchema = z.object({
+  value: z.string().trim().min(1),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+  createdById: idSchema,
+  updatedById: idSchema.or(z.null()),
+});

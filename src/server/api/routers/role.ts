@@ -39,19 +39,20 @@ export const RoleRouter = createTRPCRouter({
     .query(async ({ input: { id }, ctx: { prisma } }) => {
       return prisma.role.findUnique({
         where: { id },
-        include: { accesses: true },
+        include: RolePayload.include,
       });
     }),
   create: getProcedure(AccessType.createRole)
     .input(
       z.object({
-        name: z.string(),
+        name: z.string().trim().min(1),
         accesses: z.array(z.enum(accessTypes)),
+        cities: z.array(z.string().trim().min(1)),
       }),
     )
     .mutation(
       async ({
-        input: { name, accesses },
+        input: { name, accesses, cities },
         ctx: { prisma, session, logger },
       }) => {
         const existingRole = await prisma.role.findFirst({ where: { name } });
@@ -61,27 +62,32 @@ export const RoleRouter = createTRPCRouter({
         if (accesses.length === 0) {
           return "Role must have at least one access";
         }
+        if (cities.length === 0) {
+          return "Role must have at least one city";
+        }
         const role = await prisma.role.create({
           data: {
             name,
             accesses: {
               connect: accesses.map((access) => ({ type: access })),
             },
+            createdCity: {
+              connect: cities.map((city) => ({ value: city })),
+            },
             createdBy: {
               connect: { id: session.user.id },
             },
-            // createdState: state,
           },
         });
         await logger.info({
           message: `'${session.user.name}' created a role named '${role.name}'`,
-          state: "common",
+          city: "common",
         });
         return role;
       },
     ),
   delete: getProcedure(AccessType.deleteRole)
-    .input(z.object({ id: z.string() }))
+    .input(z.object({ id: idSchema }))
     .mutation(async ({ input: { id }, ctx: { prisma, session, logger } }) => {
       const existingRole = await prisma.role.findFirst({ where: { id } });
       if (!existingRole) {
@@ -90,7 +96,7 @@ export const RoleRouter = createTRPCRouter({
       const role = await prisma.role.delete({ where: { id } });
       await logger.info({
         message: `'${session.user.name}' deleted a role named '${role.name}'`,
-        state: "common",
+        city: "common",
       });
       return role;
     }),
@@ -103,7 +109,7 @@ export const RoleRouter = createTRPCRouter({
     )
     .mutation(
       async ({
-        input: { roleId, accesses: access },
+        input: { roleId, accesses },
         ctx: { prisma, session, logger },
       }) => {
         const existingRole = await prisma.role.findFirst({
@@ -117,7 +123,7 @@ export const RoleRouter = createTRPCRouter({
           where: { id: roleId },
           data: {
             accesses: {
-              connect: access.map((access) => ({ type: access })),
+              connect: accesses.map((access) => ({ type: access })),
             },
             updatedBy: {
               connect: { id: session.user.id },
@@ -125,10 +131,10 @@ export const RoleRouter = createTRPCRouter({
           },
         });
         await logger.info({
-          message: `'${session.user.name}' added access '${access.join(
+          message: `'${session.user.name}' added access '${accesses.join(
             ", ",
           )}' to a role named '${existingRole.name}'`,
-          state: "common",
+          city: "common",
         });
         return role;
       },
@@ -142,7 +148,7 @@ export const RoleRouter = createTRPCRouter({
     )
     .mutation(
       async ({
-        input: { roleId, accesses: access },
+        input: { roleId, accesses },
         ctx: { prisma, session, logger },
       }) => {
         const existingRole = await prisma.role.findFirst({
@@ -155,7 +161,7 @@ export const RoleRouter = createTRPCRouter({
           where: { id: roleId },
           data: {
             accesses: {
-              disconnect: access.map((access) => ({ type: access })),
+              disconnect: accesses.map((access) => ({ type: access })),
             },
             updatedBy: {
               connect: { id: session.user.id },
@@ -164,10 +170,96 @@ export const RoleRouter = createTRPCRouter({
         });
 
         await logger.info({
-          message: `'${session.user.name}' removed access '${access.join(
+          message: `'${session.user.name}' removed access '${accesses.join(
             ", ",
           )}' to a role named '${role.name}'`,
-          state: "common",
+          city: "common",
+        });
+
+        return role;
+      },
+    ),
+
+  addCity: getProcedure(AccessType.updateRole)
+    .input(
+      z.object({
+        roleId: idSchema,
+        cities: z.array(z.string().trim().min(1)),
+      }),
+    )
+    .mutation(
+      async ({
+        input: { roleId, cities },
+        ctx: { prisma, session, logger },
+      }) => {
+        if (cities.length === 0) {
+          return "Select a City to add from role";
+        }
+        const existingRole = await prisma.role.findFirst({
+          where: { id: roleId },
+        });
+        if (!existingRole) {
+          return "Role not found";
+        }
+
+        const role = await prisma.role.update({
+          where: { id: roleId },
+          data: {
+            createdCity: {
+              connect: cities.map((city) => ({ value: city })),
+            },
+            updatedBy: {
+              connect: { id: session.user.id },
+            },
+          },
+        });
+        await logger.info({
+          message: `'${session.user.name}' added city '${cities.join(
+            ", ",
+          )}' to a role named '${existingRole.name}'`,
+          city: "common",
+        });
+        return role;
+      },
+    ),
+  removeCity: getProcedure(AccessType.updateRole)
+    .input(
+      z.object({
+        roleId: idSchema,
+        cities: z.array(z.string().trim().min(1)),
+      }),
+    )
+    .mutation(
+      async ({
+        input: { roleId, cities },
+        ctx: { prisma, session, logger },
+      }) => {
+        if (cities.length === 0) {
+          return "Select a City to remove from role";
+        }
+        const existingRole = await prisma.role.findFirst({
+          where: { id: roleId },
+        });
+        if (!existingRole) {
+          return "Role not found";
+        }
+        const role = await prisma.role.update({
+          where: { id: roleId },
+          data: {
+            createdCity: {
+              disconnect: cities.map((city) => ({ value: city })),
+            },
+            updatedBy: {
+              connect: { id: session.user.id },
+            },
+          },
+        });
+
+        await logger.info({
+          message: `'${session.user.name}' removed city '${cities.join(
+            ", ",
+          )}' to a role named '${role.name}'`,
+          city: "common",
         });
 
         return role;

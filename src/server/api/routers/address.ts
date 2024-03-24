@@ -1,4 +1,3 @@
-import { states } from "@/types/prisma";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { z } from "zod";
 import { addressSchema, idSchema } from "@/utils/validation";
@@ -23,7 +22,7 @@ export const addressRouter = createTRPCRouter({
       return address;
     }),
   byTag: protectedProcedure
-    .input(z.object({ tag: z.string() }))
+    .input(z.object({ tag: z.string().trim().min(1) }))
     .query(async ({ ctx: { prisma, session }, input }) => {
       const address = await prisma.address.findMany({
         where: {
@@ -68,13 +67,13 @@ export const addressRouter = createTRPCRouter({
     .input(
       z.object({
         id: idSchema,
-        tag: z.string().optional(),
-        addressLine1: z.string().optional(),
-        addressLine2: z.string().optional(),
-        city: z.string().optional(),
-        state: z.enum(states).optional(),
-        country: z.string().optional(),
-        postalCode: z.string().optional(),
+        tag: z.string().trim().min(1).optional(),
+        addressLine1: z.string().trim().min(1).optional(),
+        addressLine2: z.string().trim().min(1).optional(),
+        state: z.string().trim().min(1).optional(),
+        cityValue: z.string().trim().min(1).optional(),
+        country: z.string().trim().min(1).optional(),
+        postalCode: z.string().trim().min(1).optional(),
       }),
     )
     .mutation(async ({ ctx: { prisma, session }, input }) => {
@@ -95,7 +94,7 @@ export const addressRouter = createTRPCRouter({
       const products = await prisma.product.findMany({
         where: {
           addressId: input.id,
-        }
+        },
       });
       if (products.length > 0) {
         return "You can't delete an address that is being used by a product" as const;

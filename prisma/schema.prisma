@@ -21,7 +21,7 @@ model Account {
     scope             String?
     id_token          String? @db.Text
     session_state     String?
-    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
     @@unique([provider, providerAccountId])
     @@index([userId])
@@ -32,7 +32,7 @@ model Session {
     sessionToken String   @unique
     userId       String
     expires      DateTime
-    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
     @@index([userId])
 }
@@ -87,6 +87,9 @@ enum AccessType {
     viewAppConfiguration // allow to view app configuration
     updateAppConfiguration // allow to update app configuration
 
+    createCity
+    updateCity
+    deleteCity
     // update types/prisma.ts when adding new access type
 }
 
@@ -103,13 +106,33 @@ model Role {
 
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
-    createdBy   User     @relation("roleCreate", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
-    updatedBy   User?    @relation("roleUpdate", fields: [updatedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    createdBy   User     @relation("createdRoles", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    updatedBy   User?    @relation("updatedRoles", fields: [updatedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
     createdById String
     updatedById String?
-    // createdState State
+    createdCity City[]
 
     @@index([name])
+    @@index([updatedById])
+    @@index([createdById])
+}
+
+model City {
+    value String @id
+
+    categories  Category[]
+    brands      Brand[]
+    models      Model[]
+    Addresses   Address[]
+    logs        Log[]
+    roles       Role[]
+    createdAt   DateTime   @default(now())
+    updatedAt   DateTime   @updatedAt
+    createdBy   User       @relation("createdCities", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: Cascade)
+    updatedBy   User?      @relation("updatedCities", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+    createdById String
+    updatedById String?
+
     @@index([updatedById])
     @@index([createdById])
 }
@@ -133,7 +156,7 @@ model User {
     favoriteProducts                     Product[] @relation("favoriteProducts")
     wishes                               Wish[]
     bids                                 Bid[]
-    role                                 Role?     @relation("role", fields: [roleId], references: [id], onDelete: SetNull)
+    role                                 Role?     @relation("role", fields: [roleId], references: [id], onDelete: SetNull, onUpdate: Cascade)
     roleId                               String?
     // location
     address                              Address[]
@@ -142,27 +165,29 @@ model User {
     updatedAt                            DateTime  @updatedAt
 
     // admin level
-    createdCategories              Category[]               @relation("categoryCreate")
-    updatedCategories              Category[]               @relation("categoryUpdate")
-    createdCoupons                 Coupon[]                 @relation("couponCreate")
-    updatedCoupons                 Coupon[]                 @relation("couponUpdate")
-    createdFeaturedCategories      FeaturedCategory[]       @relation("featureCreate")
-    updatedFeaturedCategories      FeaturedCategory[]       @relation("featureUpdate")
-    createdBrands                  Brand[]                  @relation("brandCreate")
-    updatedBrands                  Brand[]                  @relation("brandUpdate")
-    createdModels                  Model[]                  @relation("modelCreate")
-    updatedModels                  Model[]                  @relation("modelUpdate")
-    updatedMultipleChoiceQuestions MultipleChoiceQuestion[] @relation("multipleChoiceQuestionUpdate")
-    updatedChoice                  Choice[]                 @relation("choiceUpdate")
-    updatedAtomicQuestions         AtomicQuestion[]         @relation("atomicQuestionUpdate")
-    createdRoles                   Role[]                   @relation("roleCreate")
-    updatedRoles                   Role[]                   @relation("roleUpdate")
+    createdCategories              Category[]               @relation("createdCatgories")
+    updatedCategories              Category[]               @relation("updatedCategories")
+    createdCoupons                 Coupon[]                 @relation("createdCoupons")
+    updatedCoupons                 Coupon[]                 @relation("updatedCoupons")
+    createdFeaturedCategories      FeaturedCategory[]       @relation("createdFeaturedCategories")
+    updatedFeaturedCategories      FeaturedCategory[]       @relation("updatedFeaturedCategories")
+    createdBrands                  Brand[]                  @relation("createdBrands")
+    updatedBrands                  Brand[]                  @relation("updatedBrands")
+    createdModels                  Model[]                  @relation("createdModels")
+    updatedModels                  Model[]                  @relation("updatedModels")
+    updatedMultipleChoiceQuestions MultipleChoiceQuestion[] @relation("updatedMultipleChoiceQuestions")
+    updatedChoice                  Choice[]                 @relation("updatedChoices")
+    updatedAtomicQuestions         AtomicQuestion[]         @relation("updatedAtomicQuestions")
+    createdRoles                   Role[]                   @relation("createdRoles")
+    updatedRoles                   Role[]                   @relation("updatedRoles")
     reportedProducts               Report[]
     notifications                  Notification[]
-    createdConfigurations          AppConfiguration[]       @relation("configCreate")
-    updatedConfigurations          AppConfiguration[]       @relation("configUpdate")
-    updatedVariants                Variant[]                @relation("variantUpdate")
-    updatedVariantValues           VariantValue[]           @relation("variantValueUpdate")
+    createdConfigurations          AppConfiguration[]       @relation("createdConfigurations")
+    updatedConfigurations          AppConfiguration[]       @relation("updatedConfigurations")
+    updatedVariants                Variant[]                @relation("updatedVariants")
+    updatedVariantValues           VariantValue[]           @relation("updatedVariantValues")
+    createdCities                  City[]                   @relation("createdCities")
+    updatedCities                  City[]                   @relation("updatedCities")
 
     @@index([roleId])
 }
@@ -172,62 +197,33 @@ model Address {
     tag          String?
     addressLine1 String
     addressLine2 String?
-    city         String
-    state        State
+    state        String
+    city         City    @relation(fields: [cityValue], references: [value], onDelete: Restrict, onUpdate: Cascade)
     country      String
     postalCode   String
     latitude     String?
     longitude    String?
-    user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    user         User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     userId       String
 
     // Meta
     createdAt DateTime  @default(now())
     updatedAt DateTime  @updatedAt
     Product   Product[]
+    cityValue String
 
     @@index([userId])
-}
-
-enum State {
-    Andhra_Pradesh
-    Arunachal_Pradesh
-    Assam
-    Bihar
-    Chhattisgarh
-    Goa
-    Gujarat
-    Haryana
-    Himachal_Pradesh
-    Jharkhand
-    Karnataka
-    Kerala
-    Madhya_Pradesh
-    Maharashtra
-    Manipur
-    Meghalaya
-    Mizoram
-    Nagaland
-    Odisha
-    Punjab
-    Rajasthan
-    Sikkim
-    Tamil_Nadu
-    Telangana
-    Tripura
-    Uttar_Pradesh
-    Uttarakhand
-    West_Bengal
+    @@index([cityValue])
 }
 
 model Variant {
     id    String @id @default(cuid())
     title String
 
-    category   Category @relation(fields: [categoryId], references: [id])
+    category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     categoryId String
 
-    updatedBy   User?    @relation("variantUpdate", fields: [updatedById], references: [id])
+    updatedBy   User?    @relation("updatedVariants", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
     updatedById String?
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
@@ -242,12 +238,13 @@ model VariantValue {
     value                    String
     participatedCombinations ModelVariantValueCombination[]
 
-    updatedBy   User?    @relation("variantValueUpdate", fields: [updatedById], references: [id])
+    updatedBy   User?    @relation("updatedVariantValues", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
     updatedById String?
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
-    model       Model?   @relation(fields: [modelId], references: [id])
-    modelId     String?
+    model       Model?   @relation(fields: [modelId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+    modelId String?
 
     @@index([updatedById])
     @@index([modelId])
@@ -256,7 +253,8 @@ model VariantValue {
 model ModelVariantValueCombination {
     id             String         @id @default(cuid())
     selectedValues VariantValue[]
-    price          Int
+    minimumPrice   Float
+    maximumPrice   Float
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -278,20 +276,22 @@ model Category {
     featuredCategory FeaturedCategory?
 
     // Meta
-    createdState State
-    createdBy    User     @relation("categoryCreate", fields: [createdById], references: [id])
-    updatedBy    User?    @relation("categoryUpdate", fields: [updatedById], references: [id])
-    createdById  String
-    updatedById  String?
-    createdAt    DateTime @default(now())
-    updatedAt    DateTime @updatedAt
+    createdCity City     @relation(fields: [cityValue], references: [value])
+    cityValue   String
+    createdBy   User     @relation("createdCatgories", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: Cascade)
+    updatedBy   User?    @relation("updatedCategories", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+    createdById String
+    updatedById String?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
 
-    @@unique([name, createdState])
+    @@unique([name, cityValue])
     @@index([name])
     @@index([name, parentCategoryId])
     @@index([parentCategoryId])
     @@index([createdById])
     @@index([updatedById])
+    @@index([cityValue])
 }
 
 enum CouponType {
@@ -304,12 +304,12 @@ model Coupon {
     discount    Float
     type        CouponType
     active      Boolean    @default(true)
-    category    Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+    category    Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     categoryId  String
     createdAt   DateTime   @default(now())
     updatedAt   DateTime   @updatedAt
-    createdBy   User       @relation("couponCreate", fields: [createdById], references: [id])
-    updatedBy   User?      @relation("couponUpdate", fields: [updatedById], references: [id])
+    createdBy   User       @relation("createdCoupons", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: Cascade)
+    updatedBy   User?      @relation("updatedCoupons", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
     createdById String
     updatedById String?
     products    Product[]
@@ -327,11 +327,11 @@ model FeaturedCategory {
     imageId    String   @unique
 
     // Meta
-    featuredBy   User     @relation("featureCreate", fields: [featuredById], references: [id])
+    featuredBy   User     @relation("createdFeaturedCategories", fields: [featuredById], references: [id], onDelete: NoAction, onUpdate: Cascade)
     featuredById String
     createdAt    DateTime @default(now())
     updatedAt    DateTime @updatedAt
-    updatedBy    User?    @relation("featureUpdate", fields: [updatedById], references: [id])
+    updatedBy    User?    @relation("updatedFeaturedCategories", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
     updatedById  String?
 
     @@index([categoryId])
@@ -348,32 +348,32 @@ model Brand {
     wishes Wish[]
 
     // Meta
-    createdState State
-    createdBy    User     @relation("brandCreate", fields: [createdById], references: [id])
-    updatedBy    User?    @relation("brandUpdate", fields: [updatedById], references: [id])
-    createdById  String
-    updatedById  String?
-    createdAt    DateTime @default(now())
-    updatedAt    DateTime @updatedAt
+    createdCity City     @relation(fields: [cityValue], references: [value])
+    cityValue   String
+    createdBy   User     @relation("createdBrands", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: Cascade)
+    updatedBy   User?    @relation("updatedBrands", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+    createdById String
+    updatedById String?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
 
-    @@unique([name, createdState])
+    @@unique([name, cityValue])
     @@index([name])
     @@index([createdById])
     @@index([updatedById])
+    @@index([cityValue])
 }
 
 model Model {
-    id           String  @id @default(cuid())
-    name         String
-    slug         String  @unique
-    active       Boolean @default(true)
-    minimumPrice Float   @default(0)
-    maximumPrice Float   @default(0)
+    id     String  @id @default(cuid())
+    name   String
+    slug   String  @unique
+    active Boolean @default(true)
 
     // relations
-    category                Category                 @relation(fields: [categoryId], references: [id])
+    category                Category                 @relation(fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Cascade)
     categoryId              String
-    brand                   Brand                    @relation(fields: [brandId], references: [id], onDelete: Restrict)
+    brand                   Brand                    @relation(fields: [brandId], references: [id], onDelete: Restrict, onUpdate: Cascade)
     brandId                 String
     products                Product[]
     wishes                  Wish[]
@@ -384,20 +384,22 @@ model Model {
     variantValues           VariantValue[]
 
     // Meta
-    createdState State
-    createdBy    User     @relation("modelCreate", fields: [createdById], references: [id])
-    updatedBy    User?    @relation("modelUpdate", fields: [updatedById], references: [id])
-    createdById  String
-    updatedById  String?
-    createdAt    DateTime @default(now())
-    updatedAt    DateTime @updatedAt
+    createdCity City     @relation(fields: [cityValue], references: [value])
+    cityValue   String
+    createdBy   User     @relation("createdModels", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: Cascade)
+    updatedBy   User?    @relation("updatedModels", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+    createdById String
+    updatedById String?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
 
-    @@unique([name, categoryId, brandId, createdState])
+    @@unique([name, categoryId, brandId, cityValue])
     @@index([name])
     @@index([brandId])
     @@index([categoryId])
     @@index([createdById])
     @@index([updatedById])
+    @@index([cityValue])
 }
 
 enum MultipleChoiceQuestionType {
@@ -413,12 +415,12 @@ model MultipleChoiceQuestion {
     choices         Choice[]
     type            MultipleChoiceQuestionType
     required        Boolean                    @default(true)
-    model           Model                      @relation(fields: [modelId], references: [id], onDelete: Cascade)
+    model           Model                      @relation(fields: [modelId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     modelId         String
     // Meta
 
     updatedAt   DateTime @updatedAt
-    updatedBy   User?    @relation("multipleChoiceQuestionUpdate", fields: [updatedById], references: [id])
+    updatedBy   User?    @relation("updatedMultipleChoiceQuestions", fields: [updatedById], references: [id])
     updatedById String?
 
     @@unique([questionContent, modelId])
@@ -429,15 +431,16 @@ model MultipleChoiceQuestion {
 model Choice {
     id         String                 @id @default(cuid())
     value      String
-    question   MultipleChoiceQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+    question   MultipleChoiceQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     questionId String
-    model      Model                  @relation(fields: [modelId], references: [id], onDelete: Cascade)
+    model      Model                  @relation(fields: [modelId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     modelId    String
     products   Product[]
+    wishes     Wish[]
 
     // Meta
     updatedAt   DateTime @updatedAt
-    updatedBy   User?    @relation("choiceUpdate", fields: [updatedById], references: [id])
+    updatedBy   User?    @relation("updatedChoices", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
     updatedById String?
 
     @@unique([value, questionId, modelId])
@@ -459,12 +462,12 @@ model AtomicQuestion {
     type            AtomicQuestionType
     required        Boolean            @default(true)
     answers         AtomicAnswer[]
-    model           Model              @relation(fields: [modelId], references: [id], onDelete: Cascade)
+    model           Model              @relation(fields: [modelId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     modelId         String
 
     // Meta
     updatedAt   DateTime @updatedAt
-    updatedBy   User?    @relation("atomicQuestionUpdate", fields: [updatedById], references: [id])
+    updatedBy   User?    @relation("updatedAtomicQuestions", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
     updatedById String?
 
     @@unique([modelId, questionContent])
@@ -475,11 +478,11 @@ model AtomicQuestion {
 model AtomicAnswer {
     id            String         @id @default(cuid())
     answerContent String
-    question      AtomicQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+    question      AtomicQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     questionId    String
-    product       Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+    product       Product        @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     productId     String
-    model         Model          @relation(fields: [modelId], references: [id], onDelete: Cascade)
+    model         Model          @relation(fields: [modelId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     modelId       String
 
     // Meta
@@ -501,20 +504,20 @@ model Product {
     selectedChoices  Choice[]
     answers          AtomicAnswer[]
     isDeleted        Boolean        @default(false)
-    address          Address?       @relation(fields: [addressId], references: [id], onDelete: Restrict)
+    address          Address?       @relation(fields: [addressId], references: [id], onDelete: Restrict, onUpdate: Cascade)
     addressId        String?
-    model            Model          @relation(fields: [modelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    model            Model          @relation(fields: [modelId], references: [id], onDelete: Restrict, onUpdate: Cascade)
     modelId          String
-    seller           User           @relation("listedProducts", fields: [sellerId], references: [id], onDelete: Cascade)
+    seller           User           @relation("listedProducts", fields: [sellerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     sellerId         String
-    buyer            User?          @relation("purchasedProducts", fields: [buyerId], references: [id], onDelete: SetNull)
+    buyer            User?          @relation("purchasedProducts", fields: [buyerId], references: [id], onDelete: SetNull, onUpdate: Cascade)
     buyerId          String?
-    coupon           Coupon?        @relation(fields: [couponCode, couponCategoryId], references: [code, categoryId], onDelete: SetNull)
+    coupon           Coupon?        @relation(fields: [couponCode, couponCategoryId], references: [code, categoryId], onDelete: NoAction, onUpdate: Cascade)
     couponCode       String?
     couponCategoryId String?
 
     favoritedUsers User[]   @relation("favoriteProducts")
-    room           Room     @relation(fields: [roomId], references: [id], onDelete: Restrict)
+    room           Room     @relation(fields: [roomId], references: [id], onDelete: Restrict, onUpdate: Cascade)
     roomId         String   @unique
     reports        Report[]
 
@@ -536,7 +539,7 @@ model Notification {
     link        String?
     read        Boolean @default(false)
 
-    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     userId    String
     createdAt DateTime @default(now())
 
@@ -545,9 +548,9 @@ model Notification {
 
 model Report {
     id          String   @id @default(cuid())
-    product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+    product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     productId   String
-    user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    user        User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     userId      String
     description String
     createdAt   DateTime @default(now())
@@ -571,9 +574,9 @@ model Room {
 model Bid {
     id     String @id @default(cuid())
     price  Float
-    user   User   @relation(fields: [userId], references: [id], onDelete: Restrict)
+    user   User   @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
     userId String
-    room   Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+    room   Room   @relation(fields: [roomId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     roomId String
 
     // Meta
@@ -592,14 +595,15 @@ model Wish {
     id         String     @id @default(cuid())
     lowerBound Float
     upperBound Float
-    category   Category?  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+    category   Category?  @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     categoryId String?
-    brand      Brand?     @relation(fields: [brandId], references: [id], onDelete: Cascade)
+    brand      Brand?     @relation(fields: [brandId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     brandId    String?
-    model      Model?     @relation(fields: [modelId], references: [id], onDelete: Cascade)
+    model      Model?     @relation(fields: [modelId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     modelId    String?
+    choices    Choice[]
     status     WishStatus @default(pending)
-    user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+    user       User       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     userId     String
 
     // Meta
@@ -622,9 +626,9 @@ model Image {
     height           Int
     resource_type    String // "image" | "video" | "raw" | "auto"
     category         FeaturedCategory?
-    product          Product?          @relation(fields: [productId], references: [id], onDelete: Cascade)
+    product          Product?          @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     productId        String?
-    user             User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
+    user             User?             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     userId           String?
 
     @@index([productId])
@@ -633,11 +637,14 @@ model Image {
 
 model Log {
     id        String   @id @default(cuid())
-    state     State?
+    state     City?    @relation(fields: [cityValue], references: [value], onDelete: Cascade, onUpdate: Cascade)
     message   String
     detail    String?
     level     String
     createdAt DateTime @default(now())
+    cityValue String?
+
+    @@index([cityValue])
 }
 
 model AppConfiguration {
@@ -645,8 +652,8 @@ model AppConfiguration {
     value       String
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
-    createdBy   User     @relation("configCreate", fields: [createdById], references: [id])
-    updatedBy   User?    @relation("configUpdate", fields: [updatedById], references: [id])
+    createdBy   User     @relation("createdConfigurations", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: Cascade)
+    updatedBy   User?    @relation("updatedConfigurations", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
     createdById String
     updatedById String?
 

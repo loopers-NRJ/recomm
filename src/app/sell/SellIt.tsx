@@ -3,7 +3,7 @@
 import CategoryPicker from "@/components/common/CategoryPicker";
 import Loading from "@/components/common/Loading";
 import ServerError from "@/components/common/ServerError";
-import { useClientSelectedState } from "@/store/SelectedState";
+import { useClientselectedCity } from "@/store/ClientSelectedCity";
 import { api } from "@/trpc/react";
 import { parseAsString, useQueryState } from "next-usequerystate";
 import PostingForm from "@/app/sell/PostingForm";
@@ -45,18 +45,24 @@ function Alert({ count }: { count: number }) {
   );
 }
 
-export default function Sellit({count, isPrimeSeller} : {count: number, isPrimeSeller: boolean}) {
+export default function Sellit({
+  count,
+  isPrimeSeller,
+}: {
+  count: number;
+  isPrimeSeller: boolean;
+}) {
   const [parentCategorySlug, setParentCaregorySlug] = useQueryState(
     "category",
     parseAsString,
   );
-  const selectedState = useClientSelectedState((selected) => selected.state);
+  const city = useClientselectedCity((selected) => selected.city?.value);
 
   const categoryApi = api.category.all.useInfiniteQuery(
     {
       parentSlug: parentCategorySlug ?? undefined,
       parentId: parentCategorySlug ? undefined : null,
-      state: selectedState,
+      city,
     },
     {
       getNextPageParam: (page) => page.nextCursor,
@@ -64,7 +70,7 @@ export default function Sellit({count, isPrimeSeller} : {count: number, isPrimeS
   );
   const featuredCategoryApi = api.category.featured.useInfiniteQuery(
     {
-      state: selectedState,
+      city,
     },
     {
       getNextPageParam: (page) => page.nextCursor,
@@ -98,17 +104,17 @@ export default function Sellit({count, isPrimeSeller} : {count: number, isPrimeS
   } else {
     return (
       <>
-      {!isPrimeSeller && <Alert count={count} />}
-      <CategoryPicker
-        categories={categories}
-        featuredCategories={featuredCategories}
-        selectedCategorySlug={parentCategorySlug ?? undefined}
-        onSelect={(category) =>
-          void setParentCaregorySlug(category.slug, { history: "push" })
-        }
-        hasNextPage={categoryApi.hasNextPage}
-        fetchNextPage={() => void categoryApi.fetchNextPage()}
-      />
+        {!isPrimeSeller && <Alert count={count} />}
+        <CategoryPicker
+          categories={categories}
+          featuredCategories={featuredCategories}
+          selectedCategorySlug={parentCategorySlug ?? undefined}
+          onSelect={(category) =>
+            void setParentCaregorySlug(category.slug, { history: "push" })
+          }
+          hasNextPage={categoryApi.hasNextPage}
+          fetchNextPage={() => void categoryApi.fetchNextPage()}
+        />
       </>
     );
   }

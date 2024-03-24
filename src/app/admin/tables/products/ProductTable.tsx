@@ -3,7 +3,7 @@
 import { DataTable } from "@/app/admin/tables/Table";
 import ServerError from "@/components/common/ServerError";
 import { Button } from "@/components/ui/button";
-import { useAdminSelectedState } from "@/store/SelectedState";
+import { useAdminselectedCity } from "@/store/AdminSelectedCity";
 import { type OmitUndefined } from "@/types/custom";
 import { type ProductsPayloadIncluded } from "@/types/prisma";
 import { api } from "@/trpc/react";
@@ -69,7 +69,7 @@ export default function ProductTable() {
   const brandId = params.get("brand") ?? undefined;
   const modelId = params.get("model") ?? undefined;
 
-  const selectedState = useAdminSelectedState((selected) => selected.state);
+  const city = useAdminselectedCity((selected) => selected.city?.value);
 
   const productApi = api.product.all.useInfiniteQuery(
     {
@@ -79,7 +79,7 @@ export default function ProductTable() {
       modelId,
       categoryId,
       brandId,
-      state: selectedState,
+      city,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,

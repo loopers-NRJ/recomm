@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAdminSelectedState } from "@/store/SelectedState";
+import { useAdminselectedCity } from "@/store/AdminSelectedCity";
 import type { Item } from "@/types/custom";
 import {
   atomicQuestionTypeArray,
@@ -77,7 +77,7 @@ export default function CreateModel() {
 
   const router = useRouter();
 
-  const selectedState = useAdminSelectedState((selected) => selected.state);
+  const city = useAdminselectedCity((selected) => selected.city?.value);
 
   const getAtomicQuestionIndex = (id: string) => {
     let count = 0;
@@ -138,7 +138,7 @@ export default function CreateModel() {
       categoryId: selectedCategory?.id,
       atomicQuestions,
       multipleChoiceQuestions,
-      state: selectedState,
+      city,
     });
 
     if (!modelValidationResult.success) {

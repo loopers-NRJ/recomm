@@ -3,7 +3,7 @@
 import { DataTable } from "@/app/admin/tables/Table";
 import ServerError from "@/components/common/ServerError";
 import { Button } from "@/components/ui/button";
-import { useAdminSelectedState } from "@/store/SelectedState";
+import { useAdminselectedCity } from "@/store/AdminSelectedCity";
 import type { OmitUndefined } from "@/types/custom";
 import type { FeaturedCategoryPayloadIncluded } from "@/types/prisma";
 
@@ -50,13 +50,13 @@ export default function FeaturedCategoryTable() {
     "search",
     parseAsString.withDefault(""),
   );
-  const selectedState = useAdminSelectedState((selected) => selected.state);
+  const city = useAdminselectedCity((selected) => selected.city?.value);
   const categoriesApi = api.category.featured.useInfiniteQuery(
     {
       search,
       sortBy,
       sortOrder,
-      state: selectedState,
+      city,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,

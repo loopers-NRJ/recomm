@@ -50,7 +50,7 @@ export async function POST(request: Request) {
       await logger.error({
         message: "Error uploading images",
         detail: JSON.stringify(error),
-        state: "common",
+        city: "common",
       });
       return new Response("Something went wrong", { status: 500 });
     }
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
     await logger.error({
       message: "Error uploading images",
       detail: JSON.stringify(error),
-      state: "common",
+      city: "common",
     });
     return new Response("Something went wrong", { status: 500 });
   }

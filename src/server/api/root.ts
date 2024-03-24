@@ -16,6 +16,7 @@ import { reportRouter } from "./routers/report";
 import { configurationsRouter } from "./routers/configurations";
 import { inboxRouter } from "./routers/inbox";
 import { variantRouter } from "./routers/variant";
+import { cityRouter } from "./routers/city";
 
 /**
  * This is the primary router for your server.
@@ -39,6 +40,7 @@ export const appRouter = createTRPCRouter({
   report: reportRouter,
   configuration: configurationsRouter,
   variant: variantRouter,
+  city: cityRouter,
 });
 
 // export type definition of API

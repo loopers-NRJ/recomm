@@ -9,7 +9,7 @@ export const configurationsRouter = createTRPCRouter({
     },
   ),
   get: getProcedure(AccessType.viewAppConfiguration)
-    .input(z.string())
+    .input(z.string().trim().min(1))
     .query(async ({ input: key, ctx: { prisma } }) => {
       const config = await prisma.appConfiguration.findUnique({
         where: {
@@ -21,8 +21,8 @@ export const configurationsRouter = createTRPCRouter({
   set: getProcedure(AccessType.updateAppConfiguration)
     .input(
       z.object({
-        key: z.string(),
-        value: z.string(),
+        key: z.string().trim().min(1),
+        value: z.string().trim().min(1),
       }),
     )
     .mutation(async ({ input: { key, value }, ctx: { prisma, session } }) => {

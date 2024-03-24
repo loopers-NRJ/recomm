@@ -4,7 +4,7 @@ import Container from "@/components/Container";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAdminSelectedState } from "@/store/SelectedState";
+import { useAdminselectedCity } from "@/store/AdminSelectedCity";
 import { api } from "@/trpc/react";
 import { errorHandler } from "@/utils/errorHandler";
 import { Loader2 } from "lucide-react";
@@ -30,7 +30,7 @@ const CreateCategory = () => {
   });
   const [categoryName, setCategoryName] = useState("");
   const [categoryPrice, setCategoryPrice] = useState("");
-  const selectedState = useAdminSelectedState((selected) => selected.state);
+  const city = useAdminselectedCity((selected) => selected.city?.value);
   const [variants, setVariants] = useState<VariantsList>();
 
   return (
@@ -64,15 +64,16 @@ const CreateCategory = () => {
 
         <div className="flex items-end justify-end gap-8">
           <Button
-            onClick={() =>
+            onClick={() => {
+              if (!city) return toast.error("Select a state");
               createCategoryApi.mutate({
                 name: categoryName,
                 parentCategoryId: parentId ?? undefined,
-                state: selectedState,
+                city,
                 price: +categoryPrice,
                 variants,
-              })
-            }
+              });
+            }}
             disabled={
               categoryName.trim() === "" ||
               !+categoryPrice ||

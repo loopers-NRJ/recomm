@@ -20,9 +20,8 @@ import { Button } from "@/components/ui/button";
 import type { Address, User } from "@prisma/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { states } from "@/types/prisma";
 import { z } from "zod";
-import { useClientSelectedState } from "@/store/SelectedState";
+import { useClientselectedCity } from "@/store/ClientSelectedCity";
 import { api } from "@/trpc/react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
@@ -37,13 +36,13 @@ interface FormProps {
   callbackUrl?: string;
   addressOnly?: boolean;
   afterSave?: () => void;
-  edit?: boolean,
-  address?: Address
+  edit?: boolean;
+  address?: Address;
 }
 
 const detailsFormSchema = addressSchema.extend({
-  fullName: z.string().trim(),
-  phoneNumber: z.string().trim()
+  fullName: z.string().trim().min(1),
+  phoneNumber: z.string().trim().min(1),
 });
 
 type DetailsFormValues = z.infer<typeof detailsFormSchema>;
@@ -56,7 +55,9 @@ const DetailsForm = ({
   addressOnly = false,
   afterSave,
 }: FormProps) => {
-  const { state } = useClientSelectedState();
+  const city = useClientselectedCity((selected) => selected.city?.value);
+  const citiesApi = api.city.all.useQuery();
+  const cities = citiesApi.data;
   const router = useRouter();
   const createAddress = api.address.create.useMutation();
   const updateUserMobile = api.user.update.useMutation();
@@ -69,8 +70,8 @@ const DetailsForm = ({
     fullName: userData?.name ?? "",
     addressLine1: address?.addressLine1 ?? "",
     addressLine2: address?.addressLine2 ?? "",
-    city: address?.city ?? "",
-    state: address?.state ?? state,
+    state: address?.state ?? "",
+    cityValue: address?.cityValue ?? city,
     country: address?.country ?? "India",
     postalCode: address?.postalCode ?? "",
     phoneNumber: userData?.mobile ?? "",
@@ -88,8 +89,11 @@ const DetailsForm = ({
       if (addressOnly && !edit) {
         const result = await createAddress.mutateAsync(data);
         if (typeof result === "string") return toast.error(result);
-      } else if (addressOnly && edit) {
-        const result = await updateAddress.mutateAsync({ id: address?.id!, ...data }); // eslint-disable-line
+      } else if (addressOnly && edit && address) {
+        const result = await updateAddress.mutateAsync({
+          id: address.id,
+          ...data,
+        });
         if (typeof result === "string") return toast.error(result);
       } else {
         const [result1, result2] = await Promise.all([
@@ -148,7 +152,10 @@ const DetailsForm = ({
                     <FormControl>
                       <Input type="tel" {...field} />
                     </FormControl>
-                    <span className="text-xs text-gray-500">This will not be shared until you activate it in profile page</span>
+                    <span className="text-xs text-gray-500">
+                      This will not be shared until you activate it in profile
+                      page
+                    </span>
                     <FormMessage />
                   </FormLabel>
                 </FormItem>
@@ -203,14 +210,28 @@ const DetailsForm = ({
         />
         <FormField
           control={form.control}
-          name="city"
+          name="cityValue"
           render={({ field }) => (
             <FormItem>
               <FormLabel>
                 City
-                <FormControl>
-                  <Input type="text" {...field} />
-                </FormControl>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select City" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {cities?.map((city) => (
+                      <SelectItem key={city.value} value={city.value}>
+                        {city.value.replace("_", " ")}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormLabel>
             </FormItem>
@@ -223,28 +244,15 @@ const DetailsForm = ({
             <FormItem>
               <FormLabel>
                 State
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select State" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {states.map((state, i) => (
-                      <SelectItem key={i} value={state}>
-                        {state.replace("_", " ")}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                  <Input type="text" {...field} />
+                </FormControl>
                 <FormMessage />
               </FormLabel>
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="country"
@@ -275,9 +283,13 @@ const DetailsForm = ({
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={isLoading} size="lg" className="w-full">{
-          edit ? "Update" : <>{isLoading && <Loader2 className="animate-spin" />}Save</>
-        }</Button>
+        <Button type="submit" disabled={isLoading} size="lg" className="w-full">
+          {edit ? (
+            "Update"
+          ) : (
+            <>{isLoading && <Loader2 className="animate-spin" />}Save</>
+          )}
+        </Button>
       </form>
     </Form>
   );

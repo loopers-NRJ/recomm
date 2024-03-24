@@ -61,7 +61,7 @@ export function updateWishStatus(
           message: "cannot update wishes",
           error,
         }),
-        state: "common",
+        city: "common",
       });
     });
 }

@@ -7,6 +7,7 @@ import { type Title } from "./titles";
 import { api } from "@/trpc/server";
 import { AccessType } from "@prisma/client";
 import { hasAdminPageAccess } from "@/types/prisma";
+import { AdminDefaultCitySelector } from "./AdminDefaultCitySelector";
 
 export default async function layout({
   children,
@@ -22,6 +23,7 @@ export default async function layout({
   const accesses = role.accesses;
   const userAccessTypes = accesses?.map((access) => access.type);
   if (!hasAdminPageAccess(userAccessTypes)) return notFound();
+
   const filteredTitles: Title[] = [];
   if (
     userAccessTypes?.includes(AccessType.createCategory) ||
@@ -74,11 +76,14 @@ export default async function layout({
     filteredTitles.push("logs");
   }
 
+  const cities = await api.city.byRoleId.query({ roleId });
+
   return (
     <Container className="pt-3 md:flex md:gap-2">
       <AdminSidebar titles={filteredTitles} />
+      <AdminDefaultCitySelector cities={cities} />
       <div className="my-4 flex grow flex-col gap-2 overflow-hidden md:m-0">
-        <AdminTitlebar />
+        <AdminTitlebar cities={cities} />
         {children}
       </div>
     </Container>

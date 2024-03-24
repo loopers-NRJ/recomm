@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/command";
 import { api } from "@/trpc/react";
 import { debounce } from "@/utils/helper";
-import { useClientSelectedState } from "@/store/SelectedState";
+import { useClientselectedCity } from "@/store/ClientSelectedCity";
 
 interface SuggestionProps {
   searchKey: string;
@@ -17,10 +17,10 @@ interface SuggestionProps {
 
 const Suggestions: FC<SuggestionProps> = ({ searchKey }) => {
   const router = useRouter();
-  const selectedState = useClientSelectedState((selected) => selected.state);
+  const city = useClientselectedCity((selected) => selected.city?.value);
   const suggestionsApi = api.search.all.useQuery({
     search: searchKey,
-    state: selectedState,
+    city,
   });
 
   useEffect(() => {

@@ -8,7 +8,6 @@ import {
   MAXIMUM_LIMIT,
 } from "@/utils/constants";
 import { couponCodeSchema, idSchema } from "@/utils/validation";
-import { states } from "@/types/prisma";
 
 export const couponRouter = createTRPCRouter({
   all: getProcedure((accesses) =>
@@ -35,13 +34,14 @@ export const couponRouter = createTRPCRouter({
             "discount",
             "type",
             "active",
-            "state",
+            "city",
             "createdAt",
             "updatedAt",
           ])
           .default(DEFAULT_SORT_BY),
-        cursor: z.object({ code: z.string(), categoryId: idSchema }).optional(),
-        state: z.enum(states),
+        cursor: z
+          .object({ code: z.string().trim().min(1), categoryId: idSchema })
+          .optional(),
         categoryId: idSchema,
       }),
     )
@@ -49,7 +49,7 @@ export const couponRouter = createTRPCRouter({
       const coupons = await prisma.coupon.findMany({
         where: {
           code: { contains: input.search },
-          category: { createdState: input.state, id: input.categoryId },
+          category: { id: input.categoryId },
         },
         orderBy: { [input.sortBy]: input.sortOrder },
         take: input.limit,
@@ -82,7 +82,7 @@ export const couponRouter = createTRPCRouter({
         access === AccessType.deleteCoupon,
     ),
   )
-    .input(z.object({ code: couponCodeSchema, categoryId: z.string() }))
+    .input(z.object({ code: couponCodeSchema, categoryId: idSchema }))
     .query(async ({ input, ctx: { prisma } }) => {
       const coupon = await prisma.coupon.findUnique({
         where: { id: input },
@@ -127,7 +127,7 @@ export const couponRouter = createTRPCRouter({
         },
       });
       await logger.info({
-        state: category.createdState,
+        city: category.cityValue,
         message: `${session.user.name} created coupon ${coupon.code} with discount ${coupon.discount} for the category ${category.name}`,
       });
       return coupon;
@@ -135,7 +135,7 @@ export const couponRouter = createTRPCRouter({
   update: getProcedure(AccessType.updateCoupon)
     .input(
       z.object({
-        categoryId: z.string(),
+        categoryId: idSchema,
         code: couponCodeSchema,
         type: z.enum([CouponType.fixed, CouponType.percentage]).optional(),
         discount: z.number().int().min(0).optional(),
@@ -166,7 +166,7 @@ export const couponRouter = createTRPCRouter({
         });
 
         await logger.info({
-          state: updatedCoupon.category?.createdState ?? "common",
+          city: updatedCoupon.category?.cityValue ?? "common",
           message: `${session.user.name} updated coupon ${updatedCoupon.code}`,
         });
 
@@ -174,7 +174,7 @@ export const couponRouter = createTRPCRouter({
       },
     ),
   delete: getProcedure(AccessType.deleteCoupon)
-    .input(z.object({ code: couponCodeSchema, categoryId: z.string() }))
+    .input(z.object({ code: couponCodeSchema, categoryId: idSchema }))
     .mutation(async ({ input, ctx: { prisma, session, logger } }) => {
       const coupon = await prisma.coupon.findUnique({
         where: { id: input },
@@ -185,7 +185,7 @@ export const couponRouter = createTRPCRouter({
       }
       await prisma.coupon.delete({ where: { id: input } });
       await logger.info({
-        state: coupon.category?.createdState ?? "common",
+        city: coupon.category?.cityValue ?? "common",
         message: `${session.user.name} deleted coupon ${coupon.code}`,
       });
     }),

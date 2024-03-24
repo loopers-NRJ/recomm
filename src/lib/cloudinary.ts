@@ -53,7 +53,7 @@ export const deleteImage: (publicId: string) => Promise<void | Error> = async (
     await getLogger(prisma).error({
       message: "Error deleting image",
       detail: JSON.stringify({ publicId, error }),
-      state: "common",
+      city: "common",
     });
     throw new Error("cannot delete the image");
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useClientSelectedState } from "@/store/SelectedState";
+import { useClientselectedCity } from "@/store/ClientSelectedCity";
 import { api } from "@/trpc/react";
 import { type SortOrder } from "@/utils/constants";
 import ListingCard from "@/components/ListingCard";
@@ -15,7 +15,7 @@ interface Props {
   model?: string;
   category?: string;
   brand?: string;
-  price?: string
+  price?: string;
 }
 
 const Products: React.FC<Props> = ({
@@ -27,7 +27,7 @@ const Products: React.FC<Props> = ({
   brand,
   price,
 }) => {
-  const selectedState = useClientSelectedState((selected) => selected.state);
+  const city = useClientselectedCity((selected) => selected.city?.value);
 
   const { data: categoryData } = api.category.bySlug.useQuery({
     categorySlug: category ?? "dummy",
@@ -45,9 +45,9 @@ const Products: React.FC<Props> = ({
   });
   const modelId = modelData?.id ?? undefined;
 
-  const range = price ? price.split("_") : undefined
-  const min = range ? parseInt(range[0] ?? "10"): 10
-  const max = range ? parseInt(range[1] ?? "10000"): 10000
+  const range = price ? price.split("_") : undefined;
+  const min = range ? parseInt(range[0] ?? "10") : 10;
+  const max = range ? parseInt(range[1] ?? "10000") : 10000;
 
   const { data, isLoading, isError } = api.product.all.useInfiniteQuery(
     {
@@ -58,7 +58,7 @@ const Products: React.FC<Props> = ({
       modelId,
       categoryId,
       brandId,
-      state: selectedState,
+      city,
     },
     {
       getNextPageParam: (lastItem) => lastItem.nextCursor,
@@ -84,25 +84,22 @@ const Products: React.FC<Props> = ({
   }
 
   return (
-      <motion.div
-        variants={{
-          hidden: { opacity: 0 },
-          show: {
-            opacity: 1,
-            transition: { duration: 0.5, staggerChildren: 0.03 },
-          },
-        }}
-        initial="hidden"
-        animate="show"
-        className="product-area mb-32 grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6"
-      >
-        {products.map((product) => (
-          <ListingCard
-            key={product.id}
-            product={product}
-          />
-        ))}
-      </motion.div>
+    <motion.div
+      variants={{
+        hidden: { opacity: 0 },
+        show: {
+          opacity: 1,
+          transition: { duration: 0.5, staggerChildren: 0.03 },
+        },
+      }}
+      initial="hidden"
+      animate="show"
+      className="product-area mb-32 grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6"
+    >
+      {products.map((product) => (
+        <ListingCard key={product.id} product={product} />
+      ))}
+    </motion.div>
   );
 };
 

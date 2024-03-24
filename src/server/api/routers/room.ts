@@ -129,7 +129,7 @@ export const roomRounter = createTRPCRouter({
                 procedure: "deleteABid",
                 error,
               }),
-              state: "common",
+              city: "common",
             });
           });
       },
@@ -200,7 +200,7 @@ const createABid = ({
           procedure: "createABid",
           error,
         }),
-        state: "common",
+        city: "common",
       });
       return "Something went wrong";
     }

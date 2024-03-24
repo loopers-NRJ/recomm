@@ -18,7 +18,6 @@ import {
   type ProductsPayloadIncluded,
   productsPayload,
   singleProductPayload,
-  states,
 } from "@/types/prisma";
 import {
   DEFAULT_LIMIT,
@@ -57,7 +56,7 @@ export const productRouter = createTRPCRouter({
         categoryId: idSchema.optional(),
         brandId: idSchema.optional().or(z.array(idSchema)),
         modelId: idSchema.optional().or(z.array(idSchema)),
-        state: z.enum(states),
+        city: z.string().trim().min(1).optional(),
         price: z
           .object({
             min: z.number().int().positive(),
@@ -81,7 +80,7 @@ export const productRouter = createTRPCRouter({
           brandId,
           modelId,
           cursor,
-          state,
+          city,
           price,
           choiceIds,
         },
@@ -155,7 +154,7 @@ export const productRouter = createTRPCRouter({
                   },
                 },
               ],
-              createdState: state,
+              cityValue: city,
             },
             price: price
               ? {
@@ -253,7 +252,7 @@ export const productRouter = createTRPCRouter({
       },
     ),
   bySlug: publicProcedure
-    .input(z.object({ productSlug: z.string() }))
+    .input(z.object({ productSlug: z.string().trim().min(1) }))
     .query(async ({ input: { productSlug }, ctx: { prisma, session } }) => {
       const product = await prisma.product.findUnique({
         where: {
@@ -474,7 +473,7 @@ export const productRouter = createTRPCRouter({
 
         await logger.info({
           message: `${product.seller.name} created a new product: '${product.title}'`,
-          state: product.model.createdState,
+          city: product.model.cityValue,
           detail: JSON.stringify({ productId: product.id }),
         });
         return product;
@@ -720,7 +719,7 @@ async function checkUserCanSellProduct(
   )?.value;
   if (sellingDurationStr === undefined || sellingCountStr === undefined) {
     await logger.error({
-      state: "common",
+      city: "common",
       message:
         "Product selling configurations not found, check the configuration names",
       detail: JSON.stringify({ userId: user.id }),
@@ -731,7 +730,7 @@ async function checkUserCanSellProduct(
   const sellingCount = Number(sellingCountStr);
   if (isNaN(sellingDuration) || isNaN(sellingCount)) {
     await logger.error({
-      state: "common",
+      city: "common",
       message:
         "Product selling configurations are not numbers. Enter a valid configurations",
       detail: JSON.stringify({ userId: user.id }),

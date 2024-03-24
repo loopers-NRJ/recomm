@@ -11,12 +11,14 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import AccordionSection from "./AccordionSection";
 import { errorHandler } from "@/utils/errorHandler";
+import CityPicker from "./CityPicker";
 
 export default function CreateRole() {
   const [selectedRoles, setSelectedRoles] = useState<Set<AccessType>>(
     new Set(),
   );
   const [roleName, setRoleName] = useState("");
+  const [cities, setStates] = useState<Set<string>>(new Set());
   const createRoleApi = api.role.create.useMutation({
     onSuccess: () => {
       router.push("/admin/tables/roles");
@@ -61,100 +63,120 @@ export default function CreateRole() {
             onChange={(e) => setRoleName(e.target.value)}
           />
         </Label>
-        <Accordion type="single" collapsible>
-          <AccordionSection
-            title="general"
-            types={[AccessType.primeSeller]}
-            selectedRoles={selectedRoles}
-            handleCheckedChange={handleCheckedChange}
-          />
-          <AccordionSection
-            title="category"
-            types={[
-              AccessType.createCategory,
-              AccessType.updateCategory,
-              AccessType.deleteCategory,
-            ]}
-            selectedRoles={selectedRoles}
-            handleCheckedChange={handleCheckedChange}
-          />
-          <AccordionSection
-            title="brand"
-            types={[
-              AccessType.createBrand,
-              AccessType.updateBrand,
-              AccessType.deleteBrand,
-            ]}
-            selectedRoles={selectedRoles}
-            handleCheckedChange={handleCheckedChange}
-          />
-          <AccordionSection
-            title="model"
-            types={[
-              AccessType.createModel,
-              AccessType.updateModel,
-              AccessType.deleteModel,
-            ]}
-            selectedRoles={selectedRoles}
-            handleCheckedChange={handleCheckedChange}
-          />
-          <AccordionSection
-            title="product"
-            types={[AccessType.updateProduct, AccessType.deleteProduct]}
-            selectedRoles={selectedRoles}
-            handleCheckedChange={handleCheckedChange}
-          />
-          <AccordionSection
-            title="role"
-            types={[
-              AccessType.createRole,
-              AccessType.updateRole,
-              AccessType.updateUsersRole,
-              AccessType.deleteRole,
-            ]}
-            selectedRoles={selectedRoles}
-            handleCheckedChange={handleCheckedChange}
-          />
-          <AccordionSection
-            title="user"
-            types={[AccessType.updateUser, AccessType.deleteUser]}
-            selectedRoles={selectedRoles}
-            handleCheckedChange={handleCheckedChange}
-          />
+        <div>
+          <h1>Select cities for the role {roleName && `'${roleName}'`}</h1>
+          <Accordion type="single" collapsible>
+            <CityPicker value={cities} onChange={setStates} />
+          </Accordion>
+        </div>
+        <div>
+          <h1>
+            Select required access for the role {roleName && `'${roleName}'`}
+          </h1>
+          <Accordion type="single" collapsible>
+            <AccordionSection
+              title="general"
+              types={[AccessType.primeSeller]}
+              selectedRoles={selectedRoles}
+              handleCheckedChange={handleCheckedChange}
+            />
+            <AccordionSection
+              title="category"
+              types={[
+                AccessType.createCategory,
+                AccessType.updateCategory,
+                AccessType.deleteCategory,
+              ]}
+              selectedRoles={selectedRoles}
+              handleCheckedChange={handleCheckedChange}
+            />
+            <AccordionSection
+              title="brand"
+              types={[
+                AccessType.createBrand,
+                AccessType.updateBrand,
+                AccessType.deleteBrand,
+              ]}
+              selectedRoles={selectedRoles}
+              handleCheckedChange={handleCheckedChange}
+            />
+            <AccordionSection
+              title="model"
+              types={[
+                AccessType.createModel,
+                AccessType.updateModel,
+                AccessType.deleteModel,
+              ]}
+              selectedRoles={selectedRoles}
+              handleCheckedChange={handleCheckedChange}
+            />
+            <AccordionSection
+              title="product"
+              types={[AccessType.updateProduct, AccessType.deleteProduct]}
+              selectedRoles={selectedRoles}
+              handleCheckedChange={handleCheckedChange}
+            />
+            <AccordionSection
+              title="role"
+              types={[
+                AccessType.createRole,
+                AccessType.updateRole,
+                AccessType.updateUsersRole,
+                AccessType.deleteRole,
+              ]}
+              selectedRoles={selectedRoles}
+              handleCheckedChange={handleCheckedChange}
+            />
+            <AccordionSection
+              title="user"
+              types={[AccessType.updateUser, AccessType.deleteUser]}
+              selectedRoles={selectedRoles}
+              handleCheckedChange={handleCheckedChange}
+            />
 
-          <AccordionSection
-            title="log"
-            types={[AccessType.viewLogs, AccessType.clearLogs]}
-            selectedRoles={selectedRoles}
-            handleCheckedChange={handleCheckedChange}
-          />
-          <AccordionSection
-            title="report"
-            types={[AccessType.viewReports, AccessType.deleteReport]}
-            selectedRoles={selectedRoles}
-            handleCheckedChange={handleCheckedChange}
-          />
-          <AccordionSection
-            title="coupon"
-            types={[
-              AccessType.createCoupon,
-              AccessType.updateCoupon,
-              AccessType.deleteCoupon,
-            ]}
-            selectedRoles={selectedRoles}
-            handleCheckedChange={handleCheckedChange}
-          />
-          <AccordionSection
-            title="configuration"
-            types={[
-              AccessType.viewAppConfiguration,
-              AccessType.updateAppConfiguration,
-            ]}
-            selectedRoles={selectedRoles}
-            handleCheckedChange={handleCheckedChange}
-          />
-        </Accordion>
-
+            <AccordionSection
+              title="log"
+              types={[AccessType.viewLogs, AccessType.clearLogs]}
+              selectedRoles={selectedRoles}
+              handleCheckedChange={handleCheckedChange}
+            />
+            <AccordionSection
+              title="report"
+              types={[AccessType.viewReports, AccessType.deleteReport]}
+              selectedRoles={selectedRoles}
+              handleCheckedChange={handleCheckedChange}
+            />
+            <AccordionSection
+              title="coupon"
+              types={[
+                AccessType.createCoupon,
+                AccessType.updateCoupon,
+                AccessType.deleteCoupon,
+              ]}
+              selectedRoles={selectedRoles}
+              handleCheckedChange={handleCheckedChange}
+            />
+            <AccordionSection
+              title="configuration"
+              types={[
+                AccessType.viewAppConfiguration,
+                AccessType.updateAppConfiguration,
+              ]}
+              selectedRoles={selectedRoles}
+              handleCheckedChange={handleCheckedChange}
+            />
+            <AccordionSection
+              title="city"
+              types={[
+                AccessType.createCity,
+                AccessType.updateCity,
+                AccessType.deleteCity,
+              ]}
+              selectedRoles={selectedRoles}
+              handleCheckedChange={handleCheckedChange}
+            />
+          </Accordion>
+        </div>
         <Button
           className="self-end"
           disabled={
@@ -166,6 +188,7 @@ export default function CreateRole() {
             createRoleApi.mutate({
               name: roleName,
               accesses: [...selectedRoles],
+              cities: [...cities],
             });
           }}
         >

@@ -54,7 +54,7 @@ export const variantRouter = createTRPCRouter({
         });
 
         await logger.info({
-          state: created.category.createdState ?? "common",
+          city: created.category.cityValue ?? "common",
           message: `${session.user.name} created a variant in ${created.category.name} called ${created.title}`,
         });
 
@@ -109,7 +109,7 @@ export const variantRouter = createTRPCRouter({
           data: { title, updatedBy: { connect: { id: session.user.id } } },
         });
         await logger.info({
-          state: variant.category.createdState ?? "common",
+          city: variant.category.cityValue ?? "common",
           message: `${session.user.name} updated a variant in ${variant.category.name} from ${variant.title} to ${updated.title}`,
         });
         return updated;
@@ -141,7 +141,7 @@ export const variantRouter = createTRPCRouter({
           where: { id: variantId },
         });
         await logger.info({
-          state: variant.category.createdState ?? "common",
+          city: variant.category.cityValue ?? "common",
           message: `${session.user.name} deleted a variant in ${variant.category.name} called ${variant.title}`,
         });
         return updated;

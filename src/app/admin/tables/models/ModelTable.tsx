@@ -4,7 +4,7 @@ import { DataTable } from "@/app/admin/tables/Table";
 import ServerError from "@/components/common/ServerError";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { useAdminSelectedState } from "@/store/SelectedState";
+import { useAdminselectedCity } from "@/store/AdminSelectedCity";
 import { type OmitUndefined } from "@/types/custom";
 import { type ModelPayloadIncluded } from "@/types/prisma";
 import { api } from "@/trpc/react";
@@ -56,7 +56,7 @@ export default function ModelTable() {
       DEFAULT_SORT_ORDER,
     ),
   );
-  const selectedState = useAdminSelectedState((selected) => selected.state);
+  const city = useAdminselectedCity((selected) => selected.city?.value);
   const [search, setSearch] = useQueryState(
     "search",
     parseAsString.withDefault(""),
@@ -90,9 +90,10 @@ export default function ModelTable() {
       sortOrder,
       categoryId,
       brandId,
-      state: selectedState,
+      city: city ?? "",
     },
     {
+      enabled: city !== undefined,
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
@@ -250,7 +251,7 @@ export default function ModelTable() {
                 name: model.name + " copy",
                 categoryId: model.categoryId,
                 brandId: model.brandId,
-                state: model.createdState,
+                city: model.cityValue,
                 priceRange: [model.minimumPrice, model.maximumPrice],
                 atomicQuestions: model.atomicQuestions,
                 multipleChoiceQuestions: model.multipleChoiceQuestions.map(
