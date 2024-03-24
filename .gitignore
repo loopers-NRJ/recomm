@@ -52,3 +52,12 @@ bun.lockb
 .vscode/*
 
 */**/testing
+
+# PWA stuff
+**/public/sw.js
+**/public/worker-*.js
+**/public/workbox-*.js
+**/public/sw.js.map
+**/public/worker-*.js.map
+**/public/workbox-*.js.map
+
