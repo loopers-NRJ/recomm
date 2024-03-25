@@ -520,10 +520,12 @@ export const categoryRouter = createTRPCRouter({
     ),
 
   addToFeatured: getProcedure(AccessType.updateCategory)
-    .input(z.object({ categoryId: idSchema, image: imageInputs }))
+    .input(
+      z.object({ categoryId: idSchema, publicId: z.string().trim().min(1) }),
+    )
     .mutation(
       async ({
-        input: { categoryId: id, image },
+        input: { categoryId: id, publicId },
         ctx: { prisma, session, logger },
       }) => {
         const category = await prisma.category.findUnique({ where: { id } });
@@ -539,27 +541,26 @@ export const categoryRouter = createTRPCRouter({
         if (existingFeatured !== null) {
           return "Category is already featured" as const;
         }
-        try {
-          await prisma.featuredCategory.create({
-            data: {
-              category: {
-                connect: {
-                  id,
-                },
-              },
-              image: {
-                create: image,
-              },
-              featuredBy: {
-                connect: {
-                  id: session.user.id,
-                },
+
+        await prisma.featuredCategory.create({
+          data: {
+            category: {
+              connect: {
+                id,
               },
             },
-          });
-        } catch (error) {
-          console.log(error);
-        }
+            image: {
+              connect: {
+                publicId: publicId,
+              },
+            },
+            featuredBy: {
+              connect: {
+                id: session.user.id,
+              },
+            },
+          },
+        });
 
         await logger.info({
           message: `'${session.user.name}' promoted a category named '${category.name}' to featured category`,

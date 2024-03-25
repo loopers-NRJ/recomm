@@ -56,7 +56,7 @@ export default function CreateFeaturedCategory({
 
       createFeaturedCategoryApi.mutate({
         categoryId: selectedCategory.id,
-        image,
+        publicId: image.publicId,
       });
     } catch (error) {
       if (error instanceof Error) {
