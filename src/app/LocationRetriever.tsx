@@ -9,59 +9,68 @@ import { api } from "@/trpc/react";
 import type { City } from "@prisma/client";
 import { useEffect, useState } from "react";
 
+
 export default function LocationRetriever() {
-  const [unavailable, setUnavailable] = useState(false);
+  const getClosetCity = (latitude: number, longitude: number) => {
+    const map: Record<string, number[]> = {
+      "Chennai": [13.0827, 80.2707],
+      "Bengaluru": [12.9716, 77.5946]
+    }
+    let min = Infinity;
+    let closestCity: string | undefined = undefined;
+    for (const city in map) {
+      const cord = map[city] as [number, number];
+      const distance = Math.sqrt(
+        (latitude - cord[0]) ** 2 +
+        (longitude - cord[1]) ** 2
+      );
+      if (distance < min) {
+        min = distance;
+        closestCity = city;
+      }
+    }
+    return closestCity;
+  }
+
   const [manualLocation, setManualLocation] = useState(false);
-
   const { city, onCityChange } = useClientselectedCity()
-  const { data } = api.city.all.useQuery();
+  const { data, isLoading } = api.city.all.useQuery();
 
-  const map: Record<string, City> = {}
+  const map: Record<string, City> = {};
   data?.forEach((city) => {
     map[city.value] = city;
   });
 
   const [selected, setSelected] = useState<City>();
 
-  const changetoCity = api.city.mapFromCoordinates.useMutation({
-    onSuccess: (data) => {
-      if (typeof data === "string") {
-        setUnavailable(true);
-        setManualLocation(true);
-        return;
-      }
-      onCityChange(data);
-      setManualLocation(false);
-    },
-  });
-
-  const getLocation = () => {
-    try {
-      const cache = localStorage.getItem('city');
-      if (cache) {
+  useEffect(() => {
+    console.log("useEffect", isLoading);
+    const cache = localStorage.getItem('city');
+    if (cache) {
+      try {
         onCityChange(JSON.parse(cache));
-        return;
-      }
-    } catch (err) {}
-    if (!city)
-      navigator.geolocation.getCurrentPosition(
+      } catch (err) { }
+      return;
+    }
+    if (!isLoading) {
+      navigator.geolocation.watchPosition(
         (position) => {
-          changetoCity.mutate({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          });
+          const { latitude, longitude } = position.coords;
+          const closest = getClosetCity(latitude, longitude);
+          if (closest === undefined ) {
+            setManualLocation(true);
+            return;
+          }
+          onCityChange(map[closest]!);
         },
         (error) => {
-          if (error.PERMISSION_DENIED || error.POSITION_UNAVAILABLE) {
+          if (error.PERMISSION_DENIED || error.POSITION_UNAVAILABLE && !cache) {
             setManualLocation(true);
           }
         },
       );
-  }
-
-  useEffect(() => {
-    getLocation();
-  }, []);
+    }
+  }, [isLoading]);
 
   return <>
     <Dialog open={manualLocation} onOpenChange={setManualLocation}>
@@ -103,7 +112,6 @@ export default function LocationRetriever() {
             </Button>
           </div>
         </DialogFooter>
-        {unavailable && <p className="mx-auto text-sm text-red-500">City not found. Please choose manually</p>}
       </DialogContent>
     </Dialog>
   </>;
