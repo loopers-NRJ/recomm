@@ -11,6 +11,7 @@ import { useSession } from "next-auth/react";
 import { api } from "@/trpc/react";
 import { Bell } from "lucide-react";
 import { useEffect } from "react";
+import LocationRetriever from "@/app/LocationRetriever";
 
 const MobileNavbar = () => {
   const { data: session } = useSession();
@@ -45,9 +46,9 @@ const MobileNavbar = () => {
         </div>
         {/* Search bar and location selector */}
         {pathname == "/" && (
-          <div className="flex w-full gap-2">
+          <div className="flex items-center w-full gap-2">
             <Search />
-            <p className="items-center justify-center border p-2">Location</p>
+            <LocationRetriever />
           </div>
         )}
       </nav>

@@ -13,7 +13,6 @@ import { Analytics } from "@vercel/analytics/react";
 
 import MobileNavbar from "@/components/navbar/mobile-navbar";
 import DesktopNavbar from "@/components/navbar/desktop-navbar";
-import LocationRetriever from "./LocationRetriever";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -44,7 +43,6 @@ export default function RootLayout({
       <head>
         <SpeedInsights />
         <Analytics />
-        <LocationRetriever />
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body className={`font-sans ${inter.variable}`}>

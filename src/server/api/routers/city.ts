@@ -5,7 +5,7 @@ import { env } from "@/env";
 import { prisma } from "@/server/db";
 
 export const cityRouter = createTRPCRouter({
-  all: protectedProcedure.query(({ ctx: { prisma } }) => {
+  all: publicProcedure.query(({ ctx: { prisma } }) => {
     return prisma.city.findMany();
   }),
 
@@ -29,39 +29,34 @@ export const cityRouter = createTRPCRouter({
       const geocodeApiUrl = `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&format=json&apiKey=${env.GEOCODE_API_KEY}`;
       const response = await fetch(geocodeApiUrl);
       if (!response.ok) {
-        return "Something went wrong";
+        return "Failed to fetch data"
       }
       const result = responseSchema.safeParse(await response.json());
       if (!result.success) {
-        return "Something went wrong";
+        return "Invalid response"
       }
       const apiResponse = result.data;
-      let cityName = apiResponse.city;
-      if (!apiResponse.city) {
-        cityName = apiResponse.state_district.split(" ")[0];
-      }
-
+      const cityName = apiResponse.results[0]?.city;
       const city = await prisma.city.findUnique({
         where: {
           value: cityName,
         },
       });
       if (!city) {
-        return "Something went wrong";
+        return "City not found"
       }
       return city;
     }),
 });
 
 const responseSchema = z.object({
-  name: z.string(),
-  country: z.string(),
-  state: z.string(),
-  state_district: z.string(),
-  county: z.string(),
-  city: z.string().optional(),
-  postcode: z.string(),
-  district: z.string(),
-  lon: z.number(),
-  lat: z.number(),
+  results: z.array(z.object({
+    country: z.string(),
+    state: z.string(),
+    county: z.string(),
+    city: z.string().optional(),
+    postcode: z.string(),
+    lon: z.number(),
+    lat: z.number(),
+  })),
 });

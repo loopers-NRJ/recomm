@@ -11,5 +11,8 @@ export interface selectedCityType {
  * use this to set the city in the client.
  */
 export const useClientselectedCity = create<selectedCityType>((set) => ({
-  onCityChange: (city: City) => set({ city }),
+  onCityChange: (city: City) => {
+    localStorage.setItem("city", JSON.stringify(city));
+    set({ city })
+  },
 }));
