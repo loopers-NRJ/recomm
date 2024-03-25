@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signIn } from "next-auth/react";
+import toast from "react-hot-toast";
 
 type UserAuthFormType = React.ComponentProps<"div"> & {
   callbackUrl: string;
@@ -18,17 +19,23 @@ export function UserAuthForm({
   callbackUrl,
   ...props
 }: UserAuthFormType) {
-  const [isLoading, setIsLoading] = React.useState<boolean>(false);
-  const [email, setEmail] = React.useState("");
+  const [googleLoading, setGoogleLoading] = React.useState<boolean>(false);
+  const [emailLoading, setEmailLoading] = React.useState<boolean>(false);
+  const [email, setEmail] = React.useState<string>();
   async function onSubmit(event: React.SyntheticEvent) {
+    setEmailLoading(true);
     event.preventDefault();
-    setIsLoading(true);
     try {
-      await signIn("email", { callbackUrl }, { email });
+      if (!email) {
+        toast.error("Please enter your email address.");
+        setEmailLoading(false);
+        return;
+      }
+      await signIn("email", { callbackUrl, email });
     } catch (error) {
       console.log(error);
     }
-    setIsLoading(false);
+    setEmailLoading(false);
   }
 
   return (
@@ -46,13 +53,13 @@ export function UserAuthForm({
               autoCapitalize="none"
               autoComplete="email"
               autoCorrect="off"
-              disabled={isLoading}
+              disabled={emailLoading}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
-          <Button disabled={isLoading}>
-            {isLoading && (
+          <Button disabled={emailLoading}>
+            {emailLoading && (
               <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
             )}
             Log In with Email
@@ -70,12 +77,15 @@ export function UserAuthForm({
         </div>
       </div>
       <Button
-        onClick={() => void signIn("google", { callbackUrl })}
+        onClick={async () => {
+          setGoogleLoading(true);
+          await signIn("google", { callbackUrl })
+        }}
         variant="outline"
         type="button"
-        disabled={isLoading}
+        disabled={googleLoading}
       >
-        {isLoading ? (
+        {googleLoading ? (
           <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
         ) : (
           <Icons.google className="mr-2 h-4 w-4" />

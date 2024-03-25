@@ -43,6 +43,7 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     newUser: "/login/details",
+    verifyRequest: "/login/verify",
   },
   adapter: PrismaAdapter(prisma),
   providers: [
