@@ -6,6 +6,7 @@ import RecommLogo from "@/../public/recomm.png";
 import Search from "../search/Searchbar";
 import NavItems from "./NavItems";
 import { hasAdminPageAccess } from "@/types/prisma";
+import Link from "next/link";
 
 const DesktopNavbar = async () => {
   const session = await getServerAuthSession();
@@ -26,6 +27,7 @@ const DesktopNavbar = async () => {
     <Container className="navbar sticky left-0 top-0 z-10 w-full bg-white">
       <nav className="flex w-full items-center justify-between py-5">
         <div className="flex gap-2">
+          <Link href="/">
           <Image
             className="h-full w-full cursor-pointer"
             src={RecommLogo}
@@ -34,6 +36,7 @@ const DesktopNavbar = async () => {
             alt="Logo"
             priority
           />
+          </Link>
           <Search />
           <p className="flex w-fit items-center justify-center rounded-md border p-2 text-sm">
             Location

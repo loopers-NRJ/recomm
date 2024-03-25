@@ -11,17 +11,12 @@ import { useSession } from "next-auth/react";
 import { api } from "@/trpc/react";
 import { Bell } from "lucide-react";
 import { useEffect } from "react";
-import { useClientselectedCity } from "@/store/ClientSelectedCity";
 import LocationRetriever from "@/app/LocationRetriever";
 
 const MobileNavbar = () => {
   const { data: session } = useSession();
 
   const pathname = usePathname();
-
-  const { city } = useClientselectedCity();
-
-  console.log(city);
 
   return (
     <Container className="navbar sticky left-0 top-0 z-30 w-full bg-white">

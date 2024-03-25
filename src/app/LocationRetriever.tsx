@@ -36,19 +36,27 @@ export default function LocationRetriever() {
   });
 
   const getLocation = () => {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        changetoCity.mutate({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        });
-      },
-      (error) => {
-        if (error.PERMISSION_DENIED || error.POSITION_UNAVAILABLE) {
-          setManualLocation(true);
-        }
-      },
-    );
+    try {
+      const cache = localStorage.getItem('city');
+      if (cache) {
+        onCityChange(JSON.parse(cache));
+        return;
+      }
+    } catch (err) {}
+    if (!city)
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          changetoCity.mutate({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+        },
+        (error) => {
+          if (error.PERMISSION_DENIED || error.POSITION_UNAVAILABLE) {
+            setManualLocation(true);
+          }
+        },
+      );
   }
 
   useEffect(() => {
@@ -77,15 +85,16 @@ export default function LocationRetriever() {
               </SelectTrigger>
               <SelectContent>
                 {data?.map((city) => (
-                  <SelectItem key={city.value} value={city.value} > 
+                  <SelectItem key={city.value} value={city.value} >
                     {city.value}
                   </SelectItem>))}
               </SelectContent>
             </Select>
             <Button
-              disabled={selected===undefined ? true : false}
+              disabled={selected === undefined ? true : false}
               onClick={() => {
                 onCityChange(selected!);
+                localStorage.setItem('city', JSON.stringify(selected));
                 setManualLocation(false);
               }}
               className="bg-sky-500 focus:bg-sky-500 hover:bg-sky-500 active:bg-sky-700"
