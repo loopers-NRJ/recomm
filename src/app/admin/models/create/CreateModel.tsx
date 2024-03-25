@@ -30,7 +30,6 @@ import QuestionEditor from "./QuestionEditor";
 import type { Question, MultipleChoiceQuestion } from "./types";
 import toast from "react-hot-toast";
 import { errorHandler } from "@/utils/errorHandler";
-import PriceRangePicker from "./PriceRangePicker";
 
 type Tab = "tab-1" | "tab-2";
 
@@ -59,8 +58,6 @@ export default function CreateModel() {
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   // image object returned from server after uploading the image
   const [image, setImage] = useState<Image>();
-
-  const [priceRange, setPriceRange] = useState<[string, string]>(["", ""]);
 
   const [selectedBrand, setSelectedBrand] = useState<Item>();
 
@@ -133,7 +130,6 @@ export default function CreateModel() {
     const modelValidationResult = modelSchema.safeParse({
       name: modelName,
       image,
-      priceRange: priceRange.map((p) => +p),
       brandId: selectedBrand?.id,
       categoryId: selectedCategory?.id,
       atomicQuestions,
@@ -216,17 +212,6 @@ export default function CreateModel() {
                 !!formError?.find((e) => e.path[0] === "categoryId")
               }
             />
-
-            <Label className="my-4 flex w-full items-center justify-between">
-              <span>Price Range</span>
-              <PriceRangePicker
-                priceRange={priceRange}
-                setPriceRange={setPriceRange}
-                requiredError={
-                  !!formError?.find((e) => e.path[0] === "priceRange")
-                }
-              />
-            </Label>
 
             <div className="flex items-end justify-between gap-8">
               <ImagePicker

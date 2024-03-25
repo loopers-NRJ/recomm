@@ -12,7 +12,6 @@ import { useState } from "react";
 import type { Model } from "../types";
 import toast from "react-hot-toast";
 import { errorHandler } from "@/utils/errorHandler";
-import PriceRangePicker from "../../../create/PriceRangePicker";
 
 export function ModelBrandEdit({ model }: { model: Model }) {
   const [selectedBrand, setSelectedBrand] = useState<Item>(model.brand);
@@ -81,62 +80,6 @@ export function ModelCategoryEdit({ model }: { model: Model }) {
               id: model.id,
               categoryId: selectedCategory.id,
             });
-          }}
-        >
-          <Check />
-        </Button>
-      )}
-    </div>
-  );
-}
-
-export function ModelPriceRangeEdit({ model }: { model: Model }) {
-  const [[min, max], setRange] = useState<[string, string]>([
-    model.minimumPrice.toString(),
-    model.maximumPrice.toString(),
-  ]);
-  const [priceRangeEditEnabled, setPriceRangeEditEnabled] = useState(false);
-  const updateModel = api.model.update.useMutation({
-    onSuccess: (updatedModel) => {
-      if (typeof updatedModel === "string") {
-        return toast.error(updatedModel);
-      }
-      model.minimumPrice = updatedModel.minimumPrice;
-      model.maximumPrice = updatedModel.maximumPrice;
-    },
-    onError: errorHandler,
-  });
-
-  return (
-    <div className="flex w-full items-center justify-between gap-2">
-      <Label className="flex w-full items-center justify-between gap-2">
-        Price Range
-        {priceRangeEditEnabled ? (
-          <PriceRangePicker priceRange={[min, max]} setPriceRange={setRange} />
-        ) : (
-          <Button
-            variant="ghost"
-            onClick={() => setPriceRangeEditEnabled(true)}
-            className="min-w-[200px] gap-2"
-          >
-            <span>{min}</span>
-            <span>{"-"}</span>
-            <span>{max}</span>
-          </Button>
-        )}
-      </Label>
-      {(+min !== model.minimumPrice || +max !== model.maximumPrice) && (
-        <Button
-          variant="ghost"
-          size="sm"
-          title="Update"
-          disabled={updateModel.isLoading}
-          onClick={() => {
-            updateModel.mutate({
-              id: model.id,
-              priceRange: [+min, +max],
-            });
-            setPriceRangeEditEnabled(false);
           }}
         >
           <Check />

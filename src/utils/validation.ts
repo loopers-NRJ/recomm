@@ -273,21 +273,6 @@ export const atomicQuestionSchema = z.object({
   required: z.boolean().default(true),
 });
 
-export const priceRangeSchema = z
-  .tuple([
-    z
-      .number({ required_error: "Enter the minimum price range" })
-      .int({ message: "Enter a valid minimum price range" })
-      .positive({ message: "Enter a valid minimum price range" }),
-    z
-      .number({ required_error: "Enter the maximum price range" })
-      .int({ message: "Enter a valid maximum price range" })
-      .positive({ message: "Enter a valid maximum price range" }),
-  ])
-  .refine(([min, max]) => min < max, {
-    message: "Minimum price range should be less than maximum price range",
-  });
-
 export const modelSchema = z.object({
   name: z
     .string({
@@ -296,7 +281,6 @@ export const modelSchema = z.object({
     .trim()
     .min(1, "Enter a name")
     .max(255, "Name must be less than 255 characters"),
-  priceRange: priceRangeSchema,
   brandId: idSchema,
   categoryId: idSchema,
   multipleChoiceQuestions: z.array(multipleChoiceQuestionSchema),

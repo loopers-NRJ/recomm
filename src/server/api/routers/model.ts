@@ -12,7 +12,6 @@ import {
   idSchema,
   modelSchema,
   multipleChoiceQuestionSchema,
-  priceRangeSchema,
 } from "@/utils/validation";
 
 import {
@@ -265,7 +264,6 @@ export const modelRouter = createTRPCRouter({
       async ({
         input: {
           name,
-          priceRange,
           brandId,
           categoryId,
           multipleChoiceQuestions,
@@ -288,8 +286,6 @@ export const modelRouter = createTRPCRouter({
             data: {
               name,
               slug: slugify(name),
-              minimumPrice: priceRange[0],
-              maximumPrice: priceRange[1],
               createdBy: {
                 connect: {
                   id: session.user.id,
@@ -354,7 +350,6 @@ export const modelRouter = createTRPCRouter({
     .input(
       z.object({
         id: idSchema,
-        priceRange: priceRangeSchema.optional(),
         categoryId: idSchema.optional(),
         brandId: idSchema.optional(),
         active: z.boolean().optional(),
@@ -364,15 +359,7 @@ export const modelRouter = createTRPCRouter({
     )
     .mutation(
       async ({
-        input: {
-          id,
-          name: newName,
-          priceRange,
-          categoryId,
-          active,
-          brandId,
-          city,
-        },
+        input: { id, name: newName, categoryId, active, brandId, city },
         ctx: { prisma, session, logger },
       }) => {
         // check whether the model exists
@@ -404,8 +391,6 @@ export const modelRouter = createTRPCRouter({
           data: {
             name: newName,
             slug: newName ? slugify(newName) : undefined,
-            minimumPrice: priceRange ? priceRange[0] : undefined,
-            maximumPrice: priceRange ? priceRange[1] : undefined,
             category:
               categoryId !== undefined
                 ? {
@@ -439,12 +424,6 @@ export const modelRouter = createTRPCRouter({
         if (newName) {
           await logger.info({
             message: `'${session.user.name}' updated a model's name from '${existingModel.name}' to '${model.name}'`,
-            city: model.cityValue,
-          });
-        }
-        if (priceRange) {
-          await logger.info({
-            message: `'${session.user.name}' updated a model's price range from '${existingModel.minimumPrice}-${existingModel.maximumPrice}' to '${priceRange[0]}-${priceRange[1]}'`,
             city: model.cityValue,
           });
         }

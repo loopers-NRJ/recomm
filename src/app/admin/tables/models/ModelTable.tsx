@@ -252,7 +252,6 @@ export default function ModelTable() {
                 categoryId: model.categoryId,
                 brandId: model.brandId,
                 city: model.cityValue,
-                priceRange: [model.minimumPrice, model.maximumPrice],
                 atomicQuestions: model.atomicQuestions,
                 multipleChoiceQuestions: model.multipleChoiceQuestions.map(
                   (question) => ({
