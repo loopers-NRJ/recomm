@@ -60,15 +60,15 @@ async function ProductPage({ params }: { params: ProductPageParams }) {
 
   return (
     <>
-      <Carousel opts={{ loop: true }} className="min-w-xs w-full">
-        <CarouselContent>
+      <Carousel opts={{ loop: true }} className="min-w-xs bg-black">
+        <CarouselContent className="h-96">
           {product.images.map((image, i) => (
-            <CarouselItem key={i} className="pl-0">
+            <CarouselItem key={i}>
               <Image
                 src={image.url}
                 width={500}
                 height={400}
-                className="h-auto w-full"
+                className="object-contain w-full h-full"
                 alt="Product Image"
               />
             </CarouselItem>
