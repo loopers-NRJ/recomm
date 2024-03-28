@@ -45,7 +45,6 @@
     "@trpc/server": "^10.44.1",
     "@vercel/analytics": "^1.2.2",
     "@vercel/speed-insights": "^1.0.2",
-    "browser-image-compression": "^2.0.2",
     "class-variance-authority": "^0.7.0",
     "cloudinary": "^1.41.1",
     "clsx": "^2.0.0",

@@ -21,13 +21,7 @@ export default function ImageUploadSection({
             Click the plus button to upload your images
             <ImagePicker
               images={images}
-              setImages={(files) => {
-                if (files instanceof Function) {
-                  setImages(files(images));
-                } else {
-                  setImages(files);
-                }
-              }}
+              setImages={setImages}
               maxImages={10}
               requiredError={!!formError.images}
             />
